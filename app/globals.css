@@ -1872,10 +1872,6 @@ body.loading { overflow: hidden; }
 @keyframes reel-bar    { 0%{ transform:translateX(-100%); opacity:.4 } 60%{ transform:translateX(0); opacity:1 } 100%{ transform:translateX(0); opacity:1 } }
 @keyframes reel-ticker { to{ transform:translateX(-50%) } }
 @keyframes pre-pop     { to{ transform:scale(1); } }
-@keyframes pre-spin    { to{ transform:rotate(360deg); } }
-@keyframes pre-letter  { to{ opacity:1; transform:translateY(0); } }
-@keyframes pre-sub     { to{ opacity:1; transform:translateY(0); } }
-@keyframes pre-bar     { to{ transform:translateX(0); } }
 
 /* ============================================================
    PROJECT ESTIMATOR
