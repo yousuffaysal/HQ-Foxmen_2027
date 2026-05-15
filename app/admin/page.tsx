@@ -11,7 +11,7 @@ type Testi    = { id:number; quote:string; name:string; role:string; av:string; 
 type Client   = { id:number; name:string; industry:string; country:string; contact:string; eng:string; mrr:string; av:string; cls:string };
 type Message  = { id:number; av:string; sender:string; subject:string; preview:string; body:string; source:string; interested:string; budget:string; country:string; unread:boolean; received_at:string };
 type Member   = { id:number; av:string; name:string; role:string; bio:string };
-type FoxPrice = { id:number; category:string; feature_id:string; label:string; price_min:number; price_max:number; is_base:boolean; ord:number };
+type FoxPrice = { id:number; category:string; feature_id:string; label:string; price_min:number; price_max:number; is_base:boolean; ord:number; note:string };
 
 /* ================================================================
    HELPERS
@@ -79,6 +79,7 @@ export default function AdminPage() {
   const [foxPrices, setFoxPrices] = useState<FoxPrice[]>([]);
   const [priceCat,  setPriceCat]  = useState("Website");
   const [localPrices, setLocalPrices] = useState<Record<number,{min:number;max:number}>>({});
+  const [localNotes, setLocalNotes]   = useState<Record<string,string>>({});
   const [loading,   setLoading]   = useState(false);
 
   /* modal */
@@ -124,7 +125,16 @@ export default function AdminPage() {
       else if(p==="messages"){    const r=await fetch("/api/messages").then(r=>r.json()); setMsgs(Array.isArray(r)?r:[]); setActiveIdx(0); }
       else if(p==="leads"){       const r=await fetch("/api/messages").then(r=>r.json()); setMsgs(Array.isArray(r)?r:[]); }
       else if(p==="team"){        const r=await fetch("/api/team").then(r=>r.json()); setTeam(Array.isArray(r)?r:[]); }
-      else if(p==="fox-prices"){  const r=await fetch("/api/fox-prices").then(r=>r.json()); if(Array.isArray(r)){ setFoxPrices(r); setLocalPrices(Object.fromEntries(r.map((x:FoxPrice)=>[x.id,{min:x.price_min,max:x.price_max}]))); } }
+      else if(p==="fox-prices"){
+        const r=await fetch("/api/fox-prices").then(r=>r.json());
+        if(Array.isArray(r)){
+          setFoxPrices(r);
+          setLocalPrices(Object.fromEntries(r.map((x:FoxPrice)=>[x.id,{min:x.price_min,max:x.price_max}])));
+          const notes:Record<string,string>={};
+          r.filter((x:FoxPrice)=>x.is_base).forEach((x:FoxPrice)=>{ notes[x.category]=x.note||""; });
+          setLocalNotes(notes);
+        }
+      }
     } catch { toast("Error loading data"); }
     setLoading(false);
   },[toast]);
@@ -278,13 +288,19 @@ export default function AdminPage() {
   const saveFoxPrice = async(id:number)=>{
     const lp = localPrices[id]; if(!lp) return;
     const res = await fetch("/api/fox-prices",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,price_min:lp.min,price_max:lp.max})});
-    if(res.ok){ const row:FoxPrice=await res.json(); setFoxPrices(p=>p.map(x=>x.id===id?row:x)); toast("Price updated"); }
+    if(res.ok){ const row:FoxPrice=await res.json(); setFoxPrices(p=>p.map(x=>x.id===id?row:x)); }
     else { toast("Error saving price"); }
+  };
+  const saveFoxNote = async(cat:string)=>{
+    const baseRow = foxPrices.find(p=>p.category===cat&&p.is_base); if(!baseRow) return;
+    const note = localNotes[cat]??"";
+    const res = await fetch("/api/fox-prices",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:baseRow.id,note})});
+    if(res.ok){ const row:FoxPrice=await res.json(); setFoxPrices(p=>p.map(x=>x.id===baseRow.id?row:x)); }
   };
   const saveFoxCat = async(cat:string)=>{
     const catPrices = foxPrices.filter(p=>p.category===cat);
-    await Promise.all(catPrices.map(p=>saveFoxPrice(p.id)));
-    toast(`${cat} prices saved`);
+    await Promise.all([...catPrices.map(p=>saveFoxPrice(p.id)), saveFoxNote(cat)]);
+    toast(`${cat} pricing saved`);
   };
 
   /* ── SETTINGS SAVE ── */
@@ -809,48 +825,126 @@ export default function AdminPage() {
         {/* ══════════ FOX PRICING ══════════ */}
         {page==="fox-prices" && (()=>{
           const CATS = ["Website","Mobile App","E-commerce","AI Tool","Branding"];
-          const catRows = foxPrices.filter(p=>p.category===priceCat);
-          const baseRow = catRows.find(p=>p.is_base);
-          const featureRows = catRows.filter(p=>!p.is_base);
-          const lp = localPrices;
-          const setLp = (id:number, field:"min"|"max", val:string)=>{
+          const CAT_DESC:Record<string,string> = {
+            "Website":    "Marketing sites, SaaS dashboards, web apps with user accounts.",
+            "Mobile App": "Native iOS, Android, or cross-platform React Native / Flutter apps.",
+            "E-commerce": "Shopify, custom storefronts, marketplace & multi-vendor platforms.",
+            "AI Tool":    "LLM integrations, RAG pipelines, agents, copilots & AI dashboards.",
+            "Branding":   "Logo, color system, typography, guidelines & full design systems.",
+          };
+          const catRows    = foxPrices.filter(p=>p.category===priceCat);
+          const baseRow    = catRows.find(p=>p.is_base);
+          const featureRows= catRows.filter(p=>!p.is_base);
+          const lp         = localPrices;
+          const setLp      = (id:number, field:"min"|"max", val:string)=>{
             const n = parseInt(val)||0;
             setLocalPrices(prev=>({...prev,[id]:{...(prev[id]??{min:0,max:0}),[field]:n}}));
           };
           const isDirty = (id:number, orig:{price_min:number;price_max:number})=>
-            lp[id] && (lp[id].min !== orig.price_min || lp[id].max !== orig.price_max);
-          const anyDirty = catRows.some(r=>isDirty(r.id,r));
+            lp[id] && (lp[id].min!==orig.price_min||lp[id].max!==orig.price_max);
+          const noteChanged = (localNotes[priceCat]??"") !== (baseRow?.note??"");
+          const anyDirty   = catRows.some(r=>isDirty(r.id,r)) || noteChanged;
+          /* totals */
+          const baseMin = lp[baseRow?.id??-1]?.min ?? baseRow?.price_min ?? 0;
+          const baseMax = lp[baseRow?.id??-1]?.max ?? baseRow?.price_max ?? 0;
+          const addMin  = featureRows.reduce((s,f)=>s+(lp[f.id]?.min??f.price_min),0);
+          const addMax  = featureRows.reduce((s,f)=>s+(lp[f.id]?.max??f.price_max),0);
+          const fmt     = (n:number)=>`$${Number(n).toLocaleString()}`;
           return (
           <section className="page active">
             <div className="page-head">
-              <div><h2>Fox <span className="it">Pricing</span></h2><p>Set the base and feature price ranges shown to visitors in the Fox AI chat. Changes apply immediately.</p></div>
+              <div><h2>Fox <span className="it">Pricing</span></h2><p>Control what visitors see in the Fox AI chat — prices update instantly, no deploy needed.</p></div>
               <div className="page-actions">
-                <button className="btn-primary" disabled={!anyDirty} onClick={()=>saveFoxCat(priceCat)}>Save {priceCat} <ArrowChip/></button>
+                <button className="btn-primary" onClick={()=>saveFoxCat(priceCat)}>Save {priceCat} <ArrowChip/></button>
               </div>
             </div>
+
             {/* Category tabs */}
             <div style={{display:"flex",gap:4,marginBottom:20,padding:3,background:"var(--canvas)",borderRadius:999,width:"fit-content"}}>
               {CATS.map(c=>(
-                <button key={c} onClick={()=>setPriceCat(c)} style={{padding:"7px 16px",borderRadius:999,fontSize:12,fontWeight:500,border:"none",cursor:"pointer",background:priceCat===c?"#fff":"transparent",color:priceCat===c?"var(--ink)":"var(--muted)",boxShadow:priceCat===c?"0 1px 4px rgba(0,0,0,.08)":"none",transition:"all .15s"}}>{c}</button>
+                <button key={c} onClick={()=>setPriceCat(c)} style={{padding:"7px 16px",borderRadius:999,fontSize:12,fontWeight:500,border:"none",cursor:"pointer",background:priceCat===c?"#fff":"transparent",color:priceCat===c?"var(--ink)":"var(--muted)",boxShadow:priceCat===c?"0 1px 4px rgba(0,0,0,.08)":"none",transition:"all .15s"}}>
+                  {c}
+                </button>
               ))}
             </div>
+
+            {/* Overview card */}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr auto",gap:12,marginBottom:20,alignItems:"stretch"}}>
+              <div style={{background:"var(--canvas)",border:"1px solid var(--line)",borderRadius:12,padding:"16px 20px"}}>
+                <div className="sub" style={{marginBottom:6}}>Category</div>
+                <div style={{fontFamily:"var(--f-display)",fontSize:22,lineHeight:1.1}}>{priceCat}</div>
+                <div style={{fontSize:12,color:"var(--muted)",marginTop:6,lineHeight:1.4}}>{CAT_DESC[priceCat]}</div>
+              </div>
+              <div style={{background:"var(--canvas)",border:"1px solid var(--line)",borderRadius:12,padding:"16px 20px"}}>
+                <div className="sub" style={{marginBottom:6}}>Base Range</div>
+                <div style={{fontFamily:"var(--f-display)",fontSize:22,lineHeight:1.1}}>{fmt(baseMin)} <span style={{color:"var(--muted)",fontSize:16}}>–</span> {fmt(baseMax)}</div>
+                <div style={{fontSize:12,color:"var(--muted)",marginTop:6}}>Starting price, no add-ons</div>
+              </div>
+              <div style={{background:"var(--canvas)",border:"1px solid var(--line)",borderRadius:12,padding:"16px 20px"}}>
+                <div className="sub" style={{marginBottom:6}}>Max Possible</div>
+                <div style={{fontFamily:"var(--f-display)",fontSize:22,lineHeight:1.1}}>{fmt(baseMin+addMin)} <span style={{color:"var(--muted)",fontSize:16}}>–</span> {fmt(baseMax+addMax)}</div>
+                <div style={{fontSize:12,color:"var(--muted)",marginTop:6}}>Base + all {featureRows.length} features</div>
+              </div>
+              <div style={{background:"linear-gradient(135deg,#0f0f0f,#1a0a2e)",border:"1px solid rgba(184,108,249,.2)",borderRadius:12,padding:"16px 20px",minWidth:120,display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",gap:4}}>
+                <div style={{color:"rgba(255,255,255,.4)",fontSize:10,fontFamily:"var(--f-mono)",letterSpacing:".14em",textTransform:"uppercase"}}>Features</div>
+                <div style={{fontFamily:"var(--f-display)",fontSize:40,lineHeight:1,color:"#fff"}}>{featureRows.length}</div>
+                <div style={{fontSize:11,color:"rgba(255,255,255,.3)"}}>add-ons</div>
+              </div>
+            </div>
+
+            {/* Notes / custom message */}
+            <div style={{background:"var(--canvas)",border:`1.5px solid ${noteChanged?"var(--brand)":"var(--line)"}`,borderRadius:12,padding:"16px 20px",marginBottom:20,transition:"border-color .2s"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                <div>
+                  <div style={{fontWeight:600,fontSize:13,color:"var(--ink)"}}>Category Notes</div>
+                  <div style={{fontSize:12,color:"var(--muted)",marginTop:2}}>Internal memo — visible only to you. Use it to track pricing rationale, client feedback, or seasonal adjustments.</div>
+                </div>
+                {noteChanged&&<span style={{fontSize:11,color:"var(--brand)",fontFamily:"var(--f-mono)",letterSpacing:".1em"}}>unsaved</span>}
+              </div>
+              <textarea
+                value={localNotes[priceCat]??""}
+                onChange={e=>setLocalNotes(prev=>({...prev,[priceCat]:e.target.value}))}
+                placeholder={`Notes for ${priceCat} pricing — e.g. "Reduced base by 20% for Q2 to win BD market. Revisit in July."`}
+                rows={3}
+                style={{width:"100%",padding:"10px 14px",borderRadius:8,border:"1.5px solid var(--line)",fontSize:13,lineHeight:1.55,resize:"vertical",outline:"none",background:"#fff",color:"var(--ink)",boxSizing:"border-box",fontFamily:"var(--f-sans)"}}
+              />
+            </div>
+
+            {/* Price table */}
             <div className="table-wrap">
               <table>
-                <thead><tr><th>Feature</th><th style={{width:140}}>Min ($)</th><th style={{width:140}}>Max ($)</th><th style={{width:80}}/></tr></thead>
+                <thead>
+                  <tr>
+                    <th>Feature</th>
+                    <th style={{width:160}}>Min (USD)</th>
+                    <th style={{width:160}}>Max (USD)</th>
+                    <th style={{width:60}}/>
+                  </tr>
+                </thead>
                 <tbody>
                   {/* Base price row */}
                   {baseRow && (
                     <tr style={{background:"#fafaf8"}}>
                       <td>
                         <div className="ttl" style={{display:"flex",alignItems:"center",gap:8}}>
-                          <span style={{background:"#0a0a0a",color:"#fff",fontSize:9,fontFamily:"var(--f-mono)",letterSpacing:".1em",padding:"3px 8px",borderRadius:999,textTransform:"uppercase"}}>Base</span>
-                          {baseRow.label}
+                          <span style={{background:"#0a0a0a",color:"#fff",fontSize:9,fontFamily:"var(--f-mono)",letterSpacing:".1em",padding:"3px 8px",borderRadius:999,textTransform:"uppercase",flexShrink:0}}>Base</span>
+                          Starting price
                         </div>
-                        <div className="sub">Starting price before any features are added</div>
+                        <div className="sub">Shown before any feature is selected in Fox chat</div>
                       </td>
-                      <td><input type="number" value={lp[baseRow.id]?.min??baseRow.price_min} onChange={e=>setLp(baseRow.id,"min",e.target.value)} style={{width:"100%",padding:"8px 10px",borderRadius:8,border:`1.5px solid ${isDirty(baseRow.id,baseRow)?"var(--brand)":"var(--line)"}`,fontSize:13,fontFamily:"var(--f-mono)",outline:"none"}}/></td>
-                      <td><input type="number" value={lp[baseRow.id]?.max??baseRow.price_max} onChange={e=>setLp(baseRow.id,"max",e.target.value)} style={{width:"100%",padding:"8px 10px",borderRadius:8,border:`1.5px solid ${isDirty(baseRow.id,baseRow)?"var(--brand)":"var(--line)"}`,fontSize:13,fontFamily:"var(--f-mono)",outline:"none"}}/></td>
-                      <td><button className="btn-icon" title="Save" style={{opacity:isDirty(baseRow.id,baseRow)?1:.3}} onClick={()=>saveFoxPrice(baseRow.id)}><ArrowChip/></button></td>
+                      <td>
+                        <input type="number" min={0} value={lp[baseRow.id]?.min??baseRow.price_min}
+                          onChange={e=>setLp(baseRow.id,"min",e.target.value)}
+                          style={{width:"100%",padding:"9px 12px",borderRadius:8,border:`1.5px solid ${isDirty(baseRow.id,baseRow)?"var(--brand)":"var(--line)"}`,fontSize:13,fontFamily:"var(--f-mono)",outline:"none",transition:"border-color .15s"}}/>
+                      </td>
+                      <td>
+                        <input type="number" min={0} value={lp[baseRow.id]?.max??baseRow.price_max}
+                          onChange={e=>setLp(baseRow.id,"max",e.target.value)}
+                          style={{width:"100%",padding:"9px 12px",borderRadius:8,border:`1.5px solid ${isDirty(baseRow.id,baseRow)?"var(--brand)":"var(--line)"}`,fontSize:13,fontFamily:"var(--f-mono)",outline:"none",transition:"border-color .15s"}}/>
+                      </td>
+                      <td>
+                        <button className="btn-icon" title="Save row" style={{opacity:isDirty(baseRow.id,baseRow)?1:.25,transition:"opacity .15s"}} onClick={()=>{saveFoxPrice(baseRow.id);toast("Base price saved");}}><ArrowChip/></button>
+                      </td>
                     </tr>
                   )}
                   {/* Feature rows */}
@@ -858,19 +952,31 @@ export default function AdminPage() {
                     <tr key={f.id}>
                       <td>
                         <div className="ttl">{f.label}</div>
-                        <div className="sub" style={{fontFamily:"var(--f-mono)",fontSize:10,letterSpacing:".1em",color:"var(--muted)",textTransform:"uppercase"}}>{f.feature_id}</div>
+                        <div className="sub" style={{fontFamily:"var(--f-mono)",fontSize:10,letterSpacing:".1em",textTransform:"uppercase"}}>{f.feature_id}</div>
                       </td>
-                      <td><input type="number" value={lp[f.id]?.min??f.price_min} onChange={e=>setLp(f.id,"min",e.target.value)} style={{width:"100%",padding:"8px 10px",borderRadius:8,border:`1.5px solid ${isDirty(f.id,f)?"var(--brand)":"var(--line)"}`,fontSize:13,fontFamily:"var(--f-mono)",outline:"none"}}/></td>
-                      <td><input type="number" value={lp[f.id]?.max??f.price_max} onChange={e=>setLp(f.id,"max",e.target.value)} style={{width:"100%",padding:"8px 10px",borderRadius:8,border:`1.5px solid ${isDirty(f.id,f)?"var(--brand)":"var(--line)"}`,fontSize:13,fontFamily:"var(--f-mono)",outline:"none"}}/></td>
-                      <td><button className="btn-icon" title="Save" style={{opacity:isDirty(f.id,f)?1:.3}} onClick={()=>saveFoxPrice(f.id)}><ArrowChip/></button></td>
+                      <td>
+                        <input type="number" min={0} value={lp[f.id]?.min??f.price_min}
+                          onChange={e=>setLp(f.id,"min",e.target.value)}
+                          style={{width:"100%",padding:"9px 12px",borderRadius:8,border:`1.5px solid ${isDirty(f.id,f)?"var(--brand)":"var(--line)"}`,fontSize:13,fontFamily:"var(--f-mono)",outline:"none",transition:"border-color .15s"}}/>
+                      </td>
+                      <td>
+                        <input type="number" min={0} value={lp[f.id]?.max??f.price_max}
+                          onChange={e=>setLp(f.id,"max",e.target.value)}
+                          style={{width:"100%",padding:"9px 12px",borderRadius:8,border:`1.5px solid ${isDirty(f.id,f)?"var(--brand)":"var(--line)"}`,fontSize:13,fontFamily:"var(--f-mono)",outline:"none",transition:"border-color .15s"}}/>
+                      </td>
+                      <td>
+                        <button className="btn-icon" title="Save row" style={{opacity:isDirty(f.id,f)?1:.25,transition:"opacity .15s"}} onClick={()=>{saveFoxPrice(f.id);toast("Feature price saved");}}><ArrowChip/></button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              {foxPrices.length===0&&<div style={{padding:32,textAlign:"center",color:"var(--muted)"}}>Loading pricing data…</div>}
+              {foxPrices.length===0&&<div style={{padding:40,textAlign:"center",color:"var(--muted)"}}>Loading pricing data…</div>}
             </div>
-            <div style={{marginTop:16,padding:"12px 16px",background:"var(--canvas)",borderRadius:10,fontSize:12,color:"var(--muted)",border:"1px solid var(--line)"}}>
-              Prices shown in USD. The Fox chat shows a live estimate as visitors select features. Updated prices apply to all new visitors immediately — no redeploy needed.
+
+            <div style={{marginTop:14,display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",background:"var(--canvas)",borderRadius:10,fontSize:12,color:"var(--muted)",border:"1px solid var(--line)"}}>
+              <span>All prices in USD. Fox visitors see a live estimate that updates as they check/uncheck features.</span>
+              {anyDirty&&<button className="btn-primary" style={{fontSize:12,padding:"7px 16px"}} onClick={()=>saveFoxCat(priceCat)}>Save all changes <ArrowChip/></button>}
             </div>
           </section>
           );

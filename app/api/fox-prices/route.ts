@@ -53,6 +53,7 @@ const SEED = [
 ];
 
 export async function GET() {
+  // Create table (idempotent)
   await sql`
     CREATE TABLE IF NOT EXISTS fox_prices (
       id         SERIAL PRIMARY KEY,
@@ -62,16 +63,19 @@ export async function GET() {
       price_min  INT  NOT NULL DEFAULT 0,
       price_max  INT  NOT NULL DEFAULT 0,
       is_base    BOOLEAN DEFAULT FALSE,
-      ord        INT DEFAULT 0
+      ord        INT DEFAULT 0,
+      note       TEXT DEFAULT ''
     )
   `;
+  // Add note column if this is an older table without it
+  await sql`ALTER TABLE fox_prices ADD COLUMN IF NOT EXISTS note TEXT DEFAULT ''`;
 
   const count = await sql`SELECT COUNT(*) AS n FROM fox_prices`;
   if (Number((count[0] as { n: string }).n) === 0) {
     for (const s of SEED) {
       await sql`
-        INSERT INTO fox_prices (category, feature_id, label, price_min, price_max, is_base, ord)
-        VALUES (${s.category}, ${s.feature_id}, ${s.label}, ${s.price_min}, ${s.price_max}, ${s.is_base}, ${s.ord})
+        INSERT INTO fox_prices (category, feature_id, label, price_min, price_max, is_base, ord, note)
+        VALUES (${s.category}, ${s.feature_id}, ${s.label}, ${s.price_min}, ${s.price_max}, ${s.is_base}, ${s.ord}, '')
       `;
     }
   }
@@ -81,9 +85,16 @@ export async function GET() {
 }
 
 export async function PATCH(req: Request) {
-  const { id, price_min, price_max } = await req.json();
+  const body = await req.json();
+  const { id } = body;
+
+  if ("note" in body) {
+    const rows = await sql`UPDATE fox_prices SET note = ${body.note} WHERE id = ${id} RETURNING *`;
+    return NextResponse.json(rows[0]);
+  }
+
   const rows = await sql`
-    UPDATE fox_prices SET price_min = ${price_min}, price_max = ${price_max}
+    UPDATE fox_prices SET price_min = ${body.price_min}, price_max = ${body.price_max}
     WHERE id = ${id} RETURNING *
   `;
   return NextResponse.json(rows[0]);
