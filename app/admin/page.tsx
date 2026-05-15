@@ -11,7 +11,163 @@ type Testi    = { id:number; quote:string; name:string; role:string; av:string; 
 type Client   = { id:number; name:string; industry:string; country:string; contact:string; eng:string; mrr:string; av:string; cls:string };
 type Message  = { id:number; av:string; sender:string; subject:string; preview:string; body:string; source:string; interested:string; budget:string; country:string; unread:boolean; received_at:string };
 type Member   = { id:number; av:string; name:string; role:string; bio:string };
-type FoxPrice = { id:number; category:string; feature_id:string; label:string; price_min:number; price_max:number; is_base:boolean; ord:number; note:string };
+type FoxPrice    = { id:number; category:string; feature_id:string; label:string; price_min:number; price_max:number; is_base:boolean; ord:number; note:string };
+type InvoiceItem = { desc:string; qty:number; rate:number };
+type ProposalData= { executive_summary:string; scope_items:string[]; deliverables:string[]; timeline:{period:string;milestone:string;desc:string}[]; investment_note:string; terms:string };
+
+/* ── PDF template helpers (open in new window → print as PDF) ── */
+function proposalPdfHtml(client:string,company:string,service:string,timeline:string,budget:string,data:ProposalData):string{
+  const today=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
+  const num=`PROP-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`;
+  const li=(arr:string[])=>arr.map(s=>`<li><span class="arr">→</span>${s}</li>`).join("");
+  const tl=(arr:{period:string;milestone:string;desc:string}[])=>arr.map(t=>`
+    <div class="tl-row"><div class="tl-period">${t.period}</div><div class="tl-body"><h4>${t.milestone}</h4><p>${t.desc}</p></div></div>`).join("");
+  return`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Proposal — ${client}</title>
+<style>
+@page{size:A4;margin:0}*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;color:#0a0a0a}
+.cover{width:210mm;min-height:297mm;background:#0a0a0a;padding:64px;display:flex;flex-direction:column;justify-content:space-between;page-break-after:always}
+.c-brand-name{font-size:22px;font-weight:700;color:#fff;letter-spacing:-.01em}.c-brand-name em{font-style:italic;color:#b86cf9}
+.c-sub{font-size:10px;color:rgba(255,255,255,.3);letter-spacing:.12em;text-transform:uppercase;margin-top:3px}
+.c-main{flex:1;display:flex;flex-direction:column;justify-content:center;padding:80px 0 60px}
+.c-tag{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#b86cf9;margin-bottom:20px}
+.c-title{font-size:62px;font-weight:800;line-height:1;color:#fff;letter-spacing:-.04em;margin-bottom:10px}
+.c-title em{font-style:italic;color:rgba(255,255,255,.35);font-weight:300}
+.c-divider{height:1px;background:rgba(255,255,255,.08);margin:44px 0}
+.c-meta{display:grid;grid-template-columns:1fr 1fr}
+.c-meta-item{padding:22px 0;border-top:1px solid rgba(255,255,255,.08)}
+.c-meta-item:nth-child(odd){padding-right:32px;border-right:1px solid rgba(255,255,255,.08)}
+.c-meta-item:nth-child(even){padding-left:32px}
+.c-meta-label{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:6px}
+.c-meta-val{font-size:18px;font-weight:600;color:#fff;letter-spacing:-.01em}
+.c-meta-val.purple{color:#b86cf9}
+.c-foot{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.25);letter-spacing:.06em}
+.pg{width:210mm;padding:60px 64px}
+.pg-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:52px;padding-bottom:18px;border-bottom:2px solid #0a0a0a}
+.pg-head-brand{font-size:14px;font-weight:600}.pg-head-brand em{font-style:italic;color:#b86cf9}
+.pg-head-right{text-align:right;font-size:11px;color:#999;line-height:1.7}
+.sec{margin-bottom:48px}
+.sec-label{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#b86cf9;margin-bottom:10px}
+.sec h2{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-bottom:14px}
+.sec p{font-size:14px;line-height:1.78;color:#444}
+ul.items{list-style:none;margin-top:12px}
+ul.items li{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:1px solid #f0f0f0;font-size:14px;color:#333;line-height:1.55}
+ul.items li .arr{color:#b86cf9;flex-shrink:0;margin-top:1px}
+.tl-row{display:grid;grid-template-columns:110px 1fr;gap:24px;padding:16px 0;border-bottom:1px solid #f0f0f0}
+.tl-period{font-size:11px;font-weight:700;color:#b86cf9;text-transform:uppercase;letter-spacing:.06em;line-height:1.5}
+.tl-body h4{font-size:15px;font-weight:600;margin-bottom:4px}
+.tl-body p{font-size:13px;color:#666;line-height:1.55}
+.inv-box{background:#0a0a0a;padding:40px 48px;border-radius:8px;margin-top:14px}
+.inv-box .amt{font-size:52px;font-weight:800;color:#b86cf9;letter-spacing:-.04em;line-height:1;margin-bottom:12px}
+.inv-box .note{font-size:14px;color:rgba(255,255,255,.5);line-height:1.75}
+.sig{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:56px}
+.sig-line{border-top:2px solid #0a0a0a;padding-top:12px;font-size:12px;color:#888}
+.sig-line .name{font-size:14px;font-weight:600;color:#0a0a0a;margin-top:4px}
+.pg-foot{margin-top:60px;padding-top:18px;border-top:1px solid #eee;display:flex;justify-content:space-between;font-size:11px;color:#bbb}
+@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body>
+<div class="cover">
+  <div><div class="c-brand-name">Foxmen <em>Studio</em></div><div class="c-sub">Code · Craft · Care</div></div>
+  <div class="c-main">
+    <div class="c-tag">Project Proposal · ${num}</div>
+    <div class="c-title">Prepared<br/>for <em>${client}</em></div>
+    <div class="c-divider"></div>
+    <div class="c-meta">
+      <div class="c-meta-item"><div class="c-meta-label">Service</div><div class="c-meta-val">${service}</div></div>
+      <div class="c-meta-item"><div class="c-meta-label">Timeline</div><div class="c-meta-val">${timeline}</div></div>
+      <div class="c-meta-item"><div class="c-meta-label">Investment</div><div class="c-meta-val purple">${budget}</div></div>
+      <div class="c-meta-item"><div class="c-meta-label">Prepared on</div><div class="c-meta-val" style="font-size:16px">${today}</div></div>
+    </div>
+  </div>
+  <div class="c-foot"><span>hello@foxmen.studio</span><span>foxmen.studio</span><span>Confidential · ${today}</span></div>
+</div>
+<div class="pg">
+  <div class="pg-head">
+    <div class="pg-head-brand">Foxmen <em>Studio</em> · Project Proposal</div>
+    <div class="pg-head-right">${client}${company?` · ${company}`:""}<br/>${today}</div>
+  </div>
+  <div class="sec"><div class="sec-label">Executive Summary</div><h2>Project Overview</h2><p>${data.executive_summary.replace(/\n/g,"<br/>")}</p></div>
+  <div class="sec"><div class="sec-label">Scope of Work</div><h2>What We're Building</h2><ul class="items">${li(data.scope_items||[])}</ul></div>
+  <div class="sec"><div class="sec-label">Deliverables</div><h2>What You Receive</h2><ul class="items">${li(data.deliverables||[])}</ul></div>
+  <div class="sec"><div class="sec-label">Timeline</div><h2>Project Schedule</h2>${tl(data.timeline||[])}</div>
+  <div class="sec"><div class="sec-label">Investment</div><h2>Pricing</h2><div class="inv-box"><div class="amt">${budget}</div><div class="note">${data.investment_note}</div></div></div>
+  <div class="sec"><div class="sec-label">Terms & Conditions</div><h2>Agreement</h2><p>${data.terms}</p></div>
+  <div class="sig">
+    <div class="sig-line"><div class="name">Foxmen Studio</div>Authorized Representative</div>
+    <div class="sig-line"><div class="name">${client}</div>Client</div>
+  </div>
+  <div class="pg-foot"><span>Foxmen Studio · foxmen.studio · hello@foxmen.studio</span><span>${num}</span></div>
+</div>
+</body></html>`;}
+
+function invoicePdfHtml(p:{client:string;company:string;num:string;date:string;due:string;items:InvoiceItem[];notes:string;payment:string}):string{
+  const fmtD=(d:string)=>d?new Date(d+"T00:00:00").toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}):"—";
+  const fmtM=(n:number)=>"$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+  const total=p.items.reduce((s,it)=>s+(it.qty*it.rate),0);
+  const PAY:Record<string,string>={wise:"Wise — hello@foxmen.studio",paypal:"PayPal — payments@foxmen.studio",bank:"Bank Transfer — IBAN on request",crypto:"USDT / USDC — Wallet on request"};
+  const [pName,pDetail]=(PAY[p.payment]??p.payment).split("—").map(s=>s.trim());
+  const rows=p.items.filter(it=>it.desc||it.rate).map(it=>`<tr><td style="padding:14px 20px;border-bottom:1px solid #f0f0f0;font-size:14px;">${it.desc||"—"}</td><td style="padding:14px 20px;border-bottom:1px solid #f0f0f0;font-size:14px;text-align:center;">${it.qty}</td><td style="padding:14px 20px;border-bottom:1px solid #f0f0f0;font-size:14px;text-align:right;">${fmtM(it.rate)}</td><td style="padding:14px 20px;border-bottom:1px solid #f0f0f0;font-size:14px;font-weight:700;text-align:right;">${fmtM(it.qty*it.rate)}</td></tr>`).join("");
+  return`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Invoice ${p.num}</title>
+<style>
+@page{size:A4;margin:0}*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;color:#0a0a0a;width:210mm;min-height:297mm}
+.inv-wrap{display:flex;flex-direction:column;min-height:297mm}
+.inv-hd{background:#0a0a0a;padding:44px 64px;display:flex;justify-content:space-between;align-items:flex-start}
+.bn{font-size:22px;font-weight:700;color:#fff;letter-spacing:-.02em}.bn em{font-style:italic;color:#b86cf9}
+.bs{font-size:10px;color:rgba(255,255,255,.3);margin-top:4px;letter-spacing:.12em;text-transform:uppercase}
+.bc{margin-top:14px;font-size:12px;color:rgba(255,255,255,.35);line-height:1.9}
+.ib{text-align:right}.ib-tag{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:4px}
+.ib-num{font-size:28px;font-weight:800;color:#b86cf9;letter-spacing:-.02em}
+.ib-dates{margin-top:14px;font-size:12px;color:rgba(255,255,255,.4);line-height:1.9;text-align:right}
+.ib-dates strong{color:rgba(255,255,255,.7)}
+.inv-body{flex:1;padding:48px 64px}
+.bill-row{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-bottom:44px}
+.bb label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#aaa;display:block;margin-bottom:10px}
+.bb .bname{font-size:18px;font-weight:700;margin-bottom:4px}.bb .bdet{font-size:13px;color:#666;line-height:1.7}
+.tbl-wrap{border:1px solid #eee;border-radius:8px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead{background:#f7f7f5}
+th{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#999;font-weight:600;text-align:left;padding:12px 20px;border-bottom:1px solid #eee}
+th:not(:first-child){text-align:right}
+.tot-row{background:#0a0a0a;display:flex;justify-content:flex-end;gap:36px;padding:18px 20px;align-items:center}
+.tot-label{font-size:14px;color:rgba(255,255,255,.5)}.tot-val{font-size:22px;font-weight:800;color:#b86cf9;letter-spacing:-.02em}
+.pay-block{margin-top:32px;padding:24px 28px;background:#fafaf9;border:1px solid #eee;border-radius:8px}
+.pay-title{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#aaa;margin-bottom:12px}
+.pay-method{font-size:14px;color:#333}.pay-method strong{color:#0a0a0a}
+.pay-notes{margin-top:12px;font-size:13px;color:#888;line-height:1.65;border-top:1px solid #eee;padding-top:12px}
+.inv-ft{margin-top:auto;background:#0a0a0a;padding:22px 64px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:rgba(255,255,255,.3)}
+.inv-ft strong{font-size:14px;color:rgba(255,255,255,.6);font-weight:600}
+@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body>
+<div class="inv-wrap">
+<div class="inv-hd">
+  <div><div class="bn">Foxmen <em>Studio</em></div><div class="bs">Code · Craft · Care</div><div class="bc">hello@foxmen.studio<br/>foxmen.studio</div></div>
+  <div class="ib"><div class="ib-tag">Invoice</div><div class="ib-num">${p.num}</div><div class="ib-dates"><div>Date &nbsp;<strong>${fmtD(p.date)}</strong></div><div>Due &nbsp;<strong>${fmtD(p.due)}</strong></div></div></div>
+</div>
+<div class="inv-body">
+  <div class="bill-row">
+    <div class="bb"><label>Bill to</label><div class="bname">${p.client||"—"}</div><div class="bdet">${p.company?p.company+"<br/>":""}${""}</div></div>
+    <div class="bb"><label>From</label><div class="bname">Foxmen Studio</div><div class="bdet">hello@foxmen.studio<br/>foxmen.studio</div></div>
+  </div>
+  <div class="tbl-wrap">
+    <table><thead><tr><th style="width:50%">Description</th><th style="width:12%;text-align:center">Qty</th><th style="width:19%;text-align:right">Rate</th><th style="width:19%;text-align:right">Amount</th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="tot-row"><span class="tot-label">Total (USD)</span><span class="tot-val">${fmtM(total)}</span></div>
+  </div>
+  <div class="pay-block">
+    <div class="pay-title">Payment information</div>
+    <div class="pay-method"><strong>${pName}</strong> — ${pDetail||""}</div>
+    ${p.notes?`<div class="pay-notes">${p.notes}</div>`:""}
+  </div>
+</div>
+<div class="inv-ft"><strong>Foxmen Studio</strong><span>Thank you for your business.</span><span>${p.num}</span></div>
+</div>
+</body></html>`;}
+
+function openPdf(html:string){
+  const w=window.open("","_blank","width=960,height=760");
+  if(!w) return;
+  w.document.write(html);
+  w.document.close();
+  setTimeout(()=>w.print(),700);
+}
 
 /* ================================================================
    HELPERS
@@ -80,6 +236,28 @@ export default function AdminPage() {
   const [priceCat,  setPriceCat]  = useState("Website");
   const [localPrices, setLocalPrices] = useState<Record<number,{min:number;max:number}>>({});
   const [localNotes, setLocalNotes]   = useState<Record<string,string>>({});
+
+  /* proposals */
+  const [propClient,    setPropClient]    = useState("");
+  const [propCompany,   setPropCompany]   = useState("");
+  const [propService,   setPropService]   = useState("Mobile App (React Native)");
+  const [propScope,     setPropScope]     = useState("");
+  const [propTimeline,  setPropTimeline]  = useState("");
+  const [propBudget,    setPropBudget]    = useState("");
+  const [propData,      setPropData]      = useState<ProposalData|null>(null);
+  const [propGenerating,setPropGenerating]= useState(false);
+
+  /* invoices */
+  const [invClient,  setInvClient]  = useState("");
+  const [invCompany, setInvCompany] = useState("");
+  const [invEmail,   setInvEmail]   = useState("");
+  const [invNum,     setInvNum]     = useState("INV-001");
+  const [invDate,    setInvDate]    = useState(()=>new Date().toISOString().split("T")[0]);
+  const [invDue,     setInvDue]     = useState("");
+  const [invItems,   setInvItems]   = useState<InvoiceItem[]>([{desc:"",qty:1,rate:0}]);
+  const [invNotes,   setInvNotes]   = useState("Payment due within 30 days of invoice date.");
+  const [invPayment, setInvPayment] = useState("wise");
+  const [invSending, setInvSending] = useState(false);
   const [loading,   setLoading]   = useState(false);
 
   /* modal */
@@ -334,8 +512,8 @@ export default function AdminPage() {
   };
 
   /* ── page meta ── */
-  const CRUMBS:Record<string,string>={ dashboard:"Workspace / Dashboard", analytics:"Workspace / Analytics", projects:"Content / Projects", blog:"Content / Journal", services:"Content / Services", testimonials:"Content / Testimonials", media:"Content / Media", clients:"People / Clients", messages:"People / Inbox", leads:"People / Leads", team:"People / Team", settings:"System / Settings", "fox-prices":"System / Fox Pricing" };
-  const TITLES:Record<string,React.ReactNode>={ dashboard:<>Good evening, <span className="it">Arif.</span></>, analytics:"Analytics", projects:"Projects", blog:"Journal", services:"Services", testimonials:"Testimonials", media:"Media library", clients:"Clients", messages:"Inbox", leads:"Estimator Leads", team:"Team", settings:"Settings", "fox-prices":"Fox Pricing" };
+  const CRUMBS:Record<string,string>={ dashboard:"Workspace / Dashboard", analytics:"Workspace / Analytics", projects:"Content / Projects", blog:"Content / Journal", services:"Content / Services", testimonials:"Content / Testimonials", media:"Content / Media", clients:"People / Clients", messages:"People / Inbox", leads:"People / Leads", team:"People / Team", settings:"System / Settings", "fox-prices":"System / Fox Pricing", proposals:"Generate / Proposals", invoices:"Generate / Invoices" };
+  const TITLES:Record<string,React.ReactNode>={ dashboard:<>Good evening, <span className="it">Arif.</span></>, analytics:"Analytics", projects:"Projects", blog:"Journal", services:"Services", testimonials:"Testimonials", media:"Media library", clients:"Clients", messages:"Inbox", leads:"Estimator Leads", team:"Team", settings:"Settings", "fox-prices":"Fox Pricing", proposals:"Proposals", invoices:"Invoices" };
 
   /* ── dashboard derived ── */
   const liveProjects = projects.filter(p=>p.status==="live").length;
@@ -408,6 +586,9 @@ export default function AdminPage() {
           ].map(([p,label,icon,badge])=>(
             <a key={p as string} className={page===p?"active":""} onClick={()=>nav(p as string)}>{icon as React.ReactNode}{label as string}{badge&&<span className="badge">{badge as string}</span>}</a>
           ))}
+          <span className="label">Generate</span>
+          <a className={page==="proposals"?"active":""} onClick={()=>nav("proposals")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>Proposals</a>
+          <a className={page==="invoices"?"active":""} onClick={()=>nav("invoices")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4M14 15h4"/></svg>Invoices</a>
           <span className="label">System</span>
           <a className={page==="fox-prices"?"active":""} onClick={()=>nav("fox-prices")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Fox Pricing</a>
           <a className={page==="settings"?"active":""} onClick={()=>nav("settings")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.8 1.3V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.8-1.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.3-2.8H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.3-2.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 2.8-1.3V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.8 1.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0 1.3 2.8H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.3 2.8Z"/></svg>Settings</a>
