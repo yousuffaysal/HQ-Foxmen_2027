@@ -11,6 +11,7 @@ type Testi    = { id:number; quote:string; name:string; role:string; av:string; 
 type Client   = { id:number; name:string; industry:string; country:string; contact:string; eng:string; mrr:string; av:string; cls:string };
 type Message  = { id:number; av:string; sender:string; subject:string; preview:string; body:string; source:string; interested:string; budget:string; country:string; unread:boolean; received_at:string };
 type Member   = { id:number; av:string; name:string; role:string; bio:string };
+type FoxPrice = { id:number; category:string; feature_id:string; label:string; price_min:number; price_max:number; is_base:boolean; ord:number };
 
 /* ================================================================
    HELPERS
@@ -75,6 +76,9 @@ export default function AdminPage() {
   const [clients,   setClients]   = useState<Client[]>([]);
   const [msgs,      setMsgs]      = useState<Message[]>([]);
   const [team,      setTeam]      = useState<Member[]>([]);
+  const [foxPrices, setFoxPrices] = useState<FoxPrice[]>([]);
+  const [priceCat,  setPriceCat]  = useState("Website");
+  const [localPrices, setLocalPrices] = useState<Record<number,{min:number;max:number}>>({});
   const [loading,   setLoading]   = useState(false);
 
   /* modal */
@@ -120,6 +124,7 @@ export default function AdminPage() {
       else if(p==="messages"){    const r=await fetch("/api/messages").then(r=>r.json()); setMsgs(Array.isArray(r)?r:[]); setActiveIdx(0); }
       else if(p==="leads"){       const r=await fetch("/api/messages").then(r=>r.json()); setMsgs(Array.isArray(r)?r:[]); }
       else if(p==="team"){        const r=await fetch("/api/team").then(r=>r.json()); setTeam(Array.isArray(r)?r:[]); }
+      else if(p==="fox-prices"){  const r=await fetch("/api/fox-prices").then(r=>r.json()); if(Array.isArray(r)){ setFoxPrices(r); setLocalPrices(Object.fromEntries(r.map((x:FoxPrice)=>[x.id,{min:x.price_min,max:x.price_max}]))); } }
     } catch { toast("Error loading data"); }
     setLoading(false);
   },[toast]);
@@ -269,6 +274,19 @@ export default function AdminPage() {
     setSubmitting(false);
   };
 
+  /* ── FOX PRICES ── */
+  const saveFoxPrice = async(id:number)=>{
+    const lp = localPrices[id]; if(!lp) return;
+    const res = await fetch("/api/fox-prices",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,price_min:lp.min,price_max:lp.max})});
+    if(res.ok){ const row:FoxPrice=await res.json(); setFoxPrices(p=>p.map(x=>x.id===id?row:x)); toast("Price updated"); }
+    else { toast("Error saving price"); }
+  };
+  const saveFoxCat = async(cat:string)=>{
+    const catPrices = foxPrices.filter(p=>p.category===cat);
+    await Promise.all(catPrices.map(p=>saveFoxPrice(p.id)));
+    toast(`${cat} prices saved`);
+  };
+
   /* ── SETTINGS SAVE ── */
   const saveSettings = async(tab:string)=>{
     const fields = document.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>("[data-setting]");
@@ -300,8 +318,8 @@ export default function AdminPage() {
   };
 
   /* ── page meta ── */
-  const CRUMBS:Record<string,string>={ dashboard:"Workspace / Dashboard", analytics:"Workspace / Analytics", projects:"Content / Projects", blog:"Content / Journal", services:"Content / Services", testimonials:"Content / Testimonials", media:"Content / Media", clients:"People / Clients", messages:"People / Inbox", leads:"People / Leads", team:"People / Team", settings:"System / Settings" };
-  const TITLES:Record<string,React.ReactNode>={ dashboard:<>Good evening, <span className="it">Arif.</span></>, analytics:"Analytics", projects:"Projects", blog:"Journal", services:"Services", testimonials:"Testimonials", media:"Media library", clients:"Clients", messages:"Inbox", leads:"Estimator Leads", team:"Team", settings:"Settings" };
+  const CRUMBS:Record<string,string>={ dashboard:"Workspace / Dashboard", analytics:"Workspace / Analytics", projects:"Content / Projects", blog:"Content / Journal", services:"Content / Services", testimonials:"Content / Testimonials", media:"Content / Media", clients:"People / Clients", messages:"People / Inbox", leads:"People / Leads", team:"People / Team", settings:"System / Settings", "fox-prices":"System / Fox Pricing" };
+  const TITLES:Record<string,React.ReactNode>={ dashboard:<>Good evening, <span className="it">Arif.</span></>, analytics:"Analytics", projects:"Projects", blog:"Journal", services:"Services", testimonials:"Testimonials", media:"Media library", clients:"Clients", messages:"Inbox", leads:"Estimator Leads", team:"Team", settings:"Settings", "fox-prices":"Fox Pricing" };
 
   /* ── dashboard derived ── */
   const liveProjects = projects.filter(p=>p.status==="live").length;
@@ -375,6 +393,7 @@ export default function AdminPage() {
             <a key={p as string} className={page===p?"active":""} onClick={()=>nav(p as string)}>{icon as React.ReactNode}{label as string}{badge&&<span className="badge">{badge as string}</span>}</a>
           ))}
           <span className="label">System</span>
+          <a className={page==="fox-prices"?"active":""} onClick={()=>nav("fox-prices")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Fox Pricing</a>
           <a className={page==="settings"?"active":""} onClick={()=>nav("settings")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.8 1.3V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.8-1.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.3-2.8H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.3-2.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 2.8-1.3V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.8 1.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0 1.3 2.8H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.3 2.8Z"/></svg>Settings</a>
         </nav>
         <div className="side-foot">
@@ -786,6 +805,76 @@ export default function AdminPage() {
             </div>
           </section>
         )}
+
+        {/* ══════════ FOX PRICING ══════════ */}
+        {page==="fox-prices" && (()=>{
+          const CATS = ["Website","Mobile App","E-commerce","AI Tool","Branding"];
+          const catRows = foxPrices.filter(p=>p.category===priceCat);
+          const baseRow = catRows.find(p=>p.is_base);
+          const featureRows = catRows.filter(p=>!p.is_base);
+          const lp = localPrices;
+          const setLp = (id:number, field:"min"|"max", val:string)=>{
+            const n = parseInt(val)||0;
+            setLocalPrices(prev=>({...prev,[id]:{...(prev[id]??{min:0,max:0}),[field]:n}}));
+          };
+          const isDirty = (id:number, orig:{price_min:number;price_max:number})=>
+            lp[id] && (lp[id].min !== orig.price_min || lp[id].max !== orig.price_max);
+          const anyDirty = catRows.some(r=>isDirty(r.id,r));
+          return (
+          <section className="page active">
+            <div className="page-head">
+              <div><h2>Fox <span className="it">Pricing</span></h2><p>Set the base and feature price ranges shown to visitors in the Fox AI chat. Changes apply immediately.</p></div>
+              <div className="page-actions">
+                <button className="btn-primary" disabled={!anyDirty} onClick={()=>saveFoxCat(priceCat)}>Save {priceCat} <ArrowChip/></button>
+              </div>
+            </div>
+            {/* Category tabs */}
+            <div style={{display:"flex",gap:4,marginBottom:20,padding:3,background:"var(--canvas)",borderRadius:999,width:"fit-content"}}>
+              {CATS.map(c=>(
+                <button key={c} onClick={()=>setPriceCat(c)} style={{padding:"7px 16px",borderRadius:999,fontSize:12,fontWeight:500,border:"none",cursor:"pointer",background:priceCat===c?"#fff":"transparent",color:priceCat===c?"var(--ink)":"var(--muted)",boxShadow:priceCat===c?"0 1px 4px rgba(0,0,0,.08)":"none",transition:"all .15s"}}>{c}</button>
+              ))}
+            </div>
+            <div className="table-wrap">
+              <table>
+                <thead><tr><th>Feature</th><th style={{width:140}}>Min ($)</th><th style={{width:140}}>Max ($)</th><th style={{width:80}}/></tr></thead>
+                <tbody>
+                  {/* Base price row */}
+                  {baseRow && (
+                    <tr style={{background:"#fafaf8"}}>
+                      <td>
+                        <div className="ttl" style={{display:"flex",alignItems:"center",gap:8}}>
+                          <span style={{background:"#0a0a0a",color:"#fff",fontSize:9,fontFamily:"var(--f-mono)",letterSpacing:".1em",padding:"3px 8px",borderRadius:999,textTransform:"uppercase"}}>Base</span>
+                          {baseRow.label}
+                        </div>
+                        <div className="sub">Starting price before any features are added</div>
+                      </td>
+                      <td><input type="number" value={lp[baseRow.id]?.min??baseRow.price_min} onChange={e=>setLp(baseRow.id,"min",e.target.value)} style={{width:"100%",padding:"8px 10px",borderRadius:8,border:`1.5px solid ${isDirty(baseRow.id,baseRow)?"var(--brand)":"var(--line)"}`,fontSize:13,fontFamily:"var(--f-mono)",outline:"none"}}/></td>
+                      <td><input type="number" value={lp[baseRow.id]?.max??baseRow.price_max} onChange={e=>setLp(baseRow.id,"max",e.target.value)} style={{width:"100%",padding:"8px 10px",borderRadius:8,border:`1.5px solid ${isDirty(baseRow.id,baseRow)?"var(--brand)":"var(--line)"}`,fontSize:13,fontFamily:"var(--f-mono)",outline:"none"}}/></td>
+                      <td><button className="btn-icon" title="Save" style={{opacity:isDirty(baseRow.id,baseRow)?1:.3}} onClick={()=>saveFoxPrice(baseRow.id)}><ArrowChip/></button></td>
+                    </tr>
+                  )}
+                  {/* Feature rows */}
+                  {featureRows.map(f=>(
+                    <tr key={f.id}>
+                      <td>
+                        <div className="ttl">{f.label}</div>
+                        <div className="sub" style={{fontFamily:"var(--f-mono)",fontSize:10,letterSpacing:".1em",color:"var(--muted)",textTransform:"uppercase"}}>{f.feature_id}</div>
+                      </td>
+                      <td><input type="number" value={lp[f.id]?.min??f.price_min} onChange={e=>setLp(f.id,"min",e.target.value)} style={{width:"100%",padding:"8px 10px",borderRadius:8,border:`1.5px solid ${isDirty(f.id,f)?"var(--brand)":"var(--line)"}`,fontSize:13,fontFamily:"var(--f-mono)",outline:"none"}}/></td>
+                      <td><input type="number" value={lp[f.id]?.max??f.price_max} onChange={e=>setLp(f.id,"max",e.target.value)} style={{width:"100%",padding:"8px 10px",borderRadius:8,border:`1.5px solid ${isDirty(f.id,f)?"var(--brand)":"var(--line)"}`,fontSize:13,fontFamily:"var(--f-mono)",outline:"none"}}/></td>
+                      <td><button className="btn-icon" title="Save" style={{opacity:isDirty(f.id,f)?1:.3}} onClick={()=>saveFoxPrice(f.id)}><ArrowChip/></button></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {foxPrices.length===0&&<div style={{padding:32,textAlign:"center",color:"var(--muted)"}}>Loading pricing data…</div>}
+            </div>
+            <div style={{marginTop:16,padding:"12px 16px",background:"var(--canvas)",borderRadius:10,fontSize:12,color:"var(--muted)",border:"1px solid var(--line)"}}>
+              Prices shown in USD. The Fox chat shows a live estimate as visitors select features. Updated prices apply to all new visitors immediately — no redeploy needed.
+            </div>
+          </section>
+          );
+        })()}
 
         {/* ══════════ SETTINGS ══════════ */}
         {page==="settings" && (

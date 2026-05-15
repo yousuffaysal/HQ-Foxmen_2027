@@ -137,15 +137,15 @@ function TypingDots() {
 
 /* ── Feature selector card ───────────────────────────────────── */
 function FeatureCard({
-  projectType, features, onToggle, onGetEstimate,
+  projectType, features, base, onToggle, onGetEstimate,
 }: {
   projectType: string;
   features: Feature[];
+  base: [number, number];
   onToggle: (id: string) => void;
   onGetEstimate: () => void;
 }) {
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
-  const base  = BASE_PRICES[projectType] ?? [5000, 10000];
   const extra = features.filter(f => f.checked).reduce((s, f) => [s[0] + f.priceMin, s[1] + f.priceMax], [0, 0]);
   const totalMin = base[0] + extra[0];
   const totalMax = base[1] + extra[1];
@@ -244,8 +244,34 @@ export default function FoxChat() {
   const [emailVal, setEmailVal]       = useState("");
   const [emailSent, setEmailSent]     = useState(false);
   const [unread, setUnread]           = useState(0);
+  const [dynFeatureSets, setDynFeatureSets] = useState<Record<string, Feature[]>>(FEATURE_SETS);
+  const [dynBasePrices, setDynBasePrices]   = useState<Record<string, [number, number]>>(BASE_PRICES);
   const bottomRef                     = useRef<HTMLDivElement>(null);
   const inputRef                      = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetch("/api/fox-prices")
+      .then(r => r.json())
+      .then((rows: { category: string; feature_id: string; price_min: number; price_max: number; is_base: boolean }[]) => {
+        const bases: Record<string, [number, number]> = { ...BASE_PRICES };
+        const featureSets: Record<string, Feature[]>  = {};
+        rows.forEach(row => {
+          if (row.is_base) {
+            bases[row.category] = [row.price_min, row.price_max];
+          } else {
+            if (!featureSets[row.category]) featureSets[row.category] = [];
+            const staticF = FEATURE_SETS[row.category]?.find(f => f.id === row.feature_id);
+            if (staticF) featureSets[row.category].push({ ...staticF, priceMin: row.price_min, priceMax: row.price_max });
+          }
+        });
+        Object.keys(FEATURE_SETS).forEach(cat => {
+          if (!featureSets[cat]) featureSets[cat] = FEATURE_SETS[cat];
+        });
+        setDynBasePrices(bases);
+        setDynFeatureSets(featureSets);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -267,9 +293,9 @@ export default function FoxChat() {
       const data = await res.json();
       setMsgs(m => [...m, { role: "assistant", content: data.message ?? "I'm here — what are you building?" }]);
 
-      if (data.stage === "features" && data.projectType && FEATURE_SETS[data.projectType]) {
+      if (data.stage === "features" && data.projectType && dynFeatureSets[data.projectType]) {
         setProjectType(data.projectType);
-        setFeatures(FEATURE_SETS[data.projectType]);
+        setFeatures(dynFeatureSets[data.projectType]);
         setStage("features");
       }
       if (!open) setUnread(u => u + 1);
@@ -277,7 +303,7 @@ export default function FoxChat() {
       setMsgs(m => [...m, { role: "assistant", content: "Hit a snag — try again!" }]);
     }
     setLoading(false);
-  }, [input, loading, msgs, open]);
+  }, [input, loading, msgs, open, dynFeatureSets]);
 
   const toggleFeature = useCallback((id: string) => {
     setFeatures(fs => fs.map(f => f.id === id ? { ...f, checked: !f.checked } : f));
@@ -292,7 +318,7 @@ export default function FoxChat() {
     if (!emailVal.includes("@") || loading || !projectType) return;
     setLoading(true);
 
-    const base      = BASE_PRICES[projectType] ?? [5000, 10000];
+    const base      = dynBasePrices[projectType] ?? [5000, 10000];
     const checked   = features.filter(f => f.checked);
     const extraMin  = checked.reduce((s, f) => s + f.priceMin, 0);
     const extraMax  = checked.reduce((s, f) => s + f.priceMax, 0);
@@ -313,7 +339,7 @@ export default function FoxChat() {
       role: "assistant",
       content: `Estimate sent to ${emailVal}.\n\nIt includes your selected features, the process breakdown, and pricing. Our team will follow up within 24 hours.`,
     }]);
-  }, [emailVal, loading, projectType, features, msgs]);
+  }, [emailVal, loading, projectType, features, msgs, dynBasePrices]);
 
   const checkedCount = features.filter(f => f.checked).length;
 
@@ -374,6 +400,7 @@ export default function FoxChat() {
                 <FeatureCard
                   projectType={projectType}
                   features={features}
+                  base={dynBasePrices[projectType] ?? [5000, 10000]}
                   onToggle={toggleFeature}
                   onGetEstimate={handleGetEstimate}
                 />

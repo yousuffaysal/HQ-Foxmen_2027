@@ -147,7 +147,7 @@ function emailHtml(
 
 export async function POST(req: Request) {
   try {
-    const { messages, email, projectType, features, totalMin, totalMax, process } = await req.json();
+    const { messages, email, projectType, features, totalMin, totalMax, process: phases } = await req.json();
 
     // ── Save lead + send estimate email ──────────────────────
     if (email) {
@@ -169,7 +169,7 @@ export async function POST(req: Request) {
       `;
 
       if (process.env.RESEND_API_KEY && projectType) {
-        const html = emailHtml(email, messages, projectType, features ?? [], totalMin ?? 0, totalMax ?? 0, process ?? []);
+        const html = emailHtml(email, messages, projectType, features ?? [], totalMin ?? 0, totalMax ?? 0, phases ?? []);
         await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
