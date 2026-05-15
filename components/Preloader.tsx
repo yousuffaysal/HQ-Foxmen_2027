@@ -7,13 +7,11 @@ export default function Preloader() {
 
   useEffect(() => {
     document.body.classList.add("loading");
-
     const timer = setTimeout(() => {
       ref.current?.classList.add("gone");
       document.body.classList.remove("loading");
       setTimeout(() => setUnmounted(true), 900);
-    }, 2500);
-
+    }, 2400);
     return () => clearTimeout(timer);
   }, []);
 
@@ -21,8 +19,22 @@ export default function Preloader() {
 
   return (
     <div id="preloader" ref={ref} aria-hidden="true">
+      {/* noise layer */}
+      <div className="pre-noise" />
+
       <div className="pre-inner">
-        <img src="/assets/Logo_v_3-new.png" alt="Foxmen Studio" className="pre-logo" />
+        {/* Logo — identical to navbar: mark + wordmark */}
+        <div className="pre-logo-wrap">
+          <div className="pre-logo-row">
+            <img src="/assets/logo-mark.svg" className="pre-mark" alt="" />
+            <div className="pre-wordmark">
+              <span className="pre-name">Foxmen <em>Studio</em></span>
+              <span className="pre-tagline">Code · Craft · Care</span>
+            </div>
+          </div>
+        </div>
+
+        {/* thin fill bar */}
         <div className="pre-bar">
           <i />
         </div>

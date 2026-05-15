@@ -65,8 +65,6 @@ const MODAL_TITLE:Record<string,string>={
    ================================================================ */
 export default function AdminPage() {
   /* auth */
-  const [splash, setSplash]         = useState(true);
-  const [splashFade, setSplashFade] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [page, setPage]         = useState("dashboard");
 
@@ -101,13 +99,6 @@ export default function AdminPage() {
   const [secT,   setSecT]           = useState([true,true,true,false]);
 
   const toastTimer = useRef<ReturnType<typeof setTimeout>|null>(null);
-
-  /* ── splash ── */
-  useEffect(()=>{
-    const t1 = setTimeout(()=>setSplashFade(true), 1700);
-    const t2 = setTimeout(()=>setSplash(false), 2500);
-    return ()=>{ clearTimeout(t1); clearTimeout(t2); };
-  },[]);
 
   /* ── toast ── */
   const toast = useCallback((msg:string)=>{
