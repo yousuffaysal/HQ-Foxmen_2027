@@ -2210,3 +2210,25 @@ body.loading { overflow: hidden; }
   margin: 0;
   line-height: 1.6;
 }
+
+/* ============================================================
+   FOX CHAT WIDGET
+   ============================================================ */
+@keyframes fox-in {
+  from { opacity: 0; transform: translateY(16px) scale(.96); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);   }
+}
+@keyframes fox-dot {
+  0%, 100% { opacity: .3; transform: translateY(0);    }
+  50%       { opacity: 1;  transform: translateY(-3px); }
+}
+@keyframes fox-ping {
+  from { transform: scale(.7); opacity: 0; }
+  to   { transform: scale(1);  opacity: 1; }
+}
+.fox-window::-webkit-scrollbar { width: 4px; }
+.fox-window::-webkit-scrollbar-track { background: transparent; }
+.fox-window::-webkit-scrollbar-thumb { background: #e5e3e0; border-radius: 999px; }
+@media (max-width: 480px) {
+  .fox-window { width: calc(100vw - 32px) !important; right: 16px !important; bottom: 84px !important; }
+}
