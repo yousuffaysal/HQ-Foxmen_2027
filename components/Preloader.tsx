@@ -34,10 +34,6 @@ export default function Preloader() {
           </div>
         </div>
 
-        {/* thin fill bar */}
-        <div className="pre-bar">
-          <i />
-        </div>
       </div>
     </div>
   );
