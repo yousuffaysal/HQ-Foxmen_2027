@@ -229,6 +229,10 @@ h1, h2, h3, h4 { margin: 0; font-weight: 400; letter-spacing: -0.02em; }
 .btn--lg .chip svg { width: 26px; height: 26px; }
 
 .btn--brand { --bg: var(--brand); --chip: #fff; --chipfg: var(--brand); }
+
+.btn--sm { padding: 5px 5px 5px 18px; font-size: 13px; }
+.btn--sm .chip { width: 32px; height: 32px; }
+.btn--sm .chip svg { width: 15px; height: 15px; }
 .btn--brand::before { background: var(--ink); }
 
 .tlink {
@@ -1164,6 +1168,11 @@ h1, h2, h3, h4 { margin: 0; font-weight: 400; letter-spacing: -0.02em; }
   font-family: var(--f-mono); font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
   overflow: hidden;
 }
+.proj-grid .item .thumb img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: contain; display: block;
+}
 .proj-grid .item.dark .thumb  { background: #0a0a0a; color: rgba(255,255,255,.45); }
 .proj-grid .item.brand .thumb { background: var(--brand); color: rgba(255,255,255,.85); }
 .proj-grid .item.bone .thumb  { background: #efece6; color: var(--muted); }
@@ -1179,6 +1188,12 @@ h1, h2, h3, h4 { margin: 0; font-weight: 400; letter-spacing: -0.02em; }
 .proj-grid .item .meta {
   display: flex; justify-content: space-between; align-items: center;
   font-family: var(--f-mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted);
+}
+
+/* card CTA row */
+.proj-cta-row {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-top: auto; padding-top: 16px; border-top: 1px solid var(--line);
 }
 
 /* status badge on thumbnail */

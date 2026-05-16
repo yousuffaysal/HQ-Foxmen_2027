@@ -69,49 +69,103 @@ function parseLine(text: string): React.ReactNode {
   );
 }
 
+const TEXT_COLOR  = "#2a2a2a";
+const MUTED_COLOR = "#6b6b6b";
+
+/* helpers — lenient matching for various unicode dashes/bullets */
+const isBullet  = (s: string) => /^[-–—•*]\s/.test(s.trimStart());
+const isOrdered = (s: string) => /^\d+[.)]\s/.test(s.trimStart());
+const isHeading = (s: string) => /^#{1,3}/.test(s.trimStart());
+const isQuote   = (s: string) => s.trimStart().startsWith("> ");
+
+function peekNextNonBlank(lines: string[], from: number) {
+  for (let j = from; j < lines.length; j++) {
+    if (lines[j].trim()) return lines[j];
+  }
+  return null;
+}
+
 function RichText({ text, lede = true }: { text: string; lede?: boolean }) {
-  if (!text) return null;
-  const lines = text.split("\n");
+  if (!text?.trim()) return null;
+  const lines = text.split(/\r?\n/);
   const nodes: React.ReactNode[] = [];
   let i = 0;
   let firstPara = true;
 
   while (i < lines.length) {
-    const line = lines[i];
+    const raw = lines[i];
+    const line = raw.trimStart();
 
     if (!line.trim()) { i++; continue; }
 
-    if (line.startsWith("# ")) {
-      nodes.push(<h3 key={i} className="md-h3">{parseLine(line.slice(2))}</h3>);
-    } else if (line.startsWith("## ")) {
-      nodes.push(<h4 key={i} className="md-h4">{parseLine(line.slice(3))}</h4>);
-    } else if (line.startsWith("- ") || line.startsWith("• ")) {
+    /* headings — accept #Word or # Word, 1-3 hashes */
+    if (isHeading(raw)) {
+      const match = line.match(/^(#{1,3})\s*(.*)/);
+      const level = match?.[1].length ?? 1;
+      const content = match?.[2].trim() ?? line.replace(/^#+\s*/, "");
+      if (level === 1) nodes.push(<h3 key={i} className="md-h3" style={{ color: TEXT_COLOR }}>{parseLine(content)}</h3>);
+      else             nodes.push(<h4 key={i} className="md-h4" style={{ color: TEXT_COLOR }}>{parseLine(content)}</h4>);
+      i++; continue;
+    }
+
+    /* bullet list — group items even when separated by blank lines */
+    if (isBullet(raw)) {
       const items: React.ReactNode[] = [];
-      while (i < lines.length && (lines[i].startsWith("- ") || lines[i].startsWith("• "))) {
-        items.push(<li key={i}>{parseLine(lines[i].slice(2))}</li>);
+      while (i < lines.length) {
+        const cur = lines[i];
+        if (!cur.trim()) {
+          /* allow one blank line between bullets */
+          const next = peekNextNonBlank(lines, i + 1);
+          if (next && isBullet(next)) { i++; continue; }
+          break;
+        }
+        if (!isBullet(cur)) break;
+        const content = cur.trimStart().replace(/^[-–—•*]\s*/, "");
+        items.push(<li key={i} style={{ color: MUTED_COLOR }}>{parseLine(content)}</li>);
         i++;
       }
       nodes.push(<ul key={`ul-${i}`} className="md-ul">{items}</ul>);
       continue;
-    } else if (/^\d+\.\s/.test(line)) {
+    }
+
+    /* ordered list */
+    if (isOrdered(raw)) {
       const items: React.ReactNode[] = [];
-      while (i < lines.length && /^\d+\.\s/.test(lines[i])) {
-        items.push(<li key={i}>{parseLine(lines[i].replace(/^\d+\.\s/, ""))}</li>);
+      while (i < lines.length) {
+        const cur = lines[i];
+        if (!cur.trim()) {
+          const next = peekNextNonBlank(lines, i + 1);
+          if (next && isOrdered(next)) { i++; continue; }
+          break;
+        }
+        if (!isOrdered(cur)) break;
+        const content = cur.trimStart().replace(/^\d+[.)]\s*/, "");
+        items.push(<li key={i} style={{ color: MUTED_COLOR }}>{parseLine(content)}</li>);
         i++;
       }
       nodes.push(<ol key={`ol-${i}`} className="md-ol">{items}</ol>);
       continue;
-    } else if (line.startsWith("> ")) {
-      nodes.push(<blockquote key={i} className="md-bq">{parseLine(line.slice(2))}</blockquote>);
-    } else {
-      const cls = lede && firstPara ? "lede" : "";
-      nodes.push(<p key={i} className={cls}>{parseLine(line)}</p>);
-      firstPara = false;
     }
+
+    /* blockquote */
+    if (isQuote(raw)) {
+      nodes.push(<blockquote key={i} className="md-bq" style={{ color: MUTED_COLOR }}>{parseLine(line.replace(/^>\s*/, ""))}</blockquote>);
+      i++; continue;
+    }
+
+    /* paragraph */
+    const isLede = lede && firstPara;
+    nodes.push(
+      <p key={i}
+        className={isLede ? "lede" : ""}
+        style={{ color: TEXT_COLOR, fontSize: isLede ? "1.15rem" : "1rem", lineHeight: 1.75, margin: "0 0 0.9em" }}
+      >{parseLine(line)}</p>
+    );
+    firstPara = false;
     i++;
   }
 
-  return <div className="chap-rich">{nodes}</div>;
+  return <div className="chap-rich" style={{ color: TEXT_COLOR }}>{nodes}</div>;
 }
 
 /* ── progress bar ───────────────────────────────────────────────── */
@@ -172,6 +226,8 @@ function DbCasePage({ project: p }: { project: CsProject }) {
   useScrollReveal(".fade");
 
   const chapters  = parseChapters(p.chapters);
+  // eslint-disable-next-line no-console
+  console.log("[case-study] chapters:", chapters.map(c => ({ id: c.id, title: c.title, bodyLen: c.body?.length, bodyPreview: c.body?.slice(0, 80) })));
   const gallery   = parseGallery(p.gallery || "[]");
   const techStack = p.tech_stack ? p.tech_stack.split(/[,·]/).map(t => t.trim()).filter(Boolean) : [];
 

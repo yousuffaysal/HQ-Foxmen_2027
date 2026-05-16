@@ -103,9 +103,12 @@ export default function WorkPage() {
                 return (
                   <article key={p.id} className={`item ${tone} fade${i % 4 === 0 ? "" : ` d${i % 4}`}`}>
 
-                    {/* thumbnail */}
-                    <div className="thumb" style={img ? { backgroundImage: `url(${img})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}>
-                      {!img && <span style={{ fontFamily: "var(--f-mono)", fontSize: 11, letterSpacing: ".16em", textTransform: "uppercase", opacity: .4 }}>No image yet</span>}
+                    {/* thumbnail — full image, no crop */}
+                    <div className="thumb">
+                      {img
+                        ? <img src={img} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }} />
+                        : <span style={{ fontFamily: "var(--f-mono)", fontSize: 11, letterSpacing: ".16em", textTransform: "uppercase", opacity: .4 }}>No image yet</span>
+                      }
                       {p.status !== "live" && (
                         <span className="proj-status-badge">{STATUS_LABEL[p.status] ?? p.status}</span>
                       )}
@@ -126,20 +129,17 @@ export default function WorkPage() {
                       )}
 
                       {/* CTA row */}
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 8, paddingTop: 16, borderTop: "1px solid var(--line)" }}>
-                        <span style={{ fontFamily: "var(--f-mono)", fontSize: 10, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--muted)" }}>
-                          {p.industry || "Studio"}
-                        </span>
-                        <div style={{ display: "flex", gap: 8 }}>
-                          {p.live_url && (
-                            <a href={p.live_url} target="_blank" rel="noopener noreferrer" className="proj-pill">
-                              Live site
-                            </a>
-                          )}
-                          <Link href={href} className="proj-pill proj-pill--primary">
-                            Case study <ArrowIcon />
-                          </Link>
-                        </div>
+                      <div className="proj-cta-row">
+                        {p.live_url && (
+                          <a href={p.live_url} target="_blank" rel="noopener noreferrer" className="btn btn--ghost btn--sm">
+                            <span className="label">Live site</span>
+                            <span className="chip"><ArrowIcon /></span>
+                          </a>
+                        )}
+                        <Link href={href} className="btn btn--sm">
+                          <span className="label">Case study</span>
+                          <span className="chip"><ArrowIcon /></span>
+                        </Link>
                       </div>
                     </div>
 

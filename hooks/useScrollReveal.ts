@@ -12,26 +12,33 @@ export function useScrollReveal(selector = ".fade, .reveal") {
           }
         });
       },
-      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+      { threshold: 0.08, rootMargin: "0px 0px -20px 0px" }
     );
 
+    const revealEl = (el: Element) => {
+      if (el.classList.contains("in")) return;
+      // If already in viewport, reveal immediately without waiting for callback
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight + 40 && rect.bottom > -40) {
+        el.classList.add("in");
+      } else {
+        io.observe(el);
+      }
+    };
+
     const observe = (root: Element | Document = document) => {
-      root.querySelectorAll(selector).forEach((el) => {
-        if (!el.classList.contains("in")) io.observe(el);
-      });
+      root.querySelectorAll<Element>(selector).forEach(revealEl);
     };
 
     observe();
 
-    // Watch for elements added after initial render (async data loads)
+    // Catch elements added after initial render (async data loads)
     const mo = new MutationObserver((mutations) => {
       for (const m of mutations) {
         m.addedNodes.forEach((node) => {
           if (!(node instanceof Element)) return;
-          if (node.matches(selector)) io.observe(node);
-          node.querySelectorAll(selector).forEach((el) => {
-            if (!el.classList.contains("in")) io.observe(el);
-          });
+          if (node.matches(selector)) revealEl(node);
+          node.querySelectorAll<Element>(selector).forEach(revealEl);
         });
       }
     });

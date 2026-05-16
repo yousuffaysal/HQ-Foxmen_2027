@@ -671,6 +671,12 @@ export default function AdminPage() {
   const [invNotes,       setInvNotes]       = useState("Payment due within 14 days of issue. Late payments subject to 2% monthly interest.");
   const [invSending,     setInvSending]     = useState(false);
   const [invAiPrompt,    setInvAiPrompt]    = useState("");
+
+  /* email campaign */
+  const [emailTo,         setEmailTo]         = useState("");
+  const [emailSubject,    setEmailSubject]    = useState("");
+  const [emailRawContent, setEmailRawContent] = useState("");
+  const [emailSending,    setEmailSending]    = useState(false);
   const [invAiLoading,   setInvAiLoading]   = useState(false);
   const [projAiPrompt,   setProjAiPrompt]   = useState("");
   const [projAiLoading,  setProjAiLoading]  = useState(false);
@@ -929,8 +935,8 @@ export default function AdminPage() {
   };
 
   /* ── page meta ── */
-  const CRUMBS:Record<string,string>={ dashboard:"Workspace / Dashboard", analytics:"Workspace / Analytics", projects:"Content / Projects", blog:"Content / Journal", services:"Content / Services", testimonials:"Content / Testimonials", media:"Content / Media", clients:"People / Clients", messages:"People / Inbox", leads:"People / Leads", team:"People / Team", settings:"System / Settings", "fox-prices":"System / Fox Pricing", proposals:"Generate / Proposals", invoices:"Generate / Invoices" };
-  const TITLES:Record<string,React.ReactNode>={ dashboard:<>Good evening, <span className="it">Arif.</span></>, analytics:"Analytics", projects:"Projects", blog:"Journal", services:"Services", testimonials:"Testimonials", media:"Media library", clients:"Clients", messages:"Inbox", leads:"Estimator Leads", team:"Team", settings:"Settings", "fox-prices":"Fox Pricing", proposals:"Proposals", invoices:"Invoices" };
+  const CRUMBS:Record<string,string>={ dashboard:"Workspace / Dashboard", analytics:"Workspace / Analytics", projects:"Content / Projects", blog:"Content / Journal", services:"Content / Services", testimonials:"Content / Testimonials", media:"Content / Media", clients:"People / Clients", messages:"People / Inbox", leads:"People / Leads", team:"People / Team", settings:"System / Settings", "fox-prices":"System / Fox Pricing", proposals:"Generate / Proposals", invoices:"Generate / Invoices", email:"Generate / Email Campaign" };
+  const TITLES:Record<string,React.ReactNode>={ dashboard:<>Good evening, <span className="it">Arif.</span></>, analytics:"Analytics", projects:"Projects", blog:"Journal", services:"Services", testimonials:"Testimonials", media:"Media library", clients:"Clients", messages:"Inbox", leads:"Estimator Leads", team:"Team", settings:"Settings", "fox-prices":"Fox Pricing", proposals:"Proposals", invoices:"Invoices", email:"Email Campaign" };
 
   /* ── dashboard derived ── */
   const liveProjects = projects.filter(p=>p.status==="live").length;
@@ -1006,6 +1012,7 @@ export default function AdminPage() {
           <span className="label">Generate</span>
           <a className={page==="proposals"?"active":""} onClick={()=>nav("proposals")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>Proposals</a>
           <a className={page==="invoices"?"active":""} onClick={()=>nav("invoices")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4M14 15h4"/></svg>Invoices</a>
+          <a className={page==="email"?"active":""} onClick={()=>nav("email")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M4 4h16v16H4V4Z"/><path d="m4 4 8 9 8-9"/></svg>Email Campaign</a>
           <span className="label">System</span>
           <a className={page==="fox-prices"?"active":""} onClick={()=>nav("fox-prices")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Fox Pricing</a>
           <a className={page==="settings"?"active":""} onClick={()=>nav("settings")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.8 1.3V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.8-1.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.3-2.8H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.3-2.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 2.8-1.3V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.8 1.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0 1.3 2.8H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.3 2.8Z"/></svg>Settings</a>
@@ -1828,6 +1835,183 @@ export default function AdminPage() {
                       <div className="ft-right">Payment due within 14 days of issue.<br/>Late payments subject to 2% monthly interest.</div>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+          </section>
+          );
+        })()}
+
+        {/* ══════════ EMAIL CAMPAIGN ══════════ */}
+        {page==="email" && (()=>{
+          const BRAND = "#8B5DFF";
+
+          /* client-side parser — mirrors the API route */
+          function applyInline(t:string):string {
+            return t
+              .replace(/\*\*(.+?)\*\*/g,'<strong style="font-weight:700;color:#0a0a0a;">$1</strong>')
+              .replace(/\*(.+?)\*/g,'<em style="font-style:italic;">$1</em>');
+          }
+
+          function parseContent(raw:string):string {
+            const lines=raw.split(/\r?\n/);
+            const out:string[]=[];
+            let i=0;
+            while(i<lines.length){
+              const line=lines[i].trimEnd();
+              if(!line.trim()){i++;continue;}
+              if(line.startsWith("## ")){
+                out.push(`<h2 style="font-size:18px;font-weight:700;color:#0a0a0a;margin:28px 0 10px;letter-spacing:-.01em;">${line.slice(3)}</h2>`);
+              } else if(line.startsWith("### ")){
+                out.push(`<h3 style="font-size:15px;font-weight:700;color:#0a0a0a;margin:22px 0 8px;">${line.slice(4)}</h3>`);
+              } else if(line.trim()==="---"){
+                out.push(`<div style="height:1px;background:#f0ede8;margin:24px 0;"></div>`);
+              } else if(line.startsWith("> ")){
+                out.push(`<blockquote style="margin:18px 0;padding:12px 18px;background:#faf8ff;border-left:3px solid ${BRAND};font-size:14px;color:#4b4b4b;line-height:1.7;font-style:italic;">${line.slice(2)}</blockquote>`);
+              } else if(/^[-•*]\s/.test(line)){
+                const items:string[]=[];
+                while(i<lines.length&&/^[-•*]\s/.test(lines[i])){
+                  items.push(`<li style="padding:3px 0;font-size:14px;color:#4b4b4b;line-height:1.7;">${applyInline(lines[i].replace(/^[-•*]\s/,""))}</li>`);
+                  i++;
+                }
+                out.push(`<ul style="margin:10px 0 14px;padding-left:22px;">${items.join("")}</ul>`);
+                continue;
+              } else if(/^\[(.+)\]\((https?:\/\/[^)]+)\)$/.test(line.trim())){
+                const m=line.trim().match(/^\[(.+)\]\((https?:\/\/[^)]+)\)$/);
+                if(m) out.push(`<div style="text-align:center;margin:28px 0;"><a href="${m[2]}" style="display:inline-block;background:${BRAND};color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:13px 36px;border-radius:8px;">${m[1]}</a></div>`);
+              } else if(/^https?:\/\/\S+$/.test(line.trim())){
+                out.push(`<div style="text-align:center;margin:28px 0;"><a href="${line.trim()}" style="display:inline-block;background:${BRAND};color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:13px 36px;border-radius:8px;">View now →</a></div>`);
+              } else {
+                out.push(`<p style="margin:0 0 14px;font-size:15px;line-height:1.8;color:#4b4b4b;">${applyInline(line)}</p>`);
+              }
+              i++;
+            }
+            return out.join("\n");
+          }
+
+          function buildPreviewHtml():string {
+            return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>*{box-sizing:border-box;}body{margin:0;padding:24px 12px;background:#f1efe9;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;}</style></head><body>
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 6px 32px rgba(0,0,0,.10);">
+<tr><td style="background:#0a0a0a;padding:28px 36px 22px;">
+  <table cellpadding="0" cellspacing="0" border="0"><tr>
+    <td style="vertical-align:middle;padding-right:12px;"><img src="/assets/logo-mark.svg" height="38" width="38" style="display:block;"/></td>
+    <td style="vertical-align:middle;">
+      <div style="font-size:18px;font-weight:400;color:#fff;letter-spacing:-.01em;">Foxmen <em style="font-style:italic;color:${BRAND};">Studio</em></div>
+      <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:4px;">Code · Craft · Care</div>
+    </td>
+  </tr></table>
+</td></tr>
+<tr><td style="height:3px;background:linear-gradient(90deg,${BRAND},#6d28d9);font-size:0;">&nbsp;</td></tr>
+<tr><td style="padding:36px 36px 28px;">
+  ${emailRawContent ? parseContent(emailRawContent) : '<p style="color:#ccc;font-size:14px;">Start typing your email content to see a live preview…</p>'}
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:32px;padding-top:20px;border-top:1px solid #f0ede8;"><tr>
+    <td><p style="margin:0 0 3px;font-size:13px;color:#9a9a9a;">Warm regards,</p><p style="margin:0 0 2px;font-size:15px;font-weight:700;color:#0a0a0a;">The Foxmen Team</p><p style="margin:0;font-size:11px;color:#c0bdb8;">foxmen.studio</p></td>
+    <td style="text-align:right;vertical-align:bottom;"><img src="/assets/logo-mark.svg" height="26" width="26" style="display:block;margin-left:auto;opacity:.2;"/></td>
+  </tr></table>
+</td></tr>
+<tr><td style="background:#0a0a0a;padding:18px 36px;">
+  <p style="margin:0;font-size:10px;color:rgba(255,255,255,.3);line-height:1.7;">foxmen.studio · contact@foxmenstudio.com<br/>© ${new Date().getFullYear()} Foxmen Studio. All rights reserved.</p>
+</td></tr>
+</table></td></tr></table></body></html>`;
+          }
+
+          const sendEmail=async()=>{
+            if(!emailTo){toast("Enter a recipient email");return;}
+            if(!emailSubject){toast("Enter a subject line");return;}
+            if(!emailRawContent.trim()){toast("Write some email content first");return;}
+            setEmailSending(true);
+            try{
+              const r=await fetch("/api/email-campaign",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({to:emailTo,subject:emailSubject,rawContent:emailRawContent})});
+              if(r.ok){toast("Email sent to "+emailTo);}else{const d=await r.json();toast(d.error||"Send failed");}
+            }catch{toast("Send failed. Try again.");}
+            setEmailSending(false);
+          };
+
+          const copyHtml=()=>{
+            const html=buildPreviewHtml();
+            navigator.clipboard.writeText(html).then(()=>toast("HTML copied to clipboard")).catch(()=>toast("Copy failed"));
+          };
+
+          const preview=buildPreviewHtml();
+
+          return(
+          <section className="page active">
+            <div className="page-head">
+              <div>
+                <h2>Email Campaign</h2>
+                <p style={{fontSize:13,color:"var(--muted)",marginTop:4}}>Write your message, see the branded template live, then send with one click.</p>
+              </div>
+            </div>
+
+            <div className="gen-layout">
+              {/* ── FORM ── */}
+              <div className="gen-form">
+                <div className="gen-form-title">Compose</div>
+                <div className="gen-form-sub">Paste or type your email — we'll wrap it in the Foxmen template automatically.</div>
+
+                <Field label="To (recipient email)" value={emailTo} onChange={setEmailTo} placeholder="client@company.com" type="email"/>
+                <Field label="Subject line" value={emailSubject} onChange={setEmailSubject} placeholder="Here's what we've been building…"/>
+
+                <div className="field" style={{marginTop:8}}>
+                  <label>Email content</label>
+                  <div style={{fontSize:11,color:"var(--muted)",marginBottom:6,lineHeight:1.6}}>
+                    Supports <code style={{background:"var(--line)",padding:"1px 4px",borderRadius:3,fontSize:10}}>## Heading</code>, <code style={{background:"var(--line)",padding:"1px 4px",borderRadius:3,fontSize:10}}>**bold**</code>, <code style={{background:"var(--line)",padding:"1px 4px",borderRadius:3,fontSize:10}}>- list</code>, <code style={{background:"var(--line)",padding:"1px 4px",borderRadius:3,fontSize:10}}>[Label](url)</code> for CTA button
+                  </div>
+                  <textarea
+                    value={emailRawContent}
+                    onChange={e=>setEmailRawContent(e.target.value)}
+                    placeholder={`Hi Ahmed,\n\nHope you're doing well! I wanted to share a quick update on the project.\n\n## What we shipped this week\n- Redesigned the onboarding flow\n- Integrated the payment gateway\n- Performance improvements across the board\n\n> "The new design feels like a completely different product." — Early feedback\n\nWe're on track for the 14 June launch. Here's the staging link:\n\n[View the staging site](https://staging.example.com)\n\nLet us know if you have any questions.`}
+                    style={{width:"100%",minHeight:320,resize:"vertical",fontFamily:"var(--f-mono)",fontSize:13,lineHeight:1.65,padding:"12px 14px",background:"var(--canvas)",border:"1px solid var(--line)",borderRadius:"var(--r-sm)",color:"var(--ink)",outline:"none"}}
+                  />
+                </div>
+
+                <div style={{display:"flex",gap:10,marginTop:4}}>
+                  <button className="btn-generate" onClick={sendEmail} disabled={emailSending} style={{flex:1}}>
+                    {emailSending
+                      ?<><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{animation:"spin 1s linear infinite"}}><path d="M21 12a9 9 0 1 1-6.2-8.6"/></svg>Sending…</>
+                      :<><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7Z"/></svg>Send email</>
+                    }
+                  </button>
+                  <button className="btn-ghost" onClick={copyHtml} style={{display:"flex",alignItems:"center",gap:6,padding:"10px 16px",fontSize:13}}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy HTML
+                  </button>
+                </div>
+
+                {/* Syntax guide */}
+                <div style={{marginTop:20,padding:"14px 16px",background:"var(--line)",borderRadius:10}}>
+                  <div style={{fontSize:11,fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",color:"var(--muted)",marginBottom:10}}>Formatting cheatsheet</div>
+                  {[
+                    ["## Section title","Large heading"],
+                    ["**bold text**","Bold"],
+                    ["*italic text*","Italic"],
+                    ["- item","Bullet list"],
+                    ["---","Horizontal divider"],
+                    ["> quoted text","Highlighted quote"],
+                    ["[Button label](url)","Purple CTA button"],
+                    ["https://example.com","Auto CTA button"],
+                  ].map(([syntax,desc])=>(
+                    <div key={syntax} style={{display:"flex",gap:10,alignItems:"baseline",padding:"4px 0",borderBottom:"1px solid rgba(0,0,0,.04)"}}>
+                      <code style={{fontFamily:"var(--f-mono)",fontSize:11,color:"var(--brand)",minWidth:180,flexShrink:0}}>{syntax}</code>
+                      <span style={{fontSize:12,color:"var(--muted)"}}>{desc}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* ── PREVIEW ── */}
+              <div className="gen-preview">
+                <div className="gen-preview-head">
+                  <span style={{fontSize:13,fontWeight:600}}>Live preview</span>
+                  <span style={{fontSize:12,color:"var(--muted)"}}>Updates as you type</span>
+                </div>
+                <div className="gen-preview-body" style={{padding:0,background:"#f1efe9"}}>
+                  <iframe
+                    srcDoc={preview}
+                    style={{width:"100%",border:"none",minHeight:600,display:"block",borderRadius:"0 0 var(--r) var(--r)"}}
+                    title="Email preview"
+                    sandbox="allow-same-origin"
+                  />
                 </div>
               </div>
             </div>
