@@ -31,10 +31,21 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       challenge_img2    = COALESCE(${body.challenge_img2},    challenge_img2),
       solution_img1     = COALESCE(${body.solution_img1},     solution_img1),
       solution_img2     = COALESCE(${body.solution_img2},     solution_img2),
-      split1_label      = COALESCE(${body.split1_label},      split1_label),
-      split2_label      = COALESCE(${body.split2_label},      split2_label),
-      slug              = COALESCE(${body.slug},              slug),
-      updated_at        = now()
+      split1_label           = COALESCE(${body.split1_label},           split1_label),
+      split2_label           = COALESCE(${body.split2_label},           split2_label),
+      slug                   = COALESCE(${body.slug},                   slug),
+      challenge_img1_label   = COALESCE(${body.challenge_img1_label},   challenge_img1_label),
+      challenge_img2_label   = COALESCE(${body.challenge_img2_label},   challenge_img2_label),
+      solution_img1_label    = COALESCE(${body.solution_img1_label},    solution_img1_label),
+      solution_img2_label    = COALESCE(${body.solution_img2_label},    solution_img2_label),
+      challenge_img1_orient  = COALESCE(${body.challenge_img1_orient},  challenge_img1_orient),
+      challenge_img2_orient  = COALESCE(${body.challenge_img2_orient},  challenge_img2_orient),
+      solution_img1_orient   = COALESCE(${body.solution_img1_orient},   solution_img1_orient),
+      solution_img2_orient   = COALESCE(${body.solution_img2_orient},   solution_img2_orient),
+      client_quote           = COALESCE(${body.client_quote},           client_quote),
+      client_quote_author    = COALESCE(${body.client_quote_author},    client_quote_author),
+      client_quote_role      = COALESCE(${body.client_quote_role},      client_quote_role),
+      updated_at             = now()
     WHERE id = ${id}
     RETURNING *
   `;

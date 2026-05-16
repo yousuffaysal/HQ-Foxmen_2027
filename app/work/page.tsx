@@ -23,6 +23,10 @@ type DbProject = {
 const TONE: Record<string, string> = { "(purple)": "violet", "": "violet", b: "dark", c: "brand", d: "bone" };
 const STATUS_LABEL: Record<string, string> = { draft: "Draft", review: "In review", live: "Live", archived: "Archived" };
 
+function toSlug(name: string): string {
+  return name.toLowerCase().replace(/[—–]/g, "-").replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").trim();
+}
+
 export default function WorkPage() {
   useScrollReveal(".fade, .reveal");
 
@@ -32,11 +36,7 @@ export default function WorkPage() {
   useEffect(() => {
     fetch("/api/projects")
       .then(r => r.json())
-      .then(rows => {
-        if (Array.isArray(rows)) {
-          setProjects(rows.filter((p: DbProject) => p.status !== "archived"));
-        }
-      })
+      .then(rows => setProjects(Array.isArray(rows) ? rows.filter((p: DbProject) => p.status !== "archived") : []))
       .catch(() => setProjects([]));
   }, []);
 
@@ -97,7 +97,7 @@ export default function WorkPage() {
               {visible.map((p, i) => {
                 const tone = TONE[p.color_cls] ?? "violet";
                 const img  = p.thumbnail || p.hero_image || "";
-                const href = p.slug ? `/work/${p.slug}` : null;
+                const href = `/work/${p.slug || toSlug(p.name)}`;
                 const num  = String(i + 1).padStart(2, "0");
 
                 return (
@@ -136,13 +136,9 @@ export default function WorkPage() {
                               Live site
                             </a>
                           )}
-                          {href ? (
-                            <Link href={href} className="proj-pill proj-pill--primary">
-                              Case study <ArrowIcon />
-                            </Link>
-                          ) : (
-                            <span className="proj-pill proj-pill--muted">No slug yet</span>
-                          )}
+                          <Link href={href} className="proj-pill proj-pill--primary">
+                            Case study <ArrowIcon />
+                          </Link>
                         </div>
                       </div>
                     </div>

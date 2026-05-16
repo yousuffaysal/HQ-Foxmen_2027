@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 /* ================================================================
    TYPES
    ================================================================ */
-type Project = { id:number; monogram:string; color_cls:string; name:string; industry:string; year:string; scope:string; status:string; updated_at:string; tagline:string; overview:string; challenge:string; solution:string; results:string; tech_stack:string; timeline_duration:string; client_name:string; live_url:string; hero_image:string; thumbnail:string; gallery:string; video_url:string; challenge_img1:string; challenge_img2:string; solution_img1:string; solution_img2:string; split1_label:string; split2_label:string; slug:string };
+type Project = { id:number; monogram:string; color_cls:string; name:string; industry:string; year:string; scope:string; status:string; updated_at:string; tagline:string; overview:string; challenge:string; solution:string; results:string; tech_stack:string; timeline_duration:string; client_name:string; live_url:string; hero_image:string; thumbnail:string; gallery:string; video_url:string; challenge_img1:string; challenge_img2:string; solution_img1:string; solution_img2:string; split1_label:string; split2_label:string; slug:string; challenge_img1_label:string; challenge_img2_label:string; solution_img1_label:string; solution_img2_label:string; challenge_img1_orient:string; challenge_img2_orient:string; solution_img1_orient:string; solution_img2_orient:string; client_quote:string; client_quote_author:string; client_quote_role:string };
 type Post     = { id:number; title:string; category:string; author_init:string; author_name:string; read_time:string; status:string; published_at:string|null };
 type Service  = { id:number; ord:number; name:string; descr:string; count:string; visible:boolean; badge:string|null; image:string|null };
 type Testi    = { id:number; quote:string; name:string; role:string; av:string; hi:string };
@@ -330,7 +330,7 @@ function FieldSel({label,value,onChange,options}:{label:string;value:string;onCh
   return <div className="field"><label>{label}</label><select value={value} onChange={e=>onChange(e.target.value)}>{options.map(o=><option key={o} value={o}>{o.charAt(0).toUpperCase()+o.slice(1)}</option>)}</select></div>;
 }
 
-function ImageUpload({label,value,onChange,accept="image/*,video/*"}:{label:string;value:string;onChange:(v:string)=>void;accept?:string}){
+function ImageUpload({label,value,onChange,accept="image/*,video/*",orient,onOrientChange,imageLabel,onLabelChange}:{label:string;value:string;onChange:(v:string)=>void;accept?:string;orient?:"portrait"|"landscape";onOrientChange?:(v:"portrait"|"landscape")=>void;imageLabel?:string;onLabelChange?:(v:string)=>void}){
   const [uploading,setUploading]=useState(false);
   const inputRef=useRef<HTMLInputElement>(null);
   const handleFile=async(file:File)=>{
@@ -342,11 +342,13 @@ function ImageUpload({label,value,onChange,accept="image/*,video/*"}:{label:stri
     setUploading(false);
   };
   const isVideo=value&&/\.(mp4|webm|mov|ogg)$/i.test(value);
+  const previewAspect=orient==="landscape"?"16/9":"4/5";
   return(
     <div className="field">
       <label>{label}</label>
       <div
         className={`img-drop${uploading?" uploading":""}`}
+        style={onOrientChange&&value?{aspectRatio:previewAspect,height:"auto"}:undefined}
         onClick={()=>!uploading&&inputRef.current?.click()}
         onDrop={e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f)handleFile(f);}}
         onDragOver={e=>e.preventDefault()}
@@ -363,6 +365,21 @@ function ImageUpload({label,value,onChange,accept="image/*,video/*"}:{label:stri
           <button className="img-drop-clear" onClick={e=>{e.stopPropagation();onChange("");}}>✕</button>
         )}
       </div>
+      {onOrientChange&&(
+        <div className="orient-toggle">
+          <button className={orient==="portrait"?"on":""} onClick={()=>onOrientChange("portrait")}>Portrait (Mobile)</button>
+          <button className={orient==="landscape"?"on":""} onClick={()=>onOrientChange("landscape")}>Landscape (Desktop)</button>
+        </div>
+      )}
+      {onLabelChange&&(
+        <input
+          className="img-label-input"
+          type="text"
+          placeholder="Image label (overlaid on photo)"
+          value={imageLabel||""}
+          onChange={e=>onLabelChange(e.target.value)}
+        />
+      )}
       <input ref={inputRef} type="file" accept={accept} style={{display:"none"}}
         onChange={e=>{const f=e.target.files?.[0];if(f)handleFile(f);e.target.value="";}}/>
     </div>
@@ -607,7 +624,7 @@ export default function AdminPage() {
     if(!form.name?.trim()){ toast("Project name is required"); return; }
     setSubmitting(true);
     const slugVal = form.slug?.trim()||toSlug(form.name);
-    const body = { monogram:form.monogram||form.name[0].toUpperCase(), color_cls:form.color_cls||"", name:form.name, industry:form.industry||"", year:form.year||String(new Date().getFullYear()), scope:form.scope||"", status:form.status||"draft", tagline:form.tagline||"", overview:form.overview||"", challenge:form.challenge||"", solution:form.solution||"", results:form.results||"", tech_stack:form.tech_stack||"", timeline_duration:form.timeline_duration||"", client_name:form.client_name||"", live_url:form.live_url||"", hero_image:form.hero_image||"", thumbnail:form.thumbnail||"", gallery:form.gallery||"[]", video_url:form.video_url||"", challenge_img1:form.challenge_img1||"", challenge_img2:form.challenge_img2||"", solution_img1:form.solution_img1||"", solution_img2:form.solution_img2||"", split1_label:form.split1_label||"Challenge", split2_label:form.split2_label||"Solution", slug:slugVal };
+    const body = { monogram:form.monogram||form.name[0].toUpperCase(), color_cls:form.color_cls||"", name:form.name, industry:form.industry||"", year:form.year||String(new Date().getFullYear()), scope:form.scope||"", status:form.status||"draft", tagline:form.tagline||"", overview:form.overview||"", challenge:form.challenge||"", solution:form.solution||"", results:form.results||"", tech_stack:form.tech_stack||"", timeline_duration:form.timeline_duration||"", client_name:form.client_name||"", live_url:form.live_url||"", hero_image:form.hero_image||"", thumbnail:form.thumbnail||"", gallery:form.gallery||"[]", video_url:form.video_url||"", challenge_img1:form.challenge_img1||"", challenge_img2:form.challenge_img2||"", solution_img1:form.solution_img1||"", solution_img2:form.solution_img2||"", split1_label:form.split1_label||"Challenge", split2_label:form.split2_label||"Solution", slug:slugVal, challenge_img1_label:form.challenge_img1_label||"", challenge_img2_label:form.challenge_img2_label||"", solution_img1_label:form.solution_img1_label||"", solution_img2_label:form.solution_img2_label||"", challenge_img1_orient:form.challenge_img1_orient||"portrait", challenge_img2_orient:form.challenge_img2_orient||"portrait", solution_img1_orient:form.solution_img1_orient||"portrait", solution_img2_orient:form.solution_img2_orient||"portrait", client_quote:form.client_quote||"", client_quote_author:form.client_quote_author||"", client_quote_role:form.client_quote_role||"" };
     const url  = editTarget ? `/api/projects/${editTarget}` : "/api/projects";
     const meth = editTarget ? "PATCH" : "POST";
     const res  = await fetch(url,{method:meth,headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
@@ -956,7 +973,7 @@ export default function AdminPage() {
                       <td><span className={`status ${p.status}`}>{p.status}</span></td>
                       <td><span style={{color:"var(--muted)",fontFamily:"var(--f-mono)",fontSize:11}}>{relTime(p.updated_at)}</span></td>
                       <td><div className="acts">
-                        <button className="btn-icon" title="Edit" onClick={()=>openModal("edit-project",{name:p.name,industry:p.industry,year:p.year,scope:p.scope,status:p.status,color_cls:p.color_cls,monogram:p.monogram,tagline:p.tagline||"",overview:p.overview||"",challenge:p.challenge||"",solution:p.solution||"",results:p.results||"",tech_stack:p.tech_stack||"",timeline_duration:p.timeline_duration||"",client_name:p.client_name||"",live_url:p.live_url||"",hero_image:p.hero_image||"",thumbnail:p.thumbnail||"",gallery:p.gallery||"[]",video_url:p.video_url||"",challenge_img1:p.challenge_img1||"",challenge_img2:p.challenge_img2||"",solution_img1:p.solution_img1||"",solution_img2:p.solution_img2||"",split1_label:p.split1_label||"Challenge",split2_label:p.split2_label||"Solution",slug:p.slug||toSlug(p.name)},p.id)}><EditSvg/></button>
+                        <button className="btn-icon" title="Edit" onClick={()=>openModal("edit-project",{name:p.name,industry:p.industry,year:p.year,scope:p.scope,status:p.status,color_cls:p.color_cls,monogram:p.monogram,tagline:p.tagline||"",overview:p.overview||"",challenge:p.challenge||"",solution:p.solution||"",results:p.results||"",tech_stack:p.tech_stack||"",timeline_duration:p.timeline_duration||"",client_name:p.client_name||"",live_url:p.live_url||"",hero_image:p.hero_image||"",thumbnail:p.thumbnail||"",gallery:p.gallery||"[]",video_url:p.video_url||"",challenge_img1:p.challenge_img1||"",challenge_img2:p.challenge_img2||"",solution_img1:p.solution_img1||"",solution_img2:p.solution_img2||"",split1_label:p.split1_label||"Challenge",split2_label:p.split2_label||"Solution",slug:p.slug||toSlug(p.name),challenge_img1_label:p.challenge_img1_label||"",challenge_img2_label:p.challenge_img2_label||"",solution_img1_label:p.solution_img1_label||"",solution_img2_label:p.solution_img2_label||"",challenge_img1_orient:p.challenge_img1_orient||"portrait",challenge_img2_orient:p.challenge_img2_orient||"portrait",solution_img1_orient:p.solution_img1_orient||"portrait",solution_img2_orient:p.solution_img2_orient||"portrait",client_quote:p.client_quote||"",client_quote_author:p.client_quote_author||"",client_quote_role:p.client_quote_role||""},p.id)}><EditSvg/></button>
                         <button className="btn-icon danger" title="Delete" onClick={()=>deleteProject(p.id)}><TrashSvg/></button>
                       </div></td>
                     </tr>
@@ -2012,20 +2029,26 @@ export default function AdminPage() {
                 </div>
                 <div className="modal-section-label">Media</div>
                 <div className="modal-2col">
-                  <ImageUpload label="Hero image" value={form.hero_image||""} onChange={v=>sf("hero_image",v)} accept="image/*"/>
+                  <ImageUpload label="Hero image (landscape recommended)" value={form.hero_image||""} onChange={v=>sf("hero_image",v)} accept="image/*"/>
                   <ImageUpload label="Thumbnail" value={form.thumbnail||""} onChange={v=>sf("thumbnail",v)} accept="image/*"/>
                 </div>
                 <div className="modal-section-label" style={{marginTop:8}}>Split shots — pair 1</div>
                 <Field label="Section label" value={form.split1_label||"Challenge"} onChange={v=>sf("split1_label",v)} placeholder="e.g. Challenge, Before / After, Mobile views…"/>
                 <div className="modal-2col">
-                  <ImageUpload label="Left image" value={form.challenge_img1||""} onChange={v=>sf("challenge_img1",v)} accept="image/*"/>
-                  <ImageUpload label="Right image" value={form.challenge_img2||""} onChange={v=>sf("challenge_img2",v)} accept="image/*"/>
+                  <ImageUpload label="Left image" value={form.challenge_img1||""} onChange={v=>sf("challenge_img1",v)} accept="image/*" orient={(form.challenge_img1_orient||"portrait") as "portrait"|"landscape"} onOrientChange={v=>sf("challenge_img1_orient",v)} imageLabel={form.challenge_img1_label||""} onLabelChange={v=>sf("challenge_img1_label",v)}/>
+                  <ImageUpload label="Right image" value={form.challenge_img2||""} onChange={v=>sf("challenge_img2",v)} accept="image/*" orient={(form.challenge_img2_orient||"portrait") as "portrait"|"landscape"} onOrientChange={v=>sf("challenge_img2_orient",v)} imageLabel={form.challenge_img2_label||""} onLabelChange={v=>sf("challenge_img2_label",v)}/>
                 </div>
                 <div className="modal-section-label" style={{marginTop:8}}>Split shots — pair 2</div>
                 <Field label="Section label" value={form.split2_label||"Solution"} onChange={v=>sf("split2_label",v)} placeholder="e.g. Solution, After, Desktop views…"/>
                 <div className="modal-2col">
-                  <ImageUpload label="Left image" value={form.solution_img1||""} onChange={v=>sf("solution_img1",v)} accept="image/*"/>
-                  <ImageUpload label="Right image" value={form.solution_img2||""} onChange={v=>sf("solution_img2",v)} accept="image/*"/>
+                  <ImageUpload label="Left image" value={form.solution_img1||""} onChange={v=>sf("solution_img1",v)} accept="image/*" orient={(form.solution_img1_orient||"portrait") as "portrait"|"landscape"} onOrientChange={v=>sf("solution_img1_orient",v)} imageLabel={form.solution_img1_label||""} onLabelChange={v=>sf("solution_img1_label",v)}/>
+                  <ImageUpload label="Right image" value={form.solution_img2||""} onChange={v=>sf("solution_img2",v)} accept="image/*" orient={(form.solution_img2_orient||"portrait") as "portrait"|"landscape"} onOrientChange={v=>sf("solution_img2_orient",v)} imageLabel={form.solution_img2_label||""} onLabelChange={v=>sf("solution_img2_label",v)}/>
+                </div>
+                <div className="modal-section-label" style={{marginTop:8}}>Client Quote (optional)</div>
+                <FieldArea label="Quote text" value={form.client_quote||""} onChange={v=>sf("client_quote",v)} placeholder="What the client said about the project…"/>
+                <div className="modal-2col">
+                  <Field label="Author name" value={form.client_quote_author||""} onChange={v=>sf("client_quote_author",v)} placeholder="Sara Köhler"/>
+                  <Field label="Author role" value={form.client_quote_role||""} onChange={v=>sf("client_quote_role",v)} placeholder="CEO · Nestaro"/>
                 </div>
                 <div className="modal-section-label" style={{marginTop:8}}>Showreel / video</div>
                 <VideoInput value={form.video_url||""} onChange={v=>sf("video_url",v)}/>

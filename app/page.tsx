@@ -171,10 +171,10 @@ const svcRows = [
 ];
 
 const cards = [
-  { tone:"violet", num:"CASE 01 / 06", name:"Nestaro", sub:"— real-estate OS", copy:"A search-first listings platform with map clustering, saved searches, agent CRMs and mortgage tools. We rebuilt the search index from scratch — page-loads dropped from 4.1s to 380ms.", meta:[["Industry","Real Estate"],["Year","2025"],["Scope","Design · Build · AI"]], eyebrow:"Web · iOS · Android", screenTitle:"Nestaro", screenSub:"— real estate", lns:["w2","w1","w3","w4","w2"], ph:"Product · 01", phColor:undefined },
-  { tone:"ink",    num:"CASE 02 / 06", name:"Pulse",   sub:"— AI copilot",     copy:"RAG-powered sales copilot for a B2B SaaS, with custom embeddings, agent tooling and an interface that feels closer to Linear than to ChatGPT. Adoption hit 92% in week one.", meta:[["Industry","B2B SaaS"],["Year","2025"],["Scope","AI · UX · Build"]], eyebrow:"LLMs · Vector DB", screenTitle:"Pulse", screenSub:"— ai copilot", lns:["w2","w3","w1","w2","w4"], ph:"Product · 02", phColor:undefined },
-  { tone:"bone",   num:"CASE 03 / 06", name:"Marketo", sub:"— multi-vendor",   copy:"A multi-vendor marketplace with vendor onboarding, split payouts via Stripe Connect, ratings, and an opinionated commerce design language. Now hosts 2,400+ sellers.", meta:[["Industry","Ecommerce"],["Year","2024"],["Scope","Platform · Brand"]], eyebrow:"Medusa · Stripe", screenTitle:"Marketo", screenSub:"— marketplace", lns:["w1","w2","w3","w4","w2"], ph:"Product · 03", phColor:"rgba(10,10,10,.35)" },
-  { tone:"brand",  num:"CASE 04 / 06", name:"Atlas",   sub:"— travel app",     copy:"A native iOS travel planner with AI-generated itineraries and offline maps. The first version shipped in 9 weeks; #6 in App Store Travel within a month.", meta:[["Industry","Travel"],["Year","2025"],["Scope","iOS · AI"]], eyebrow:"Swift · Mapbox", screenTitle:"Atlas", screenSub:"— mobile", lns:["w2","w1","w3","w2","w4"], ph:"Product · 04", phColor:"rgba(255,255,255,.55)" },
+  { tone:"violet", slug:"nestaro", num:"CASE 01 / 06", name:"Nestaro", sub:"— real-estate OS", copy:"A search-first listings platform with map clustering, saved searches, agent CRMs and mortgage tools. We rebuilt the search index from scratch — page-loads dropped from 4.1s to 380ms.", meta:[["Industry","Real Estate"],["Year","2025"],["Scope","Design · Build · AI"]], eyebrow:"Web · iOS · Android", screenTitle:"Nestaro", screenSub:"— real estate", lns:["w2","w1","w3","w4","w2"], ph:"Product · 01", phColor:undefined },
+  { tone:"ink",    slug:"pulse",   num:"CASE 02 / 06", name:"Pulse",   sub:"— AI copilot",     copy:"RAG-powered sales copilot for a B2B SaaS, with custom embeddings, agent tooling and an interface that feels closer to Linear than to ChatGPT. Adoption hit 92% in week one.", meta:[["Industry","B2B SaaS"],["Year","2025"],["Scope","AI · UX · Build"]], eyebrow:"LLMs · Vector DB", screenTitle:"Pulse", screenSub:"— ai copilot", lns:["w2","w3","w1","w2","w4"], ph:"Product · 02", phColor:undefined },
+  { tone:"bone",   slug:"marketo", num:"CASE 03 / 06", name:"Marketo", sub:"— multi-vendor",   copy:"A multi-vendor marketplace with vendor onboarding, split payouts via Stripe Connect, ratings, and an opinionated commerce design language. Now hosts 2,400+ sellers.", meta:[["Industry","Ecommerce"],["Year","2024"],["Scope","Platform · Brand"]], eyebrow:"Medusa · Stripe", screenTitle:"Marketo", screenSub:"— marketplace", lns:["w1","w2","w3","w4","w2"], ph:"Product · 03", phColor:"rgba(10,10,10,.35)" },
+  { tone:"brand",  slug:"atlas",   num:"CASE 04 / 06", name:"Atlas",   sub:"— travel app",     copy:"A native iOS travel planner with AI-generated itineraries and offline maps. The first version shipped in 9 weeks; #6 in App Store Travel within a month.", meta:[["Industry","Travel"],["Year","2025"],["Scope","iOS · AI"]], eyebrow:"Swift · Mapbox", screenTitle:"Atlas", screenSub:"— mobile", lns:["w2","w1","w3","w2","w4"], ph:"Product · 04", phColor:"rgba(255,255,255,.55)" },
 ];
 
 const proofCells = [
@@ -203,40 +203,22 @@ const marqueeItems = ["Web Design","Mobile Apps","AI Integration","Ecommerce","R
 const techItems    = ["React","Next.js","Swift","Flutter","OpenAI","Anthropic","Stripe","Postgres","Figma","Webflow"];
 
 type DbService = { id:number; ord:number; name:string; descr:string; count:string; visible:boolean; badge:string|null; image:string|null };
-type DbProject = { id:number; name:string; tagline:string; overview:string; industry:string; year:string; scope:string; status:string; thumbnail:string; hero_image:string; color_cls:string; live_url:string; monogram:string; slug:string };
+type DbProject = { id:number; name:string; tagline:string; industry:string; year:string; scope:string; status:string; thumbnail:string; slug:string; color_cls:string; live_url:string };
 
-const TONE_MAP:Record<string,string> = { "(purple)":"violet", "":"violet", b:"ink", c:"bone", d:"brand" };
-const DEFAULT_LNS = ["w2","w1","w3","w4","w2"];
-
-function dbToCard(p:DbProject, i:number, total:number) {
-  const tones = ["violet","ink","bone","brand"];
-  const tone = TONE_MAP[p.color_cls] ?? tones[i % 4];
-  const nameParts = p.name.split(/\s*[—–-]\s*/);
-  const sub = nameParts.length > 1 ? `— ${nameParts.slice(1).join(" ")}` : "";
-  return {
-    tone, num:`CASE ${String(i+1).padStart(2,"0")} / ${String(total).padStart(2,"0")}`,
-    name:nameParts[0], sub, copy:p.overview||p.tagline||"",
-    meta:[["Industry",p.industry||"—"],["Year",p.year||"—"],["Scope",p.scope||"—"]] as [string,string][],
-    eyebrow:p.scope||"", screenTitle:nameParts[0], screenSub:sub,
-    lns:DEFAULT_LNS, ph:`${p.monogram||"FX"} · ${String(i+1).padStart(2,"0")}`,
-    phColor:undefined as string|undefined,
-    thumbnail:p.thumbnail||p.hero_image||"",
-    href:p.slug ? `/work/${p.slug}` : p.live_url||"/work",
-  };
-}
+function toSlug(n: string) { return n.toLowerCase().replace(/[—–]/g,"-").replace(/[^a-z0-9\s-]/g,"").replace(/\s+/g,"-").replace(/-+/g,"-").trim(); }
 
 export default function Home() {
   useScrollReveal(".fade, .reveal, .bento .tile, .split .shot");
 
-  const [dbServices, setDbServices] = useState<DbService[]>([]);
-  const [liveProjects, setLiveProjects] = useState<DbProject[]>([]);
+  const [dbServices, setDbServices]   = useState<DbService[]>([]);
+  const [dbProjects, setDbProjects]   = useState<DbProject[]>([]);
 
   useEffect(() => {
     fetch("/api/services?visible=true").then(r => r.json()).then(rows => {
       if (Array.isArray(rows) && rows.length > 0) setDbServices(rows);
     }).catch(() => {});
     fetch("/api/projects").then(r => r.json()).then(rows => {
-      if (Array.isArray(rows)) setLiveProjects(rows.filter((p:DbProject)=>p.status==="live"));
+      if (Array.isArray(rows)) setDbProjects(rows.filter((p:DbProject) => p.status === "live").slice(0, 6));
     }).catch(() => {});
   }, []);
 
@@ -307,50 +289,87 @@ export default function Home() {
             </Link>
           </div>
           <div className="stack">
-            {(liveProjects.length > 0 ? liveProjects.map((p,i)=>dbToCard(p,i,liveProjects.length)) : cards).map((c, i) => (
-              <article className="card" data-tone={c.tone} key={i}>
-                <div className="card-inner">
-                  <div className="card-media">
-                    <div className="device">
-                      <div className="bar"><i/><i/><i/></div>
-                      <div className="screen">
-                        {("thumbnail" in c && c.thumbnail)
-                          ? <img src={c.thumbnail as string} alt={c.name} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
-                          : <><h4>{c.screenTitle} <span style={{ color:"#b86cf9", fontStyle:"italic" }}>{c.screenSub}</span></h4>
-                              {c.lns.map((cls, j) => <div key={j} className={`ln ${cls}`} />)}</>
-                        }
+            {dbProjects.length > 0
+              /* Real DB projects */
+              ? dbProjects.map((p, i) => {
+                  const href = `/work/${p.slug || toSlug(p.name)}`;
+                  const tones = ["violet","ink","bone","brand","violet","ink"];
+                  const tone  = tones[i % tones.length];
+                  return (
+                    <article className="card" data-tone={tone} key={p.id}>
+                      <div className="card-inner">
+                        <div className="card-media">
+                          <div className="device">
+                            <div className="bar"><i/><i/><i/></div>
+                            <div className="screen">
+                              {p.thumbnail
+                                ? <img src={p.thumbnail} alt={p.name} style={{ width:"100%", height:"100%", objectFit:"cover", display:"block" }} />
+                                : <h4>{p.name}</h4>
+                              }
+                            </div>
+                          </div>
+                          <span className="ph">Product · {String(i+1).padStart(2,"0")}</span>
+                        </div>
+                        <div className="card-body">
+                          <div>
+                            <div className="num">CASE {String(i+1).padStart(2,"0")} / {String(dbProjects.length).padStart(2,"0")}</div>
+                            <h3>{p.name}</h3>
+                            {p.tagline && <p className="copy">{p.tagline}</p>}
+                            <div className="meta">
+                              {p.industry && <div><div className="k">Industry</div><div className="v">{p.industry}</div></div>}
+                              {p.year     && <div><div className="k">Year</div><div className="v">{p.year}</div></div>}
+                              {p.scope    && <div><div className="k">Scope</div><div className="v">{p.scope}</div></div>}
+                            </div>
+                          </div>
+                          <div className="row">
+                            <span className="eyebrow">{p.industry || "Studio"}</span>
+                            <Link href={href} className="btn">
+                              <span className="label">Case study</span>
+                              <span className="chip"><ArrowIcon /></span>
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })
+              /* Static curated cards (show instantly while DB loads) */
+              : cards.map((c, i) => (
+                <article className="card" data-tone={c.tone} key={i}>
+                  <div className="card-inner">
+                    <div className="card-media">
+                      <div className="device">
+                        <div className="bar"><i/><i/><i/></div>
+                        <div className="screen">
+                          <h4>{c.screenTitle} <span style={{ color:"#b86cf9", fontStyle:"italic" }}>{c.screenSub}</span></h4>
+                          {c.lns.map((cls, j) => <div key={j} className={`ln ${cls}`} />)}
+                        </div>
+                      </div>
+                      <span className="ph" style={c.phColor ? { color: c.phColor } : undefined}>{c.ph}</span>
+                    </div>
+                    <div className="card-body">
+                      <div>
+                        <div className="num">{c.num}</div>
+                        <h3>{c.name} <span className="it">{c.sub}</span></h3>
+                        <p className="copy">{c.copy}</p>
+                        <div className="meta">
+                          {c.meta.map(([k, v], j) => (
+                            <div key={j}><div className="k">{k}</div><div className="v">{v}</div></div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="row">
+                        <span className="eyebrow">{c.eyebrow}</span>
+                        <Link href={`/work/${c.slug}`} className="btn">
+                          <span className="label">Case study</span>
+                          <span className="chip"><ArrowIcon /></span>
+                        </Link>
                       </div>
                     </div>
-                    <span className="ph" style={c.phColor ? { color: c.phColor } : undefined}>{c.ph}</span>
                   </div>
-                  <div className="card-body">
-                    <div>
-                      <div className="num">{c.num}</div>
-                      <h3>{c.name} <span className="it">{c.sub}</span></h3>
-                      <p className="copy">{c.copy}</p>
-                      <div className="meta">
-                        {c.meta.map(([k, v], j) => (
-                          <div key={j}><div className="k">{k}</div><div className="v">{v}</div></div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="row">
-                      <span className="eyebrow">{c.eyebrow}</span>
-                      {"href" in c
-                        ? <Link href={c.href as string} className="btn" target={c.href !== "/work" ? "_blank" : undefined} rel="noopener noreferrer">
-                            <span className="label">View project</span>
-                            <span className="chip"><ArrowIcon /></span>
-                          </Link>
-                        : <Link href="/work/nestaro" className="btn">
-                            <span className="label">Case study</span>
-                            <span className="chip"><ArrowIcon /></span>
-                          </Link>
-                      }
-                    </div>
-                  </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              ))
+            }
           </div>
         </div>
       </section>
