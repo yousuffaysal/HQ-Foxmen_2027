@@ -105,59 +105,114 @@ function invoicePdfHtml(p:{client:string;company:string;num:string;date:string;d
   const total=p.items.reduce((s,it)=>s+(it.qty*it.rate),0);
   const PAY:Record<string,string>={wise:"Wise — hello@foxmen.studio",paypal:"PayPal — payments@foxmen.studio",bank:"Bank Transfer — IBAN on request",crypto:"USDT / USDC — Wallet on request"};
   const [pName,pDetail]=(PAY[p.payment]??p.payment).split("—").map(s=>s.trim());
-  const rows=p.items.filter(it=>it.desc||it.rate).map(it=>`<tr><td style="padding:14px 20px;border-bottom:1px solid #f0f0f0;font-size:14px;">${it.desc||"—"}</td><td style="padding:14px 20px;border-bottom:1px solid #f0f0f0;font-size:14px;text-align:center;">${it.qty}</td><td style="padding:14px 20px;border-bottom:1px solid #f0f0f0;font-size:14px;text-align:right;">${fmtM(it.rate)}</td><td style="padding:14px 20px;border-bottom:1px solid #f0f0f0;font-size:14px;font-weight:700;text-align:right;">${fmtM(it.qty*it.rate)}</td></tr>`).join("");
-  return`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Invoice ${p.num}</title>
+  const logoUrl="https://foxmen.studio/assets/logo-mark.svg";
+  const rows=p.items.filter(it=>it.desc||it.rate).map(it=>`
+    <tr>
+      <td style="padding:13px 0;border-bottom:1px solid #f0f0ee;font-size:13px;font-weight:600;color:#0a0a0a;">${it.desc||"—"}</td>
+      <td style="padding:13px 0;border-bottom:1px solid #f0f0ee;font-size:13px;color:#666;text-align:right;">${it.qty}</td>
+      <td style="padding:13px 0;border-bottom:1px solid #f0f0ee;font-size:13px;color:#666;text-align:right;">${fmtM(it.rate)}</td>
+      <td style="padding:13px 0;border-bottom:1px solid #f0f0ee;font-size:13px;font-weight:700;color:#0a0a0a;text-align:right;">${fmtM(it.qty*it.rate)}</td>
+    </tr>`).join("");
+  return`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Invoice ${p.num} — Foxmen Studio</title>
 <style>
-@page{size:A4;margin:0}*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;color:#0a0a0a;width:210mm;min-height:297mm}
-.inv-wrap{display:flex;flex-direction:column;min-height:297mm}
-.inv-hd{background:#0a0a0a;padding:44px 64px;display:flex;justify-content:space-between;align-items:flex-start}
-.bn{font-size:22px;font-weight:700;color:#fff;letter-spacing:-.02em}.bn em{font-style:italic;color:#b86cf9}
-.bs{font-size:10px;color:rgba(255,255,255,.3);margin-top:4px;letter-spacing:.12em;text-transform:uppercase}
-.bc{margin-top:14px;font-size:12px;color:rgba(255,255,255,.35);line-height:1.9}
-.ib{text-align:right}.ib-tag{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:4px}
-.ib-num{font-size:28px;font-weight:800;color:#b86cf9;letter-spacing:-.02em}
-.ib-dates{margin-top:14px;font-size:12px;color:rgba(255,255,255,.4);line-height:1.9;text-align:right}
-.ib-dates strong{color:rgba(255,255,255,.7)}
-.inv-body{flex:1;padding:48px 64px}
-.bill-row{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-bottom:44px}
-.bb label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#aaa;display:block;margin-bottom:10px}
-.bb .bname{font-size:18px;font-weight:700;margin-bottom:4px}.bb .bdet{font-size:13px;color:#666;line-height:1.7}
-.tbl-wrap{border:1px solid #eee;border-radius:8px;overflow:hidden}
+@page{size:A4;margin:0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;color:#0a0a0a;background:#f2f1ef}
+.wrap{width:210mm;min-height:297mm;background:#fff;border-radius:12px;overflow:hidden;margin:0 auto}
+/* dark header */
+.hd{background:#0a0a0a;padding:36px 48px 32px;display:flex;justify-content:space-between;align-items:flex-start}
+.brand-row{display:flex;align-items:center;gap:12px}
+.mark{width:38px;height:38px}
+.bn{font-size:22px;font-weight:800;letter-spacing:-.02em;color:#fff;line-height:1}
+.bn em{font-style:italic;color:#b86cf9}
+.btag{font-size:9px;color:#b86cf9;letter-spacing:.16em;text-transform:uppercase;margin-top:5px;font-weight:600}
+.bct{margin-top:12px;font-size:11px;color:rgba(255,255,255,.4);line-height:1.9}
+.meta{text-align:right}
+.inv-tag{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.35)}
+.inv-num{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.02em;margin-top:5px;word-break:break-all;max-width:220px}
+.inv-dates{margin-top:12px;font-size:11px;color:rgba(255,255,255,.4);line-height:2;text-align:right}
+.inv-dates strong{color:rgba(255,255,255,.75);font-weight:600}
+/* gradient divider */
+.hdline{height:3px;background:linear-gradient(90deg,#b86cf9 0%,#8c3bd9 50%,#ff6b6b 100%)}
+/* three-col billing strip */
+.bill{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid #e8e6e3}
+.bb{padding:20px 24px}
+.bb:not(:last-child){border-right:1px solid #e8e6e3}
+.bb label{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:#b86cf9;display:block;margin-bottom:10px;font-weight:700}
+.bb .bn2{font-size:14px;font-weight:700;color:#0a0a0a}
+.bb .bdet{font-size:11px;color:#777;margin-top:4px;line-height:1.8}
+/* items */
+.body{padding:24px 48px 20px}
 table{width:100%;border-collapse:collapse}
-thead{background:#f7f7f5}
-th{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#999;font-weight:600;text-align:left;padding:12px 20px;border-bottom:1px solid #eee}
+th{font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:#aaa;font-weight:600;text-align:left;padding:0 0 10px;border-bottom:1px solid #e8e6e3}
 th:not(:first-child){text-align:right}
-.tot-row{background:#0a0a0a;display:flex;justify-content:flex-end;gap:36px;padding:18px 20px;align-items:center}
-.tot-label{font-size:14px;color:rgba(255,255,255,.5)}.tot-val{font-size:22px;font-weight:800;color:#b86cf9;letter-spacing:-.02em}
-.pay-block{margin-top:32px;padding:24px 28px;background:#fafaf9;border:1px solid #eee;border-radius:8px}
-.pay-title{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#aaa;margin-bottom:12px}
-.pay-method{font-size:14px;color:#333}.pay-method strong{color:#0a0a0a}
-.pay-notes{margin-top:12px;font-size:13px;color:#888;line-height:1.65;border-top:1px solid #eee;padding-top:12px}
-.inv-ft{margin-top:auto;background:#0a0a0a;padding:22px 64px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:rgba(255,255,255,.3)}
-.inv-ft strong{font-size:14px;color:rgba(255,255,255,.6);font-weight:600}
-@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+td{padding:13px 0;border-bottom:1px solid #f0f0ee;font-size:13px;color:#555;vertical-align:middle}
+td:not(:first-child){text-align:right}
+/* subtotal row */
+.sub-row{display:flex;justify-content:flex-end;gap:48px;padding:10px 0;font-size:13px;color:#888}
+/* total due */
+.total-due{display:flex;justify-content:space-between;align-items:baseline;padding:20px 48px;border-top:1px solid #e8e6e3}
+.due-label{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#0a0a0a}
+.due-amount{font-size:36px;font-weight:800;color:#0a0a0a;letter-spacing:-.03em}
+/* notes */
+.notes{margin:0 48px 24px;padding:16px 20px;background:#f7f6f4;border:1px solid #e8e6e3;border-radius:8px}
+.notes h4{font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:#aaa;margin-bottom:8px;font-weight:600}
+.notes p{font-size:12px;color:#777;line-height:1.7}
+/* footer */
+.ft{border-top:1px solid #e8e6e3;padding:18px 48px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;font-size:10px;color:#bbb;background:#fafaf9}
+.ft-brand{font-size:13px;font-weight:700;color:#0a0a0a;margin-bottom:3px}
+.ft-brand em{font-style:italic;color:#b86cf9}
+.ft-mid{text-align:center;color:#b86cf9;font-weight:700;font-size:9px;letter-spacing:.12em;text-transform:uppercase;line-height:1.8}
+.ft-right{text-align:right;line-height:1.8}
+@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.wrap{border-radius:0}}
 </style></head><body>
-<div class="inv-wrap">
-<div class="inv-hd">
-  <div><div class="bn">Foxmen <em>Studio</em></div><div class="bs">Code · Craft · Care</div><div class="bc">hello@foxmen.studio<br/>foxmen.studio</div></div>
-  <div class="ib"><div class="ib-tag">Invoice</div><div class="ib-num">${p.num}</div><div class="ib-dates"><div>Date &nbsp;<strong>${fmtD(p.date)}</strong></div><div>Due &nbsp;<strong>${fmtD(p.due)}</strong></div></div></div>
+<div class="wrap">
+<div class="hd">
+  <div class="brand-row">
+    <img src="${logoUrl}" class="mark" alt=""/>
+    <div>
+      <div class="bn">Foxmen <em>Studio</em></div>
+      <div class="btag">Est. 2024 · Premium Studio</div>
+      <div class="bct">hello@foxmen.studio · foxmen.studio</div>
+    </div>
+  </div>
+  <div class="meta">
+    <div class="inv-tag">Invoice</div>
+    <div class="inv-num">${p.num}</div>
+    <div class="inv-dates">
+      <div>Date: <strong>${fmtD(p.date)}</strong></div>
+      ${p.due?`<div>Due: <strong>${fmtD(p.due)}</strong></div>`:""}
+    </div>
+  </div>
 </div>
-<div class="inv-body">
-  <div class="bill-row">
-    <div class="bb"><label>Bill to</label><div class="bname">${p.client||"—"}</div><div class="bdet">${p.company?p.company+"<br/>":""}${""}</div></div>
-    <div class="bb"><label>From</label><div class="bname">Foxmen Studio</div><div class="bdet">hello@foxmen.studio<br/>foxmen.studio</div></div>
-  </div>
-  <div class="tbl-wrap">
-    <table><thead><tr><th style="width:50%">Description</th><th style="width:12%;text-align:center">Qty</th><th style="width:19%;text-align:right">Rate</th><th style="width:19%;text-align:right">Amount</th></tr></thead><tbody>${rows}</tbody></table>
-    <div class="tot-row"><span class="tot-label">Total (USD)</span><span class="tot-val">${fmtM(total)}</span></div>
-  </div>
-  <div class="pay-block">
-    <div class="pay-title">Payment information</div>
-    <div class="pay-method"><strong>${pName}</strong> — ${pDetail||""}</div>
-    ${p.notes?`<div class="pay-notes">${p.notes}</div>`:""}
-  </div>
+<div class="hdline"></div>
+<div class="bill">
+  <div class="bb"><label>Bill to</label><div class="bn2">${p.client||"—"}</div><div class="bdet">${p.company?p.company+"<br/>":""}${p.client?" &nbsp;":""}</div></div>
+  <div class="bb"><label>From</label><div class="bn2">Foxmen Studio</div><div class="bdet">hello@foxmen.studio<br/>foxmen.studio</div></div>
+  <div class="bb"><label>Payment</label><div class="bn2">${pName}</div><div class="bdet">${pDetail||""}</div></div>
 </div>
-<div class="inv-ft"><strong>Foxmen Studio</strong><span>Thank you for your business.</span><span>${p.num}</span></div>
+<div class="body">
+<table>
+  <thead><tr>
+    <th style="width:52%">Item</th>
+    <th style="width:12%;text-align:right">Qty</th>
+    <th style="width:18%;text-align:right">Unit Price</th>
+    <th style="width:18%;text-align:right">Total</th>
+  </tr></thead>
+  <tbody>${rows}</tbody>
+</table>
+<div class="sub-row"><span>Subtotal</span><span>${fmtM(total)}</span></div>
+</div>
+<div class="total-due">
+  <div class="due-label">Total Due</div>
+  <div class="due-amount">${fmtM(total)}</div>
+</div>
+${p.notes?`<div class="notes"><h4>Notes</h4><p>${p.notes}</p></div>`:""}
+<div class="ft">
+  <div><div class="ft-brand">Foxmen <em>Studio</em></div><div>Code · Craft · Care · Est. 2024</div></div>
+  <div class="ft-mid">hello@foxmen.studio<br/>foxmen.studio</div>
+  <div class="ft-right">This document serves as your official receipt.<br/>Foxmen Studio · Est. 2024</div>
+</div>
 </div>
 </body></html>`;}
 
@@ -1002,6 +1057,302 @@ export default function AdminPage() {
             </div>
           </section>
         )}
+
+        {/* ══════════ PROPOSALS ══════════ */}
+        {page==="proposals" && (()=>{
+          const SERVICES=["Website (React / Next.js)","Mobile App (React Native)","Mobile App (Flutter)","E-commerce (Custom)","E-commerce (Shopify Plus)","AI Tool / Copilot","AI Agent / RAG System","Branding & Design System","Full-stack SaaS Platform"];
+
+          const generate=async()=>{
+            if(!propClient||!propService||!propScope||!propTimeline||!propBudget){toast("Fill all required fields");return;}
+            setPropGenerating(true);
+            try{
+              const r=await fetch("/api/proposal",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({client:propClient,company:propCompany,service:propService,scope:propScope,timeline:propTimeline,budget:propBudget})});
+              const d=await r.json();
+              if(d.error){toast("AI generation failed. Try again.");}else{setPropData(d);}
+            }catch{toast("Generation failed. Try again.");}
+            setPropGenerating(false);
+          };
+
+          const download=()=>{
+            if(!propData)return;
+            openPdf(proposalPdfHtml(propClient,propCompany,propService,propTimeline,propBudget,propData));
+          };
+
+          const today=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
+
+          return(
+          <section className="page active">
+            <div className="page-head">
+              <div><h2>AI Proposal Generator</h2><p style={{fontSize:13,color:"var(--muted)",marginTop:4}}>Fill 5 fields → full branded proposal in 20 seconds. Ready to send or download as PDF.</p></div>
+            </div>
+            <div className="gen-layout">
+              {/* FORM */}
+              <div className="gen-form">
+                <div><div className="gen-form-title">Proposal details</div><div className="gen-form-sub">AI writes the full proposal — you just fill the brief.</div></div>
+                <div className="field-row">
+                  <Field label="Client name *" value={propClient} onChange={setPropClient} placeholder="Ahmed Hassan"/>
+                  <Field label="Company" value={propCompany} onChange={setPropCompany} placeholder="Hassan Co."/>
+                </div>
+                <FieldSel label="Service *" value={propService} onChange={setPropService} options={SERVICES}/>
+                <FieldArea label="Project scope / brief *" value={propScope} onChange={setPropScope} placeholder="Paste the client brief or describe the project in detail…"/>
+                <div className="field-row">
+                  <Field label="Timeline *" value={propTimeline} onChange={setPropTimeline} placeholder="8 weeks"/>
+                  <Field label="Investment *" value={propBudget} onChange={setPropBudget} placeholder="$7,500"/>
+                </div>
+                <button className="btn-generate" onClick={generate} disabled={propGenerating}>
+                  {propGenerating
+                    ?<><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{animation:"spin 1s linear infinite"}}><path d="M21 12a9 9 0 1 1-6.2-8.6"/></svg>Generating…</>
+                    :<><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2a10 10 0 1 0 10 10M18 2l4 4-4 4"/></svg>Generate with AI</>
+                  }
+                </button>
+              </div>
+
+              {/* PREVIEW */}
+              <div className="gen-preview">
+                <div className="gen-preview-head">
+                  <span style={{fontSize:13,fontWeight:600}}>Proposal preview</span>
+                  {propData&&<div style={{display:"flex",gap:8}}>
+                    <button className="btn-ghost" onClick={download} style={{display:"flex",alignItems:"center",gap:6}}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Download PDF
+                    </button>
+                  </div>}
+                </div>
+                <div className="gen-preview-body">
+                  {!propData
+                    ?<div className="gen-empty">
+                        <div className="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></div>
+                        <h4>Nothing generated yet</h4>
+                        <p>Fill the form and click Generate with AI.</p>
+                      </div>
+                    :<>
+                      <div className="prop-cover">
+                        <div className="tag">Project Proposal · {today}</div>
+                        <div className="headline">Prepared for {propClient}{propCompany&&` · ${propCompany}`}</div>
+                        <div className="sub">{propService} · {propTimeline} · {propBudget}</div>
+                      </div>
+                      <div className="prop-section"><div className="prop-label">Executive Summary</div><p>{propData.executive_summary}</p></div>
+                      <div className="prop-section"><div className="prop-label">Scope of Work</div><ul className="prop-list">{(propData.scope_items||[]).map((s,i)=><li key={i}>{s}</li>)}</ul></div>
+                      <div className="prop-section"><div className="prop-label">Deliverables</div><ul className="prop-list">{(propData.deliverables||[]).map((s,i)=><li key={i}>{s}</li>)}</ul></div>
+                      <div className="prop-section">
+                        <div className="prop-label">Timeline</div>
+                        {(propData.timeline||[]).map((t,i)=>(
+                          <div key={i} className="prop-tl-row">
+                            <div className="prop-tl-period">{t.period}</div>
+                            <div className="prop-tl-content"><h4>{t.milestone}</h4><p>{t.desc}</p></div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="prop-section">
+                        <div className="prop-label">Investment</div>
+                        <div className="prop-invest-box"><div className="amount">{propBudget}</div><div className="note">{propData.investment_note}</div></div>
+                      </div>
+                      <div className="prop-section"><div className="prop-label">Terms</div><p>{propData.terms}</p></div>
+                    </>
+                  }
+                </div>
+              </div>
+            </div>
+          </section>
+          );
+        })()}
+
+        {/* ══════════ INVOICES ══════════ */}
+        {page==="invoices" && (()=>{
+          const fmtM=(n:number)=>"$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+          const fmtD=(d:string)=>d?new Date(d+"T00:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}):"—";
+          const total=invItems.reduce((s,it)=>s+(it.qty*it.rate),0);
+
+          const addItem=()=>setInvItems(p=>[...p,{desc:"",qty:1,rate:0}]);
+          const removeItem=(i:number)=>setInvItems(p=>p.filter((_,idx)=>idx!==i));
+          const updateItem=(i:number,f:keyof InvoiceItem,v:string)=>setInvItems(p=>p.map((it,idx)=>idx===i?{...it,[f]:f==="desc"?v:(parseFloat(v)||0)}:it));
+
+          const PAY_LABELS:Record<string,string>={wise:"Wise — hello@foxmen.studio",paypal:"PayPal — payments@foxmen.studio",bank:"Bank Transfer — IBAN on request",crypto:"USDT / USDC — Wallet on request"};
+
+          const download=()=>openPdf(invoicePdfHtml({client:invClient,company:invCompany,num:invNum,date:invDate,due:invDue,items:invItems,notes:invNotes,payment:invPayment}));
+
+          const send=async()=>{
+            if(!invEmail){toast("Enter client email first");return;}
+            setInvSending(true);
+            try{
+              const r=await fetch("/api/invoice",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({client:invClient,company:invCompany,email:invEmail,num:invNum,date:invDate,due:invDue,items:invItems,notes:invNotes,payment:invPayment,total})});
+              if(r.ok){toast("Invoice sent to "+invEmail);}else{toast("Send failed — check RESEND_API_KEY");}
+            }catch{toast("Send failed. Try again.");}
+            setInvSending(false);
+          };
+
+          return(
+          <section className="page active">
+            <div className="page-head">
+              <div><h2>Invoice Generator</h2><p style={{fontSize:13,color:"var(--muted)",marginTop:4}}>Professional branded invoices with payment terms. Download PDF or send directly to client.</p></div>
+            </div>
+            <div className="gen-layout">
+              {/* FORM */}
+              <div className="gen-form">
+                <div><div className="gen-form-title">Invoice details</div></div>
+                <div className="field-row">
+                  <Field label="Client name" value={invClient} onChange={setInvClient} placeholder="Ahmed Hassan"/>
+                  <Field label="Company" value={invCompany} onChange={setInvCompany} placeholder="Hassan Co."/>
+                </div>
+                <div className="field-row">
+                  <Field label="Client email" value={invEmail} onChange={setInvEmail} placeholder="ahmed@co.com" type="email"/>
+                  <Field label="Invoice #" value={invNum} onChange={setInvNum} placeholder="INV-001"/>
+                </div>
+                <div className="field-row">
+                  <Field label="Invoice date" value={invDate} onChange={setInvDate} type="date"/>
+                  <Field label="Due date" value={invDue} onChange={setInvDue} type="date"/>
+                </div>
+
+                {/* Line items */}
+                <div className="field">
+                  <label>Line items</label>
+                  <div style={{marginTop:8}}>
+                    <div className="inv-th-row" style={{marginBottom:4}}>
+                      <span>Description</span><span style={{textAlign:"center"}}>Qty</span><span style={{textAlign:"right"}}>Rate $</span><span/>
+                    </div>
+                    <div className="inv-items-wrap">
+                      {invItems.map((it,i)=>(
+                        <div key={i} className="inv-item-row">
+                          <input value={it.desc} onChange={e=>updateItem(i,"desc",e.target.value)} placeholder="Service or deliverable"/>
+                          <input type="number" min={1} value={it.qty} onChange={e=>updateItem(i,"qty",e.target.value)} style={{textAlign:"center"}}/>
+                          <input type="number" min={0} value={it.rate||""} onChange={e=>updateItem(i,"rate",e.target.value)} placeholder="0"/>
+                          <span className="inv-item-amount">
+                            {fmtM(it.qty*it.rate)}
+                            {invItems.length>1&&<button className="inv-remove-btn" onClick={()=>removeItem(i)} style={{marginLeft:6}}>×</button>}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <button className="btn-ghost" style={{marginTop:8,width:"100%",justifyContent:"center",display:"flex"}} onClick={addItem}>+ Add line item</button>
+                  </div>
+                </div>
+
+                {/* Payment method */}
+                <div className="field">
+                  <label>Payment method</label>
+                  <select value={invPayment} onChange={e=>setInvPayment(e.target.value)} style={{background:"var(--canvas)",border:"1px solid var(--line)",borderRadius:"var(--r-sm)",padding:"10px 12px",fontSize:14,width:"100%",fontFamily:"var(--f-sans)",color:"var(--ink)"}}>
+                    <option value="wise">Wise — hello@foxmen.studio</option>
+                    <option value="paypal">PayPal — payments@foxmen.studio</option>
+                    <option value="bank">Bank Transfer — IBAN on request</option>
+                    <option value="crypto">USDT / USDC — Wallet on request</option>
+                  </select>
+                </div>
+
+                <FieldArea label="Notes / payment terms" value={invNotes} onChange={setInvNotes} placeholder="Payment due within 30 days…"/>
+
+                <div style={{display:"flex",gap:8}}>
+                  <button className="btn-generate" onClick={download} style={{flex:1,background:"var(--ink-2)"}}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                    Download PDF
+                  </button>
+                  <button className="btn-primary" onClick={send} disabled={invSending} style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+                    {invSending
+                      ?<><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{animation:"spin 1s linear infinite"}}><path d="M21 12a9 9 0 1 1-6.2-8.6"/></svg>Sending…</>
+                      :<>Send Invoice<ArrowChip/></>
+                    }
+                  </button>
+                </div>
+              </div>
+
+              {/* LIVE PREVIEW */}
+              <div className="gen-preview" style={{padding:0}}>
+                <div className="gen-preview-head">
+                  <span style={{fontSize:13,fontWeight:600}}>Live preview</span>
+                  <span style={{fontSize:12,color:"var(--muted)"}}>Updates as you type</span>
+                </div>
+                <div className="gen-preview-body">
+                  <div className="inv-doc">
+                    {/* Dark header */}
+                    <div className="inv-doc-header">
+                      <div className="inv-brand-row">
+                        <img src="/assets/logo-mark.svg" alt=""/>
+                        <div className="inv-brand-text">
+                          <div className="bname">Foxmen <em>Studio</em></div>
+                          <div className="btag">Est. 2024 · Premium Studio</div>
+                          <div className="bcontact">hello@foxmen.studio · foxmen.studio</div>
+                        </div>
+                      </div>
+                      <div className="inv-meta-col">
+                        <div className="inv-badge">Invoice</div>
+                        <div className="inv-num">{invNum||"INV-001"}</div>
+                        <div className="inv-dates">
+                          <div>Date: <strong>{fmtD(invDate)}</strong></div>
+                          {invDue&&<div>Due: <strong>{fmtD(invDue)}</strong></div>}
+                        </div>
+                      </div>
+                    </div>
+                    {/* Purple–red gradient divider */}
+                    <div className="inv-hd-line"/>
+                    {/* Three-column billing strip */}
+                    <div className="inv-bill-grid">
+                      <div className="inv-bill-block">
+                        <label>Bill to</label>
+                        <div className="bill-name">{invClient||<span style={{color:"var(--muted-2)"}}>Client name</span>}</div>
+                        {invCompany&&<div className="bill-detail">{invCompany}</div>}
+                        {invEmail&&<div className="bill-detail">{invEmail}</div>}
+                      </div>
+                      <div className="inv-bill-block">
+                        <label>From</label>
+                        <div className="bill-name">Foxmen Studio</div>
+                        <div className="bill-detail">hello@foxmen.studio<br/>foxmen.studio</div>
+                      </div>
+                      <div className="inv-bill-block">
+                        <label>Payment</label>
+                        <div className="bill-name">{(PAY_LABELS[invPayment]??"").split("—")[0].trim()}</div>
+                        <div className="bill-detail">{(PAY_LABELS[invPayment]??"").split("—")[1]?.trim()}</div>
+                      </div>
+                    </div>
+                    {/* Items table */}
+                    <div className="inv-doc-body">
+                      <table className="inv-preview-table">
+                        <thead><tr>
+                          <th>Item</th>
+                          <th style={{textAlign:"right"}}>Qty</th>
+                          <th style={{textAlign:"right"}}>Unit Price</th>
+                          <th style={{textAlign:"right"}}>Total</th>
+                        </tr></thead>
+                        <tbody>
+                          {invItems.filter(it=>it.desc||it.rate).map((it,i)=>(
+                            <tr key={i}>
+                              <td style={{fontWeight:600}}>{it.desc||"—"}</td>
+                              <td style={{textAlign:"right"}}>{it.qty}</td>
+                              <td style={{textAlign:"right"}}>{fmtM(it.rate)}</td>
+                              <td style={{textAlign:"right",fontWeight:700,color:"var(--ink)"}}>{fmtM(it.qty*it.rate)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      <div className="inv-totals-box">
+                        <div className="inv-total-row"><span>Subtotal</span><span>{fmtM(total)}</span></div>
+                      </div>
+                    </div>
+                    {/* Large total due */}
+                    <div className="inv-total-due-row">
+                      <div className="due-label">Total Due</div>
+                      <div className="due-amount">{fmtM(total)}</div>
+                    </div>
+                    {/* Notes */}
+                    {invNotes&&(
+                      <div className="inv-notes-block">
+                        <h4>Notes</h4>
+                        <p>{invNotes}</p>
+                      </div>
+                    )}
+                    {/* Three-column footer */}
+                    <div className="inv-doc-footer">
+                      <div>
+                        <div className="ft-brand">Foxmen <em>Studio</em></div>
+                        <div>Code · Craft · Care</div>
+                      </div>
+                      <div className="ft-mid">hello@foxmen.studio<br/>foxmen.studio</div>
+                      <div className="ft-right">This document serves as your official receipt.<br/>Foxmen Studio · Est. 2024</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+          );
+        })()}
 
         {/* ══════════ FOX PRICING ══════════ */}
         {page==="fox-prices" && (()=>{

@@ -936,44 +936,64 @@ td .acts{ display:flex; gap:6px; justify-content:flex-end; }
 }
 
 /* ── Invoice live preview doc ── */
-.inv-doc{
-  border:1px solid var(--line); border-radius:var(--r); overflow:hidden;
-}
+.inv-doc{ border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#fff; box-shadow:0 4px 32px rgba(0,0,0,.07); }
+
+/* Dark header */
 .inv-doc-header{
-  background:var(--ink); padding:28px 32px;
+  background:#0a0a0a; padding:28px 32px 24px;
   display:flex; justify-content:space-between; align-items:flex-start;
 }
-.inv-doc-brand .brand-name{ font-size:18px; font-weight:700; color:#fff; letter-spacing:-.01em; }
-.inv-doc-brand .brand-name em{ font-style:italic; color:var(--brand); }
-.inv-doc-brand .brand-tag{ font-size:10px; color:rgba(255,255,255,.35); margin-top:3px; letter-spacing:.1em; text-transform:uppercase; }
-.inv-doc-brand .brand-contact{ margin-top:12px; font-size:11px; color:rgba(255,255,255,.35); line-height:1.8; }
-.inv-doc-right{ text-align:right; }
-.inv-doc-right .inv-badge{ font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.4); margin-bottom:4px; }
-.inv-doc-right .inv-num{ font-size:24px; font-weight:800; color:var(--brand); letter-spacing:-.02em; }
-.inv-doc-right .inv-dates{ margin-top:12px; font-size:11px; color:rgba(255,255,255,.4); line-height:1.9; }
+.inv-brand-row{ display:flex; align-items:center; gap:10px; }
+.inv-brand-row img{ width:34px; height:34px; flex-shrink:0; }
+.inv-brand-text .bname{ font-size:20px; font-weight:800; letter-spacing:-.02em; color:#fff; line-height:1; }
+.inv-brand-text .bname em{ font-style:italic; color:var(--brand); }
+.inv-brand-text .btag{ font-size:9px; color:var(--brand); letter-spacing:.16em; text-transform:uppercase; margin-top:5px; font-weight:600; }
+.inv-brand-text .bcontact{ margin-top:12px; font-size:11px; color:rgba(255,255,255,.4); line-height:1.9; }
+.inv-meta-col{ text-align:right; }
+.inv-meta-col .inv-badge{ font-size:9px; letter-spacing:.22em; text-transform:uppercase; color:rgba(255,255,255,.35); margin-bottom:6px; }
+.inv-meta-col .inv-num{ font-size:20px; font-weight:800; color:#fff; letter-spacing:-.02em; word-break:break-all; max-width:200px; }
+.inv-meta-col .inv-dates{ margin-top:12px; font-size:11px; color:rgba(255,255,255,.4); line-height:2; text-align:right; }
+.inv-meta-col .inv-dates strong{ color:rgba(255,255,255,.75); font-weight:600; }
 
-.inv-doc-body{ padding:28px 32px; }
-.inv-bill-grid{ display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-bottom:28px; padding-bottom:24px; border-bottom:1px solid var(--line); }
-.inv-bill-block label{ font-family:var(--f-mono); font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted-2); display:block; margin-bottom:8px; }
-.inv-bill-block .bill-name{ font-size:16px; font-weight:700; }
-.inv-bill-block .bill-detail{ font-size:12px; color:var(--muted); margin-top:3px; line-height:1.7; }
+/* Coloured divider line below header */
+.inv-hd-line{ height:3px; background:linear-gradient(90deg,#b86cf9 0%,#8c3bd9 50%,#ff6b6b 100%); }
 
+/* Three-col billing strip */
+.inv-bill-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; border-bottom:1px solid var(--line); }
+.inv-bill-block{ padding:20px 24px; }
+.inv-bill-block:not(:last-child){ border-right:1px solid var(--line); }
+.inv-bill-block label{ font-size:8px; letter-spacing:.2em; text-transform:uppercase; color:var(--brand); display:block; margin-bottom:10px; font-weight:700; }
+.inv-bill-block .bill-name{ font-size:14px; font-weight:700; color:var(--ink); }
+.inv-bill-block .bill-detail{ font-size:11px; color:var(--muted); margin-top:4px; line-height:1.75; }
+
+/* Items table */
+.inv-doc-body{ padding:24px 32px 20px; }
 .inv-preview-table{ width:100%; border-collapse:collapse; }
-.inv-preview-table th{ font-family:var(--f-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted-2); font-weight:500; text-align:left; padding:8px 0 10px; border-bottom:2px solid var(--ink); }
+.inv-preview-table th{ font-size:8px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted-2); font-weight:600; text-align:left; padding:0 0 10px; border-bottom:1px solid var(--line); }
 .inv-preview-table th:not(:first-child){ text-align:right; }
-.inv-preview-table td{ padding:12px 0; border-bottom:1px solid var(--line-2); font-size:13px; vertical-align:middle; }
+.inv-preview-table td{ padding:13px 0; border-bottom:1px solid var(--line-2); font-size:13px; color:var(--ink); vertical-align:middle; }
 .inv-preview-table td:not(:first-child){ text-align:right; color:var(--muted); }
-.inv-preview-table td:last-child{ font-weight:600; color:var(--ink); }
+.inv-preview-table td:last-child{ font-weight:700; color:var(--ink); }
 
-.inv-totals-box{ margin-top:0; background:var(--ink); padding:18px 0 0; }
-.inv-total-row{ display:flex; justify-content:flex-end; gap:32px; padding:8px 0; font-size:13px; color:rgba(255,255,255,.5); }
-.inv-total-row.final{ font-size:20px; font-weight:800; color:#fff; padding-top:12px; border-top:1px solid rgba(255,255,255,.08); }
-.inv-total-row.final .tot-amount{ color:var(--brand); }
+/* Totals */
+.inv-totals-box{ margin-top:0; }
+.inv-total-row{ display:flex; justify-content:flex-end; gap:48px; padding:5px 0; font-size:13px; color:var(--muted); }
+.inv-total-due-row{ display:flex; justify-content:space-between; align-items:baseline; padding:20px 32px; border-top:1px solid var(--line); }
+.inv-total-due-row .due-label{ font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ink); }
+.inv-total-due-row .due-amount{ font-size:28px; font-weight:800; color:var(--ink); letter-spacing:-.03em; }
 
-.inv-pay-block{ margin-top:24px; padding:18px 22px; background:var(--canvas); border-radius:var(--r-sm); border:1px solid var(--line); }
-.inv-pay-block h4{ font-family:var(--f-mono); font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted-2); margin-bottom:10px; }
-.inv-pay-method{ font-size:13px; color:var(--muted); }
-.inv-pay-method strong{ color:var(--ink); }
-.inv-pay-notes{ margin-top:10px; font-size:12px; color:var(--muted-2); line-height:1.65; border-top:1px solid var(--line); padding-top:10px; }
+/* Notes */
+.inv-notes-block{ margin:0 32px 24px; padding:16px 20px; background:var(--canvas); border:1px solid var(--line); border-radius:8px; }
+.inv-notes-block h4{ font-size:8px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted-2); margin-bottom:8px; font-weight:600; }
+.inv-notes-block p{ font-size:12px; color:var(--muted); line-height:1.65; }
 
-.inv-doc-footer{ background:var(--canvas); border-top:1px solid var(--line); padding:14px 32px; display:flex; justify-content:space-between; font-size:11px; color:var(--muted-2); }
+/* Footer */
+.inv-doc-footer{
+  border-top:1px solid var(--line); padding:16px 32px;
+  display:grid; grid-template-columns:1fr 1fr 1fr;
+  gap:16px; font-size:10px; color:var(--muted-2); background:#fafaf9;
+}
+.inv-doc-footer .ft-brand{ font-size:13px; font-weight:700; color:var(--ink); margin-bottom:3px; }
+.inv-doc-footer .ft-brand em{ font-style:italic; color:var(--brand); }
+.inv-doc-footer .ft-mid{ text-align:center; color:var(--brand); font-weight:600; font-size:9px; letter-spacing:.12em; text-transform:uppercase; }
+.inv-doc-footer .ft-right{ text-align:right; line-height:1.7; }
