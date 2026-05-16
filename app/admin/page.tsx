@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 /* ================================================================
    TYPES
    ================================================================ */
-type Project = { id:number; monogram:string; color_cls:string; name:string; industry:string; year:string; scope:string; status:string; updated_at:string };
+type Project = { id:number; monogram:string; color_cls:string; name:string; industry:string; year:string; scope:string; status:string; updated_at:string; tagline:string; overview:string; challenge:string; solution:string; results:string; tech_stack:string; timeline_duration:string; client_name:string; live_url:string; github_url:string; hero_image:string; thumbnail:string; gallery:string; video_url:string; challenge_img1:string; challenge_img2:string; solution_img1:string; solution_img2:string };
 type Post     = { id:number; title:string; category:string; author_init:string; author_name:string; read_time:string; status:string; published_at:string|null };
 type Service  = { id:number; ord:number; name:string; descr:string; count:string; visible:boolean; badge:string|null; image:string|null };
 type Testi    = { id:number; quote:string; name:string; role:string; av:string; hi:string };
@@ -12,7 +12,7 @@ type Client   = { id:number; name:string; industry:string; country:string; conta
 type Message  = { id:number; av:string; sender:string; subject:string; preview:string; body:string; source:string; interested:string; budget:string; country:string; unread:boolean; received_at:string };
 type Member   = { id:number; av:string; name:string; role:string; bio:string };
 type FoxPrice    = { id:number; category:string; feature_id:string; label:string; price_min:number; price_max:number; is_base:boolean; ord:number; note:string };
-type InvoiceItem = { desc:string; qty:number; rate:number };
+type InvoiceItem = { service:string; description:string; quantity:number; unit:string; rate:number };
 type ProposalData= { executive_summary:string; scope_items:string[]; deliverables:string[]; timeline:{period:string;milestone:string;desc:string}[]; investment_note:string; terms:string };
 
 /* ── PDF template helpers (open in new window → print as PDF) ── */
@@ -99,119 +99,185 @@ ul.items li .arr{color:#b86cf9;flex-shrink:0;margin-top:1px}
 </div>
 </body></html>`;}
 
-function invoicePdfHtml(p:{client:string;company:string;num:string;date:string;due:string;items:InvoiceItem[];notes:string;payment:string}):string{
+function invoicePdfHtml(p:{
+  status:string; client:string; company:string; email:string; phone:string;
+  num:string; date:string; due:string;
+  projectName:string; projectType:string; timeline:string;
+  items:InvoiceItem[]; taxRate:number; discount:number;
+  payment:string; notes:string;
+}):string{
   const fmtD=(d:string)=>d?new Date(d+"T00:00:00").toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}):"—";
   const fmtM=(n:number)=>"$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
-  const total=p.items.reduce((s,it)=>s+(it.qty*it.rate),0);
-  const PAY:Record<string,string>={wise:"Wise — hello@foxmen.studio",paypal:"PayPal — payments@foxmen.studio",bank:"Bank Transfer — IBAN on request",crypto:"USDT / USDC — Wallet on request"};
+  const subtotal=p.items.reduce((s,it)=>s+(it.quantity*it.rate),0);
+  const taxAmt=subtotal*(p.taxRate/100);
+  const total=subtotal+taxAmt-p.discount;
+  const PAY:Record<string,string>={wise:"Wise — contact@foxmenstudio.com",paypal:"PayPal — payments@foxmenstudio.com",bank:"Bank Transfer — IBAN on request",crypto:"USDT / USDC — Wallet on request"};
   const [pName,pDetail]=(PAY[p.payment]??p.payment).split("—").map(s=>s.trim());
+  const STATUS_STYLE:Record<string,{color:string;bg:string;label:string}>={
+    draft:{color:"#6b7280",bg:"#f9fafb",label:"Draft"},
+    sent:{color:"#1d4ed8",bg:"#eff6ff",label:"Sent"},
+    paid:{color:"#15803d",bg:"#f0fdf4",label:"Paid"},
+    overdue:{color:"#b91c1c",bg:"#fef2f2",label:"Overdue"},
+  };
+  const st=STATUS_STYLE[p.status]??STATUS_STYLE.sent;
   const logoUrl="https://foxmen.studio/assets/logo-mark.svg";
-  const rows=p.items.filter(it=>it.desc||it.rate).map(it=>`
+  const rows=p.items.filter(it=>it.service||it.rate).map(it=>`
     <tr>
-      <td style="padding:13px 0;border-bottom:1px solid #f0f0ee;font-size:13px;font-weight:600;color:#0a0a0a;">${it.desc||"—"}</td>
-      <td style="padding:13px 0;border-bottom:1px solid #f0f0ee;font-size:13px;color:#666;text-align:right;">${it.qty}</td>
-      <td style="padding:13px 0;border-bottom:1px solid #f0f0ee;font-size:13px;color:#666;text-align:right;">${fmtM(it.rate)}</td>
-      <td style="padding:13px 0;border-bottom:1px solid #f0f0ee;font-size:13px;font-weight:700;color:#0a0a0a;text-align:right;">${fmtM(it.qty*it.rate)}</td>
+      <td style="padding:12px 0;border-bottom:1px solid #f8f7f5;vertical-align:top;">
+        <div style="font-size:13px;font-weight:700;color:#0a0a0a;">${it.service||"—"}</div>
+        ${it.description?`<div style="font-size:11px;color:#6b6b6b;margin-top:3px;line-height:1.55;">${it.description}</div>`:""}
+      </td>
+      <td style="padding:12px 0;border-bottom:1px solid #f8f7f5;font-size:12px;color:#0a0a0a;text-align:right;vertical-align:top;white-space:nowrap;">${it.quantity} ${it.unit}</td>
+      <td style="padding:12px 0;border-bottom:1px solid #f8f7f5;font-size:12px;color:#6b6b6b;text-align:right;vertical-align:top;white-space:nowrap;">${fmtM(it.rate)}/${it.unit}</td>
+      <td style="padding:12px 0;border-bottom:1px solid #f8f7f5;font-size:13px;font-weight:700;color:#0a0a0a;text-align:right;vertical-align:top;white-space:nowrap;">${fmtM(it.quantity*it.rate)}</td>
     </tr>`).join("");
   return`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Invoice ${p.num} — Foxmen Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet"/>
 <style>
-@page{size:A4;margin:0}
+@page{size:A4;margin:10mm 12mm}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;color:#0a0a0a;background:#f2f1ef}
-.wrap{width:210mm;min-height:297mm;background:#fff;border-radius:12px;overflow:hidden;margin:0 auto}
-/* dark header */
-.hd{background:#0a0a0a;padding:36px 48px 32px;display:flex;justify-content:space-between;align-items:flex-start}
-.brand-row{display:flex;align-items:center;gap:12px}
-.mark{width:38px;height:38px}
-.bn{font-size:22px;font-weight:800;letter-spacing:-.02em;color:#fff;line-height:1}
-.bn em{font-style:italic;color:#b86cf9}
-.btag{font-size:9px;color:#b86cf9;letter-spacing:.16em;text-transform:uppercase;margin-top:5px;font-weight:600}
-.bct{margin-top:12px;font-size:11px;color:rgba(255,255,255,.4);line-height:1.9}
-.meta{text-align:right}
-.inv-tag{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.35)}
-.inv-num{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.02em;margin-top:5px;word-break:break-all;max-width:220px}
-.inv-dates{margin-top:12px;font-size:11px;color:rgba(255,255,255,.4);line-height:2;text-align:right}
-.inv-dates strong{color:rgba(255,255,255,.75);font-weight:600}
-/* gradient divider */
-.hdline{height:3px;background:linear-gradient(90deg,#b86cf9 0%,#8c3bd9 50%,#ff6b6b 100%)}
-/* three-col billing strip */
-.bill{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid #e8e6e3}
-.bb{padding:20px 24px}
-.bb:not(:last-child){border-right:1px solid #e8e6e3}
-.bb label{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:#b86cf9;display:block;margin-bottom:10px;font-weight:700}
-.bb .bn2{font-size:14px;font-weight:700;color:#0a0a0a}
-.bb .bdet{font-size:11px;color:#777;margin-top:4px;line-height:1.8}
-/* items */
-.body{padding:24px 48px 20px}
-table{width:100%;border-collapse:collapse}
-th{font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:#aaa;font-weight:600;text-align:left;padding:0 0 10px;border-bottom:1px solid #e8e6e3}
-th:not(:first-child){text-align:right}
-td{padding:13px 0;border-bottom:1px solid #f0f0ee;font-size:13px;color:#555;vertical-align:middle}
-td:not(:first-child){text-align:right}
-/* subtotal row */
-.sub-row{display:flex;justify-content:flex-end;gap:48px;padding:10px 0;font-size:13px;color:#888}
-/* total due */
-.total-due{display:flex;justify-content:space-between;align-items:baseline;padding:20px 48px;border-top:1px solid #e8e6e3}
-.due-label{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#0a0a0a}
-.due-amount{font-size:36px;font-weight:800;color:#0a0a0a;letter-spacing:-.03em}
-/* notes */
-.notes{margin:0 48px 24px;padding:16px 20px;background:#f7f6f4;border:1px solid #e8e6e3;border-radius:8px}
-.notes h4{font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:#aaa;margin-bottom:8px;font-weight:600}
-.notes p{font-size:12px;color:#777;line-height:1.7}
-/* footer */
-.ft{border-top:1px solid #e8e6e3;padding:18px 48px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;font-size:10px;color:#bbb;background:#fafaf9}
-.ft-brand{font-size:13px;font-weight:700;color:#0a0a0a;margin-bottom:3px}
+body{font-family:'Instrument Serif','Times New Roman',serif;color:#0a0a0a;background:#f1efe9}
+.wrap{width:100%;background:#fff;border-radius:8px;overflow:hidden;min-height:270mm}
+.hd{background:#0a0a0a;padding:2.5rem 3rem 2rem;position:relative;overflow:hidden;display:flex;justify-content:space-between;align-items:flex-start}
+.hd::before{content:'';position:absolute;top:-60px;right:-60px;width:180px;height:180px;border:1.5px solid rgba(184,108,249,.12);border-radius:50%}
+.hd::after{content:'';position:absolute;bottom:-80px;left:-40px;width:220px;height:220px;border:1.5px solid rgba(184,108,249,.07);border-radius:50%}
+.hd-left,.hd-right{position:relative;z-index:1}
+.hd-right{text-align:right}
+.hd-top{display:flex;justify-content:space-between;align-items:flex-start}
+.hd-brand{display:flex;flex-direction:column;gap:10px}
+.hd-brand-main{display:flex;align-items:center;gap:14px}
+.hd-brand-main img{height:46px;width:auto;object-fit:contain}
+.hd-name{font-family:'Instrument Serif','Times New Roman',serif;font-size:2rem;font-weight:400;color:#fff;line-height:1}
+.hd-name em{font-style:italic;color:#b86cf9;font-weight:400}
+.hd-tag{font-family:monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:#b86cf9;font-weight:700;margin-top:7px}
+.hd-tag2{font-family:monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.9);font-weight:400;padding-top:8px;border-top:1px solid rgba(255,255,255,.07)}
+.hd-para{font-size:.73rem;color:rgba(255,255,255,.45);line-height:1.8;margin-top:7px}
+.hd-right{text-align:right}
+.hd-label{font-family:monospace;font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.35)}
+.hd-num{font-family:'Playfair Display',Georgia,serif;font-size:1.5rem;font-weight:700;color:#fff;margin-top:5px;word-break:break-all}
+.hd-dates{margin-top:10px;font-size:.68rem;color:rgba(255,255,255,.38);line-height:2.1;text-align:right}
+.hd-dates strong{color:rgba(255,255,255,.8);font-weight:600}
+.hd-rule{height:1px;background:rgba(255,255,255,.1);margin:1.75rem 0 1.5rem;position:relative}
+.hd-rule::before{content:'';position:absolute;left:0;top:-1px;width:48px;height:3px;background:linear-gradient(90deg,#b86cf9,#8c3bd9)}
+.hd-bottom{display:flex;justify-content:space-between;align-items:center}
+.hd-ct{font-size:.68rem;color:rgba(255,255,255,.38);line-height:1.9}
+.hd-ct strong{color:rgba(255,255,255,.7);font-weight:500}
+.badge{display:inline-flex;align-items:center;gap:7px;padding:5px 14px;border-radius:999px;font-size:.7rem;font-weight:700}
+.badge .dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+.aline{height:3px;background:linear-gradient(90deg,#b86cf9,#8c3bd9,#6d28d9)}
+.info-grid{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid #f0ede8}
+.ic{padding:1.25rem 1.75rem}
+.ic:not(:last-child){border-right:1px solid #f0ede8}
+.ic-label{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:#b86cf9;font-weight:700;margin-bottom:8px;display:block}
+.ic-name{font-size:.875rem;font-weight:700;color:#0a0a0a}
+.ic-det{font-size:.75rem;color:#6b6b6b;margin-top:4px;line-height:1.75}
+.tbl-wrap{padding:1.5rem 3rem 1rem}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:#9a9a9a;font-weight:600;text-align:left;padding:0 0 10px;border-bottom:2px solid #f0ede8}
+.col-svc{width:26%}.col-desc{width:30%}.col-qty{width:12%;text-align:right}.col-rate{width:15%;text-align:right}.col-tot{width:17%;text-align:right}
+.tot-wrap{display:flex;justify-content:flex-end;padding:.5rem 3rem 1.5rem}
+.tot-box{width:260px}
+.tot-r{display:flex;justify-content:space-between;padding:5px 0;font-size:.78rem;color:#6b6b6b}
+.tot-r.disc{color:#16a34a}
+.tot-hr{border:none;border-top:1px solid #f0ede8;margin:8px 0}
+.tot-final{display:flex;justify-content:space-between;align-items:baseline;padding-top:8px}
+.tot-final .lbl{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#0a0a0a}
+.tot-final .amt{font-family:'Playfair Display',Georgia,serif;font-size:1.75rem;font-weight:700;color:#0a0a0a}
+.notes-box{margin:0 3rem 1.5rem;background:#fafaf8;border:1px solid #f0ede8;border-radius:8px;padding:1rem 1.25rem}
+.notes-lbl{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:#9a9a9a;font-weight:600;margin-bottom:6px;display:block}
+.notes-txt{font-size:.78rem;color:#4b4b4b;line-height:1.7}
+.ft{background:#0a0a0a;padding:1.75rem 3rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:auto;position:relative}
+.ft::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#b86cf9,#8c3bd9,#6d28d9)}
+.ft-logo-row{display:flex;align-items:center;gap:10px}
+.ft-logo-row img{height:32px;width:auto}
+.ft-brand{font-family:'Instrument Serif','Times New Roman',serif;font-size:1rem;color:#fff;font-weight:400}
 .ft-brand em{font-style:italic;color:#b86cf9}
-.ft-mid{text-align:center;color:#b86cf9;font-weight:700;font-size:9px;letter-spacing:.12em;text-transform:uppercase;line-height:1.8}
-.ft-right{text-align:right;line-height:1.8}
-@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.wrap{border-radius:0}}
+.ft-sub{font-size:.6rem;color:rgba(255,255,255,.3);margin-top:5px;letter-spacing:.06em}
+.ft-mid{text-align:center;font-size:.7rem;color:rgba(255,255,255,.4);line-height:2}
+.ft-mid strong{color:rgba(255,255,255,.75);font-weight:500}
+.ft-right{text-align:right;font-size:.65rem;color:rgba(255,255,255,.3);line-height:1.9}
+@media print{body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}.wrap{border-radius:0}}
 </style></head><body>
 <div class="wrap">
 <div class="hd">
-  <div class="brand-row">
-    <img src="${logoUrl}" class="mark" alt=""/>
+  <div class="hd-top">
     <div>
-      <div class="bn">Foxmen <em>Studio</em></div>
-      <div class="btag">Est. 2024 · Premium Studio</div>
-      <div class="bct">hello@foxmen.studio · foxmen.studio</div>
+      <div class="hd-brand">
+        <div class="hd-brand-main">
+          <img src="${logoUrl}" alt="Foxmen Studio"/>
+          <div>
+            <div class="hd-name">Foxmen <em>Studio</em></div>
+            <div class="hd-tag">Code · Craft · Care</div>
+          </div>
+        </div>
+        <div class="hd-tag2">Est. 2019 · AI-Powered Studio</div>
+        <div class="hd-para">We architect AI-integrated digital products that define the next era of business.<br/>Precision-engineered software and elevated design — built to give your brand an unfair advantage.</div>
+      </div>
+    </div>
+    <div class="hd-right">
+      <div class="hd-label">Invoice</div>
+      <div class="hd-num">${p.num}</div>
+      <div class="hd-dates">
+        <div>Issued: <strong>${fmtD(p.date)}</strong></div>
+        ${p.due?`<div>Due: <strong>${fmtD(p.due)}</strong></div>`:""}
+      </div>
     </div>
   </div>
-  <div class="meta">
-    <div class="inv-tag">Invoice</div>
-    <div class="inv-num">${p.num}</div>
-    <div class="inv-dates">
-      <div>Date: <strong>${fmtD(p.date)}</strong></div>
-      ${p.due?`<div>Due: <strong>${fmtD(p.due)}</strong></div>`:""}
+  <div class="hd-rule"></div>
+  <div class="hd-bottom">
+    <div class="hd-ct"><strong>contact@foxmenstudio.com</strong> · foxmen.studio</div>
+    <div class="badge" style="background:${st.bg};color:${st.color};">
+      <span class="dot" style="background:${st.color};"></span>${st.label}
     </div>
   </div>
 </div>
-<div class="hdline"></div>
-<div class="bill">
-  <div class="bb"><label>Bill to</label><div class="bn2">${p.client||"—"}</div><div class="bdet">${p.company?p.company+"<br/>":""}${p.client?" &nbsp;":""}</div></div>
-  <div class="bb"><label>From</label><div class="bn2">Foxmen Studio</div><div class="bdet">hello@foxmen.studio<br/>foxmen.studio</div></div>
-  <div class="bb"><label>Payment</label><div class="bn2">${pName}</div><div class="bdet">${pDetail||""}</div></div>
+<div class="aline"></div>
+<div class="info-grid">
+  <div class="ic">
+    <span class="ic-label">Bill To</span>
+    <div class="ic-name">${p.client||"—"}</div>
+    <div class="ic-det">${p.company?p.company+"<br/>":""}${p.email?p.email+"<br/>":""}${p.phone||""}</div>
+  </div>
+  <div class="ic">
+    <span class="ic-label">Project</span>
+    <div class="ic-name">${p.projectName||"—"}</div>
+    <div class="ic-det">${p.projectType?p.projectType+"<br/>":""}${p.timeline||""}</div>
+  </div>
+  <div class="ic">
+    <span class="ic-label">Payment Terms</span>
+    <div class="ic-name">${p.due?fmtD(p.due):"Net 14"}</div>
+    <div class="ic-det">${pName}<br/>${pDetail||""}</div>
+  </div>
 </div>
-<div class="body">
+<div class="tbl-wrap">
 <table>
   <thead><tr>
-    <th style="width:52%">Item</th>
-    <th style="width:12%;text-align:right">Qty</th>
-    <th style="width:18%;text-align:right">Unit Price</th>
-    <th style="width:18%;text-align:right">Total</th>
+    <th class="col-svc">Service</th>
+    <th class="col-desc">Description</th>
+    <th class="col-qty" style="text-align:right">Hrs / Units</th>
+    <th class="col-rate" style="text-align:right">Rate</th>
+    <th class="col-tot" style="text-align:right">Total</th>
   </tr></thead>
   <tbody>${rows}</tbody>
 </table>
-<div class="sub-row"><span>Subtotal</span><span>${fmtM(total)}</span></div>
 </div>
-<div class="total-due">
-  <div class="due-label">Total Due</div>
-  <div class="due-amount">${fmtM(total)}</div>
+<div class="tot-wrap">
+  <div class="tot-box">
+    <div class="tot-r"><span>Subtotal</span><span>${fmtM(subtotal)}</span></div>
+    ${p.taxRate>0?`<div class="tot-r"><span>VAT ${p.taxRate}%</span><span>${fmtM(taxAmt)}</span></div>`:""}
+    ${p.discount>0?`<div class="tot-r disc"><span>Discount</span><span>−${fmtM(p.discount)}</span></div>`:""}
+    <hr class="tot-hr"/>
+    <div class="tot-final"><span class="lbl">Total Due</span><span class="amt">${fmtM(total)}</span></div>
+  </div>
 </div>
-${p.notes?`<div class="notes"><h4>Notes</h4><p>${p.notes}</p></div>`:""}
+${p.notes?`<div class="notes-box"><span class="notes-lbl">Project Notes</span><div class="notes-txt">${p.notes}</div></div>`:""}
 <div class="ft">
-  <div><div class="ft-brand">Foxmen <em>Studio</em></div><div>Code · Craft · Care · Est. 2024</div></div>
-  <div class="ft-mid">hello@foxmen.studio<br/>foxmen.studio</div>
-  <div class="ft-right">This document serves as your official receipt.<br/>Foxmen Studio · Est. 2024</div>
+  <div>
+    <div class="ft-logo-row"><img src="${logoUrl}" alt=""/><div class="ft-brand">Foxmen <em>Studio</em></div></div>
+    <div class="ft-sub">Code · Craft · Care · Est. 2019</div>
+  </div>
+  <div class="ft-mid"><strong>contact@foxmenstudio.com</strong><br/>foxmen.studio</div>
+  <div class="ft-right">Payment due within 14 days of issue.<br/>Late payments subject to 2% monthly interest.</div>
 </div>
 </div>
 </body></html>`;}
@@ -261,6 +327,86 @@ function FieldSel({label,value,onChange,options}:{label:string;value:string;onCh
   return <div className="field"><label>{label}</label><select value={value} onChange={e=>onChange(e.target.value)}>{options.map(o=><option key={o} value={o}>{o.charAt(0).toUpperCase()+o.slice(1)}</option>)}</select></div>;
 }
 
+function ImageUpload({label,value,onChange,accept="image/*,video/*"}:{label:string;value:string;onChange:(v:string)=>void;accept?:string}){
+  const [uploading,setUploading]=useState(false);
+  const inputRef=useRef<HTMLInputElement>(null);
+  const handleFile=async(file:File)=>{
+    setUploading(true);
+    const fd=new FormData(); fd.append("file",file);
+    const res=await fetch("/api/upload",{method:"POST",body:fd});
+    const json=await res.json();
+    if(json.url) onChange(json.url);
+    setUploading(false);
+  };
+  const isVideo=value&&/\.(mp4|webm|mov|ogg)$/i.test(value);
+  return(
+    <div className="field">
+      <label>{label}</label>
+      <div
+        className={`img-drop${uploading?" uploading":""}`}
+        onClick={()=>!uploading&&inputRef.current?.click()}
+        onDrop={e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f)handleFile(f);}}
+        onDragOver={e=>e.preventDefault()}
+      >
+        {uploading
+          ? <span className="img-drop-hint">Uploading…</span>
+          : value
+            ? isVideo
+              ? <video src={value} className="img-drop-preview" muted playsInline/>
+              : <img src={value} alt="" className="img-drop-preview"/>
+            : <span className="img-drop-hint">Click or drag to upload</span>
+        }
+        {value&&!uploading&&(
+          <button className="img-drop-clear" onClick={e=>{e.stopPropagation();onChange("");}}>✕</button>
+        )}
+      </div>
+      <input ref={inputRef} type="file" accept={accept} style={{display:"none"}}
+        onChange={e=>{const f=e.target.files?.[0];if(f)handleFile(f);e.target.value="";}}/>
+    </div>
+  );
+}
+
+function GalleryUpload({label,value,onChange}:{label:string;value:string[];onChange:(v:string[])=>void}){
+  const [uploading,setUploading]=useState(false);
+  const inputRef=useRef<HTMLInputElement>(null);
+  const handleFiles=async(files:FileList)=>{
+    setUploading(true);
+    const uploaded:string[]=[];
+    for(const file of Array.from(files)){
+      const fd=new FormData(); fd.append("file",file);
+      const res=await fetch("/api/upload",{method:"POST",body:fd});
+      const json=await res.json();
+      if(json.url) uploaded.push(json.url);
+    }
+    onChange([...value,...uploaded]);
+    setUploading(false);
+  };
+  const remove=(i:number)=>onChange(value.filter((_,j)=>j!==i));
+  return(
+    <div className="field">
+      <label>{label}</label>
+      <div className="gallery-upload">
+        {value.map((url,i)=>{
+          const isV=/\.(mp4|webm|mov|ogg)$/i.test(url);
+          return(
+            <div key={i} className="gallery-tile">
+              {isV
+                ? <video src={url} className="gallery-tile-media" muted playsInline/>
+                : <img src={url} alt="" className="gallery-tile-media"/>}
+              <button className="gallery-tile-rm" onClick={()=>remove(i)}>✕</button>
+            </div>
+          );
+        })}
+        <button className="gallery-add" onClick={()=>!uploading&&inputRef.current?.click()} disabled={uploading}>
+          {uploading?"…":"+"}
+        </button>
+      </div>
+      <input ref={inputRef} type="file" accept="image/*,video/*" multiple style={{display:"none"}}
+        onChange={e=>{if(e.target.files)handleFiles(e.target.files);e.target.value="";}}/>
+    </div>
+  );
+}
+
 /* modal title map */
 const MODAL_TITLE:Record<string,string>={
   "new-project":"New project","edit-project":"Edit project",
@@ -303,16 +449,27 @@ export default function AdminPage() {
   const [propGenerating,setPropGenerating]= useState(false);
 
   /* invoices */
-  const [invClient,  setInvClient]  = useState("");
-  const [invCompany, setInvCompany] = useState("");
-  const [invEmail,   setInvEmail]   = useState("");
-  const [invNum,     setInvNum]     = useState("INV-001");
-  const [invDate,    setInvDate]    = useState(()=>new Date().toISOString().split("T")[0]);
-  const [invDue,     setInvDue]     = useState("");
-  const [invItems,   setInvItems]   = useState<InvoiceItem[]>([{desc:"",qty:1,rate:0}]);
-  const [invNotes,   setInvNotes]   = useState("Payment due within 30 days of invoice date.");
-  const [invPayment, setInvPayment] = useState("wise");
-  const [invSending, setInvSending] = useState(false);
+  const [invStatus,      setInvStatus]      = useState<"draft"|"sent"|"paid"|"overdue">("sent");
+  const [invClient,      setInvClient]      = useState("");
+  const [invCompany,     setInvCompany]     = useState("");
+  const [invEmail,       setInvEmail]       = useState("");
+  const [invPhone,       setInvPhone]       = useState("");
+  const [invNum,         setInvNum]         = useState("INV-001");
+  const [invDate,        setInvDate]        = useState(()=>new Date().toISOString().split("T")[0]);
+  const [invDue,         setInvDue]         = useState("");
+  const [invProjectName, setInvProjectName] = useState("");
+  const [invProjectType, setInvProjectType] = useState("Web App + AI Integration");
+  const [invTimeline,    setInvTimeline]    = useState("");
+  const [invItems,       setInvItems]       = useState<InvoiceItem[]>([{service:"",description:"",quantity:1,unit:"hrs",rate:0}]);
+  const [invTaxRate,     setInvTaxRate]     = useState(10);
+  const [invDiscount,    setInvDiscount]    = useState(0);
+  const [invPayment,     setInvPayment]     = useState("wise");
+  const [invNotes,       setInvNotes]       = useState("Payment due within 14 days of issue. Late payments subject to 2% monthly interest.");
+  const [invSending,     setInvSending]     = useState(false);
+  const [invAiPrompt,    setInvAiPrompt]    = useState("");
+  const [invAiLoading,   setInvAiLoading]   = useState(false);
+  const [projAiPrompt,   setProjAiPrompt]   = useState("");
+  const [projAiLoading,  setProjAiLoading]  = useState(false);
   const [loading,   setLoading]   = useState(false);
 
   /* modal */
@@ -392,7 +549,7 @@ export default function AdminPage() {
   const submitProject = async()=>{
     if(!form.name?.trim()){ toast("Project name is required"); return; }
     setSubmitting(true);
-    const body = { monogram:form.name[0].toUpperCase(), color_cls:form.color_cls||"", name:form.name, industry:form.industry||"", year:form.year||String(new Date().getFullYear()), scope:form.scope||"", status:form.status||"draft" };
+    const body = { monogram:form.monogram||form.name[0].toUpperCase(), color_cls:form.color_cls||"", name:form.name, industry:form.industry||"", year:form.year||String(new Date().getFullYear()), scope:form.scope||"", status:form.status||"draft", tagline:form.tagline||"", overview:form.overview||"", challenge:form.challenge||"", solution:form.solution||"", results:form.results||"", tech_stack:form.tech_stack||"", timeline_duration:form.timeline_duration||"", client_name:form.client_name||"", live_url:form.live_url||"", github_url:form.github_url||"", hero_image:form.hero_image||"", thumbnail:form.thumbnail||"", gallery:form.gallery||"[]", video_url:form.video_url||"", challenge_img1:form.challenge_img1||"", challenge_img2:form.challenge_img2||"", solution_img1:form.solution_img1||"", solution_img2:form.solution_img2||"" };
     const url  = editTarget ? `/api/projects/${editTarget}` : "/api/projects";
     const meth = editTarget ? "PATCH" : "POST";
     const res  = await fetch(url,{method:meth,headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
@@ -741,7 +898,7 @@ export default function AdminPage() {
                       <td><span className={`status ${p.status}`}>{p.status}</span></td>
                       <td><span style={{color:"var(--muted)",fontFamily:"var(--f-mono)",fontSize:11}}>{relTime(p.updated_at)}</span></td>
                       <td><div className="acts">
-                        <button className="btn-icon" title="Edit" onClick={()=>openModal("edit-project",{name:p.name,industry:p.industry,year:p.year,scope:p.scope,status:p.status,color_cls:p.color_cls},p.id)}><EditSvg/></button>
+                        <button className="btn-icon" title="Edit" onClick={()=>openModal("edit-project",{name:p.name,industry:p.industry,year:p.year,scope:p.scope,status:p.status,color_cls:p.color_cls,monogram:p.monogram,tagline:p.tagline||"",overview:p.overview||"",challenge:p.challenge||"",solution:p.solution||"",results:p.results||"",tech_stack:p.tech_stack||"",timeline_duration:p.timeline_duration||"",client_name:p.client_name||"",live_url:p.live_url||"",github_url:p.github_url||"",hero_image:p.hero_image||"",thumbnail:p.thumbnail||"",gallery:p.gallery||"[]",video_url:p.video_url||"",challenge_img1:p.challenge_img1||"",challenge_img2:p.challenge_img2||"",solution_img1:p.solution_img1||"",solution_img2:p.solution_img2||""},p.id)}><EditSvg/></button>
                         <button className="btn-icon danger" title="Delete" onClick={()=>deleteProject(p.id)}><TrashSvg/></button>
                       </div></td>
                     </tr>
@@ -1160,21 +1317,25 @@ export default function AdminPage() {
         {page==="invoices" && (()=>{
           const fmtM=(n:number)=>"$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
           const fmtD=(d:string)=>d?new Date(d+"T00:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}):"—";
-          const total=invItems.reduce((s,it)=>s+(it.qty*it.rate),0);
 
-          const addItem=()=>setInvItems(p=>[...p,{desc:"",qty:1,rate:0}]);
+          const addItem=()=>setInvItems(p=>[...p,{service:"",description:"",quantity:1,unit:"hrs",rate:0}]);
           const removeItem=(i:number)=>setInvItems(p=>p.filter((_,idx)=>idx!==i));
-          const updateItem=(i:number,f:keyof InvoiceItem,v:string)=>setInvItems(p=>p.map((it,idx)=>idx===i?{...it,[f]:f==="desc"?v:(parseFloat(v)||0)}:it));
+          const updateItem=(i:number,f:keyof InvoiceItem,v:string)=>setInvItems(p=>p.map((it,idx)=>idx===i?{...it,[f]:f==="service"||f==="description"||f==="unit"?v:(parseFloat(v)||0)}:it));
 
-          const PAY_LABELS:Record<string,string>={wise:"Wise — hello@foxmen.studio",paypal:"PayPal — payments@foxmen.studio",bank:"Bank Transfer — IBAN on request",crypto:"USDT / USDC — Wallet on request"};
+          const PAY_LABELS:Record<string,string>={wise:"Wise — contact@foxmenstudio.com",paypal:"PayPal — payments@foxmenstudio.com",bank:"Bank Transfer — IBAN on request",crypto:"USDT / USDC — Wallet on request"};
 
-          const download=()=>openPdf(invoicePdfHtml({client:invClient,company:invCompany,num:invNum,date:invDate,due:invDue,items:invItems,notes:invNotes,payment:invPayment}));
+          const subtotal=invItems.reduce((s,it)=>s+(it.quantity*it.rate),0);
+          const taxAmt=subtotal*(invTaxRate/100);
+          const total=subtotal+taxAmt-invDiscount;
+          const STATUS_MAP={draft:{label:"Draft",color:"#6b7280",bg:"#f9fafb"},sent:{label:"Sent",color:"#1d4ed8",bg:"#eff6ff"},paid:{label:"Paid",color:"#15803d",bg:"#f0fdf4"},overdue:{label:"Overdue",color:"#b91c1c",bg:"#fef2f2"}};
+          const stBadge=STATUS_MAP[invStatus];
+          const download=()=>openPdf(invoicePdfHtml({status:invStatus,client:invClient,company:invCompany,email:invEmail,phone:invPhone,num:invNum,date:invDate,due:invDue,projectName:invProjectName,projectType:invProjectType,timeline:invTimeline,items:invItems,taxRate:invTaxRate,discount:invDiscount,payment:invPayment,notes:invNotes}));
 
           const send=async()=>{
             if(!invEmail){toast("Enter client email first");return;}
             setInvSending(true);
             try{
-              const r=await fetch("/api/invoice",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({client:invClient,company:invCompany,email:invEmail,num:invNum,date:invDate,due:invDue,items:invItems,notes:invNotes,payment:invPayment,total})});
+              const r=await fetch("/api/invoice",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:invStatus,client:invClient,company:invCompany,email:invEmail,phone:invPhone,num:invNum,date:invDate,due:invDue,projectName:invProjectName,projectType:invProjectType,timeline:invTimeline,items:invItems,taxRate:invTaxRate,discount:invDiscount,payment:invPayment,notes:invNotes,total})});
               if(r.ok){toast("Invoice sent to "+invEmail);}else{toast("Send failed — check RESEND_API_KEY");}
             }catch{toast("Send failed. Try again.");}
             setInvSending(false);
@@ -1183,71 +1344,145 @@ export default function AdminPage() {
           return(
           <section className="page active">
             <div className="page-head">
-              <div><h2>Invoice Generator</h2><p style={{fontSize:13,color:"var(--muted)",marginTop:4}}>Professional branded invoices with payment terms. Download PDF or send directly to client.</p></div>
+              <div><h2>Invoice Generator</h2><p style={{fontSize:13,color:"var(--muted)",marginTop:4}}>Professional branded invoices. Download PDF or send directly to client.</p></div>
             </div>
             <div className="gen-layout">
               {/* FORM */}
               <div className="gen-form">
-                <div><div className="gen-form-title">Invoice details</div></div>
+                <div className="gen-form-title">Invoice details</div>
+
+                {/* Status + Invoice # */}
+                <div className="field-row">
+                  <div className="field">
+                    <label>Status</label>
+                    <select value={invStatus} onChange={e=>setInvStatus(e.target.value as "draft"|"sent"|"paid"|"overdue")} style={{background:"var(--canvas)",border:"1px solid var(--line)",borderRadius:"var(--r-sm)",padding:"10px 12px",fontSize:14,width:"100%",fontFamily:"var(--f-sans)",color:"var(--ink)"}}>
+                      <option value="draft">Draft</option>
+                      <option value="sent">Sent</option>
+                      <option value="paid">Paid</option>
+                      <option value="overdue">Overdue</option>
+                    </select>
+                  </div>
+                  <Field label="Invoice #" value={invNum} onChange={setInvNum} placeholder="INV-001"/>
+                </div>
+
+                {/* Dates */}
+                <div className="field-row">
+                  <Field label="Issue date" value={invDate} onChange={setInvDate} type="date"/>
+                  <Field label="Due date" value={invDue} onChange={setInvDue} type="date"/>
+                </div>
+
+                {/* Client */}
                 <div className="field-row">
                   <Field label="Client name" value={invClient} onChange={setInvClient} placeholder="Ahmed Hassan"/>
                   <Field label="Company" value={invCompany} onChange={setInvCompany} placeholder="Hassan Co."/>
                 </div>
                 <div className="field-row">
                   <Field label="Client email" value={invEmail} onChange={setInvEmail} placeholder="ahmed@co.com" type="email"/>
-                  <Field label="Invoice #" value={invNum} onChange={setInvNum} placeholder="INV-001"/>
+                  <Field label="Phone" value={invPhone} onChange={setInvPhone} placeholder="+1 234 567 8900"/>
                 </div>
+
+                {/* Project */}
                 <div className="field-row">
-                  <Field label="Invoice date" value={invDate} onChange={setInvDate} type="date"/>
-                  <Field label="Due date" value={invDue} onChange={setInvDue} type="date"/>
+                  <Field label="Project name" value={invProjectName} onChange={setInvProjectName} placeholder="E-commerce Rebuild"/>
+                  <Field label="Project type" value={invProjectType} onChange={setInvProjectType} placeholder="Web App + AI Integration"/>
+                </div>
+                <Field label="Timeline" value={invTimeline} onChange={setInvTimeline} placeholder="8 weeks · Mar–Apr 2025"/>
+
+                {/* AI fill */}
+                <div className="inv-ai-box">
+                  <div className="inv-ai-label">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    AI Auto-fill
+                  </div>
+                  <textarea
+                    className="inv-ai-textarea"
+                    value={invAiPrompt}
+                    onChange={e=>setInvAiPrompt(e.target.value)}
+                    placeholder="Describe the work — e.g. &quot;Built a full e-commerce site with custom checkout, 3 months work, total budget $18,000. Also did brand identity and logo design.&quot;"
+                  />
+                  <button
+                    className="inv-ai-btn"
+                    disabled={invAiLoading||!invAiPrompt.trim()}
+                    onClick={async()=>{
+                      setInvAiLoading(true);
+                      try{
+                        const r=await fetch("/api/invoice-ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({description:invAiPrompt})});
+                        const d=await r.json();
+                        if(d.items?.length){
+                          setInvItems(d.items.map((it:InvoiceItem)=>({service:it.service||"",description:it.description||"",quantity:Number(it.quantity)||1,unit:it.unit||"flat",rate:Number(it.rate)||0})));
+                          if(d.notes) setInvNotes(d.notes);
+                          toast("Invoice items filled by AI");
+                        }else{ toast("AI returned no items — try rephrasing"); }
+                      }catch{ toast("AI fill failed. Try again."); }
+                      setInvAiLoading(false);
+                    }}
+                  >
+                    {invAiLoading
+                      ?<><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{animation:"spin 1s linear infinite"}}><path d="M21 12a9 9 0 1 1-6.2-8.6"/></svg>Generating…</>
+                      :<><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>Fill Invoice with AI</>
+                    }
+                  </button>
                 </div>
 
                 {/* Line items */}
                 <div className="field">
-                  <label>Line items</label>
+                  <label>Services</label>
                   <div style={{marginTop:8}}>
-                    <div className="inv-th-row" style={{marginBottom:4}}>
-                      <span>Description</span><span style={{textAlign:"center"}}>Qty</span><span style={{textAlign:"right"}}>Rate $</span><span/>
-                    </div>
                     <div className="inv-items-wrap">
                       {invItems.map((it,i)=>(
-                        <div key={i} className="inv-item-row">
-                          <input value={it.desc} onChange={e=>updateItem(i,"desc",e.target.value)} placeholder="Service or deliverable"/>
-                          <input type="number" min={1} value={it.qty} onChange={e=>updateItem(i,"qty",e.target.value)} style={{textAlign:"center"}}/>
-                          <input type="number" min={0} value={it.rate||""} onChange={e=>updateItem(i,"rate",e.target.value)} placeholder="0"/>
-                          <span className="inv-item-amount">
-                            {fmtM(it.qty*it.rate)}
-                            {invItems.length>1&&<button className="inv-remove-btn" onClick={()=>removeItem(i)} style={{marginLeft:6}}>×</button>}
-                          </span>
+                        <div key={i} className="inv-item-card">
+                          <div className="inv-item-top">
+                            <input value={it.service} onChange={e=>updateItem(i,"service",e.target.value)} placeholder="Service name"/>
+                            <input value={it.description} onChange={e=>updateItem(i,"description",e.target.value)} placeholder="Brief description…"/>
+                          </div>
+                          <div className="inv-item-bottom">
+                            <input type="number" min={0} value={it.quantity||""} onChange={e=>updateItem(i,"quantity",e.target.value)} placeholder="Qty" style={{textAlign:"center"}}/>
+                            <select value={it.unit} onChange={e=>updateItem(i,"unit",e.target.value)}>
+                              <option value="hrs">hrs</option>
+                              <option value="days">days</option>
+                              <option value="flat">flat</option>
+                            </select>
+                            <input type="number" min={0} value={it.rate||""} onChange={e=>updateItem(i,"rate",e.target.value)} placeholder="Rate $"/>
+                            <span className="inv-item-amount">
+                              {fmtM(it.quantity*it.rate)}
+                              {invItems.length>1&&<button className="inv-remove-btn" onClick={()=>removeItem(i)}>×</button>}
+                            </span>
+                          </div>
                         </div>
                       ))}
                     </div>
-                    <button className="btn-ghost" style={{marginTop:8,width:"100%",justifyContent:"center",display:"flex"}} onClick={addItem}>+ Add line item</button>
+                    <button className="btn-ghost" style={{marginTop:8,width:"100%",justifyContent:"center",display:"flex"}} onClick={addItem}>+ Add service</button>
                   </div>
+                </div>
+
+                {/* Tax & Discount */}
+                <div className="field-row">
+                  <div className="field"><label>VAT / Tax (%)</label><input type="number" min={0} max={100} value={invTaxRate} onChange={e=>setInvTaxRate(parseFloat(e.target.value)||0)} style={{background:"var(--canvas)",border:"1px solid var(--line)",borderRadius:"var(--r-sm)",padding:"10px 12px",fontSize:14,width:"100%",fontFamily:"var(--f-sans)",color:"var(--ink)"}}/></div>
+                  <div className="field"><label>Discount ($)</label><input type="number" min={0} value={invDiscount} onChange={e=>setInvDiscount(parseFloat(e.target.value)||0)} style={{background:"var(--canvas)",border:"1px solid var(--line)",borderRadius:"var(--r-sm)",padding:"10px 12px",fontSize:14,width:"100%",fontFamily:"var(--f-sans)",color:"var(--ink)"}}/></div>
                 </div>
 
                 {/* Payment method */}
                 <div className="field">
                   <label>Payment method</label>
                   <select value={invPayment} onChange={e=>setInvPayment(e.target.value)} style={{background:"var(--canvas)",border:"1px solid var(--line)",borderRadius:"var(--r-sm)",padding:"10px 12px",fontSize:14,width:"100%",fontFamily:"var(--f-sans)",color:"var(--ink)"}}>
-                    <option value="wise">Wise — hello@foxmen.studio</option>
-                    <option value="paypal">PayPal — payments@foxmen.studio</option>
+                    <option value="wise">Wise — contact@foxmenstudio.com</option>
+                    <option value="paypal">PayPal — payments@foxmenstudio.com</option>
                     <option value="bank">Bank Transfer — IBAN on request</option>
                     <option value="crypto">USDT / USDC — Wallet on request</option>
                   </select>
                 </div>
 
-                <FieldArea label="Notes / payment terms" value={invNotes} onChange={setInvNotes} placeholder="Payment due within 30 days…"/>
+                <FieldArea label="Project notes" value={invNotes} onChange={setInvNotes} placeholder="Payment due within 14 days…"/>
 
-                <div style={{display:"flex",gap:8}}>
-                  <button className="btn-generate" onClick={download} style={{flex:1,background:"var(--ink-2)"}}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,paddingTop:8}}>
+                  <button onClick={download} style={{display:"flex",alignItems:"center",justifyContent:"center",gap:9,padding:"15px 20px",borderRadius:999,background:"#0a0a0a",color:"#fff",border:"none",font:"600 14px/1 var(--f-sans)",cursor:"pointer",boxShadow:"3px 3px 0 rgba(0,0,0,.3)",transition:"transform .2s,box-shadow .2s",letterSpacing:".01em"}}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                     Download PDF
                   </button>
-                  <button className="btn-primary" onClick={send} disabled={invSending} style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+                  <button onClick={send} disabled={invSending} style={{display:"flex",alignItems:"center",justifyContent:"center",gap:9,padding:"15px 20px",borderRadius:999,background:"linear-gradient(135deg,#b86cf9,#8c3bd9)",color:"#fff",border:"none",font:"600 14px/1 var(--f-sans)",cursor:"pointer",boxShadow:"0 4px 20px rgba(140,59,217,.45)",transition:"transform .2s,box-shadow .2s",letterSpacing:".01em",opacity:invSending?.6:1}}>
                     {invSending
-                      ?<><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{animation:"spin 1s linear infinite"}}><path d="M21 12a9 9 0 1 1-6.2-8.6"/></svg>Sending…</>
-                      :<>Send Invoice<ArrowChip/></>
+                      ?<><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{animation:"spin 1s linear infinite"}}><path d="M21 12a9 9 0 1 1-6.2-8.6"/></svg>Sending…</>
+                      :<><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Send Invoice</>
                     }
                   </button>
                 </div>
@@ -1262,89 +1497,130 @@ export default function AdminPage() {
                 <div className="gen-preview-body">
                   <div className="inv-doc">
                     {/* Dark header */}
-                    <div className="inv-doc-header">
-                      <div className="inv-brand-row">
-                        <img src="/assets/logo-mark.svg" alt=""/>
-                        <div className="inv-brand-text">
-                          <div className="bname">Foxmen <em>Studio</em></div>
-                          <div className="btag">Est. 2024 · Premium Studio</div>
-                          <div className="bcontact">hello@foxmen.studio · foxmen.studio</div>
+                    <div className="inv-hd">
+                      {/* Top row: brand + invoice meta */}
+                      <div className="inv-hd-top">
+                        <div className="inv-hd-left">
+                          <div className="inv-hd-brand">
+                            <div className="inv-hd-brand-main">
+                              <img src="/assets/logo-mark.svg" alt=""/>
+                              <div>
+                                <div className="inv-hd-name">Foxmen <em>Studio</em></div>
+                                <div className="inv-hd-tagline">Code · Craft · Care</div>
+                              </div>
+                            </div>
+                            <div className="inv-hd-tagline2">Est. 2019 · AI-Powered Studio</div>
+                            <div className="inv-hd-para">We architect AI-integrated digital products that define the next era of business.<br/>Precision-engineered software and elevated design — built to give your brand an unfair advantage.</div>
+                          </div>
+                        </div>
+                        <div className="inv-hd-right">
+                          <div className="inv-hd-label">Invoice</div>
+                          <div className="inv-hd-num">{invNum||"INV-001"}</div>
+                          <div className="inv-hd-dates">
+                            <div>Issued: <strong>{fmtD(invDate)}</strong></div>
+                            {invDue&&<div>Due: <strong>{fmtD(invDue)}</strong></div>}
+                          </div>
                         </div>
                       </div>
-                      <div className="inv-meta-col">
-                        <div className="inv-badge">Invoice</div>
-                        <div className="inv-num">{invNum||"INV-001"}</div>
-                        <div className="inv-dates">
-                          <div>Date: <strong>{fmtD(invDate)}</strong></div>
-                          {invDue&&<div>Due: <strong>{fmtD(invDue)}</strong></div>}
+                      {/* Horizontal rule with accent */}
+                      <div className="inv-hd-rule"/>
+                      {/* Bottom row: contact + status */}
+                      <div className="inv-hd-bottom">
+                        <div className="inv-hd-contact">
+                          <strong>contact@foxmenstudio.com</strong> · foxmen.studio
+                        </div>
+                        <div className="inv-status" style={{background:stBadge.bg,color:stBadge.color}}>
+                          <span className="sdot" style={{background:stBadge.color}}/>
+                          {stBadge.label}
                         </div>
                       </div>
                     </div>
-                    {/* Purple–red gradient divider */}
-                    <div className="inv-hd-line"/>
-                    {/* Three-column billing strip */}
-                    <div className="inv-bill-grid">
-                      <div className="inv-bill-block">
-                        <label>Bill to</label>
-                        <div className="bill-name">{invClient||<span style={{color:"var(--muted-2)"}}>Client name</span>}</div>
-                        {invCompany&&<div className="bill-detail">{invCompany}</div>}
-                        {invEmail&&<div className="bill-detail">{invEmail}</div>}
+                    {/* Accent line */}
+                    <div className="inv-accent-line"/>
+                    {/* Three-col info */}
+                    <div className="inv-info-grid">
+                      <div className="inv-info-col">
+                        <span className="inv-info-label">Bill To</span>
+                        <div className="inv-info-name">{invClient||<span style={{color:"#ccc"}}>Client name</span>}</div>
+                        <div className="inv-info-detail">
+                          {invCompany&&<>{invCompany}<br/></>}
+                          {invEmail&&<>{invEmail}<br/></>}
+                          {invPhone||""}
+                        </div>
                       </div>
-                      <div className="inv-bill-block">
-                        <label>From</label>
-                        <div className="bill-name">Foxmen Studio</div>
-                        <div className="bill-detail">hello@foxmen.studio<br/>foxmen.studio</div>
+                      <div className="inv-info-col">
+                        <span className="inv-info-label">Project</span>
+                        <div className="inv-info-name">{invProjectName||<span style={{color:"#ccc"}}>Project name</span>}</div>
+                        <div className="inv-info-detail">
+                          {invProjectType&&<>{invProjectType}<br/></>}
+                          {invTimeline||""}
+                        </div>
                       </div>
-                      <div className="inv-bill-block">
-                        <label>Payment</label>
-                        <div className="bill-name">{(PAY_LABELS[invPayment]??"").split("—")[0].trim()}</div>
-                        <div className="bill-detail">{(PAY_LABELS[invPayment]??"").split("—")[1]?.trim()}</div>
+                      <div className="inv-info-col">
+                        <span className="inv-info-label">Payment Terms</span>
+                        <div className="inv-info-name">{invDue?fmtD(invDue):"Net 14"}</div>
+                        <div className="inv-info-detail">
+                          {(()=>{const[n,d]=(PAY_LABELS[invPayment]??"").split("—").map(s=>s.trim());return<>{n}<br/>{d}</>})()}
+                        </div>
                       </div>
                     </div>
-                    {/* Items table */}
-                    <div className="inv-doc-body">
-                      <table className="inv-preview-table">
+                    {/* Services table */}
+                    <div className="inv-table-wrap">
+                      <table className="inv-svc-table">
                         <thead><tr>
-                          <th>Item</th>
-                          <th style={{textAlign:"right"}}>Qty</th>
-                          <th style={{textAlign:"right"}}>Unit Price</th>
-                          <th style={{textAlign:"right"}}>Total</th>
+                          <th className="col-svc">Service</th>
+                          <th className="col-desc">Description</th>
+                          <th className="col-qty">Hrs / Units</th>
+                          <th className="col-rate">Rate</th>
+                          <th className="col-total">Total</th>
                         </tr></thead>
                         <tbody>
-                          {invItems.filter(it=>it.desc||it.rate).map((it,i)=>(
+                          {invItems.filter(it=>it.service||it.rate).map((it,i)=>(
                             <tr key={i}>
-                              <td style={{fontWeight:600}}>{it.desc||"—"}</td>
-                              <td style={{textAlign:"right"}}>{it.qty}</td>
-                              <td style={{textAlign:"right"}}>{fmtM(it.rate)}</td>
-                              <td style={{textAlign:"right",fontWeight:700,color:"var(--ink)"}}>{fmtM(it.qty*it.rate)}</td>
+                              <td className="td-svc">
+                                <div className="svc-name">{it.service||"—"}</div>
+                                {it.description&&<div className="svc-desc">{it.description}</div>}
+                              </td>
+                              <td><div className="svc-desc">{it.description||""}</div></td>
+                              <td><div className="svc-qty">{it.quantity} {it.unit}</div></td>
+                              <td><div className="svc-rate">{fmtM(it.rate)}/{it.unit}</div></td>
+                              <td><div className="svc-total">{fmtM(it.quantity*it.rate)}</div></td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
-                      <div className="inv-totals-box">
-                        <div className="inv-total-row"><span>Subtotal</span><span>{fmtM(total)}</span></div>
-                      </div>
                     </div>
-                    {/* Large total due */}
-                    <div className="inv-total-due-row">
-                      <div className="due-label">Total Due</div>
-                      <div className="due-amount">{fmtM(total)}</div>
+                    {/* Totals */}
+                    <div className="inv-totals-wrap">
+                      <div className="inv-totals-inner">
+                        <div className="inv-totals-row"><span>Subtotal</span><span>{fmtM(subtotal)}</span></div>
+                        {invTaxRate>0&&<div className="inv-totals-row"><span>VAT {invTaxRate}%</span><span>{fmtM(taxAmt)}</span></div>}
+                        {invDiscount>0&&<div className="inv-totals-row is-discount"><span>Discount</span><span>−{fmtM(invDiscount)}</span></div>}
+                        <hr className="inv-totals-hr"/>
+                        <div className="inv-totals-final">
+                          <span className="tot-label">Total Due</span>
+                          <span className="tot-amount">{fmtM(total)}</span>
+                        </div>
+                      </div>
                     </div>
                     {/* Notes */}
                     {invNotes&&(
-                      <div className="inv-notes-block">
-                        <h4>Notes</h4>
-                        <p>{invNotes}</p>
+                      <div className="inv-notes">
+                        <span className="inv-notes-label">Project Notes</span>
+                        <div className="inv-notes-text">{invNotes}</div>
                       </div>
                     )}
-                    {/* Three-column footer */}
+                    {/* Footer */}
                     <div className="inv-doc-footer">
                       <div>
-                        <div className="ft-brand">Foxmen <em>Studio</em></div>
-                        <div>Code · Craft · Care</div>
+                        <div className="ft-logo-row">
+                          <img src="/assets/logo-mark.svg" alt=""/>
+                          <div className="ft-brand">Foxmen <em>Studio</em></div>
+                        </div>
+                        <div className="ft-sub">Code · Craft · Care · Est. 2019</div>
                       </div>
-                      <div className="ft-mid">hello@foxmen.studio<br/>foxmen.studio</div>
-                      <div className="ft-right">This document serves as your official receipt.<br/>Foxmen Studio · Est. 2024</div>
+                      <div className="ft-mid"><strong>contact@foxmenstudio.com</strong><br/>foxmen.studio</div>
+                      <div className="ft-right">Payment due within 14 days of issue.<br/>Late payments subject to 2% monthly interest.</div>
                     </div>
                   </div>
                 </div>
@@ -1597,7 +1873,7 @@ export default function AdminPage() {
       {/* ══ MODAL ══ */}
       {modalType && (
         <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-card" onClick={e=>e.stopPropagation()}>
+          <div className={"modal-card"+((modalType||"").includes("project")?" wide":"")} onClick={e=>e.stopPropagation()}>
             <div className="modal-head">
               <h3>{modalType==="new-service"&&editTarget?"Edit service":(MODAL_TITLE[modalType]||"New item")}</h3>
               <button className="close" onClick={closeModal}>✕</button>
@@ -1605,12 +1881,102 @@ export default function AdminPage() {
             <div className="modal-body">
               {/* PROJECT */}
               {(modalType==="new-project"||modalType==="edit-project") && <>
-                <Field label="Project name *" value={form.name||""} onChange={v=>sf("name",v)} placeholder="e.g. Nestaro — real estate OS"/>
-                <Field label="Industry" value={form.industry||""} onChange={v=>sf("industry",v)} placeholder="e.g. Fintech"/>
-                <Field label="Year" value={form.year||String(new Date().getFullYear())} onChange={v=>sf("year",v)}/>
-                <Field label="Scope" value={form.scope||""} onChange={v=>sf("scope",v)} placeholder="e.g. Web · iOS · Android"/>
-                <FieldSel label="Status" value={form.status||"draft"} onChange={v=>sf("status",v)} options={["draft","live","review","archived"]}/>
-                <FieldSel label="Color variant" value={form.color_cls||""} onChange={v=>sf("color_cls",v)} options={["(purple)","b","c","d"]}/>
+                <div className="inv-ai-box">
+                  <div className="inv-ai-label">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    AI Auto-fill
+                  </div>
+                  <textarea
+                    className="inv-ai-textarea"
+                    value={projAiPrompt}
+                    onChange={e=>setProjAiPrompt(e.target.value)}
+                    placeholder="Describe the project — e.g. &quot;We built a real estate platform for Nestaro Inc. in Dubai. Took 3 months, used Next.js and Supabase. Main challenge was multi-currency search. Result was 40% faster search and 2x listings.&quot;"
+                  />
+                  <button
+                    className="inv-ai-btn"
+                    disabled={projAiLoading||!projAiPrompt.trim()}
+                    onClick={async()=>{
+                      setProjAiLoading(true);
+                      try{
+                        const r=await fetch("/api/project-ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({description:projAiPrompt})});
+                        const d=await r.json();
+                        if(d.name){
+                          setForm(f=>({...f,
+                            name:d.name||f.name,
+                            client_name:d.client_name||f.client_name,
+                            industry:d.industry||f.industry,
+                            year:d.year||f.year,
+                            scope:d.scope||f.scope,
+                            status:d.status||f.status||"draft",
+                            tagline:d.tagline||f.tagline,
+                            overview:d.overview||f.overview,
+                            challenge:d.challenge||f.challenge,
+                            solution:d.solution||f.solution,
+                            results:d.results||f.results,
+                            tech_stack:d.tech_stack||f.tech_stack,
+                            timeline_duration:d.timeline_duration||f.timeline_duration,
+                            live_url:d.live_url||f.live_url,
+                            github_url:d.github_url||f.github_url,
+                            monogram:d.monogram||f.monogram,
+                          }));
+                          toast("Project fields filled by AI");
+                        }else{ toast("AI returned nothing — try rephrasing"); }
+                      }catch{ toast("AI fill failed. Try again."); }
+                      setProjAiLoading(false);
+                    }}
+                  >
+                    {projAiLoading
+                      ?<><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{animation:"spin 1s linear infinite"}}><path d="M21 12a9 9 0 1 1-6.2-8.6"/></svg>Generating…</>
+                      :<><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>Fill Project with AI</>
+                    }
+                  </button>
+                </div>
+                <div className="modal-section-label">Basic Info</div>
+                <div className="modal-2col" style={{gridColumn:"1/-1"}}>
+                  <div style={{gridColumn:"1/-1"}}><Field label="Project name *" value={form.name||""} onChange={v=>sf("name",v)} placeholder="e.g. Nestaro — real estate OS"/></div>
+                  <Field label="Client name" value={form.client_name||""} onChange={v=>sf("client_name",v)} placeholder="e.g. Nestaro Inc."/>
+                  <Field label="Industry" value={form.industry||""} onChange={v=>sf("industry",v)} placeholder="e.g. Fintech"/>
+                  <Field label="Year" value={form.year||String(new Date().getFullYear())} onChange={v=>sf("year",v)}/>
+                  <FieldSel label="Status" value={form.status||"draft"} onChange={v=>sf("status",v)} options={["draft","live","review","archived"]}/>
+                  <div style={{gridColumn:"1/-1"}}><Field label="Scope" value={form.scope||""} onChange={v=>sf("scope",v)} placeholder="Web · iOS · Android · AI"/></div>
+                  <div style={{gridColumn:"1/-1"}}><Field label="Tagline" value={form.tagline||""} onChange={v=>sf("tagline",v)} placeholder="Short compelling subtitle for the case study"/></div>
+                </div>
+                <div className="modal-section-label">Case Study</div>
+                <FieldArea label="Overview" value={form.overview||""} onChange={v=>sf("overview",v)} placeholder="What was built and why — 2-3 sentences"/>
+                <FieldArea label="Challenge" value={form.challenge||""} onChange={v=>sf("challenge",v)} placeholder="The problem the client faced"/>
+                <FieldArea label="Solution" value={form.solution||""} onChange={v=>sf("solution",v)} placeholder="How Foxmen Studio solved it"/>
+                <FieldArea label="Results" value={form.results||""} onChange={v=>sf("results",v)} placeholder="Outcomes, metrics, impact"/>
+                <div className="modal-section-label">Tech &amp; Links</div>
+                <div className="modal-2col">
+                  <Field label="Tech stack" value={form.tech_stack||""} onChange={v=>sf("tech_stack",v)} placeholder="Next.js, Supabase, OpenAI"/>
+                  <Field label="Timeline duration" value={form.timeline_duration||""} onChange={v=>sf("timeline_duration",v)} placeholder="e.g. 8 weeks"/>
+                  <Field label="Live URL" value={form.live_url||""} onChange={v=>sf("live_url",v)} placeholder="https://"/>
+                  <Field label="GitHub URL" value={form.github_url||""} onChange={v=>sf("github_url",v)} placeholder="https://github.com/"/>
+                </div>
+                <div className="modal-section-label">Media</div>
+                <div className="modal-2col">
+                  <ImageUpload label="Hero image" value={form.hero_image||""} onChange={v=>sf("hero_image",v)} accept="image/*"/>
+                  <ImageUpload label="Thumbnail" value={form.thumbnail||""} onChange={v=>sf("thumbnail",v)} accept="image/*"/>
+                </div>
+                <div className="modal-section-label" style={{marginTop:8}}>Challenge split shots</div>
+                <div className="modal-2col">
+                  <ImageUpload label="Challenge — left" value={form.challenge_img1||""} onChange={v=>sf("challenge_img1",v)} accept="image/*"/>
+                  <ImageUpload label="Challenge — right" value={form.challenge_img2||""} onChange={v=>sf("challenge_img2",v)} accept="image/*"/>
+                </div>
+                <div className="modal-section-label" style={{marginTop:8}}>Solution split shots</div>
+                <div className="modal-2col">
+                  <ImageUpload label="Solution — left" value={form.solution_img1||""} onChange={v=>sf("solution_img1",v)} accept="image/*"/>
+                  <ImageUpload label="Solution — right" value={form.solution_img2||""} onChange={v=>sf("solution_img2",v)} accept="image/*"/>
+                </div>
+                <div className="modal-section-label" style={{marginTop:8}}>Showreel / video</div>
+                <ImageUpload label="Video" value={form.video_url||""} onChange={v=>sf("video_url",v)} accept="video/*"/>
+                <div className="modal-section-label" style={{marginTop:8}}>Gallery</div>
+                <GalleryUpload label="Additional images &amp; videos" value={form.gallery?JSON.parse(form.gallery):[]} onChange={v=>sf("gallery",JSON.stringify(v))}/>
+                <div className="modal-section-label">Display</div>
+                <div className="modal-2col">
+                  <Field label="Monogram (2-char)" value={form.monogram||""} onChange={v=>sf("monogram",v)} placeholder="e.g. NE"/>
+                  <FieldSel label="Color variant" value={form.color_cls||""} onChange={v=>sf("color_cls",v)} options={["(purple)","b","c","d"]}/>
+                </div>
               </>}
               {/* POST */}
               {(modalType==="new-post"||modalType==="edit-post") && <>
