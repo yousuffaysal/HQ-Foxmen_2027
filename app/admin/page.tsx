@@ -1844,7 +1844,7 @@ export default function AdminPage() {
 
         {/* ══════════ EMAIL CAMPAIGN ══════════ */}
         {page==="email" && (()=>{
-          const BRAND = "#8B5DFF";
+          const BRAND = "#B86CF9";
 
           /* client-side parser — mirrors the API route */
           function applyInline(t:string):string {
@@ -1890,29 +1890,71 @@ export default function AdminPage() {
           }
 
           function buildPreviewHtml():string {
-            return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>*{box-sizing:border-box;}body{margin:0;padding:24px 12px;background:#f1efe9;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;}</style></head><body>
+            const yr=new Date().getFullYear();
+            const body=emailRawContent
+              ? parseContent(emailRawContent)
+              : `<p style="color:#d0cdc8;font-size:15px;line-height:1.8;font-style:italic;">Start typing your email content on the left to see a live preview here…</p>`;
+            return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/><style>*{box-sizing:border-box;}body{margin:0;padding:28px 12px;background:#f1efe9;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased;}</style></head><body>
 <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 6px 32px rgba(0,0,0,.10);">
-<tr><td style="background:#0a0a0a;padding:28px 36px 22px;">
-  <table cellpadding="0" cellspacing="0" border="0"><tr>
-    <td style="vertical-align:middle;padding-right:12px;"><img src="/assets/logo-mark.svg" height="38" width="38" style="display:block;"/></td>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 8px 48px rgba(0,0,0,.12);">
+
+<!-- HEADER -->
+<tr><td style="background:#0a0a0a;padding:34px 44px 26px;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+    <td style="vertical-align:middle;width:50px;padding-right:15px;">
+      <img src="https://res.cloudinary.com/djofqa3vc/image/upload/v1778967518/logo_sn_fox_copy_e9sigm.png" height="44" width="44" style="display:block;"/>
+    </td>
     <td style="vertical-align:middle;">
-      <div style="font-size:18px;font-weight:400;color:#fff;letter-spacing:-.01em;">Foxmen <em style="font-style:italic;color:${BRAND};">Studio</em></div>
-      <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:4px;">Code · Craft · Care</div>
+      <div style="font-family:'Instrument Serif',Georgia,'Times New Roman',serif;font-size:24px;font-weight:400;color:#fff;letter-spacing:-.02em;line-height:1.1;">Foxmen <em style="font-style:italic;color:${BRAND};">Studio</em></div>
+      <div style="font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:7px;">Code · Craft · Care</div>
+    </td>
+    <td style="text-align:right;vertical-align:middle;">
+      <div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.38);line-height:1.9;">Est. 2019<br/>AI-Powered</div>
+    </td>
+  </tr></table>
+  <div style="height:1px;background:rgba(255,255,255,.12);margin:20px 0 16px;"></div>
+  <div style="font-size:11px;color:rgba(255,255,255,.5);">
+    <strong style="color:rgba(255,255,255,.78);font-weight:500;">contact@foxmenstudio.com</strong> &nbsp;·&nbsp; foxmen.studio
+  </div>
+</td></tr>
+
+<!-- ACCENT LINE -->
+<tr><td style="height:3px;background:linear-gradient(90deg,${BRAND},#6d28d9);font-size:0;">&nbsp;</td></tr>
+
+<!-- BODY -->
+<tr><td style="padding:44px 44px 36px;">
+  ${body}
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:36px;padding-top:24px;border-top:1px solid #f0ede8;"><tr>
+    <td style="vertical-align:bottom;">
+      <p style="margin:0 0 3px;font-size:12px;color:#b8b5b0;letter-spacing:.01em;">Warm regards,</p>
+      <p style="margin:0 0 4px;font-family:'Instrument Serif',Georgia,serif;font-size:20px;font-weight:400;color:#0a0a0a;font-style:italic;">The Foxmen Team</p>
+      <p style="margin:0;font-size:11px;color:#c8c5c0;">foxmen.studio · contact@foxmenstudio.com</p>
+    </td>
+    <td style="text-align:right;vertical-align:bottom;width:44px;">
+      <img src="https://res.cloudinary.com/djofqa3vc/image/upload/v1778967518/logo_sn_fox_copy_e9sigm.png" height="28" width="28" style="display:block;margin-left:auto;opacity:.15;"/>
     </td>
   </tr></table>
 </td></tr>
-<tr><td style="height:3px;background:linear-gradient(90deg,${BRAND},#6d28d9);font-size:0;">&nbsp;</td></tr>
-<tr><td style="padding:36px 36px 28px;">
-  ${emailRawContent ? parseContent(emailRawContent) : '<p style="color:#ccc;font-size:14px;">Start typing your email content to see a live preview…</p>'}
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:32px;padding-top:20px;border-top:1px solid #f0ede8;"><tr>
-    <td><p style="margin:0 0 3px;font-size:13px;color:#9a9a9a;">Warm regards,</p><p style="margin:0 0 2px;font-size:15px;font-weight:700;color:#0a0a0a;">The Foxmen Team</p><p style="margin:0;font-size:11px;color:#c0bdb8;">foxmen.studio</p></td>
-    <td style="text-align:right;vertical-align:bottom;"><img src="/assets/logo-mark.svg" height="26" width="26" style="display:block;margin-left:auto;opacity:.2;"/></td>
-  </tr></table>
+
+<!-- FOOTER -->
+<tr><td style="background:#0a0a0a;">
+  <div style="height:2px;background:linear-gradient(90deg,${BRAND},#6d28d9);"></div>
+  <div style="padding:20px 44px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td>
+        <div style="font-family:'Instrument Serif',Georgia,serif;font-size:14px;color:rgba(255,255,255,.6);font-style:italic;">Foxmen Studio</div>
+        <p style="margin:4px 0 0;font-size:10px;color:rgba(255,255,255,.42);line-height:1.8;">
+          <a href="https://foxmen.studio" style="color:rgba(255,255,255,.6);text-decoration:none;">foxmen.studio</a> · contact@foxmenstudio.com<br/>
+          © ${yr} Foxmen Studio. All rights reserved.
+        </p>
+      </td>
+      <td style="text-align:right;vertical-align:middle;">
+        <img src="https://res.cloudinary.com/djofqa3vc/image/upload/v1778967518/logo_sn_fox_copy_e9sigm.png" height="26" width="26" style="display:block;margin-left:auto;opacity:.15;"/>
+      </td>
+    </tr></table>
+  </div>
 </td></tr>
-<tr><td style="background:#0a0a0a;padding:18px 36px;">
-  <p style="margin:0;font-size:10px;color:rgba(255,255,255,.3);line-height:1.7;">foxmen.studio · contact@foxmenstudio.com<br/>© ${new Date().getFullYear()} Foxmen Studio. All rights reserved.</p>
-</td></tr>
+
 </table></td></tr></table></body></html>`;
           }
 
