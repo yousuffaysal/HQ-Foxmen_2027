@@ -673,10 +673,13 @@ export default function AdminPage() {
   const [invAiPrompt,    setInvAiPrompt]    = useState("");
 
   /* email campaign */
-  const [emailTo,         setEmailTo]         = useState("");
-  const [emailSubject,    setEmailSubject]    = useState("");
-  const [emailRawContent, setEmailRawContent] = useState("");
-  const [emailSending,    setEmailSending]    = useState(false);
+  const [emailTo,          setEmailTo]          = useState("");
+  const [emailSubject,     setEmailSubject]     = useState("");
+  const [emailRawContent,  setEmailRawContent]  = useState("");
+  const [emailSending,     setEmailSending]     = useState(false);
+  const [emailImgUploading,setEmailImgUploading]= useState(false);
+  const [emailUrlSuggestions, setEmailUrlSuggestions] = useState<string[]>([]);
+  const emailTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [invAiLoading,   setInvAiLoading]   = useState(false);
   const [projAiPrompt,   setProjAiPrompt]   = useState("");
   const [projAiLoading,  setProjAiLoading]  = useState(false);
@@ -1844,15 +1847,31 @@ export default function AdminPage() {
 
         {/* ══════════ EMAIL CAMPAIGN ══════════ */}
         {page==="email" && (()=>{
-          const BRAND = "#B86CF9";
+          const BRAND  = "#B86CF9";
+          const IS     = "'Instrument Serif',Georgia,'Times New Roman',serif";
+          const LOGO_C = "https://res.cloudinary.com/djofqa3vc/image/upload/v1778967518/logo_sn_fox_copy_e9sigm.png";
 
-          /* client-side parser — mirrors the API route */
-          function applyInline(t:string):string {
-            return t
-              .replace(/\*\*(.+?)\*\*/g,'<strong style="font-weight:700;color:#0a0a0a;">$1</strong>')
-              .replace(/\*(.+?)\*/g,'<em style="font-style:italic;">$1</em>');
+          /* pill CTA button — email-safe nested tables, matches site design */
+          function ctaBtn(label:string, url:string):string {
+            return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:28px 0;"><tr><td align="left">
+<a href="${url}" style="text-decoration:none;display:inline-block;">
+<table cellpadding="0" cellspacing="0" border="0" style="background:#0a0a0a;border-radius:999px;overflow:hidden;">
+<tr>
+  <td style="font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:15px;font-weight:500;color:#fff;padding:11px 8px 11px 26px;white-space:nowrap;letter-spacing:-.01em;vertical-align:middle;">${label}</td>
+  <td style="padding:8px 8px 8px 4px;vertical-align:middle;"><table cellpadding="0" cellspacing="0" border="0"><tr>
+    <td style="width:42px;height:42px;background:#fff;border-radius:50%;text-align:center;vertical-align:middle;font-size:20px;color:#0a0a0a;line-height:42px;">&#x2197;</td>
+  </tr></table></td>
+</tr>
+</table></a>
+</td></tr></table>`;
           }
 
+          /* inline parser — luxury Instrument Serif body, brand-color headings, inline image + button */
+          function applyInline(t:string):string {
+            return t
+              .replace(/\*\*(.+?)\*\*/g,`<strong style="font-weight:700;color:#1a1a1a;">$1</strong>`)
+              .replace(/\*(.+?)\*/g,`<em style="font-style:italic;">$1</em>`);
+          }
           function parseContent(raw:string):string {
             const lines=raw.split(/\r?\n/);
             const out:string[]=[];
@@ -1860,29 +1879,62 @@ export default function AdminPage() {
             while(i<lines.length){
               const line=lines[i].trimEnd();
               if(!line.trim()){i++;continue;}
+
+              /* ## heading — brand color, Instrument Serif italic */
               if(line.startsWith("## ")){
-                out.push(`<h2 style="font-size:18px;font-weight:700;color:#0a0a0a;margin:28px 0 10px;letter-spacing:-.01em;">${line.slice(3)}</h2>`);
+                out.push(`<h2 style="font-family:${IS};font-size:24px;font-weight:400;font-style:italic;color:${BRAND};margin:32px 0 12px;letter-spacing:-.02em;line-height:1.2;">${line.slice(3)}</h2>`);
+
+              /* ### sub-heading — dark, Instrument Serif */
               } else if(line.startsWith("### ")){
-                out.push(`<h3 style="font-size:15px;font-weight:700;color:#0a0a0a;margin:22px 0 8px;">${line.slice(4)}</h3>`);
+                out.push(`<h3 style="font-family:${IS};font-size:18px;font-weight:400;color:#1a1a1a;margin:24px 0 8px;letter-spacing:-.01em;">${line.slice(4)}</h3>`);
+
+              /* divider */
               } else if(line.trim()==="---"){
-                out.push(`<div style="height:1px;background:#f0ede8;margin:24px 0;"></div>`);
+                out.push(`<div style="height:1px;background:#f0ede8;margin:28px 0;"></div>`);
+
+              /* > blockquote */
               } else if(line.startsWith("> ")){
-                out.push(`<blockquote style="margin:18px 0;padding:12px 18px;background:#faf8ff;border-left:3px solid ${BRAND};font-size:14px;color:#4b4b4b;line-height:1.7;font-style:italic;">${line.slice(2)}</blockquote>`);
+                out.push(`<blockquote style="margin:24px 0;padding:16px 22px;background:#faf8ff;border-left:3px solid ${BRAND};font-family:${IS};font-size:16px;color:#4a4a4a;line-height:1.75;font-style:italic;">${line.slice(2)}</blockquote>`);
+
+              /* bullet list */
               } else if(/^[-•*]\s/.test(line)){
                 const items:string[]=[];
-                while(i<lines.length&&/^[-•*]\s/.test(lines[i])){
-                  items.push(`<li style="padding:3px 0;font-size:14px;color:#4b4b4b;line-height:1.7;">${applyInline(lines[i].replace(/^[-•*]\s/,""))}</li>`);
+                while(i<lines.length&&/^[-•*]\s/.test(lines[i].trimStart())){
+                  items.push(`<li style="padding:4px 0;font-family:${IS};font-size:16px;color:#3a3a3a;line-height:1.75;">${applyInline(lines[i].replace(/^[-•*]\s/,""))}</li>`);
                   i++;
                 }
-                out.push(`<ul style="margin:10px 0 14px;padding-left:22px;">${items.join("")}</ul>`);
+                out.push(`<ul style="margin:12px 0 18px;padding-left:22px;">${items.join("")}</ul>`);
                 continue;
-              } else if(/^\[(.+)\]\((https?:\/\/[^)]+)\)$/.test(line.trim())){
-                const m=line.trim().match(/^\[(.+)\]\((https?:\/\/[^)]+)\)$/);
-                if(m) out.push(`<div style="text-align:center;margin:28px 0;"><a href="${m[2]}" style="display:inline-block;background:${BRAND};color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:13px 36px;border-radius:8px;">${m[1]}</a></div>`);
-              } else if(/^https?:\/\/\S+$/.test(line.trim())){
-                out.push(`<div style="text-align:center;margin:28px 0;"><a href="${line.trim()}" style="display:inline-block;background:${BRAND};color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:13px 36px;border-radius:8px;">View now →</a></div>`);
+
+              /* numbered list */
+              } else if(/^\d+[.)]\s/.test(line)){
+                const items:string[]=[];
+                while(i<lines.length&&/^\d+[.)]\s/.test(lines[i].trimStart())){
+                  items.push(`<li style="padding:4px 0;font-family:${IS};font-size:16px;color:#3a3a3a;line-height:1.75;">${applyInline(lines[i].replace(/^\d+[.)]\s/,""))}</li>`);
+                  i++;
+                }
+                out.push(`<ol style="margin:12px 0 18px;padding-left:22px;">${items.join("")}</ol>`);
+                continue;
+
+              /* ![caption](url) — inline image, anywhere in the email */
+              } else if(/^!\[([^\]]*)\]\((https?:\/\/[^)]+)\)$/.test(line.trim())){
+                const m=line.trim().match(/^!\[([^\]]*)\]\((https?:\/\/[^)]+)\)$/);
+                if(m){
+                  const cap=m[1];
+                  out.push(`<div style="margin:24px 0;">`+
+                    `<img src="${m[2]}" alt="${cap}" width="100%" style="display:block;width:100%;height:auto;border:0;border-radius:10px;"/>`+
+                    (cap?`<p style="font-family:${IS};font-size:12px;color:#a0a0a0;margin:8px 0 0;font-style:italic;text-align:center;">${cap}</p>`:``)
+                  +`</div>`);
+                }
+
+              /* [Label](url) — pill CTA button, inline anywhere */
+              } else if(/^\[([^\]]+)\]\((https?:\/\/[^)]+)\)$/.test(line.trim())){
+                const m=line.trim().match(/^\[([^\]]+)\]\((https?:\/\/[^)]+)\)$/);
+                if(m) out.push(ctaBtn(m[1],m[2]));
+
+              /* paragraph — Instrument Serif, generous line height */
               } else {
-                out.push(`<p style="margin:0 0 14px;font-size:15px;line-height:1.8;color:#4b4b4b;">${applyInline(line)}</p>`);
+                out.push(`<p style="margin:0 0 18px;font-family:${IS};font-size:16px;line-height:1.85;color:#3a3a3a;">${applyInline(line)}</p>`);
               }
               i++;
             }
@@ -1893,19 +1945,16 @@ export default function AdminPage() {
             const yr=new Date().getFullYear();
             const body=emailRawContent
               ? parseContent(emailRawContent)
-              : `<p style="color:#d0cdc8;font-size:15px;line-height:1.8;font-style:italic;">Start typing your email content on the left to see a live preview here…</p>`;
+              : `<p style="color:#d0cdc8;font-family:${IS};font-size:16px;line-height:1.85;font-style:italic;">Start typing your email content on the left — buttons, images and headings appear here live…</p>`;
             return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/><style>*{box-sizing:border-box;}body{margin:0;padding:28px 12px;background:#f1efe9;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased;}</style></head><body>
 <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 8px 48px rgba(0,0,0,.12);">
-
 <!-- HEADER -->
 <tr><td style="background:#0a0a0a;padding:34px 44px 26px;">
   <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-    <td style="vertical-align:middle;width:50px;padding-right:15px;">
-      <img src="https://res.cloudinary.com/djofqa3vc/image/upload/v1778967518/logo_sn_fox_copy_e9sigm.png" height="44" width="44" style="display:block;"/>
-    </td>
+    <td style="vertical-align:middle;width:50px;padding-right:15px;"><img src="${LOGO_C}" height="44" width="44" style="display:block;"/></td>
     <td style="vertical-align:middle;">
-      <div style="font-family:'Instrument Serif',Georgia,'Times New Roman',serif;font-size:24px;font-weight:400;color:#fff;letter-spacing:-.02em;line-height:1.1;">Foxmen <em style="font-style:italic;color:${BRAND};">Studio</em></div>
+      <div style="font-family:${IS};font-size:24px;font-weight:400;color:#fff;letter-spacing:-.02em;line-height:1.1;">Foxmen <em style="font-style:italic;color:${BRAND};">Studio</em></div>
       <div style="font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:7px;">Code · Craft · Care</div>
     </td>
     <td style="text-align:right;vertical-align:middle;">
@@ -1913,50 +1962,65 @@ export default function AdminPage() {
     </td>
   </tr></table>
   <div style="height:1px;background:rgba(255,255,255,.12);margin:20px 0 16px;"></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.5);">
-    <strong style="color:rgba(255,255,255,.78);font-weight:500;">contact@foxmenstudio.com</strong> &nbsp;·&nbsp; foxmen.studio
-  </div>
+  <div style="font-size:11px;color:rgba(255,255,255,.5);"><strong style="color:rgba(255,255,255,.78);font-weight:500;">contact@foxmenstudio.com</strong> &nbsp;·&nbsp; foxmen.studio</div>
 </td></tr>
-
 <!-- ACCENT LINE -->
-<tr><td style="height:3px;background:linear-gradient(90deg,${BRAND},#6d28d9);font-size:0;">&nbsp;</td></tr>
-
+<tr><td style="height:3px;background:linear-gradient(90deg,${BRAND},#8B5DFF);font-size:0;">&nbsp;</td></tr>
 <!-- BODY -->
 <tr><td style="padding:44px 44px 36px;">
   ${body}
   <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:36px;padding-top:24px;border-top:1px solid #f0ede8;"><tr>
     <td style="vertical-align:bottom;">
-      <p style="margin:0 0 3px;font-size:12px;color:#b8b5b0;letter-spacing:.01em;">Warm regards,</p>
-      <p style="margin:0 0 4px;font-family:'Instrument Serif',Georgia,serif;font-size:20px;font-weight:400;color:#0a0a0a;font-style:italic;">The Foxmen Team</p>
+      <p style="margin:0 0 3px;font-size:12px;color:#b8b5b0;">Warm regards,</p>
+      <p style="margin:0 0 4px;font-family:${IS};font-size:20px;color:#0a0a0a;font-style:italic;">The Foxmen Team</p>
       <p style="margin:0;font-size:11px;color:#c8c5c0;">foxmen.studio · contact@foxmenstudio.com</p>
     </td>
-    <td style="text-align:right;vertical-align:bottom;width:44px;">
-      <img src="https://res.cloudinary.com/djofqa3vc/image/upload/v1778967518/logo_sn_fox_copy_e9sigm.png" height="28" width="28" style="display:block;margin-left:auto;opacity:.15;"/>
-    </td>
+    <td style="text-align:right;vertical-align:bottom;width:44px;"><img src="${LOGO_C}" height="28" width="28" style="display:block;margin-left:auto;opacity:.15;"/></td>
   </tr></table>
 </td></tr>
-
 <!-- FOOTER -->
 <tr><td style="background:#0a0a0a;">
-  <div style="height:2px;background:linear-gradient(90deg,${BRAND},#6d28d9);"></div>
+  <div style="height:2px;background:linear-gradient(90deg,${BRAND},#8B5DFF);"></div>
   <div style="padding:20px 44px;">
     <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-      <td>
-        <div style="font-family:'Instrument Serif',Georgia,serif;font-size:14px;color:rgba(255,255,255,.6);font-style:italic;">Foxmen Studio</div>
-        <p style="margin:4px 0 0;font-size:10px;color:rgba(255,255,255,.42);line-height:1.8;">
-          <a href="https://foxmen.studio" style="color:rgba(255,255,255,.6);text-decoration:none;">foxmen.studio</a> · contact@foxmenstudio.com<br/>
-          © ${yr} Foxmen Studio. All rights reserved.
-        </p>
+      <td><div style="font-family:${IS};font-size:14px;color:rgba(255,255,255,.6);font-style:italic;">Foxmen Studio</div>
+        <p style="margin:4px 0 0;font-size:10px;color:rgba(255,255,255,.42);line-height:1.8;"><a href="https://foxmen.studio" style="color:rgba(255,255,255,.6);text-decoration:none;">foxmen.studio</a> · contact@foxmenstudio.com<br/>© ${yr} Foxmen Studio. All rights reserved.</p>
       </td>
-      <td style="text-align:right;vertical-align:middle;">
-        <img src="https://res.cloudinary.com/djofqa3vc/image/upload/v1778967518/logo_sn_fox_copy_e9sigm.png" height="26" width="26" style="display:block;margin-left:auto;opacity:.15;"/>
-      </td>
+      <td style="text-align:right;vertical-align:middle;"><img src="${LOGO_C}" height="26" width="26" style="display:block;margin-left:auto;opacity:.15;"/></td>
     </tr></table>
   </div>
 </td></tr>
-
 </table></td></tr></table></body></html>`;
           }
+
+          /* insert text at cursor position in the textarea */
+          const insertAt=(text:string)=>{
+            const ta=emailTextareaRef.current;
+            if(!ta){setEmailRawContent(c=>c+(c?"\n":"")+text);return;}
+            const s=ta.selectionStart; const e=ta.selectionEnd;
+            const next=emailRawContent.slice(0,s)+text+emailRawContent.slice(e);
+            setEmailRawContent(next);
+            setTimeout(()=>{ta.selectionStart=ta.selectionEnd=s+text.length;ta.focus();},0);
+          };
+
+          /* scan content for URLs, show as clickable chips → inserts [View now](url) at cursor */
+          const suggestUrls=()=>{
+            const found=[...new Set((emailRawContent.match(/https?:\/\/[^\s"')]+/g)||[]))];
+            if(found.length===0){toast("No URLs found in your content");return;}
+            setEmailUrlSuggestions(found);
+          };
+
+          /* upload image → insert ![](url) at cursor */
+          const uploadAndInsert=async(file:File)=>{
+            setEmailImgUploading(true);
+            try{
+              const fd=new FormData(); fd.append("file",file);
+              const r=await fetch("/api/upload",{method:"POST",body:fd});
+              const d=await r.json();
+              if(d.url){insertAt(`\n![](${d.url})\n`);}else{toast("Upload failed");}
+            }catch{toast("Upload failed.");}
+            setEmailImgUploading(false);
+          };
 
           const sendEmail=async()=>{
             if(!emailTo){toast("Enter a recipient email");return;}
@@ -1971,8 +2035,7 @@ export default function AdminPage() {
           };
 
           const copyHtml=()=>{
-            const html=buildPreviewHtml();
-            navigator.clipboard.writeText(html).then(()=>toast("HTML copied to clipboard")).catch(()=>toast("Copy failed"));
+            navigator.clipboard.writeText(buildPreviewHtml()).then(()=>toast("HTML copied")).catch(()=>toast("Copy failed"));
           };
 
           const preview=buildPreviewHtml();
@@ -1982,7 +2045,7 @@ export default function AdminPage() {
             <div className="page-head">
               <div>
                 <h2>Email Campaign</h2>
-                <p style={{fontSize:13,color:"var(--muted)",marginTop:4}}>Write your message, see the branded template live, then send with one click.</p>
+                <p style={{fontSize:13,color:"var(--muted)",marginTop:4}}>Write your message — buttons and images go wherever you place them in the content.</p>
               </div>
             </div>
 
@@ -1990,25 +2053,71 @@ export default function AdminPage() {
               {/* ── FORM ── */}
               <div className="gen-form">
                 <div className="gen-form-title">Compose</div>
-                <div className="gen-form-sub">Paste or type your email — we'll wrap it in the Foxmen template automatically.</div>
+                <div className="gen-form-sub">Preview updates live as you type.</div>
 
                 <Field label="To (recipient email)" value={emailTo} onChange={setEmailTo} placeholder="client@company.com" type="email"/>
                 <Field label="Subject line" value={emailSubject} onChange={setEmailSubject} placeholder="Here's what we've been building…"/>
 
-                <div className="field" style={{marginTop:8}}>
+                {/* BODY + TOOLBAR */}
+                <div className="field" style={{marginTop:4}}>
                   <label>Email content</label>
-                  <div style={{fontSize:11,color:"var(--muted)",marginBottom:6,lineHeight:1.6}}>
-                    Supports <code style={{background:"var(--line)",padding:"1px 4px",borderRadius:3,fontSize:10}}>## Heading</code>, <code style={{background:"var(--line)",padding:"1px 4px",borderRadius:3,fontSize:10}}>**bold**</code>, <code style={{background:"var(--line)",padding:"1px 4px",borderRadius:3,fontSize:10}}>- list</code>, <code style={{background:"var(--line)",padding:"1px 4px",borderRadius:3,fontSize:10}}>[Label](url)</code> for CTA button
+
+                  {/* Toolbar */}
+                  <div style={{display:"flex",gap:6,marginBottom:8,flexWrap:"wrap"}}>
+                    {/* Insert button */}
+                    <button onClick={()=>insertAt("\n[View now](https://)\n")} style={{display:"inline-flex",alignItems:"center",gap:5,padding:"5px 11px",background:"#0a0a0a",border:"none",borderRadius:999,fontSize:12,fontWeight:500,color:"#fff",cursor:"pointer",whiteSpace:"nowrap"}}>
+                      <span style={{fontSize:15,lineHeight:1}}>↗</span> Insert button
+                    </button>
+
+                    {/* Suggest URL */}
+                    <button onClick={suggestUrls} style={{display:"inline-flex",alignItems:"center",gap:5,padding:"5px 11px",background:"var(--line)",border:"none",borderRadius:999,fontSize:12,fontWeight:500,color:"var(--ink)",cursor:"pointer",whiteSpace:"nowrap"}}>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg> Suggest link
+                    </button>
+
+                    {/* Upload image */}
+                    <label style={{display:"inline-flex",alignItems:"center",gap:5,padding:"5px 11px",background:"var(--line)",border:"none",borderRadius:999,fontSize:12,fontWeight:500,color:"var(--ink)",cursor:"pointer",whiteSpace:"nowrap"}}>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
+                      {emailImgUploading?"Uploading…":"Insert image"}
+                      <input type="file" accept="image/*" style={{display:"none"}} onChange={e=>{const f=e.target.files?.[0];if(f)uploadAndInsert(f);}}/>
+                    </label>
                   </div>
+
+                  {/* URL suggestion chips */}
+                  {emailUrlSuggestions.length>0&&(
+                    <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:8,padding:"10px 12px",background:"#faf8ff",borderRadius:8,border:"1px solid rgba(184,108,249,.2)"}}>
+                      <span style={{fontSize:11,color:"var(--muted)",width:"100%",marginBottom:2}}>Click a URL to insert as a button:</span>
+                      {emailUrlSuggestions.map(u=>(
+                        <button key={u} onClick={()=>{insertAt(`\n[View now](${u})\n`);setEmailUrlSuggestions([]);}} style={{padding:"4px 10px",background:"#fff",border:"1px solid var(--brand)",borderRadius:999,fontSize:11,color:"var(--brand)",cursor:"pointer",fontFamily:"var(--f-mono)",maxWidth:240,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                          {u}
+                        </button>
+                      ))}
+                      <button onClick={()=>setEmailUrlSuggestions([])} style={{padding:"4px 10px",background:"transparent",border:"1px solid var(--line)",borderRadius:999,fontSize:11,color:"var(--muted)",cursor:"pointer"}}>✕</button>
+                    </div>
+                  )}
+
                   <textarea
+                    ref={emailTextareaRef}
                     value={emailRawContent}
                     onChange={e=>setEmailRawContent(e.target.value)}
-                    placeholder={`Hi Ahmed,\n\nHope you're doing well! I wanted to share a quick update on the project.\n\n## What we shipped this week\n- Redesigned the onboarding flow\n- Integrated the payment gateway\n- Performance improvements across the board\n\n> "The new design feels like a completely different product." — Early feedback\n\nWe're on track for the 14 June launch. Here's the staging link:\n\n[View the staging site](https://staging.example.com)\n\nLet us know if you have any questions.`}
-                    style={{width:"100%",minHeight:320,resize:"vertical",fontFamily:"var(--f-mono)",fontSize:13,lineHeight:1.65,padding:"12px 14px",background:"var(--canvas)",border:"1px solid var(--line)",borderRadius:"var(--r-sm)",color:"var(--ink)",outline:"none"}}
+                    placeholder={`Hi Ahmed,\n\nHope you're doing well! Here's a quick update on the project.\n\n## What we shipped this week\n- Redesigned the onboarding flow\n- Integrated the payment gateway\n- Performance improvements across the board\n\n> "The new design feels like a completely different product." — Early feedback\n\n![Project screenshot](https://your-image-url.com)\n\n[View the staging site](https://staging.example.com)\n\nLet us know if you have any questions.`}
+                    style={{width:"100%",minHeight:280,resize:"vertical",fontFamily:"var(--f-mono)",fontSize:12.5,lineHeight:1.65,padding:"12px 14px",background:"var(--canvas)",border:"1px solid var(--line)",borderRadius:"var(--r-sm)",color:"var(--ink)",outline:"none"}}
                   />
+
+                  {/* Cheatsheet */}
+                  <div style={{marginTop:8,padding:"10px 14px",background:"var(--line)",borderRadius:8}}>
+                    <div style={{fontSize:10,fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",color:"var(--muted)",marginBottom:7}}>Syntax</div>
+                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"3px 16px"}}>
+                      {[["## Heading","Brand-color italic heading"],["### Sub","Dark subheading"],["**bold**","Bold text"],["- item","Bullet list"],["> quote","Highlight quote"],["---","Divider"],["[Label](url)","↗ Button (anywhere)"],["![caption](url)","Image (anywhere)"]].map(([s,d])=>(
+                        <div key={s} style={{display:"flex",gap:8,alignItems:"baseline",padding:"2px 0"}}>
+                          <code style={{fontFamily:"var(--f-mono)",fontSize:10,color:"var(--brand)",flexShrink:0,minWidth:120}}>{s}</code>
+                          <span style={{fontSize:10,color:"var(--muted)"}}>{d}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
-                <div style={{display:"flex",gap:10,marginTop:4}}>
+                <div style={{display:"flex",gap:10,marginTop:12}}>
                   <button className="btn-generate" onClick={sendEmail} disabled={emailSending} style={{flex:1}}>
                     {emailSending
                       ?<><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{animation:"spin 1s linear infinite"}}><path d="M21 12a9 9 0 1 1-6.2-8.6"/></svg>Sending…</>
@@ -2018,26 +2127,6 @@ export default function AdminPage() {
                   <button className="btn-ghost" onClick={copyHtml} style={{display:"flex",alignItems:"center",gap:6,padding:"10px 16px",fontSize:13}}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy HTML
                   </button>
-                </div>
-
-                {/* Syntax guide */}
-                <div style={{marginTop:20,padding:"14px 16px",background:"var(--line)",borderRadius:10}}>
-                  <div style={{fontSize:11,fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",color:"var(--muted)",marginBottom:10}}>Formatting cheatsheet</div>
-                  {[
-                    ["## Section title","Large heading"],
-                    ["**bold text**","Bold"],
-                    ["*italic text*","Italic"],
-                    ["- item","Bullet list"],
-                    ["---","Horizontal divider"],
-                    ["> quoted text","Highlighted quote"],
-                    ["[Button label](url)","Purple CTA button"],
-                    ["https://example.com","Auto CTA button"],
-                  ].map(([syntax,desc])=>(
-                    <div key={syntax} style={{display:"flex",gap:10,alignItems:"baseline",padding:"4px 0",borderBottom:"1px solid rgba(0,0,0,.04)"}}>
-                      <code style={{fontFamily:"var(--f-mono)",fontSize:11,color:"var(--brand)",minWidth:180,flexShrink:0}}>{syntax}</code>
-                      <span style={{fontSize:12,color:"var(--muted)"}}>{desc}</span>
-                    </div>
-                  ))}
                 </div>
               </div>
 
@@ -2050,7 +2139,7 @@ export default function AdminPage() {
                 <div className="gen-preview-body" style={{padding:0,background:"#f1efe9"}}>
                   <iframe
                     srcDoc={preview}
-                    style={{width:"100%",border:"none",minHeight:600,display:"block",borderRadius:"0 0 var(--r) var(--r)"}}
+                    style={{width:"100%",border:"none",minHeight:660,display:"block",borderRadius:"0 0 var(--r) var(--r)"}}
                     title="Email preview"
                     sandbox="allow-same-origin"
                   />

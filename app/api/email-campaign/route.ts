@@ -62,10 +62,37 @@ function applyInline(t: string): string {
     .replace(/`(.+?)`/g,       '<code style="font-family:monospace;font-size:13px;background:#f4f4f2;padding:1px 5px;border-radius:3px;">$1</code>');
 }
 
-export function buildEmailCampaignHtml(subject: string, rawContent: string): string {
+/* Email-safe pill button — dark bg + white circle chip + ↗ (matches site design) */
+function ctaButton(label: string, url: string): string {
+  return `<table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin:32px 0;"><tr><td align="center">
+<a href="${url}" style="text-decoration:none;display:inline-block;">
+<table cellpadding="0" cellspacing="0" border="0" role="presentation" style="background:#0a0a0a;border-radius:999px;overflow:hidden;">
+<tr>
+  <td style="font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:15px;font-weight:500;color:#ffffff;padding:11px 8px 11px 26px;white-space:nowrap;letter-spacing:-.01em;vertical-align:middle;">${label}</td>
+  <td style="padding:8px 8px 8px 4px;vertical-align:middle;">
+    <table cellpadding="0" cellspacing="0" border="0" role="presentation"><tr>
+      <td style="width:42px;height:42px;background:#ffffff;border-radius:50%;text-align:center;vertical-align:middle;font-family:sans-serif;font-size:20px;color:#0a0a0a;line-height:42px;">&#x2197;</td>
+    </tr></table>
+  </td>
+</tr>
+</table></a>
+</td></tr></table>`;
+}
+
+export function buildEmailCampaignHtml(
+  subject: string,
+  rawContent: string,
+  imageUrl?: string,
+  ctaLabel?: string,
+  ctaUrl?: string,
+): string {
   const bodyHtml = parseRawContent(rawContent);
   const year = new Date().getFullYear();
   const IS = `'Instrument Serif',Georgia,'Times New Roman',serif`;
+  const imgBlock = imageUrl
+    ? `\n  <!-- HERO IMAGE -->\n  <tr><td style="padding:0;font-size:0;line-height:0;"><img src="${imageUrl}" width="600" alt="" style="display:block;width:100%;height:auto;border:0;max-height:400px;object-fit:cover;"/></td></tr>`
+    : "";
+  const ctaBlock = ctaUrl ? ctaButton(ctaLabel || "View now", ctaUrl) : "";
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -103,11 +130,11 @@ export function buildEmailCampaignHtml(subject: string, rawContent: string): str
 
   <!-- ACCENT LINE -->
   <tr><td style="height:3px;background:linear-gradient(90deg,${BRAND_COLOR},${BRAND_DARK});font-size:0;line-height:0;">&nbsp;</td></tr>
-
+  ${imgBlock}
   <!-- BODY -->
   <tr><td style="padding:48px 48px 40px;">
     ${bodyHtml}
-
+    ${ctaBlock}
     <!-- SIGNATURE -->
     <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin-top:40px;padding-top:24px;border-top:1px solid #f0ede8;">
       <tr>
@@ -151,7 +178,7 @@ export function buildEmailCampaignHtml(subject: string, rawContent: string): str
 }
 
 export async function POST(req: Request) {
-  const { to, subject, rawContent } = await req.json();
+  const { to, subject, rawContent, imageUrl, ctaLabel, ctaUrl } = await req.json();
 
   if (!to)         return NextResponse.json({ error: "No recipient" },  { status: 400 });
   if (!subject)    return NextResponse.json({ error: "No subject" },    { status: 400 });
@@ -161,7 +188,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "RESEND_API_KEY not configured" }, { status: 500 });
   }
 
-  const html = buildEmailCampaignHtml(subject, rawContent);
+  const html = buildEmailCampaignHtml(subject, rawContent, imageUrl, ctaLabel, ctaUrl);
 
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
