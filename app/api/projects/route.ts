@@ -21,6 +21,9 @@ export async function GET() {
   await sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS challenge_img2 TEXT DEFAULT ''`;
   await sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS solution_img1 TEXT DEFAULT ''`;
   await sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS solution_img2 TEXT DEFAULT ''`;
+  await sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS split1_label TEXT DEFAULT 'Challenge'`;
+  await sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS split2_label TEXT DEFAULT 'Solution'`;
+  await sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS slug TEXT DEFAULT ''`;
 
   const rows = await sql`SELECT * FROM projects ORDER BY updated_at DESC`;
   return NextResponse.json(rows);
@@ -33,21 +36,24 @@ export async function POST(req: Request) {
     tech_stack, timeline_duration, client_name,
     live_url, github_url, hero_image, thumbnail,
     gallery, video_url, challenge_img1, challenge_img2, solution_img1, solution_img2,
+    split1_label, split2_label, slug,
   } = await req.json();
   const rows = await sql`
     INSERT INTO projects (
       monogram, color_cls, name, industry, year, scope, status,
       tagline, overview, challenge, solution, results,
       tech_stack, timeline_duration, client_name,
-      live_url, github_url, hero_image, thumbnail,
-      gallery, video_url, challenge_img1, challenge_img2, solution_img1, solution_img2
+      live_url, hero_image, thumbnail,
+      gallery, video_url, challenge_img1, challenge_img2, solution_img1, solution_img2,
+      split1_label, split2_label, slug
     )
     VALUES (
       ${monogram ?? ""}, ${color_cls ?? ""}, ${name}, ${industry ?? ""}, ${year ?? ""}, ${scope ?? ""}, ${status ?? "draft"},
       ${tagline ?? ""}, ${overview ?? ""}, ${challenge ?? ""}, ${solution ?? ""}, ${results ?? ""},
       ${tech_stack ?? ""}, ${timeline_duration ?? ""}, ${client_name ?? ""},
-      ${live_url ?? ""}, ${github_url ?? ""}, ${hero_image ?? ""}, ${thumbnail ?? ""},
-      ${gallery ?? "[]"}, ${video_url ?? ""}, ${challenge_img1 ?? ""}, ${challenge_img2 ?? ""}, ${solution_img1 ?? ""}, ${solution_img2 ?? ""}
+      ${live_url ?? ""}, ${hero_image ?? ""}, ${thumbnail ?? ""},
+      ${gallery ?? "[]"}, ${video_url ?? ""}, ${challenge_img1 ?? ""}, ${challenge_img2 ?? ""}, ${solution_img1 ?? ""}, ${solution_img2 ?? ""},
+      ${split1_label ?? "Challenge"}, ${split2_label ?? "Solution"}, ${slug ?? ""}
     )
     RETURNING *
   `;

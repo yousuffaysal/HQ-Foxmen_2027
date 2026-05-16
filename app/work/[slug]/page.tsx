@@ -1,381 +1,368 @@
 "use client";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { projectMap } from "../data";
-import type { HeadingParts } from "../data";
 
-const chapters = ["overview", "challenge", "approach", "solution", "results", "credits"];
+/* ── types ─────────────────────────────────────────────────── */
+type CsProject = {
+  id: number; name: string; tagline: string; overview: string;
+  challenge: string; solution: string; results: string;
+  tech_stack: string; timeline_duration: string; client_name: string;
+  industry: string; year: string; scope: string; status: string;
+  hero_image: string; thumbnail: string; gallery: string;
+  video_url: string; live_url: string; monogram: string; color_cls: string;
+  challenge_img1: string; challenge_img2: string; split1_label: string;
+  solution_img1: string; solution_img2: string; split2_label: string;
+  slug: string;
+};
 
+/* ── helpers ────────────────────────────────────────────────── */
 function ArrowIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 12h18M13 5l7 7-7 7" />
     </svg>
   );
 }
 
-function H({ parts }: { parts: HeadingParts }) {
-  return <>{parts.pre}<span className="it">{parts.it}</span>{parts.post ?? ""}</>;
+function getVideoEmbed(url: string): { type: "iframe" | "mp4"; src: string } | null {
+  if (!url) return null;
+  const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/);
+  if (yt) return { type: "iframe", src: `https://www.youtube.com/embed/${yt[1]}?rel=0` };
+  const vimeo = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (vimeo) return { type: "iframe", src: `https://player.vimeo.com/video/${vimeo[1]}` };
+  return { type: "mp4", src: url };
 }
 
-const monoMuted: React.CSSProperties = {
-  fontSize: 14, color: "var(--muted)", fontFamily: "var(--f-mono)",
-  letterSpacing: ".14em", textTransform: "uppercase", marginBottom: 12,
-};
+function parseGallery(raw: string): string[] {
+  try { const arr = JSON.parse(raw); return Array.isArray(arr) ? arr.filter(Boolean) : []; }
+  catch { return []; }
+}
 
-export default function CasePage({ params }: { params: { slug: string } }) {
-  const d = projectMap[params.slug];
-  if (!d) notFound();
-
-  useScrollReveal(".fade, .reveal, .bento .tile, .split .shot");
-
-  const [activeChap, setActiveChap] = useState(0);
-  const progressRef = useRef<HTMLSpanElement>(null);
-
+/* ── progress bar ───────────────────────────────────────────── */
+function ProgressBar() {
+  const barRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const update = () => {
-      const scrollY = window.scrollY + window.innerHeight * 0.4;
-      let idx = 0;
-      chapters.forEach((id, i) => {
-        const el = document.getElementById(id);
-        if (el && el.offsetTop <= scrollY) idx = i;
-      });
-      setActiveChap(idx);
       const total = document.body.scrollHeight - window.innerHeight;
-      const p = Math.min(100, Math.max(0, (window.scrollY / total) * 100));
-      if (progressRef.current) progressRef.current.style.width = p + "%";
+      const pct = total > 0 ? (window.scrollY / total) * 100 : 0;
+      if (barRef.current) barRef.current.style.width = `${pct}%`;
     };
     window.addEventListener("scroll", update, { passive: true });
-    update();
     return () => window.removeEventListener("scroll", update);
   }, []);
+  return <div className="cs2-progress-track"><div className="cs2-progress-bar" ref={barRef} /></div>;
+}
 
-  const scrollTo = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) window.scrollTo({ top: el.offsetTop - 80, behavior: "smooth" });
-  };
-
-  const delays = ["", " d1", " d2", " d3"];
+/* ── DB-driven case study ───────────────────────────────────── */
+function DbCasePage({ project: p }: { project: CsProject }) {
+  useScrollReveal(".cs2-fade");
+  const gallery = parseGallery(p.gallery);
+  const video = getVideoEmbed(p.video_url);
+  const techStack = p.tech_stack ? p.tech_stack.split(/[,·]/).map(t => t.trim()).filter(Boolean) : [];
+  const hasSplit1 = p.challenge_img1 || p.challenge_img2;
+  const hasSplit2 = p.solution_img1 || p.solution_img2;
 
   return (
     <>
-      {/* ── CASE HERO ─────────────────────────────────────────────────────── */}
-      <section className="case-hero">
-        <div className="wrap">
-          <div className="case-meta">
-            <span><span className="dot" />{d.caseLabel}</span>
-            <span>·</span><span>{d.industry}</span>
-            <span>·</span><span>{d.scope}</span>
-            <span>·</span><span>{d.year}</span>
+      <ProgressBar />
+
+      {/* ── HERO ── */}
+      <section className="cs2-hero">
+        <div className="cs2-hero-inner wrap">
+          <div className="cs2-hero-eye cs2-fade">
+            <Link href="/work" className="cs2-back">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              Work
+            </Link>
+            <span className="cs2-dot" />
+            <span>{p.industry}</span>
+            <span className="cs2-dot" />
+            <span>{p.year}</span>
           </div>
-          <h1 className="case-title">
-            {d.titleLines.map((line, i) => (
-              <span key={i} className={`reveal in${i > 0 ? ` reveal-delay-${i}` : ""}`}>
-                <span className={`reveal-inner${line.it ? " it" : ""}`}>{line.text}</span>
-              </span>
-            ))}
+          <h1 className="cs2-title">
+            {p.name.split(" ").map((word, i, arr) =>
+              i === arr.length - 1
+                ? <span key={i} className="cs2-title-it">{word}</span>
+                : <span key={i}>{word} </span>
+            )}
           </h1>
-          <p className="case-sub">{d.sub}</p>
-          <div className="case-keys">
-            {d.keys.map(({ k, v }) => (
-              <div key={k}><div className="k">{k}</div><div className="v">{v}</div></div>
-            ))}
+          {p.tagline && <p className="cs2-tagline cs2-fade">{p.tagline}</p>}
+          <div className="cs2-hero-meta cs2-fade">
+            {p.client_name && <div><div className="cs2-meta-k">Company</div><div className="cs2-meta-v">{p.client_name}</div></div>}
+            {p.timeline_duration && <div><div className="cs2-meta-k">Timeline</div><div className="cs2-meta-v">{p.timeline_duration}</div></div>}
+            {p.scope && <div><div className="cs2-meta-k">Scope</div><div className="cs2-meta-v">{p.scope}</div></div>}
+            {p.industry && <div><div className="cs2-meta-k">Industry</div><div className="cs2-meta-v">{p.industry}</div></div>}
           </div>
         </div>
       </section>
 
-      {/* ── HERO SHOT ────────────────────────────────────────────────────── */}
-      <div className="hero-shot fade">
-        <div className="frame">
-          <span className="badge">{d.badge}</span>
-          <div className="device-mock" />
-        </div>
+      {/* ── COVER IMAGE ── */}
+      <div className="cs2-cover">
+        {p.hero_image
+          ? <img src={p.hero_image} alt={p.name} className="cs2-cover-img" />
+          : <div className="cs2-cover-placeholder">
+              <span className="cs2-cover-mono">{p.monogram || p.name.slice(0,2).toUpperCase()}</span>
+            </div>
+        }
+        {p.live_url && (
+          <a href={p.live_url} target="_blank" rel="noopener noreferrer" className="cs2-live-btn">
+            View live <ArrowIcon />
+          </a>
+        )}
       </div>
 
-      {/* ── CHAPTER NAV ──────────────────────────────────────────────────── */}
-      <nav className="chapter-nav">
-        <div className="wrap inner">
-          {chapters.map((id, i) => (
-            <a key={id} onClick={() => scrollTo(id)} className={activeChap === i ? "on" : ""} style={{ cursor: "pointer" }}>
-              <span className="n">0{i + 1}</span>
-              {id.charAt(0).toUpperCase() + id.slice(1)}
-            </a>
-          ))}
-          <span className="progress-line" ref={progressRef} />
-        </div>
-      </nav>
-
-      {/* ── 01 OVERVIEW ──────────────────────────────────────────────────── */}
-      <section className="chap" id="overview">
-        <div className="wrap-tight">
-          <div className="chap-head">
-            <div className="num fade">01</div>
-            <div>
-              <div className="label fade">Overview</div>
-              <h2 className="fade d1"><H parts={d.overview.title} /></h2>
+      {/* ── OVERVIEW ── */}
+      {p.overview && (
+        <section className="cs2-section">
+          <div className="wrap-tight">
+            <div className="cs2-section-head cs2-fade">
+              <span className="cs2-section-num">01</span>
+              <span className="cs2-section-label">Overview</span>
+            </div>
+            <div className="cs2-overview-grid">
+              <p className="cs2-lede cs2-fade">{p.overview}</p>
+              {techStack.length > 0 && (
+                <div className="cs2-stack cs2-fade">
+                  <div className="cs2-stack-label">Stack</div>
+                  <div className="cs2-stack-chips">
+                    {techStack.map(t => <span key={t} className="cs2-chip">{t}</span>)}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-          <div className="chap-body">
-            <aside className="side fade">
-              <div className="label">At a glance</div>
-              <ul>{d.overview.sideItems.map((it) => <li key={it}>{it}</li>)}</ul>
-            </aside>
-            <div className="fade d1">
-              <p className="lede">{d.overview.lede}</p>
-              <p>{d.overview.body}</p>
+        </section>
+      )}
+
+      {/* ── CHALLENGE / SPLIT 1 ── */}
+      {p.challenge && (
+        <section className="cs2-section cs2-section--alt">
+          <div className="wrap-tight">
+            <div className="cs2-section-head cs2-fade">
+              <span className="cs2-section-num">02</span>
+              <span className="cs2-section-label">{p.split1_label || "Challenge"}</span>
             </div>
-            <div className="meta-stats fade d2">
-              {d.overview.stats.map((s) => (
-                <div className="stat-big" key={s.k}>
-                  <div className="k">{s.k}</div>
-                  <div className="v">{s.v}{s.it && <span className="it">{s.it}</span>}</div>
-                </div>
+            <div className="cs2-text-block cs2-fade">
+              {p.challenge.split("\n").filter(Boolean).map((para, i) => (
+                <p key={i}>{para}</p>
               ))}
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 02 CHALLENGE ─────────────────────────────────────────────────── */}
-      <section className="chap" id="challenge">
-        <div className="wrap-tight">
-          <div className="chap-head">
-            <div className="num fade">02</div>
-            <div>
-              <div className="label fade">Challenge</div>
-              <h2 className="fade d1"><H parts={d.challenge.title} /></h2>
-            </div>
-          </div>
-          <div className="chap-body">
-            <aside className="side fade">
-              <div className="label">{d.challenge.sideLabel}</div>
-              <ul>{d.challenge.sideItems.map((it) => <li key={it}>{it}</li>)}</ul>
-            </aside>
-            <div className="fade d1">
-              <p className="lede">{d.challenge.lede}</p>
-              {d.challenge.body.map((p, i) => <p key={i}>{p}</p>)}
-            </div>
-            {d.challenge.metric && (
-              <div className="fade d2">
-                <p style={monoMuted}>Before / After</p>
-                <div style={{ display: "flex", gap: 32, fontFamily: "var(--f-display)", fontSize: 48, lineHeight: 1, letterSpacing: "-.02em", alignItems: "baseline" }}>
-                  <div>
-                    <div style={{ ...monoMuted, marginBottom: 8 }}>Before</div>
-                    {d.challenge.metric.before}<small style={{ fontFamily: "var(--f-sans)", fontSize: 20, fontWeight: 400 }}>{d.challenge.metric.u1}</small>
+            {hasSplit1 && (
+              <div className="cs2-split cs2-fade">
+                {p.challenge_img1 && (
+                  <div className="cs2-split-img">
+                    <img src={p.challenge_img1} alt={`${p.split1_label} — left`} />
                   </div>
-                  <div style={{ color: "var(--brand)", fontStyle: "italic" }}>→</div>
-                  <div>
-                    <div style={{ ...monoMuted, marginBottom: 8 }}>After</div>
-                    <span style={{ color: "var(--brand)", fontStyle: "italic" }}>
-                      {d.challenge.metric.after}<small style={{ fontFamily: "var(--f-sans)", fontSize: 20, fontWeight: 400 }}>{d.challenge.metric.u2}</small>
-                    </span>
+                )}
+                {p.challenge_img2 && (
+                  <div className="cs2-split-img">
+                    <img src={p.challenge_img2} alt={`${p.split1_label} — right`} />
                   </div>
-                </div>
+                )}
               </div>
             )}
           </div>
-          <div className="split">
-            <div className="shot dark fade"><span className="label">{d.challenge.splitLabels[0]}</span></div>
-            <div className="shot brand fade delay"><span className="label">{d.challenge.splitLabels[1]}</span></div>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* ── 03 APPROACH ──────────────────────────────────────────────────── */}
-      <section className="chap" id="approach">
-        <div className="wrap-tight">
-          <div className="chap-head">
-            <div className="num fade">03</div>
-            <div>
-              <div className="label fade">Approach</div>
-              <h2 className="fade d1"><H parts={d.approach.title} /></h2>
+      {/* ── SOLUTION / SPLIT 2 ── */}
+      {p.solution && (
+        <section className="cs2-section">
+          <div className="wrap-tight">
+            <div className="cs2-section-head cs2-fade">
+              <span className="cs2-section-num">03</span>
+              <span className="cs2-section-label">{p.split2_label || "Solution"}</span>
             </div>
-          </div>
-          <div style={{ maxWidth: "60ch", marginBottom: 24 }}>
-            <p className="lede fade d1" style={{ fontSize: 22, lineHeight: 1.5, color: "#1a1a1a", margin: 0 }}>
-              {d.approach.lede}
-            </p>
-          </div>
-          <div className="pillars">
-            {d.approach.pillars.map((p, i) => (
-              <div className={`pillar fade${delays[i]}`} key={i}>
-                <div className="ix">{p.ix}</div>
-                <h4>{p.pre}<span className="it">{p.it}</span></h4>
-                <p>{p.p}</p>
-              </div>
-            ))}
-          </div>
-          <div className="bento">
-            {d.approach.bento.map((b, i) => (
-              <div key={i} className={`tile ${b.cls}${b.dark ? " dark-bg" : ""} fade${delays[i % 4]}`}>
-                <span className="label">{b.label}</span>
-                <span className="sym">{b.sym}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── PULL QUOTE ───────────────────────────────────────────────────── */}
-      <section className="quote-full">
-        <div className="wrap-tight">
-          <p className="text">{d.quote.text}</p>
-          <div className="meta">
-            <span className="av">{d.quote.av}</span>
-            <span>{d.quote.who}</span>
-            <span style={{ opacity: 0.5 }}>·</span>
-            <span>{d.quote.role}</span>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 04 SOLUTION ──────────────────────────────────────────────────── */}
-      <section className="chap" id="solution">
-        <div className="wrap-tight">
-          <div className="chap-head">
-            <div className="num fade">04</div>
-            <div>
-              <div className="label fade">Solution</div>
-              <h2 className="fade d1"><H parts={d.solution.title} /></h2>
-            </div>
-          </div>
-          <div className="chap-body">
-            <aside className="side fade">
-              <div className="label">{d.solution.sideLabel}</div>
-              <ul>{d.solution.sideItems.map((it) => <li key={it}>{it}</li>)}</ul>
-            </aside>
-            <div className="fade d1">
-              <p className="lede">{d.solution.lede}</p>
-              <p>{d.solution.body}</p>
-            </div>
-            <div className="fade d2" style={{ display: "grid", gap: 18 }}>
-              <div style={{ padding: 20, border: "1px solid var(--line)", borderRadius: 15, background: "#fff" }}>
-                <div style={{ fontFamily: "var(--f-mono)", fontSize: 10, letterSpacing: ".18em", color: "var(--muted)", textTransform: "uppercase" }}>Stack</div>
-                <div style={{ marginTop: 12, display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {d.solution.stack.map((t) => (
-                    <span key={t} style={{ padding: "5px 12px", border: "1px solid var(--line)", borderRadius: 999, fontFamily: "var(--f-mono)", fontSize: 10, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--muted)" }}>{t}</span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="split">
-            <div className="shot dark fade"><span className="label">{d.solution.splitLabels[0]}</span></div>
-            <div className="shot brand fade delay"><span className="label">{d.solution.splitLabels[1]}</span></div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 05 RESULTS ───────────────────────────────────────────────────── */}
-      <section className="chap" id="results">
-        <div className="wrap">
-          <div className="results-hero">
-            <div className="fade"><span className="eyebrow">{d.results.h1}</span></div>
-            <h2 className="fade d1" style={{ marginTop: 24 }}>
-              {d.results.h2.pre}<br /><span className="it">{d.results.h2.it}</span>
-            </h2>
-          </div>
-          <div className="results-grid">
-            {d.results.metrics.map((r, i) => (
-              <div key={i} className={`r fade${delays[i % 4]}`}>
-                <div className="k">{r.k}</div>
-                <div className="v">
-                  {r.v}
-                  {r.it  && <span className="it">{r.it}</span>}
-                  {r.small && <small>{r.small}</small>}
-                </div>
-                <div className="ctx">{r.ctx}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── 06 CREDITS ───────────────────────────────────────────────────── */}
-      <section id="credits" style={{ padding: "48px 0" }}>
-        <div className="credits">
-          <div className="inner">
-            <div className="credits-grid">
-              <div>
-                <div className="label">06 — Behind the build</div>
-                <h3><H parts={d.credits.title} /></h3>
-                <p style={{ color: "#bdbdbd", fontSize: 16, lineHeight: 1.6, maxWidth: "42ch", margin: 0 }}>{d.credits.desc}</p>
-              </div>
-              <div>
-                <div className="label">Technology</div>
-                <div className="tech-list">
-                  {d.credits.tech.map((t) => <span key={t}>{t}</span>)}
-                </div>
-              </div>
-              <div>
-                <div className="label">Credits</div>
-                <div className="team-list">
-                  {d.credits.team.map(({ name, role }) => (
-                    <div className="row" key={name}>
-                      <span className="name">{name}</span>
-                      <span className="role">{role}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── SHARE BAR ────────────────────────────────────────────────────── */}
-      <section style={{ padding: "0 24px" }}>
-        <div className="wrap-tight">
-          <div className="share-bar fade">
-            <div>
-              <div className="label">Share this case study</div>
-              <div style={{ marginTop: 8, fontFamily: "var(--f-display)", fontSize: 24, lineHeight: 1, letterSpacing: "-.01em" }}>
-                {d.shareTitle}
-              </div>
-            </div>
-            <div className="links">
-              <a href="#" aria-label="Twitter">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2H21.5l-7.5 8.57L23 22h-6.844l-5.36-7.005L4.7 22H1.44l8.04-9.183L1 2h7.014l4.844 6.405L18.244 2Z" /></svg>
-              </a>
-              <a href="#" aria-label="LinkedIn">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9h4v12H3V9Zm6 0h3.84v1.71h.05c.54-1 1.87-2.08 3.84-2.08C20.6 8.63 22 11 22 14.18V21h-4v-6.06c0-1.45-.03-3.31-2.02-3.31-2.02 0-2.33 1.58-2.33 3.21V21H9V9Z" /></svg>
-              </a>
-              <a href="#" aria-label="Email">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── NEXT PROJECT ─────────────────────────────────────────────────── */}
-      <section style={{ padding: "48px 0" }}>
-        <Link href={`/work/${d.next.slug}`} className="next-project">
-          <div className="wrap">
-            <div className="eye">Next case · {d.next.caseNum}</div>
-            <h2>
-              {d.next.name}{d.next.nameSep} <span className="it">{d.next.nameIt}</span><br />
-              <span className="it">{d.next.nameIt2}</span>
-            </h2>
-            <div className="preview">
-              {d.next.meta.map((m, i) => (
-                <>
-                  {i > 0 && <span key={`sep-${i}`} className="sep">·</span>}
-                  <span key={m}>{m}</span>
-                </>
+            <div className="cs2-text-block cs2-fade">
+              {p.solution.split("\n").filter(Boolean).map((para, i) => (
+                <p key={i}>{para}</p>
               ))}
             </div>
-            <div className="cta-row">
-              <span className="btn btn--lg" style={{ background: "#fff", color: "var(--ink)", pointerEvents: "none" }}>
-                <span className="label">View case study</span>
-                <span className="chip" style={{ background: "var(--ink)", color: "#fff" }}><ArrowIcon /></span>
-              </span>
+            {hasSplit2 && (
+              <div className="cs2-split cs2-fade">
+                {p.solution_img1 && (
+                  <div className="cs2-split-img">
+                    <img src={p.solution_img1} alt={`${p.split2_label} — left`} />
+                  </div>
+                )}
+                {p.solution_img2 && (
+                  <div className="cs2-split-img">
+                    <img src={p.solution_img2} alt={`${p.split2_label} — right`} />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* ── RESULTS ── */}
+      {p.results && (
+        <section className="cs2-results">
+          <div className="wrap-tight">
+            <div className="cs2-section-head cs2-fade" style={{ color: "#fff", borderColor: "rgba(255,255,255,.1)" }}>
+              <span className="cs2-section-num" style={{ color: "var(--brand)" }}>04</span>
+              <span className="cs2-section-label" style={{ color: "rgba(255,255,255,.5)" }}>Results</span>
+            </div>
+            <div className="cs2-results-text cs2-fade">
+              {p.results.split("\n").filter(Boolean).map((para, i) => (
+                <p key={i}>{para}</p>
+              ))}
             </div>
           </div>
-        </Link>
+        </section>
+      )}
+
+      {/* ── VIDEO ── */}
+      {video && (
+        <section className="cs2-section cs2-section--tight">
+          <div className="wrap-tight">
+            <div className="cs2-section-head cs2-fade">
+              <span className="cs2-section-num">05</span>
+              <span className="cs2-section-label">Showreel</span>
+            </div>
+            <div className="cs2-video cs2-fade">
+              {video.type === "iframe"
+                ? <iframe src={video.src} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                : <video src={video.src} controls playsInline />
+              }
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── GALLERY ── */}
+      {gallery.length > 0 && (
+        <section className="cs2-section cs2-section--tight">
+          <div className="wrap-tight">
+            <div className="cs2-section-head cs2-fade">
+              <span className="cs2-section-num">{video ? "06" : "05"}</span>
+              <span className="cs2-section-label">Gallery</span>
+            </div>
+            <div className="cs2-gallery">
+              {gallery.map((url, i) => {
+                const isVid = /\.(mp4|webm|mov)$/i.test(url);
+                return (
+                  <div key={i} className={`cs2-gallery-item cs2-fade${i % 3 === 0 ? " cs2-gallery-item--wide" : ""}`}>
+                    {isVid
+                      ? <video src={url} muted playsInline loop autoPlay />
+                      : <img src={url} alt={`${p.name} — ${i + 1}`} />
+                    }
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── CREDITS FOOTER ── */}
+      <div className="cs2-credits">
+        <div className="wrap">
+          <div className="cs2-credits-grid">
+            <div>
+              <div className="cs2-credits-label">Project</div>
+              <div className="cs2-credits-val">{p.name}</div>
+            </div>
+            {p.client_name && (
+              <div>
+                <div className="cs2-credits-label">Company</div>
+                <div className="cs2-credits-val">{p.client_name}</div>
+              </div>
+            )}
+            {p.industry && (
+              <div>
+                <div className="cs2-credits-label">Industry</div>
+                <div className="cs2-credits-val">{p.industry}</div>
+              </div>
+            )}
+            {p.year && (
+              <div>
+                <div className="cs2-credits-label">Year</div>
+                <div className="cs2-credits-val">{p.year}</div>
+              </div>
+            )}
+            {p.timeline_duration && (
+              <div>
+                <div className="cs2-credits-label">Duration</div>
+                <div className="cs2-credits-val">{p.timeline_duration}</div>
+              </div>
+            )}
+          </div>
+          {techStack.length > 0 && (
+            <div className="cs2-credits-stack">
+              <div className="cs2-credits-label" style={{ marginBottom: 12 }}>Technology</div>
+              <div className="cs2-stack-chips">
+                {techStack.map(t => <span key={t} className="cs2-chip cs2-chip--light">{t}</span>)}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── CTA ── */}
+      <section className="cs2-cta">
+        <div className="wrap-tight">
+          <div className="cs2-fade"><span className="eyebrow" style={{ color: "var(--brand)" }}>What&apos;s next</span></div>
+          <h2 className="cs2-cta-heading cs2-fade">
+            Ready to build<br /><span className="it">something great?</span>
+          </h2>
+          <div className="cs2-cta-row cs2-fade">
+            <Link href="/contact" className="btn btn--lg">
+              <span className="label">Start a project</span>
+              <span className="chip"><ArrowIcon /></span>
+            </Link>
+            <Link href="/work" className="btn btn--ghost">
+              <span className="label">All case studies</span>
+              <span className="chip"><ArrowIcon /></span>
+            </Link>
+          </div>
+        </div>
       </section>
     </>
   );
+}
+
+/* ── ROOT: tries DB first, falls back to static data ────────── */
+export default function CasePage({ params }: { params: { slug: string } }) {
+  const [dbProject, setDbProject] = useState<CsProject | null | "loading">("loading");
+
+  useEffect(() => {
+    fetch(`/api/case-study/${params.slug}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => setDbProject(data || null))
+      .catch(() => setDbProject(null));
+  }, [params.slug]);
+
+  if (dbProject === "loading") {
+    return (
+      <div style={{ minHeight: "100svh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <span style={{ fontFamily: "var(--f-mono)", fontSize: 11, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--muted)" }}>
+          Loading…
+        </span>
+      </div>
+    );
+  }
+
+  if (dbProject) return <DbCasePage project={dbProject} />;
+
+  /* ── fallback: legacy static pages ── */
+  const d = projectMap[params.slug];
+  if (!d) {
+    return (
+      <div style={{ minHeight: "60svh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24 }}>
+        <p style={{ fontFamily: "var(--f-mono)", fontSize: 11, letterSpacing: ".2em", color: "var(--muted)", textTransform: "uppercase" }}>
+          Case study not found
+        </p>
+        <Link href="/work" className="btn">
+          <span className="label">Back to work</span>
+          <span className="chip"><ArrowIcon /></span>
+        </Link>
+      </div>
+    );
+  }
+
+  return null;
 }

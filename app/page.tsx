@@ -203,14 +203,40 @@ const marqueeItems = ["Web Design","Mobile Apps","AI Integration","Ecommerce","R
 const techItems    = ["React","Next.js","Swift","Flutter","OpenAI","Anthropic","Stripe","Postgres","Figma","Webflow"];
 
 type DbService = { id:number; ord:number; name:string; descr:string; count:string; visible:boolean; badge:string|null; image:string|null };
+type DbProject = { id:number; name:string; tagline:string; overview:string; industry:string; year:string; scope:string; status:string; thumbnail:string; hero_image:string; color_cls:string; live_url:string; monogram:string; slug:string };
+
+const TONE_MAP:Record<string,string> = { "(purple)":"violet", "":"violet", b:"ink", c:"bone", d:"brand" };
+const DEFAULT_LNS = ["w2","w1","w3","w4","w2"];
+
+function dbToCard(p:DbProject, i:number, total:number) {
+  const tones = ["violet","ink","bone","brand"];
+  const tone = TONE_MAP[p.color_cls] ?? tones[i % 4];
+  const nameParts = p.name.split(/\s*[—–-]\s*/);
+  const sub = nameParts.length > 1 ? `— ${nameParts.slice(1).join(" ")}` : "";
+  return {
+    tone, num:`CASE ${String(i+1).padStart(2,"0")} / ${String(total).padStart(2,"0")}`,
+    name:nameParts[0], sub, copy:p.overview||p.tagline||"",
+    meta:[["Industry",p.industry||"—"],["Year",p.year||"—"],["Scope",p.scope||"—"]] as [string,string][],
+    eyebrow:p.scope||"", screenTitle:nameParts[0], screenSub:sub,
+    lns:DEFAULT_LNS, ph:`${p.monogram||"FX"} · ${String(i+1).padStart(2,"0")}`,
+    phColor:undefined as string|undefined,
+    thumbnail:p.thumbnail||p.hero_image||"",
+    href:p.slug ? `/work/${p.slug}` : p.live_url||"/work",
+  };
+}
 
 export default function Home() {
   useScrollReveal(".fade, .reveal, .bento .tile, .split .shot");
 
   const [dbServices, setDbServices] = useState<DbService[]>([]);
+  const [liveProjects, setLiveProjects] = useState<DbProject[]>([]);
+
   useEffect(() => {
     fetch("/api/services?visible=true").then(r => r.json()).then(rows => {
       if (Array.isArray(rows) && rows.length > 0) setDbServices(rows);
+    }).catch(() => {});
+    fetch("/api/projects").then(r => r.json()).then(rows => {
+      if (Array.isArray(rows)) setLiveProjects(rows.filter((p:DbProject)=>p.status==="live"));
     }).catch(() => {});
   }, []);
 
@@ -281,15 +307,18 @@ export default function Home() {
             </Link>
           </div>
           <div className="stack">
-            {cards.map((c, i) => (
+            {(liveProjects.length > 0 ? liveProjects.map((p,i)=>dbToCard(p,i,liveProjects.length)) : cards).map((c, i) => (
               <article className="card" data-tone={c.tone} key={i}>
                 <div className="card-inner">
                   <div className="card-media">
                     <div className="device">
                       <div className="bar"><i/><i/><i/></div>
                       <div className="screen">
-                        <h4>{c.screenTitle} <span style={{ color:"#b86cf9", fontStyle:"italic" }}>{c.screenSub}</span></h4>
-                        {c.lns.map((cls, j) => <div key={j} className={`ln ${cls}`} />)}
+                        {("thumbnail" in c && c.thumbnail)
+                          ? <img src={c.thumbnail as string} alt={c.name} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
+                          : <><h4>{c.screenTitle} <span style={{ color:"#b86cf9", fontStyle:"italic" }}>{c.screenSub}</span></h4>
+                              {c.lns.map((cls, j) => <div key={j} className={`ln ${cls}`} />)}</>
+                        }
                       </div>
                     </div>
                     <span className="ph" style={c.phColor ? { color: c.phColor } : undefined}>{c.ph}</span>
@@ -307,10 +336,16 @@ export default function Home() {
                     </div>
                     <div className="row">
                       <span className="eyebrow">{c.eyebrow}</span>
-                      <Link href="/work/nestaro" className="btn">
-                        <span className="label">Case study</span>
-                        <span className="chip"><ArrowIcon /></span>
-                      </Link>
+                      {"href" in c
+                        ? <Link href={c.href as string} className="btn" target={c.href !== "/work" ? "_blank" : undefined} rel="noopener noreferrer">
+                            <span className="label">View project</span>
+                            <span className="chip"><ArrowIcon /></span>
+                          </Link>
+                        : <Link href="/work/nestaro" className="btn">
+                            <span className="label">Case study</span>
+                            <span className="chip"><ArrowIcon /></span>
+                          </Link>
+                      }
                     </div>
                   </div>
                 </div>

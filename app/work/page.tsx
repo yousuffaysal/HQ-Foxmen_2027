@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 function ArrowIcon() {
@@ -24,9 +24,19 @@ const projects = [
   { slug:"northwind",tone:"bone",   label:"Case 08", year:"2023", name:"Northwind", sub:"— logistics",        desc:"Fleet dashboard with predictive routing and real-time SLA telemetry." },
 ];
 
+type DbProject = { id:number; name:string; tagline:string; industry:string; year:string; scope:string; status:string; thumbnail:string; hero_image:string; color_cls:string; live_url:string; slug:string };
+const TONE_MAP:Record<string,string> = { "(purple)":"violet","":"violet",b:"dark",c:"brand",d:"bone" };
+
 export default function WorkPage() {
   useScrollReveal();
   const [active, setActive] = useState("All work");
+  const [dbProjects, setDbProjects] = useState<DbProject[]>([]);
+
+  useEffect(()=>{
+    fetch("/api/projects").then(r=>r.json()).then(rows=>{
+      if(Array.isArray(rows)) setDbProjects(rows.filter((p:DbProject)=>p.status==="live"));
+    }).catch(()=>{});
+  },[]);
 
   return (
     <>
@@ -61,7 +71,26 @@ export default function WorkPage() {
           </div>
 
           <div className="proj-grid">
-            {projects.map((p, i) => (
+            {(dbProjects.length > 0 ? dbProjects.map((p,i)=>{
+              const tone = TONE_MAP[p.color_cls]??"violet";
+              const label = `Case ${String(i+1).padStart(2,"0")}`;
+              const img = p.thumbnail||p.hero_image||"";
+              const href = p.slug ? `/work/${p.slug}` : p.live_url||"#";
+              const isExternal = !p.slug && !!p.live_url;
+              return(
+                <a href={href} target={isExternal?"_blank":"_self"} rel="noopener noreferrer"
+                  className={`item ${tone} fade${i%4===0?"":" d"+(i%4)}`} key={p.id}>
+                  <div className="thumb" style={img?{backgroundImage:`url(${img})`,backgroundSize:"cover",backgroundPosition:"center"}:undefined}>
+                    {!img&&"— Hero shot —"}
+                  </div>
+                  <div className="body">
+                    <div className="meta"><span>{label}</span><span>{p.year}</span></div>
+                    <h3>{p.name}</h3>
+                    <p style={{color:"#3a3a3a",margin:0}}>{p.tagline}</p>
+                  </div>
+                </a>
+              );
+            }) : projects.map((p, i) => (
               <Link href={`/work/${p.slug}`} className={`item ${p.tone} fade${i % 4 === 0 ? "" : ` d${i % 4}`}`} key={p.slug}>
                 <div className="thumb">— Hero shot —</div>
                 <div className="body">
@@ -70,7 +99,7 @@ export default function WorkPage() {
                   <p style={{ color:"#3a3a3a", margin: 0 }}>{p.desc}</p>
                 </div>
               </Link>
-            ))}
+            )))}
           </div>
         </div>
       </section>

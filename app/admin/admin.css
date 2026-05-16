@@ -1239,3 +1239,22 @@ td .acts{ display:flex; gap:6px; justify-content:flex-end; }
 }
 .gallery-add:hover:not(:disabled){ border-color:var(--brand); color:var(--brand); }
 .gallery-add:disabled{ opacity:.5; cursor:not-allowed; }
+
+/* ── Video input tab switcher ── */
+.video-tabs{
+  display:flex; gap:4px; margin-bottom:8px;
+}
+.video-tabs button{
+  padding:5px 14px; border-radius:var(--r-pill); border:1px solid var(--line);
+  background:transparent; font:500 11px/1 var(--f-sans); color:var(--muted);
+  cursor:pointer; transition:all .15s;
+}
+.video-tabs button.on{
+  background:var(--ink); color:#fff; border-color:var(--ink);
+}
+.field.input{
+  width:100%; padding:10px 13px; border:1px solid var(--line); border-radius:var(--r-sm);
+  font:400 13px/1 var(--f-sans); color:var(--ink); background:var(--canvas);
+  outline:none; transition:border-color .2s;
+}
+.field.input:focus{ border-color:var(--brand); }

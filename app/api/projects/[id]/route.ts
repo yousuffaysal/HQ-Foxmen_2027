@@ -31,6 +31,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       challenge_img2    = COALESCE(${body.challenge_img2},    challenge_img2),
       solution_img1     = COALESCE(${body.solution_img1},     solution_img1),
       solution_img2     = COALESCE(${body.solution_img2},     solution_img2),
+      split1_label      = COALESCE(${body.split1_label},      split1_label),
+      split2_label      = COALESCE(${body.split2_label},      split2_label),
+      slug              = COALESCE(${body.slug},              slug),
       updated_at        = now()
     WHERE id = ${id}
     RETURNING *

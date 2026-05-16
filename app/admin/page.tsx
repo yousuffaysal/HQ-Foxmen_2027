@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 /* ================================================================
    TYPES
    ================================================================ */
-type Project = { id:number; monogram:string; color_cls:string; name:string; industry:string; year:string; scope:string; status:string; updated_at:string; tagline:string; overview:string; challenge:string; solution:string; results:string; tech_stack:string; timeline_duration:string; client_name:string; live_url:string; github_url:string; hero_image:string; thumbnail:string; gallery:string; video_url:string; challenge_img1:string; challenge_img2:string; solution_img1:string; solution_img2:string };
+type Project = { id:number; monogram:string; color_cls:string; name:string; industry:string; year:string; scope:string; status:string; updated_at:string; tagline:string; overview:string; challenge:string; solution:string; results:string; tech_stack:string; timeline_duration:string; client_name:string; live_url:string; hero_image:string; thumbnail:string; gallery:string; video_url:string; challenge_img1:string; challenge_img2:string; solution_img1:string; solution_img2:string; split1_label:string; split2_label:string; slug:string };
 type Post     = { id:number; title:string; category:string; author_init:string; author_name:string; read_time:string; status:string; published_at:string|null };
 type Service  = { id:number; ord:number; name:string; descr:string; count:string; visible:boolean; badge:string|null; image:string|null };
 type Testi    = { id:number; quote:string; name:string; role:string; av:string; hi:string };
@@ -306,6 +306,9 @@ function fmtDate(d:string|null):string {
 function autoAv(name:string):string {
   return name.split(" ").map(w=>w[0]||"").join("").slice(0,2).toUpperCase();
 }
+function toSlug(name:string):string {
+  return name.toLowerCase().replace(/[—–]/g,"-").replace(/[^a-z0-9\s-]/g,"").replace(/\s+/g,"-").replace(/-+/g,"-").trim();
+}
 const CLS_CYCLE = ["","b","c","d"];
 
 /* ================================================================
@@ -403,6 +406,60 @@ function GalleryUpload({label,value,onChange}:{label:string;value:string[];onCha
       </div>
       <input ref={inputRef} type="file" accept="image/*,video/*" multiple style={{display:"none"}}
         onChange={e=>{if(e.target.files)handleFiles(e.target.files);e.target.value="";}}/>
+    </div>
+  );
+}
+
+function VideoInput({value,onChange}:{value:string;onChange:(v:string)=>void}){
+  const [uploading,setUploading]=useState(false);
+  const [tab,setTab]=useState<"upload"|"link">(value&&!value.startsWith("blob:")?"link":"upload");
+  const inputRef=useRef<HTMLInputElement>(null);
+  const handleFile=async(file:File)=>{
+    setUploading(true);
+    const fd=new FormData(); fd.append("file",file);
+    const res=await fetch("/api/upload",{method:"POST",body:fd});
+    const json=await res.json();
+    if(json.url){onChange(json.url);setTab("link");}
+    setUploading(false);
+  };
+  return(
+    <div className="field">
+      <label>Video / showreel</label>
+      <div className="video-tabs">
+        <button className={tab==="upload"?"on":""} onClick={()=>setTab("upload")} type="button">Upload file</button>
+        <button className={tab==="link"?"on":""} onClick={()=>setTab("link")} type="button">Paste URL</button>
+      </div>
+      {tab==="upload"?(
+        <div className={`img-drop${uploading?" uploading":""}`} style={{aspectRatio:"16/9",minHeight:80}}
+          onClick={()=>!uploading&&inputRef.current?.click()}
+          onDrop={e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f)handleFile(f);}}
+          onDragOver={e=>e.preventDefault()}>
+          {uploading
+            ?<span className="img-drop-hint">Uploading…</span>
+            :value
+              ?<video src={value} className="img-drop-preview" muted playsInline/>
+              :<span className="img-drop-hint">Click or drag a video file</span>}
+          {value&&!uploading&&<button className="img-drop-clear" onClick={e=>{e.stopPropagation();onChange("");}}>✕</button>}
+        </div>
+      ):(
+        <div style={{display:"flex",flexDirection:"column",gap:6}}>
+          <input
+            className="field input"
+            style={{marginTop:4}}
+            value={value}
+            onChange={e=>onChange(e.target.value)}
+            placeholder="https://youtube.com/… or https://vimeo.com/… or direct .mp4 URL"
+          />
+          {value&&(value.includes("youtube")||value.includes("youtu.be")||value.includes("vimeo"))&&(
+            <span style={{fontSize:10,fontFamily:"var(--f-mono)",color:"var(--ok)",letterSpacing:".1em"}}>✓ Embed URL detected</span>
+          )}
+          {value&&!value.includes("youtube")&&!value.includes("youtu.be")&&!value.includes("vimeo")&&value.startsWith("http")&&(
+            <video src={value} controls style={{width:"100%",borderRadius:10,marginTop:4,maxHeight:160}}/>
+          )}
+        </div>
+      )}
+      <input ref={inputRef} type="file" accept="video/*" style={{display:"none"}}
+        onChange={e=>{const f=e.target.files?.[0];if(f)handleFile(f);e.target.value="";}}/>
     </div>
   );
 }
@@ -549,7 +606,8 @@ export default function AdminPage() {
   const submitProject = async()=>{
     if(!form.name?.trim()){ toast("Project name is required"); return; }
     setSubmitting(true);
-    const body = { monogram:form.monogram||form.name[0].toUpperCase(), color_cls:form.color_cls||"", name:form.name, industry:form.industry||"", year:form.year||String(new Date().getFullYear()), scope:form.scope||"", status:form.status||"draft", tagline:form.tagline||"", overview:form.overview||"", challenge:form.challenge||"", solution:form.solution||"", results:form.results||"", tech_stack:form.tech_stack||"", timeline_duration:form.timeline_duration||"", client_name:form.client_name||"", live_url:form.live_url||"", github_url:form.github_url||"", hero_image:form.hero_image||"", thumbnail:form.thumbnail||"", gallery:form.gallery||"[]", video_url:form.video_url||"", challenge_img1:form.challenge_img1||"", challenge_img2:form.challenge_img2||"", solution_img1:form.solution_img1||"", solution_img2:form.solution_img2||"" };
+    const slugVal = form.slug?.trim()||toSlug(form.name);
+    const body = { monogram:form.monogram||form.name[0].toUpperCase(), color_cls:form.color_cls||"", name:form.name, industry:form.industry||"", year:form.year||String(new Date().getFullYear()), scope:form.scope||"", status:form.status||"draft", tagline:form.tagline||"", overview:form.overview||"", challenge:form.challenge||"", solution:form.solution||"", results:form.results||"", tech_stack:form.tech_stack||"", timeline_duration:form.timeline_duration||"", client_name:form.client_name||"", live_url:form.live_url||"", hero_image:form.hero_image||"", thumbnail:form.thumbnail||"", gallery:form.gallery||"[]", video_url:form.video_url||"", challenge_img1:form.challenge_img1||"", challenge_img2:form.challenge_img2||"", solution_img1:form.solution_img1||"", solution_img2:form.solution_img2||"", split1_label:form.split1_label||"Challenge", split2_label:form.split2_label||"Solution", slug:slugVal };
     const url  = editTarget ? `/api/projects/${editTarget}` : "/api/projects";
     const meth = editTarget ? "PATCH" : "POST";
     const res  = await fetch(url,{method:meth,headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
@@ -898,7 +956,7 @@ export default function AdminPage() {
                       <td><span className={`status ${p.status}`}>{p.status}</span></td>
                       <td><span style={{color:"var(--muted)",fontFamily:"var(--f-mono)",fontSize:11}}>{relTime(p.updated_at)}</span></td>
                       <td><div className="acts">
-                        <button className="btn-icon" title="Edit" onClick={()=>openModal("edit-project",{name:p.name,industry:p.industry,year:p.year,scope:p.scope,status:p.status,color_cls:p.color_cls,monogram:p.monogram,tagline:p.tagline||"",overview:p.overview||"",challenge:p.challenge||"",solution:p.solution||"",results:p.results||"",tech_stack:p.tech_stack||"",timeline_duration:p.timeline_duration||"",client_name:p.client_name||"",live_url:p.live_url||"",github_url:p.github_url||"",hero_image:p.hero_image||"",thumbnail:p.thumbnail||"",gallery:p.gallery||"[]",video_url:p.video_url||"",challenge_img1:p.challenge_img1||"",challenge_img2:p.challenge_img2||"",solution_img1:p.solution_img1||"",solution_img2:p.solution_img2||""},p.id)}><EditSvg/></button>
+                        <button className="btn-icon" title="Edit" onClick={()=>openModal("edit-project",{name:p.name,industry:p.industry,year:p.year,scope:p.scope,status:p.status,color_cls:p.color_cls,monogram:p.monogram,tagline:p.tagline||"",overview:p.overview||"",challenge:p.challenge||"",solution:p.solution||"",results:p.results||"",tech_stack:p.tech_stack||"",timeline_duration:p.timeline_duration||"",client_name:p.client_name||"",live_url:p.live_url||"",hero_image:p.hero_image||"",thumbnail:p.thumbnail||"",gallery:p.gallery||"[]",video_url:p.video_url||"",challenge_img1:p.challenge_img1||"",challenge_img2:p.challenge_img2||"",solution_img1:p.solution_img1||"",solution_img2:p.solution_img2||"",split1_label:p.split1_label||"Challenge",split2_label:p.split2_label||"Solution",slug:p.slug||toSlug(p.name)},p.id)}><EditSvg/></button>
                         <button className="btn-icon danger" title="Delete" onClick={()=>deleteProject(p.id)}><TrashSvg/></button>
                       </div></td>
                     </tr>
@@ -1916,7 +1974,6 @@ export default function AdminPage() {
                             tech_stack:d.tech_stack||f.tech_stack,
                             timeline_duration:d.timeline_duration||f.timeline_duration,
                             live_url:d.live_url||f.live_url,
-                            github_url:d.github_url||f.github_url,
                             monogram:d.monogram||f.monogram,
                           }));
                           toast("Project fields filled by AI");
@@ -1934,7 +1991,7 @@ export default function AdminPage() {
                 <div className="modal-section-label">Basic Info</div>
                 <div className="modal-2col" style={{gridColumn:"1/-1"}}>
                   <div style={{gridColumn:"1/-1"}}><Field label="Project name *" value={form.name||""} onChange={v=>sf("name",v)} placeholder="e.g. Nestaro — real estate OS"/></div>
-                  <Field label="Client name" value={form.client_name||""} onChange={v=>sf("client_name",v)} placeholder="e.g. Nestaro Inc."/>
+                  <Field label="Company / Brand" value={form.client_name||""} onChange={v=>sf("client_name",v)} placeholder="e.g. Nestaro Inc."/>
                   <Field label="Industry" value={form.industry||""} onChange={v=>sf("industry",v)} placeholder="e.g. Fintech"/>
                   <Field label="Year" value={form.year||String(new Date().getFullYear())} onChange={v=>sf("year",v)}/>
                   <FieldSel label="Status" value={form.status||"draft"} onChange={v=>sf("status",v)} options={["draft","live","review","archived"]}/>
@@ -1951,25 +2008,27 @@ export default function AdminPage() {
                   <Field label="Tech stack" value={form.tech_stack||""} onChange={v=>sf("tech_stack",v)} placeholder="Next.js, Supabase, OpenAI"/>
                   <Field label="Timeline duration" value={form.timeline_duration||""} onChange={v=>sf("timeline_duration",v)} placeholder="e.g. 8 weeks"/>
                   <Field label="Live URL" value={form.live_url||""} onChange={v=>sf("live_url",v)} placeholder="https://"/>
-                  <Field label="GitHub URL" value={form.github_url||""} onChange={v=>sf("github_url",v)} placeholder="https://github.com/"/>
+                  <Field label="Case study URL slug" value={form.slug||toSlug(form.name||"")} onChange={v=>sf("slug",v)} placeholder="auto-generated from name"/>
                 </div>
                 <div className="modal-section-label">Media</div>
                 <div className="modal-2col">
                   <ImageUpload label="Hero image" value={form.hero_image||""} onChange={v=>sf("hero_image",v)} accept="image/*"/>
                   <ImageUpload label="Thumbnail" value={form.thumbnail||""} onChange={v=>sf("thumbnail",v)} accept="image/*"/>
                 </div>
-                <div className="modal-section-label" style={{marginTop:8}}>Challenge split shots</div>
+                <div className="modal-section-label" style={{marginTop:8}}>Split shots — pair 1</div>
+                <Field label="Section label" value={form.split1_label||"Challenge"} onChange={v=>sf("split1_label",v)} placeholder="e.g. Challenge, Before / After, Mobile views…"/>
                 <div className="modal-2col">
-                  <ImageUpload label="Challenge — left" value={form.challenge_img1||""} onChange={v=>sf("challenge_img1",v)} accept="image/*"/>
-                  <ImageUpload label="Challenge — right" value={form.challenge_img2||""} onChange={v=>sf("challenge_img2",v)} accept="image/*"/>
+                  <ImageUpload label="Left image" value={form.challenge_img1||""} onChange={v=>sf("challenge_img1",v)} accept="image/*"/>
+                  <ImageUpload label="Right image" value={form.challenge_img2||""} onChange={v=>sf("challenge_img2",v)} accept="image/*"/>
                 </div>
-                <div className="modal-section-label" style={{marginTop:8}}>Solution split shots</div>
+                <div className="modal-section-label" style={{marginTop:8}}>Split shots — pair 2</div>
+                <Field label="Section label" value={form.split2_label||"Solution"} onChange={v=>sf("split2_label",v)} placeholder="e.g. Solution, After, Desktop views…"/>
                 <div className="modal-2col">
-                  <ImageUpload label="Solution — left" value={form.solution_img1||""} onChange={v=>sf("solution_img1",v)} accept="image/*"/>
-                  <ImageUpload label="Solution — right" value={form.solution_img2||""} onChange={v=>sf("solution_img2",v)} accept="image/*"/>
+                  <ImageUpload label="Left image" value={form.solution_img1||""} onChange={v=>sf("solution_img1",v)} accept="image/*"/>
+                  <ImageUpload label="Right image" value={form.solution_img2||""} onChange={v=>sf("solution_img2",v)} accept="image/*"/>
                 </div>
                 <div className="modal-section-label" style={{marginTop:8}}>Showreel / video</div>
-                <ImageUpload label="Video" value={form.video_url||""} onChange={v=>sf("video_url",v)} accept="video/*"/>
+                <VideoInput value={form.video_url||""} onChange={v=>sf("video_url",v)}/>
                 <div className="modal-section-label" style={{marginTop:8}}>Gallery</div>
                 <GalleryUpload label="Additional images &amp; videos" value={form.gallery?JSON.parse(form.gallery):[]} onChange={v=>sf("gallery",JSON.stringify(v))}/>
                 <div className="modal-section-label">Display</div>
