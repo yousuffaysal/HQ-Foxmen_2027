@@ -45,6 +45,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       client_quote           = COALESCE(${body.client_quote},           client_quote),
       client_quote_author    = COALESCE(${body.client_quote_author},    client_quote_author),
       client_quote_role      = COALESCE(${body.client_quote_role},      client_quote_role),
+      chapters               = COALESCE(${body.chapters},               chapters),
       updated_at             = now()
     WHERE id = ${id}
     RETURNING *

@@ -4,7 +4,9 @@ import { useState, useEffect, useRef, useCallback } from "react";
 /* ================================================================
    TYPES
    ================================================================ */
-type Project = { id:number; monogram:string; color_cls:string; name:string; industry:string; year:string; scope:string; status:string; updated_at:string; tagline:string; overview:string; challenge:string; solution:string; results:string; tech_stack:string; timeline_duration:string; client_name:string; live_url:string; hero_image:string; thumbnail:string; gallery:string; video_url:string; challenge_img1:string; challenge_img2:string; solution_img1:string; solution_img2:string; split1_label:string; split2_label:string; slug:string; challenge_img1_label:string; challenge_img2_label:string; solution_img1_label:string; solution_img2_label:string; challenge_img1_orient:string; challenge_img2_orient:string; solution_img1_orient:string; solution_img2_orient:string; client_quote:string; client_quote_author:string; client_quote_role:string };
+type Project = { id:number; monogram:string; color_cls:string; name:string; industry:string; year:string; scope:string; status:string; updated_at:string; tagline:string; overview:string; challenge:string; solution:string; results:string; tech_stack:string; timeline_duration:string; client_name:string; live_url:string; hero_image:string; thumbnail:string; gallery:string; video_url:string; challenge_img1:string; challenge_img2:string; solution_img1:string; solution_img2:string; split1_label:string; split2_label:string; slug:string; challenge_img1_label:string; challenge_img2_label:string; solution_img1_label:string; solution_img2_label:string; challenge_img1_orient:string; challenge_img2_orient:string; solution_img1_orient:string; solution_img2_orient:string; client_quote:string; client_quote_author:string; client_quote_role:string; chapters:string };
+type ChapterImage = { url:string; orient:"portrait"|"landscape"; label:string };
+type Chapter = { id:string; title:string; body:string; images:ChapterImage[]; video:string };
 type Post     = { id:number; title:string; category:string; author_init:string; author_name:string; read_time:string; status:string; published_at:string|null };
 type Service  = { id:number; ord:number; name:string; descr:string; count:string; visible:boolean; badge:string|null; image:string|null };
 type Testi    = { id:number; quote:string; name:string; role:string; av:string; hi:string };
@@ -481,6 +483,106 @@ function VideoInput({value,onChange}:{value:string;onChange:(v:string)=>void}){
   );
 }
 
+/* ── Chapter image uploader ── */
+function ChapterImageItem({img,onChange,onRemove}:{img:ChapterImage;onChange:(img:ChapterImage)=>void;onRemove:()=>void}){
+  const [uploading,setUploading]=useState(false);
+  const inputRef=useRef<HTMLInputElement>(null);
+  const handleFile=async(file:File)=>{
+    setUploading(true);
+    const fd=new FormData(); fd.append("file",file);
+    const res=await fetch("/api/upload",{method:"POST",body:fd});
+    const json=await res.json();
+    if(json.url) onChange({...img,url:json.url});
+    setUploading(false);
+  };
+  const aspect=img.orient==="portrait"?"4/5":"16/9";
+  return(
+    <div className="ch-img-item">
+      <div
+        className={`ch-img-drop${uploading?" uploading":""}`}
+        style={{aspectRatio:aspect}}
+        onClick={()=>!uploading&&inputRef.current?.click()}
+        onDrop={e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f)handleFile(f);}}
+        onDragOver={e=>e.preventDefault()}
+      >
+        {uploading?<span className="img-drop-hint">Uploading…</span>
+          :img.url?<img src={img.url} alt="" className="ch-img-preview"/>
+          :<span className="img-drop-hint">Click or drag image</span>}
+        {img.url&&!uploading&&<button className="img-drop-clear" onClick={e=>{e.stopPropagation();onChange({...img,url:""});}}>✕</button>}
+      </div>
+      <div className="orient-toggle" style={{marginTop:6}}>
+        <button type="button" className={img.orient==="portrait"?"on":""} onClick={()=>onChange({...img,orient:"portrait"})}>Portrait (Mobile)</button>
+        <button type="button" className={img.orient==="landscape"?"on":""} onClick={()=>onChange({...img,orient:"landscape"})}>Landscape (Desktop)</button>
+      </div>
+      <input className="img-label-input" placeholder="Label (optional, shows over image)" value={img.label} onChange={e=>onChange({...img,label:e.target.value})}/>
+      <button type="button" className="ch-img-rm-btn" onClick={onRemove}>Remove image</button>
+      <input ref={inputRef} type="file" accept="image/*" style={{display:"none"}}
+        onChange={e=>{const f=e.target.files?.[0];if(f)handleFile(f);e.target.value="";}}/>
+    </div>
+  );
+}
+
+/* ── Chapter card ── */
+function ChapterCard({ch,index,total,onChange,onRemove,onMove}:{ch:Chapter;index:number;total:number;onChange:(ch:Chapter)=>void;onRemove:()=>void;onMove:(dir:-1|1)=>void}){
+  const addImage=()=>onChange({...ch,images:[...(ch.images||[]),{url:"",orient:"landscape",label:""}]});
+  const updateImg=(i:number,img:ChapterImage)=>onChange({...ch,images:(ch.images||[]).map((x,j)=>j===i?img:x)});
+  const removeImg=(i:number)=>onChange({...ch,images:(ch.images||[]).filter((_,j)=>j!==i)});
+  return(
+    <div className="ch-card">
+      <div className="ch-card-head">
+        <span className="ch-num">{String(index+1).padStart(2,"0")}</span>
+        <input className="ch-title-input" placeholder="Chapter title, e.g. The Challenge" value={ch.title} onChange={e=>onChange({...ch,title:e.target.value})}/>
+        <div className="ch-actions">
+          <button type="button" onClick={()=>onMove(-1)} disabled={index===0} title="Move up">↑</button>
+          <button type="button" onClick={()=>onMove(1)} disabled={index===total-1} title="Move down">↓</button>
+          <button type="button" onClick={onRemove} className="ch-rm" title="Delete chapter">✕</button>
+        </div>
+      </div>
+      <textarea className="ch-body-input" placeholder="Chapter body text — supports multiple paragraphs (press Enter for new paragraph)" value={ch.body} onChange={e=>onChange({...ch,body:e.target.value})} rows={4}/>
+      <div className="ch-img-grid-admin">
+        {(ch.images||[]).map((img,i)=>(
+          <ChapterImageItem key={i} img={img} onChange={v=>updateImg(i,v)} onRemove={()=>removeImg(i)}/>
+        ))}
+      </div>
+      <div className="ch-add-row">
+        <button type="button" className="ch-add-img-btn" onClick={addImage}>+ Add image</button>
+        <input className="ch-video-input" placeholder="Video URL (YouTube, Vimeo, or .mp4)" value={ch.video} onChange={e=>onChange({...ch,video:e.target.value})}/>
+      </div>
+    </div>
+  );
+}
+
+/* ── Chapter builder ── */
+function ChapterBuilder({value,onChange}:{value:string;onChange:(v:string)=>void}){
+  const parse=():Chapter[]=>{try{const a=JSON.parse(value||"[]");return Array.isArray(a)?a:[];}catch{return[];}};
+  const set=(chs:Chapter[])=>onChange(JSON.stringify(chs));
+  const chapters=parse();
+  const add=()=>set([...chapters,{id:Math.random().toString(36).slice(2),title:"",body:"",images:[],video:""}]);
+  const update=(id:string,ch:Chapter)=>set(chapters.map(c=>c.id===id?ch:c));
+  const remove=(id:string)=>set(chapters.filter(c=>c.id!==id));
+  const move=(id:string,dir:-1|1)=>{
+    const idx=chapters.findIndex(c=>c.id===id);
+    if(idx<0)return;
+    const ni=idx+dir;
+    if(ni<0||ni>=chapters.length)return;
+    const arr=[...chapters];
+    [arr[idx],arr[ni]]=[arr[ni],arr[idx]];
+    set(arr);
+  };
+  return(
+    <div className="chapter-builder">
+      {chapters.map((ch,i)=>(
+        <ChapterCard key={ch.id} ch={ch} index={i} total={chapters.length}
+          onChange={c=>update(ch.id,c)} onRemove={()=>remove(ch.id)} onMove={d=>move(ch.id,d)}/>
+      ))}
+      {chapters.length===0&&(
+        <div className="ch-empty">No chapters yet. Add your first one below.</div>
+      )}
+      <button type="button" className="ch-add-btn" onClick={add}>+ Add Chapter</button>
+    </div>
+  );
+}
+
 /* modal title map */
 const MODAL_TITLE:Record<string,string>={
   "new-project":"New project","edit-project":"Edit project",
@@ -624,7 +726,7 @@ export default function AdminPage() {
     if(!form.name?.trim()){ toast("Project name is required"); return; }
     setSubmitting(true);
     const slugVal = form.slug?.trim()||toSlug(form.name);
-    const body = { monogram:form.monogram||form.name[0].toUpperCase(), color_cls:form.color_cls||"", name:form.name, industry:form.industry||"", year:form.year||String(new Date().getFullYear()), scope:form.scope||"", status:form.status||"draft", tagline:form.tagline||"", overview:form.overview||"", challenge:form.challenge||"", solution:form.solution||"", results:form.results||"", tech_stack:form.tech_stack||"", timeline_duration:form.timeline_duration||"", client_name:form.client_name||"", live_url:form.live_url||"", hero_image:form.hero_image||"", thumbnail:form.thumbnail||"", gallery:form.gallery||"[]", video_url:form.video_url||"", challenge_img1:form.challenge_img1||"", challenge_img2:form.challenge_img2||"", solution_img1:form.solution_img1||"", solution_img2:form.solution_img2||"", split1_label:form.split1_label||"Challenge", split2_label:form.split2_label||"Solution", slug:slugVal, challenge_img1_label:form.challenge_img1_label||"", challenge_img2_label:form.challenge_img2_label||"", solution_img1_label:form.solution_img1_label||"", solution_img2_label:form.solution_img2_label||"", challenge_img1_orient:form.challenge_img1_orient||"portrait", challenge_img2_orient:form.challenge_img2_orient||"portrait", solution_img1_orient:form.solution_img1_orient||"portrait", solution_img2_orient:form.solution_img2_orient||"portrait", client_quote:form.client_quote||"", client_quote_author:form.client_quote_author||"", client_quote_role:form.client_quote_role||"" };
+    const body = { monogram:form.monogram||form.name[0].toUpperCase(), color_cls:form.color_cls||"", name:form.name, industry:form.industry||"", year:form.year||String(new Date().getFullYear()), scope:form.scope||"", status:form.status||"draft", tagline:form.tagline||"", overview:form.overview||"", challenge:form.challenge||"", solution:form.solution||"", results:form.results||"", tech_stack:form.tech_stack||"", timeline_duration:form.timeline_duration||"", client_name:form.client_name||"", live_url:form.live_url||"", hero_image:form.hero_image||"", thumbnail:form.thumbnail||"", gallery:form.gallery||"[]", video_url:form.video_url||"", challenge_img1:form.challenge_img1||"", challenge_img2:form.challenge_img2||"", solution_img1:form.solution_img1||"", solution_img2:form.solution_img2||"", split1_label:form.split1_label||"Challenge", split2_label:form.split2_label||"Solution", slug:slugVal, challenge_img1_label:form.challenge_img1_label||"", challenge_img2_label:form.challenge_img2_label||"", solution_img1_label:form.solution_img1_label||"", solution_img2_label:form.solution_img2_label||"", challenge_img1_orient:form.challenge_img1_orient||"portrait", challenge_img2_orient:form.challenge_img2_orient||"portrait", solution_img1_orient:form.solution_img1_orient||"portrait", solution_img2_orient:form.solution_img2_orient||"portrait", client_quote:form.client_quote||"", client_quote_author:form.client_quote_author||"", client_quote_role:form.client_quote_role||"", chapters:form.chapters||"[]" };
     const url  = editTarget ? `/api/projects/${editTarget}` : "/api/projects";
     const meth = editTarget ? "PATCH" : "POST";
     const res  = await fetch(url,{method:meth,headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
@@ -973,7 +1075,7 @@ export default function AdminPage() {
                       <td><span className={`status ${p.status}`}>{p.status}</span></td>
                       <td><span style={{color:"var(--muted)",fontFamily:"var(--f-mono)",fontSize:11}}>{relTime(p.updated_at)}</span></td>
                       <td><div className="acts">
-                        <button className="btn-icon" title="Edit" onClick={()=>openModal("edit-project",{name:p.name,industry:p.industry,year:p.year,scope:p.scope,status:p.status,color_cls:p.color_cls,monogram:p.monogram,tagline:p.tagline||"",overview:p.overview||"",challenge:p.challenge||"",solution:p.solution||"",results:p.results||"",tech_stack:p.tech_stack||"",timeline_duration:p.timeline_duration||"",client_name:p.client_name||"",live_url:p.live_url||"",hero_image:p.hero_image||"",thumbnail:p.thumbnail||"",gallery:p.gallery||"[]",video_url:p.video_url||"",challenge_img1:p.challenge_img1||"",challenge_img2:p.challenge_img2||"",solution_img1:p.solution_img1||"",solution_img2:p.solution_img2||"",split1_label:p.split1_label||"Challenge",split2_label:p.split2_label||"Solution",slug:p.slug||toSlug(p.name),challenge_img1_label:p.challenge_img1_label||"",challenge_img2_label:p.challenge_img2_label||"",solution_img1_label:p.solution_img1_label||"",solution_img2_label:p.solution_img2_label||"",challenge_img1_orient:p.challenge_img1_orient||"portrait",challenge_img2_orient:p.challenge_img2_orient||"portrait",solution_img1_orient:p.solution_img1_orient||"portrait",solution_img2_orient:p.solution_img2_orient||"portrait",client_quote:p.client_quote||"",client_quote_author:p.client_quote_author||"",client_quote_role:p.client_quote_role||""},p.id)}><EditSvg/></button>
+                        <button className="btn-icon" title="Edit" onClick={()=>openModal("edit-project",{name:p.name,industry:p.industry,year:p.year,scope:p.scope,status:p.status,color_cls:p.color_cls,monogram:p.monogram,tagline:p.tagline||"",overview:p.overview||"",challenge:p.challenge||"",solution:p.solution||"",results:p.results||"",tech_stack:p.tech_stack||"",timeline_duration:p.timeline_duration||"",client_name:p.client_name||"",live_url:p.live_url||"",hero_image:p.hero_image||"",thumbnail:p.thumbnail||"",gallery:p.gallery||"[]",video_url:p.video_url||"",challenge_img1:p.challenge_img1||"",challenge_img2:p.challenge_img2||"",solution_img1:p.solution_img1||"",solution_img2:p.solution_img2||"",split1_label:p.split1_label||"Challenge",split2_label:p.split2_label||"Solution",slug:p.slug||toSlug(p.name),challenge_img1_label:p.challenge_img1_label||"",challenge_img2_label:p.challenge_img2_label||"",solution_img1_label:p.solution_img1_label||"",solution_img2_label:p.solution_img2_label||"",challenge_img1_orient:p.challenge_img1_orient||"portrait",challenge_img2_orient:p.challenge_img2_orient||"portrait",solution_img1_orient:p.solution_img1_orient||"portrait",solution_img2_orient:p.solution_img2_orient||"portrait",client_quote:p.client_quote||"",client_quote_author:p.client_quote_author||"",client_quote_role:p.client_quote_role||"",chapters:p.chapters||"[]"},p.id)}><EditSvg/></button>
                         <button className="btn-icon danger" title="Delete" onClick={()=>deleteProject(p.id)}><TrashSvg/></button>
                       </div></td>
                     </tr>
@@ -2015,44 +2117,32 @@ export default function AdminPage() {
                   <div style={{gridColumn:"1/-1"}}><Field label="Scope" value={form.scope||""} onChange={v=>sf("scope",v)} placeholder="Web · iOS · Android · AI"/></div>
                   <div style={{gridColumn:"1/-1"}}><Field label="Tagline" value={form.tagline||""} onChange={v=>sf("tagline",v)} placeholder="Short compelling subtitle for the case study"/></div>
                 </div>
-                <div className="modal-section-label">Case Study</div>
-                <FieldArea label="Overview" value={form.overview||""} onChange={v=>sf("overview",v)} placeholder="What was built and why — 2-3 sentences"/>
-                <FieldArea label="Challenge" value={form.challenge||""} onChange={v=>sf("challenge",v)} placeholder="The problem the client faced"/>
-                <FieldArea label="Solution" value={form.solution||""} onChange={v=>sf("solution",v)} placeholder="How Foxmen Studio solved it"/>
-                <FieldArea label="Results" value={form.results||""} onChange={v=>sf("results",v)} placeholder="Outcomes, metrics, impact"/>
+                <div className="modal-section-label">Overview &amp; Project Info</div>
+                <FieldArea label="Short overview (shown in case study hero)" value={form.overview||""} onChange={v=>sf("overview",v)} placeholder="What was built and why — 2-3 sentences shown at the top of the case study"/>
                 <div className="modal-section-label">Tech &amp; Links</div>
                 <div className="modal-2col">
                   <Field label="Tech stack" value={form.tech_stack||""} onChange={v=>sf("tech_stack",v)} placeholder="Next.js, Supabase, OpenAI"/>
-                  <Field label="Timeline duration" value={form.timeline_duration||""} onChange={v=>sf("timeline_duration",v)} placeholder="e.g. 8 weeks"/>
+                  <Field label="Timeline" value={form.timeline_duration||""} onChange={v=>sf("timeline_duration",v)} placeholder="e.g. 8 weeks"/>
                   <Field label="Live URL" value={form.live_url||""} onChange={v=>sf("live_url",v)} placeholder="https://"/>
-                  <Field label="Case study URL slug" value={form.slug||toSlug(form.name||"")} onChange={v=>sf("slug",v)} placeholder="auto-generated from name"/>
+                  <Field label="Case study slug" value={form.slug||toSlug(form.name||"")} onChange={v=>sf("slug",v)} placeholder="auto-generated from name"/>
                 </div>
-                <div className="modal-section-label">Media</div>
+                <div className="modal-section-label">Cover Images</div>
                 <div className="modal-2col">
-                  <ImageUpload label="Hero image (landscape recommended)" value={form.hero_image||""} onChange={v=>sf("hero_image",v)} accept="image/*"/>
-                  <ImageUpload label="Thumbnail" value={form.thumbnail||""} onChange={v=>sf("thumbnail",v)} accept="image/*"/>
+                  <ImageUpload label="Hero image — landscape (21:9 banner)" value={form.hero_image||""} onChange={v=>sf("hero_image",v)} accept="image/*"/>
+                  <ImageUpload label="Thumbnail — card preview" value={form.thumbnail||""} onChange={v=>sf("thumbnail",v)} accept="image/*"/>
                 </div>
-                <div className="modal-section-label" style={{marginTop:8}}>Split shots — pair 1</div>
-                <Field label="Section label" value={form.split1_label||"Challenge"} onChange={v=>sf("split1_label",v)} placeholder="e.g. Challenge, Before / After, Mobile views…"/>
-                <div className="modal-2col">
-                  <ImageUpload label="Left image" value={form.challenge_img1||""} onChange={v=>sf("challenge_img1",v)} accept="image/*" orient={(form.challenge_img1_orient||"portrait") as "portrait"|"landscape"} onOrientChange={v=>sf("challenge_img1_orient",v)} imageLabel={form.challenge_img1_label||""} onLabelChange={v=>sf("challenge_img1_label",v)}/>
-                  <ImageUpload label="Right image" value={form.challenge_img2||""} onChange={v=>sf("challenge_img2",v)} accept="image/*" orient={(form.challenge_img2_orient||"portrait") as "portrait"|"landscape"} onOrientChange={v=>sf("challenge_img2_orient",v)} imageLabel={form.challenge_img2_label||""} onLabelChange={v=>sf("challenge_img2_label",v)}/>
-                </div>
-                <div className="modal-section-label" style={{marginTop:8}}>Split shots — pair 2</div>
-                <Field label="Section label" value={form.split2_label||"Solution"} onChange={v=>sf("split2_label",v)} placeholder="e.g. Solution, After, Desktop views…"/>
-                <div className="modal-2col">
-                  <ImageUpload label="Left image" value={form.solution_img1||""} onChange={v=>sf("solution_img1",v)} accept="image/*" orient={(form.solution_img1_orient||"portrait") as "portrait"|"landscape"} onOrientChange={v=>sf("solution_img1_orient",v)} imageLabel={form.solution_img1_label||""} onLabelChange={v=>sf("solution_img1_label",v)}/>
-                  <ImageUpload label="Right image" value={form.solution_img2||""} onChange={v=>sf("solution_img2",v)} accept="image/*" orient={(form.solution_img2_orient||"portrait") as "portrait"|"landscape"} onOrientChange={v=>sf("solution_img2_orient",v)} imageLabel={form.solution_img2_label||""} onLabelChange={v=>sf("solution_img2_label",v)}/>
-                </div>
+                <div className="modal-section-label" style={{marginTop:8}}>Case Study Chapters</div>
+                <p style={{fontSize:12,color:"var(--muted)",margin:"-4px 0 12px",lineHeight:1.5}}>
+                  Add any number of chapters. Each chapter has a title, body text, and images (choose portrait for mobile screenshots, landscape for desktop). Images are never cropped — the whole image is always visible.
+                </p>
+                <ChapterBuilder value={form.chapters||"[]"} onChange={v=>sf("chapters",v)}/>
                 <div className="modal-section-label" style={{marginTop:8}}>Client Quote (optional)</div>
                 <FieldArea label="Quote text" value={form.client_quote||""} onChange={v=>sf("client_quote",v)} placeholder="What the client said about the project…"/>
                 <div className="modal-2col">
                   <Field label="Author name" value={form.client_quote_author||""} onChange={v=>sf("client_quote_author",v)} placeholder="Sara Köhler"/>
                   <Field label="Author role" value={form.client_quote_role||""} onChange={v=>sf("client_quote_role",v)} placeholder="CEO · Nestaro"/>
                 </div>
-                <div className="modal-section-label" style={{marginTop:8}}>Showreel / video</div>
-                <VideoInput value={form.video_url||""} onChange={v=>sf("video_url",v)}/>
-                <div className="modal-section-label" style={{marginTop:8}}>Gallery</div>
+                <div className="modal-section-label" style={{marginTop:8}}>Gallery (additional media)</div>
                 <GalleryUpload label="Additional images &amp; videos" value={form.gallery?JSON.parse(form.gallery):[]} onChange={v=>sf("gallery",JSON.stringify(v))}/>
                 <div className="modal-section-label">Display</div>
                 <div className="modal-2col">

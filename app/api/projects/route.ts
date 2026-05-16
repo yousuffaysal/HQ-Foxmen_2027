@@ -38,6 +38,7 @@ async function ensureMigrated() {
     sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS client_quote TEXT DEFAULT ''`,
     sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS client_quote_author TEXT DEFAULT ''`,
     sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS client_quote_role TEXT DEFAULT ''`,
+    sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS chapters TEXT DEFAULT '[]'`,
   ]);
   migrated = true;
 }
@@ -60,6 +61,7 @@ export async function POST(req: Request) {
     challenge_img1_label, challenge_img2_label, solution_img1_label, solution_img2_label,
     challenge_img1_orient, challenge_img2_orient, solution_img1_orient, solution_img2_orient,
     client_quote, client_quote_author, client_quote_role,
+    chapters,
   } = await req.json();
   const rows = await sql`
     INSERT INTO projects (
@@ -71,7 +73,8 @@ export async function POST(req: Request) {
       split1_label, split2_label, slug,
       challenge_img1_label, challenge_img2_label, solution_img1_label, solution_img2_label,
       challenge_img1_orient, challenge_img2_orient, solution_img1_orient, solution_img2_orient,
-      client_quote, client_quote_author, client_quote_role
+      client_quote, client_quote_author, client_quote_role,
+      chapters
     )
     VALUES (
       ${monogram ?? ""}, ${color_cls ?? ""}, ${name}, ${industry ?? ""}, ${year ?? ""}, ${scope ?? ""}, ${status ?? "draft"},
@@ -82,7 +85,8 @@ export async function POST(req: Request) {
       ${split1_label ?? "Challenge"}, ${split2_label ?? "Solution"}, ${slug ?? ""},
       ${challenge_img1_label ?? ""}, ${challenge_img2_label ?? ""}, ${solution_img1_label ?? ""}, ${solution_img2_label ?? ""},
       ${challenge_img1_orient ?? "portrait"}, ${challenge_img2_orient ?? "portrait"}, ${solution_img1_orient ?? "portrait"}, ${solution_img2_orient ?? "portrait"},
-      ${client_quote ?? ""}, ${client_quote_author ?? ""}, ${client_quote_role ?? ""}
+      ${client_quote ?? ""}, ${client_quote_author ?? ""}, ${client_quote_role ?? ""},
+      ${chapters ?? "[]"}
     )
     RETURNING *
   `;

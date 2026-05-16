@@ -1526,15 +1526,14 @@ h1, h2, h3, h4 { margin: 0; font-weight: 400; letter-spacing: -0.02em; }
 
 .hero-shot { margin: -80px 24px 0; position: relative; z-index: 2; }
 .hero-shot .frame {
-  width: 100%; aspect-ratio: 21 / 9;
+  width: 100%;
   border-radius: 15px; overflow: hidden;
-  background:
-    radial-gradient(80% 80% at 20% 30%, rgba(184,108,249,.5), transparent 60%),
-    radial-gradient(60% 80% at 90% 100%, rgba(184,108,249,.22), transparent 60%),
-    #0a0a0a;
+  background: #0a0a0a;
   position: relative; border: 1px solid var(--line);
   box-shadow: 0 60px 100px -40px rgba(0,0,0,.5);
 }
+/* when no real image: show the decorative placeholder at 21:9 */
+.hero-shot .frame:not(:has(.hero-shot-img)) { aspect-ratio: 21/9; }
 .hero-shot .frame .device-mock {
   position: absolute; inset: 8% 8% 6%;
   border-radius: 10px;
@@ -2796,3 +2795,197 @@ body.loading { overflow: hidden; }
 }
 .orient-toggle button.on { background:var(--ink); color:#fff; border-color:var(--ink); }
 .img-label-input { margin-top:6px; width:100%; padding:6px 10px; border:1px solid var(--line); border-radius:6px; font-size:13px; }
+
+/* ============================================================
+   FLEXIBLE CHAPTER IMAGES — no cutoff, full image always visible
+   ============================================================ */
+
+/* Progress bar (top of page) */
+.cs-progress-track { position:fixed; top:0; left:0; right:0; height:2px; background:rgba(0,0,0,.06); z-index:1000; }
+.cs-progress-bar   { height:2px; background:var(--brand); width:0; transition:width .1s linear; }
+
+/* Back link in hero */
+.cs-back { display:inline-flex; align-items:center; gap:6px; font-family:var(--f-mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#bdbdbd; transition:color .2s; }
+.cs-back:hover { color:#fff; }
+
+/* Hero shot image */
+.hero-shot-img { width:100%; height:100%; object-fit:contain; display:block; background:#0a0a0a; }
+.hero-shot-placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-family:var(--f-display); font-size:120px; color:rgba(184,108,249,.3); }
+
+/* Chapter body text */
+.chap-text { max-width:72ch; }
+.chap-text .lede { font-size:22px; line-height:1.5; letter-spacing:-.005em; color:#1a1a1a; margin:0 0 18px; }
+.chap-text p { font-size:16px; line-height:1.7; color:#3a3a3a; margin:14px 0; }
+
+/* ── IMAGE GRID ── */
+.cs-img-grid { margin-top:56px; display:flex; flex-wrap:wrap; gap:24px; align-items:flex-start; }
+
+/* Single image — centered, generous max-width */
+.cs-img-grid--single { justify-content:center; }
+.cs-img-grid--single .cs-img-wrap { width:100%; max-width:100%; }
+.cs-img-grid--single .cs-img-wrap.portrait { max-width:500px; margin:0 auto; }
+
+/* Two images — side by side */
+.cs-img-grid--double { }
+.cs-img-grid--double .cs-img-wrap { flex:1; min-width:280px; }
+
+/* Three or more — wrap naturally */
+.cs-img-grid--multi .cs-img-wrap { flex:1; min-width:240px; }
+.cs-img-grid--multi .cs-img-wrap.portrait { flex:0 0 auto; width:clamp(240px, 33%, 400px); }
+.cs-img-grid--multi .cs-img-wrap.landscape { flex:1; min-width:340px; }
+
+/* ── IMAGE WRAPPER — aspect-ratio container, NO CROP ── */
+.cs-img-wrap {
+  position:relative;
+  border-radius:15px;
+  overflow:hidden;
+  border:1px solid var(--line);
+  background:#f5f4f2;  /* neutral bg for "letterbox" areas */
+  box-shadow:0 20px 60px -20px rgba(0,0,0,.12);
+}
+.cs-img-wrap.portrait  { aspect-ratio:4/5; }
+.cs-img-wrap.landscape { aspect-ratio:16/9; }
+
+/* THE KEY RULE — object-fit:contain = full image always visible, zero cutoff */
+.cs-img-wrap img {
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+}
+
+/* Image label badge */
+.cs-img-label {
+  position:absolute; top:16px; left:16px; z-index:3;
+  background:rgba(255,255,255,.95); color:var(--ink);
+  backdrop-filter:blur(8px);
+  padding:6px 14px; border-radius:999px;
+  font-family:var(--f-mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase;
+  pointer-events:none;
+}
+
+/* ── VIDEO IN CHAPTER ── */
+.cs-video-wrap { margin-top:48px; border-radius:15px; overflow:hidden; aspect-ratio:16/9; background:#000; box-shadow:0 20px 60px -20px rgba(0,0,0,.2); }
+.cs-video-wrap iframe, .cs-video-wrap video { width:100%; height:100%; border:none; display:block; }
+
+/* ── GALLERY GRID ── */
+.cs-gallery-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:48px; }
+.cs-gallery-item { border-radius:15px; overflow:hidden; aspect-ratio:4/3; background:var(--canvas); border:1px solid var(--line); }
+.cs-gallery-item--wide { grid-column:span 2; aspect-ratio:16/9; }
+.cs-gallery-item img, .cs-gallery-item video { width:100%; height:100%; object-fit:contain; display:block; }
+
+/* ── RESPONSIVE ── */
+@media (max-width:900px) {
+  .cs-img-grid--double { flex-direction:column; }
+  .cs-img-grid--double .cs-img-wrap { min-width:unset; width:100%; }
+  .cs-img-grid--multi .cs-img-wrap.portrait { width:100%; }
+  .cs-gallery-grid { grid-template-columns:1fr 1fr; }
+  .cs-gallery-item--wide { grid-column:span 2; }
+  .chap-text .lede { font-size:18px; }
+}
+@media (max-width:600px) {
+  .cs-img-grid { flex-direction:column; }
+  .cs-img-wrap.portrait, .cs-img-wrap.landscape { width:100%; }
+  .cs-gallery-grid { grid-template-columns:1fr; }
+  .cs-gallery-item--wide { grid-column:span 1; aspect-ratio:4/3; }
+}
+
+/* ============================================================
+   ADMIN — CHAPTER BUILDER
+   ============================================================ */
+.chapter-builder { display:flex; flex-direction:column; gap:16px; }
+
+.ch-card {
+  border:1px solid var(--line); border-radius:12px;
+  background:#fff; overflow:hidden;
+}
+
+.ch-card-head {
+  display:flex; align-items:center; gap:12px;
+  padding:14px 16px; background:#faf9f8;
+  border-bottom:1px solid var(--line);
+}
+.ch-num {
+  font-family:var(--f-display); font-size:28px; line-height:1;
+  letter-spacing:-.02em; color:var(--brand); min-width:36px;
+}
+.ch-title-input {
+  flex:1; border:none; outline:none; background:transparent;
+  font-size:15px; font-weight:600; color:var(--ink);
+  letter-spacing:-.01em;
+}
+.ch-title-input::placeholder { color:var(--muted); font-weight:400; }
+.ch-actions { display:flex; gap:4px; margin-left:auto; }
+.ch-actions button {
+  width:28px; height:28px; border-radius:6px; border:1px solid var(--line);
+  background:#fff; cursor:pointer; font-size:13px; color:var(--muted);
+  display:flex; align-items:center; justify-content:center;
+  transition:all .2s;
+}
+.ch-actions button:hover { background:var(--ink); color:#fff; border-color:var(--ink); }
+.ch-actions button:disabled { opacity:.3; cursor:default; }
+.ch-rm:hover { background:#e53e3e !important; border-color:#e53e3e !important; }
+
+.ch-body-input {
+  width:100%; border:none; outline:none; resize:vertical;
+  padding:16px; font-size:14px; line-height:1.65; color:#2a2a2a;
+  font-family:var(--f-sans); border-bottom:1px solid var(--line);
+  min-height:100px; background:#fff;
+}
+
+.ch-img-grid-admin {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:16px; padding:16px;
+  border-bottom:1px solid var(--line);
+}
+
+.ch-img-item { display:flex; flex-direction:column; gap:6px; }
+.ch-img-drop {
+  border:1.5px dashed var(--line); border-radius:10px;
+  background:#faf9f8; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  position:relative; overflow:hidden;
+  transition:border-color .2s, background .2s;
+  min-height:80px;
+}
+.ch-img-drop:hover { border-color:var(--brand); background:#fdf8ff; }
+.ch-img-drop.uploading { opacity:.6; cursor:wait; }
+.ch-img-preview { width:100%; height:100%; object-fit:contain; display:block; }
+.ch-img-rm-btn {
+  font-size:11px; font-family:var(--f-mono); letter-spacing:.1em; text-transform:uppercase;
+  color:#e53e3e; background:none; border:none; cursor:pointer; padding:2px 0;
+  text-align:left;
+}
+.ch-img-rm-btn:hover { text-decoration:underline; }
+
+.ch-add-row {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 16px;
+}
+.ch-add-img-btn {
+  font-family:var(--f-mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+  border:1px solid var(--line); border-radius:6px; padding:7px 14px;
+  background:#fff; cursor:pointer; color:var(--ink); white-space:nowrap;
+  transition:all .2s;
+}
+.ch-add-img-btn:hover { background:var(--ink); color:#fff; border-color:var(--ink); }
+.ch-video-input {
+  flex:1; border:1px solid var(--line); border-radius:6px;
+  padding:7px 12px; font-size:13px; color:var(--ink);
+  background:#fff; outline:none;
+}
+.ch-video-input::placeholder { color:var(--muted); }
+
+.ch-add-btn {
+  display:flex; align-items:center; justify-content:center;
+  padding:14px; border:1.5px dashed var(--line); border-radius:12px;
+  font-family:var(--f-mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--muted); background:#faf9f8; cursor:pointer;
+  transition:all .2s; width:100%;
+}
+.ch-add-btn:hover { border-color:var(--brand); color:var(--brand); background:#fdf8ff; }
+
+.ch-empty {
+  text-align:center; padding:32px; font-size:13px; color:var(--muted);
+  font-family:var(--f-mono); letter-spacing:.1em;
+}
