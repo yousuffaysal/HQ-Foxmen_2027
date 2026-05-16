@@ -1155,11 +1155,11 @@ h1, h2, h3, h4 { margin: 0; font-weight: 400; letter-spacing: -0.02em; }
   border-radius: 15px; overflow: hidden;
   background: #fff; border: 1px solid var(--line);
   transition: transform .5s var(--ease-out), border-color .4s var(--ease);
+  display: flex; flex-direction: column;
 }
 .proj-grid .item:hover { transform: translateY(-6px); border-color: var(--brand); }
 .proj-grid .item .thumb {
-  aspect-ratio: 4 / 3;
-  position: relative;
+  aspect-ratio: 4 / 3; position: relative;
   display: grid; place-items: center;
   font-family: var(--f-mono); font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
   overflow: hidden;
@@ -1170,15 +1170,55 @@ h1, h2, h3, h4 { margin: 0; font-weight: 400; letter-spacing: -0.02em; }
 .proj-grid .item.violet .thumb{ background: #1a0c2c; color: rgba(255,255,255,.45); }
 .proj-grid .item .thumb::after {
   content: ""; position: absolute; inset: 0;
-  background: radial-gradient(60% 60% at 50% 50%, rgba(184,108,249,.25), transparent 60%);
+  background: radial-gradient(60% 60% at 50% 50%, rgba(184,108,249,.15), transparent 60%);
+  pointer-events: none;
 }
-.proj-grid .item .body { padding: 28px; display: grid; gap: 14px; }
+.proj-grid .item .body { padding: 28px; display: grid; gap: 14px; flex: 1; }
 .proj-grid .item .body h3 { font-family: var(--f-display); font-size: 36px; line-height: 1; letter-spacing: -.02em; }
 .proj-grid .item .body h3 .it { font-style: italic; color: var(--brand); }
 .proj-grid .item .meta {
   display: flex; justify-content: space-between; align-items: center;
   font-family: var(--f-mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted);
 }
+
+/* status badge on thumbnail */
+.proj-status-badge {
+  position: absolute; top: 12px; left: 12px; z-index: 2;
+  background: rgba(0,0,0,.65); color: #fff; backdrop-filter: blur(6px);
+  padding: 4px 10px; border-radius: 999px;
+  font-family: var(--f-mono); font-size: 9px; letter-spacing: .18em; text-transform: uppercase;
+}
+
+/* pill buttons inside card */
+.proj-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: var(--r-pill);
+  font-family: var(--f-sans); font-size: 12px; font-weight: 600; letter-spacing: .01em;
+  border: 1.5px solid var(--line); color: var(--muted); background: transparent;
+  text-decoration: none; transition: all .2s var(--ease); white-space: nowrap; cursor: pointer;
+}
+.proj-pill:hover { border-color: var(--ink); color: var(--ink); }
+.proj-pill--primary {
+  background: var(--ink); color: #fff; border-color: var(--ink);
+}
+.proj-pill--primary:hover { background: #222; border-color: #222; color: #fff; }
+.proj-pill--muted { opacity: .45; cursor: default; pointer-events: none; }
+
+/* skeleton loader */
+.proj-item-skeleton {
+  border-radius: 15px; border: 1px solid var(--line);
+  aspect-ratio: 3/4; background: linear-gradient(90deg,var(--canvas) 25%,#ece9e3 50%,var(--canvas) 75%);
+  background-size: 400% 100%; animation: shimmer 1.6s infinite;
+}
+@keyframes shimmer { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
+
+/* empty state */
+.work-empty {
+  padding: 80px 0; text-align: center;
+  font-size: 16px; color: var(--muted); line-height: 1.6;
+}
+.work-empty a { color: var(--brand); text-decoration: underline; }
+
 @media (max-width:760px) { .proj-grid { grid-template-columns: 1fr; } }
 
 /* ============================================================
