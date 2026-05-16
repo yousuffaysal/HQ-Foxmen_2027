@@ -1,11 +1,18 @@
 "use client";
 import Link from "next/link";
 import { use, useEffect, useRef, useState } from "react";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { projectMap } from "../data";
 
 /* ── types ─────────────────────────────────────────────────────── */
 type ChapterImage = { url: string; orient: "portrait" | "landscape"; label: string };
-type Chapter = { id: string; title: string; body: string; images: ChapterImage[]; video: string };
+type ChapterStat  = { value: string; label: string; context: string };
+type Chapter = {
+  id: string; title: string; body: string;
+  images: ChapterImage[]; video: string;
+  stats?: ChapterStat[];
+  img_layout?: "side-by-side" | "stacked";
+};
 
 type CsProject = {
   id: number; name: string; tagline: string; overview: string;
@@ -14,8 +21,7 @@ type CsProject = {
   hero_image: string; thumbnail: string; gallery: string;
   live_url: string; monogram: string; color_cls: string;
   client_quote: string; client_quote_author: string; client_quote_role: string;
-  chapters: string;
-  slug: string;
+  chapters: string; slug: string;
 };
 
 /* ── helpers ────────────────────────────────────────────────────── */
@@ -45,8 +51,67 @@ function parseChapters(raw: string): Chapter[] {
   try {
     const arr = JSON.parse(raw || "[]");
     if (!Array.isArray(arr)) return [];
-    return arr.filter(c => c.title || c.body || (Array.isArray(c.images) && c.images.length > 0) || c.video);
+    return arr.filter(c => c.title || c.body || (Array.isArray(c.images) && c.images.filter((i: ChapterImage) => i.url).length > 0) || c.video);
   } catch { return []; }
+}
+
+/* ── markdown renderer ──────────────────────────────────────────── */
+function parseLine(text: string): React.ReactNode {
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part.startsWith("**") && part.endsWith("**")) return <strong key={i}>{part.slice(2, -2)}</strong>;
+        if (part.startsWith("*") && part.endsWith("*")) return <em key={i}>{part.slice(1, -1)}</em>;
+        return <span key={i}>{part}</span>;
+      })}
+    </>
+  );
+}
+
+function RichText({ text, lede = true }: { text: string; lede?: boolean }) {
+  if (!text) return null;
+  const lines = text.split("\n");
+  const nodes: React.ReactNode[] = [];
+  let i = 0;
+  let firstPara = true;
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    if (!line.trim()) { i++; continue; }
+
+    if (line.startsWith("# ")) {
+      nodes.push(<h3 key={i} className="md-h3">{parseLine(line.slice(2))}</h3>);
+    } else if (line.startsWith("## ")) {
+      nodes.push(<h4 key={i} className="md-h4">{parseLine(line.slice(3))}</h4>);
+    } else if (line.startsWith("- ") || line.startsWith("• ")) {
+      const items: React.ReactNode[] = [];
+      while (i < lines.length && (lines[i].startsWith("- ") || lines[i].startsWith("• "))) {
+        items.push(<li key={i}>{parseLine(lines[i].slice(2))}</li>);
+        i++;
+      }
+      nodes.push(<ul key={`ul-${i}`} className="md-ul">{items}</ul>);
+      continue;
+    } else if (/^\d+\.\s/.test(line)) {
+      const items: React.ReactNode[] = [];
+      while (i < lines.length && /^\d+\.\s/.test(lines[i])) {
+        items.push(<li key={i}>{parseLine(lines[i].replace(/^\d+\.\s/, ""))}</li>);
+        i++;
+      }
+      nodes.push(<ol key={`ol-${i}`} className="md-ol">{items}</ol>);
+      continue;
+    } else if (line.startsWith("> ")) {
+      nodes.push(<blockquote key={i} className="md-bq">{parseLine(line.slice(2))}</blockquote>);
+    } else {
+      const cls = lede && firstPara ? "lede" : "";
+      nodes.push(<p key={i} className={cls}>{parseLine(line)}</p>);
+      firstPara = false;
+    }
+    i++;
+  }
+
+  return <div className="chap-rich">{nodes}</div>;
 }
 
 /* ── progress bar ───────────────────────────────────────────────── */
@@ -64,18 +129,19 @@ function ProgressBar() {
   return <div className="cs-progress-track"><div className="cs-progress-bar" ref={barRef} /></div>;
 }
 
-/* ── chapter image grid ─────────────────────────────────────────── */
-function ChapterImages({ images }: { images: ChapterImage[] }) {
+/* ── chapter images ─────────────────────────────────────────────── */
+function ChapterImages({ images, layout }: { images: ChapterImage[]; layout?: string }) {
   const real = images.filter(img => img.url);
   if (!real.length) return null;
-
-  const single = real.length === 1;
-  const double = real.length === 2;
-
+  let cls: string;
+  if (real.length === 1) cls = "cs-img-grid--single";
+  else if (layout === "stacked") cls = "cs-img-grid--stacked";
+  else if (real.length === 2) cls = "cs-img-grid--double";
+  else cls = "cs-img-grid--multi";
   return (
-    <div className={`cs-img-grid ${single ? "cs-img-grid--single" : double ? "cs-img-grid--double" : "cs-img-grid--multi"}`}>
+    <div className={`cs-img-grid ${cls}`}>
       {real.map((img, i) => (
-        <div key={i} className={`cs-img-wrap ${img.orient === "portrait" ? "portrait" : "landscape"}`}>
+        <div key={i} className={`cs-img-wrap ${img.orient === "portrait" ? "portrait" : "landscape"} fade`}>
           {img.label && <span className="cs-img-label">{img.label}</span>}
           <img src={img.url} alt={img.label || `Image ${i + 1}`} />
         </div>
@@ -84,56 +150,56 @@ function ChapterImages({ images }: { images: ChapterImage[] }) {
   );
 }
 
-/* ── chapter video ──────────────────────────────────────────────── */
-function ChapterVideo({ url }: { url: string }) {
-  const embed = getVideoEmbed(url);
-  if (!embed) return null;
+/* ── chapter stats ──────────────────────────────────────────────── */
+function ChapterStats({ stats }: { stats: ChapterStat[] }) {
+  const real = stats.filter(s => s.value || s.label);
+  if (!real.length) return null;
   return (
-    <div className="cs-video-wrap">
-      {embed.type === "iframe"
-        ? <iframe src={embed.src} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
-        : <video src={embed.src} controls playsInline />
-      }
+    <div className="cs-stats-grid">
+      {real.map((s, i) => (
+        <div key={i} className="cs-stat">
+          <div className="cs-stat-v">{s.value}</div>
+          <div className="cs-stat-k">{s.label}</div>
+          {s.context && <div className="cs-stat-ctx">{s.context}</div>}
+        </div>
+      ))}
     </div>
   );
 }
 
 /* ── DB-driven case study ───────────────────────────────────────── */
 function DbCasePage({ project: p }: { project: CsProject }) {
-  const chapters = parseChapters(p.chapters);
-  const gallery  = parseGallery(p.gallery || "[]");
+  useScrollReveal(".fade");
+
+  const chapters  = parseChapters(p.chapters);
+  const gallery   = parseGallery(p.gallery || "[]");
   const techStack = p.tech_stack ? p.tech_stack.split(/[,·]/).map(t => t.trim()).filter(Boolean) : [];
 
-  /* chapter nav IDs */
-  const navItems: { id: string; label: string; num: string }[] = [
-    ...(p.overview ? [{ id: "cs-overview", label: "Overview", num: "00" }] : []),
-    ...chapters.map((ch, i) => ({
-      id: `cs-ch-${i}`,
-      label: ch.title || `Chapter ${i + 1}`,
-      num: String(i + 1 + (p.overview ? 0 : 0)).padStart(2, "0"),
-    })),
-    ...(p.client_quote ? [{ id: "cs-quote", label: "Quote", num: "--" }] : []),
-    ...(gallery.length > 0 ? [{ id: "cs-gallery", label: "Gallery", num: "--" }] : []),
-    { id: "cs-credits", label: "Credits", num: "--" },
+  /* nav items */
+  const navItems = [
+    ...(p.overview ? [{ id: "cs-overview", label: "Overview" }] : []),
+    ...chapters.map((ch, i) => ({ id: `cs-ch-${i}`, label: ch.title || `Chapter ${i + 1}` })),
+    ...(p.client_quote ? [{ id: "cs-quote", label: "Quote" }] : []),
+    ...(gallery.length > 0 ? [{ id: "cs-gallery", label: "Gallery" }] : []),
+    { id: "cs-credits", label: "Credits" },
   ].map((item, i) => ({ ...item, num: String(i + 1).padStart(2, "0") }));
 
-  /* active chapter scroll spy */
+  /* active nav scroll spy */
   const [activeId, setActiveId] = useState(navItems[0]?.id || "");
   const progressRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     const ids = navItems.map(n => n.id);
-    const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(e => { if (e.isIntersecting) setActiveId(e.target.id); });
-      },
-      { rootMargin: "-40% 0px -55% 0px" }
+    const io = new IntersectionObserver(
+      entries => entries.forEach(e => { if (e.isIntersecting) setActiveId(e.target.id); }),
+      { rootMargin: "-35% 0px -60% 0px" }
     );
-    ids.forEach(id => { const el = document.getElementById(id); if (el) observer.observe(el); });
-    return () => observer.disconnect();
+    ids.forEach(id => { const el = document.getElementById(id); if (el) io.observe(el); });
+    return () => io.disconnect();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [p.id]);
 
+  /* chapter nav progress line */
   useEffect(() => {
     const update = () => {
       const total = document.body.scrollHeight - window.innerHeight;
@@ -144,15 +210,16 @@ function DbCasePage({ project: p }: { project: CsProject }) {
     return () => window.removeEventListener("scroll", update);
   }, []);
 
-  /* fade-in on scroll */
+  /* hero parallax */
+  const heroInnerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const io = new IntersectionObserver(
-      entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }),
-      { threshold: 0.1 }
-    );
-    document.querySelectorAll(".fade").forEach(el => io.observe(el));
-    return () => io.disconnect();
-  }, [p.id]);
+    const onScroll = () => {
+      if (heroInnerRef.current)
+        heroInnerRef.current.style.transform = `translateY(${window.scrollY * 0.18}px)`;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <>
@@ -160,7 +227,7 @@ function DbCasePage({ project: p }: { project: CsProject }) {
 
       {/* ── CASE HERO ── */}
       <section className="case-hero">
-        <div className="wrap">
+        <div className="wrap" ref={heroInnerRef}>
           <div className="case-meta fade in">
             <Link href="/work" className="cs-back">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -182,7 +249,7 @@ function DbCasePage({ project: p }: { project: CsProject }) {
 
           {p.overview && (
             <p className="case-sub fade in">
-              {p.overview.length > 220 ? p.overview.slice(0, 220) + "…" : p.overview}
+              {p.overview.length > 240 ? p.overview.slice(0, 240) + "…" : p.overview}
             </p>
           )}
 
@@ -212,27 +279,25 @@ function DbCasePage({ project: p }: { project: CsProject }) {
       </div>
 
       {/* ── STICKY CHAPTER NAV ── */}
-      {navItems.filter(n => !["cs-quote","cs-gallery","cs-credits"].includes(n.id) || n.id === "cs-credits").length > 1 && (
-        <nav className="chapter-nav">
-          <div className="wrap inner" id="chapter-nav-inner">
-            {navItems.map(n => (
-              <a
-                key={n.id}
-                href={`#${n.id}`}
-                className={activeId === n.id ? "on" : ""}
-                onClick={e => {
-                  e.preventDefault();
-                  document.getElementById(n.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-                }}
-              >
-                <span className="n">{n.num}</span>
-                {n.label}
-              </a>
-            ))}
-            <span className="progress-line" ref={progressRef} />
-          </div>
-        </nav>
-      )}
+      <nav className="chapter-nav">
+        <div className="wrap inner">
+          {navItems.map(n => (
+            <a
+              key={n.id}
+              href={`#${n.id}`}
+              className={activeId === n.id ? "on" : ""}
+              onClick={e => {
+                e.preventDefault();
+                const el = document.getElementById(n.id);
+                if (el) window.scrollTo({ top: el.offsetTop - 100, behavior: "smooth" });
+              }}
+            >
+              <span className="n">{n.num}</span>{n.label}
+            </a>
+          ))}
+          <span className="progress-line" ref={progressRef} />
+        </div>
+      </nav>
 
       {/* ── OVERVIEW ── */}
       {p.overview && (
@@ -254,10 +319,8 @@ function DbCasePage({ project: p }: { project: CsProject }) {
                   </>
                 )}
               </aside>
-              <div className="fade d1">
-                {p.overview.split("\n").filter(Boolean).map((para, i) => (
-                  <p key={i} className={i === 0 ? "lede" : ""}>{para}</p>
-                ))}
+              <div>
+                <RichText text={p.overview} />
               </div>
               <div className="meta-stats fade d2">
                 {p.timeline_duration && <div className="stat-big"><div className="k">Timeline</div><div className="v">{p.timeline_duration}</div></div>}
@@ -272,6 +335,9 @@ function DbCasePage({ project: p }: { project: CsProject }) {
       {/* ── FLEXIBLE CHAPTERS ── */}
       {chapters.map((ch, i) => {
         const chNum = String(i + 1 + (p.overview ? 1 : 0)).padStart(2, "0");
+        const hasStats = ch.stats && ch.stats.filter(s => s.value || s.label).length > 0;
+        const video = ch.video ? getVideoEmbed(ch.video) : null;
+
         return (
           <section className="chap" id={`cs-ch-${i}`} key={ch.id || i}>
             <div className="wrap-tight">
@@ -279,27 +345,34 @@ function DbCasePage({ project: p }: { project: CsProject }) {
                 <div className="num fade">{chNum}</div>
                 <div>
                   <div className="label fade">{ch.title}</div>
-                  <h2 className="fade d1">{ch.title} <span className="it">—</span></h2>
+                  <h2 className="fade d1">
+                    {ch.title}
+                  </h2>
                 </div>
               </div>
 
+              {/* Stats grid — above body text if present */}
+              {hasStats && <ChapterStats stats={ch.stats!} />}
+
+              {/* Rich body text — no fade so it's always visible */}
               {ch.body && (
-                <div className="chap-text fade d1">
-                  {ch.body.split("\n").filter(Boolean).map((para, j) => (
-                    <p key={j} className={j === 0 ? "lede" : ""}>{para}</p>
-                  ))}
+                <div style={{ marginTop: hasStats ? 48 : 0 }}>
+                  <RichText text={ch.body} lede={!hasStats} />
                 </div>
               )}
 
-              {ch.images && ch.images.length > 0 && (
-                <div className="fade d2">
-                  <ChapterImages images={ch.images} />
-                </div>
+              {/* Images */}
+              {ch.images && ch.images.filter(img => img.url).length > 0 && (
+                <ChapterImages images={ch.images} layout={ch.img_layout} />
               )}
 
-              {ch.video && (
-                <div className="fade d2">
-                  <ChapterVideo url={ch.video} />
+              {/* Video */}
+              {video && (
+                <div className="cs-video-wrap fade d2" style={{ marginTop: 48 }}>
+                  {video.type === "iframe"
+                    ? <iframe src={video.src} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                    : <video src={video.src} controls playsInline />
+                  }
                 </div>
               )}
             </div>
@@ -316,7 +389,7 @@ function DbCasePage({ project: p }: { project: CsProject }) {
               <div className="meta">
                 {p.client_quote_author && (
                   <div className="av">
-                    {p.client_quote_author.split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase()}
+                    {p.client_quote_author.split(" ").map((w: string) => w[0]).slice(0, 2).join("").toUpperCase()}
                   </div>
                 )}
                 {p.client_quote_author && <span>{p.client_quote_author}</span>}
@@ -362,11 +435,10 @@ function DbCasePage({ project: p }: { project: CsProject }) {
             <div className="credits-grid">
               <div>
                 <div className="label">Behind the build</div>
-                <h3>{p.name} <span className="it">—</span><br />a {p.industry || "studio"} project.</h3>
+                <h3>{p.name}<br /><span className="it">{p.industry || "Studio"} project.</span></h3>
                 {p.client_name && (
                   <p style={{ color: "#bdbdbd", fontSize: 16, lineHeight: 1.6, maxWidth: "42ch", margin: "16px 0 0" }}>
-                    Built for {p.client_name}{p.year ? ` in ${p.year}` : ""}.{" "}
-                    {p.scope ? `Scope: ${p.scope}.` : ""}
+                    Built for {p.client_name}{p.year ? ` in ${p.year}` : ""}.{p.scope ? ` Scope: ${p.scope}.` : ""}
                   </p>
                 )}
                 {p.live_url && (
@@ -399,7 +471,7 @@ function DbCasePage({ project: p }: { project: CsProject }) {
         </div>
       </section>
 
-      {/* ── NEXT PROJECT CTA ── */}
+      {/* ── NEXT / BACK CTA ── */}
       <section style={{ padding: "0 0 96px" }}>
         <Link href="/work" className="next-project" style={{ display: "block" }}>
           <div className="wrap">
@@ -413,9 +485,7 @@ function DbCasePage({ project: p }: { project: CsProject }) {
             <div className="cta-row" style={{ marginTop: 48 }}>
               <span className="btn btn--lg" style={{ background: "#fff", color: "var(--ink)", pointerEvents: "none" }}>
                 <span className="label">All case studies</span>
-                <span className="chip" style={{ background: "var(--ink)", color: "#fff" }}>
-                  <ArrowIcon />
-                </span>
+                <span className="chip" style={{ background: "var(--ink)", color: "#fff" }}><ArrowIcon /></span>
               </span>
             </div>
           </div>
@@ -449,7 +519,6 @@ export default function CasePage({ params }: { params: Promise<{ slug: string }>
 
   if (dbProject) return <DbCasePage project={dbProject} />;
 
-  /* fallback: static project map */
   const d = projectMap[slug];
   if (!d) {
     return (

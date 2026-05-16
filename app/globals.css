@@ -1526,14 +1526,12 @@ h1, h2, h3, h4 { margin: 0; font-weight: 400; letter-spacing: -0.02em; }
 
 .hero-shot { margin: -80px 24px 0; position: relative; z-index: 2; }
 .hero-shot .frame {
-  width: 100%;
+  width: 100%; aspect-ratio: 16/9;
   border-radius: 15px; overflow: hidden;
   background: #0a0a0a;
   position: relative; border: 1px solid var(--line);
   box-shadow: 0 60px 100px -40px rgba(0,0,0,.5);
 }
-/* when no real image: show the decorative placeholder at 21:9 */
-.hero-shot .frame:not(:has(.hero-shot-img)) { aspect-ratio: 21/9; }
 .hero-shot .frame .device-mock {
   position: absolute; inset: 8% 8% 6%;
   border-radius: 10px;
@@ -2354,12 +2352,9 @@ body.loading { overflow: hidden; }
   z-index:2;
 }
 .hero-shot .frame {
-  width:100%; aspect-ratio:21 / 9;
+  width:100%; aspect-ratio:16/9;
   border-radius:15px; overflow:hidden;
-  background:
-    radial-gradient(80% 80% at 20% 30%, rgba(184,108,249,.5), transparent 60%),
-    radial-gradient(60% 80% at 90% 100%, rgba(184,108,249,.22), transparent 60%),
-    #0a0a0a;
+  background:#0a0a0a;
   position:relative;
   border:1px solid var(--line);
   box-shadow:0 60px 100px -40px rgba(0,0,0,.5);
@@ -2834,6 +2829,10 @@ body.loading { overflow: hidden; }
 .cs-img-grid--multi .cs-img-wrap.portrait { flex:0 0 auto; width:clamp(240px, 33%, 400px); }
 .cs-img-grid--multi .cs-img-wrap.landscape { flex:1; min-width:340px; }
 
+/* Stacked — each image full width, one after another */
+.cs-img-grid--stacked { flex-direction:column; }
+.cs-img-grid--stacked .cs-img-wrap { width:100%; }
+
 /* ── IMAGE WRAPPER — aspect-ratio container, NO CROP ── */
 .cs-img-wrap {
   position:relative;
@@ -2958,6 +2957,16 @@ body.loading { overflow: hidden; }
 }
 .ch-img-rm-btn:hover { text-decoration:underline; }
 
+.ch-layout-toggle {
+  display:flex; align-items:center; gap:12px;
+  padding:10px 16px; border-bottom:1px solid var(--line);
+  background:#fafaf9;
+}
+.ch-layout-label {
+  font-size:11px; font-family:var(--f-mono); letter-spacing:.12em;
+  text-transform:uppercase; color:var(--muted); white-space:nowrap;
+}
+
 .ch-add-row {
   display:flex; align-items:center; gap:12px;
   padding:12px 16px;
@@ -2988,4 +2997,106 @@ body.loading { overflow: hidden; }
 .ch-empty {
   text-align:center; padding:32px; font-size:13px; color:var(--muted);
   font-family:var(--f-mono); letter-spacing:.1em;
+}
+
+/* Stats rows inside chapter card */
+.ch-stats-section {
+  display:flex; flex-direction:column; gap:8px;
+  padding:12px 16px; border-bottom:1px solid var(--line);
+  background:#fdfcff;
+}
+.ch-stat-row {
+  display:grid; grid-template-columns:90px 1fr 1fr 28px;
+  gap:8px; align-items:center;
+}
+.ch-stat-val, .ch-stat-label, .ch-stat-ctx {
+  border:1px solid var(--line); border-radius:6px;
+  padding:6px 10px; font-size:13px; color:var(--ink);
+  background:#fff; outline:none; width:100%;
+}
+.ch-stat-val { font-weight:700; font-family:var(--f-display); font-size:14px; }
+.ch-stat-val::placeholder { font-weight:400; font-family:var(--f-sans); }
+.ch-stat-rm {
+  width:28px; height:28px; border-radius:6px; border:1px solid var(--line);
+  background:#fff; cursor:pointer; font-size:11px; color:#e53e3e;
+  display:flex; align-items:center; justify-content:center;
+  transition:all .15s;
+}
+.ch-stat-rm:hover { background:#e53e3e; color:#fff; border-color:#e53e3e; }
+.ch-add-stat-btn {
+  font-family:var(--f-mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+  border:1px solid var(--brand); border-radius:6px; padding:7px 14px;
+  background:#fff; cursor:pointer; color:var(--brand); white-space:nowrap;
+  transition:all .2s;
+}
+.ch-add-stat-btn:hover { background:var(--brand); color:#fff; }
+
+/* ============================================================
+   CASE STUDY — RICH TEXT DISPLAY
+   (chapter sections have a light background)
+   ============================================================ */
+.chap-rich { color:var(--muted); font-size:1.05rem; line-height:1.8; }
+.chap-rich p { margin:0 0 1.1em; }
+.chap-rich p:last-child { margin-bottom:0; }
+.chap-rich strong { color:var(--ink); font-weight:700; }
+.chap-rich em { font-style:italic; }
+.md-h3 {
+  font-family:var(--f-display); font-size:1.45rem; font-weight:600;
+  color:var(--ink); letter-spacing:-.02em; margin:1.6em 0 .5em;
+  line-height:1.2;
+}
+.md-h4 {
+  font-family:var(--f-sans); font-size:.8rem; font-weight:700;
+  color:var(--ink); letter-spacing:.12em; text-transform:uppercase;
+  margin:1.4em 0 .45em;
+}
+.md-ul {
+  list-style:none; margin:.6em 0 1em; padding:0;
+  display:flex; flex-direction:column; gap:.35em;
+}
+.md-ul li { display:flex; gap:.7em; color:var(--muted); font-size:1.05rem; line-height:1.7; }
+.md-ul li::before { content:"—"; color:var(--brand); flex-shrink:0; }
+.md-ol {
+  list-style:none; margin:.6em 0 1em; padding:0;
+  display:flex; flex-direction:column; gap:.35em; counter-reset:md-ol;
+}
+.md-ol li {
+  display:flex; gap:.7em; color:var(--muted);
+  font-size:1.05rem; line-height:1.7; counter-increment:md-ol;
+}
+.md-ol li::before {
+  content:counter(md-ol) "."; color:var(--brand);
+  font-weight:700; flex-shrink:0; min-width:1.4em;
+}
+.md-bq {
+  border-left:3px solid var(--brand); padding:.6em 1.2em;
+  margin:.8em 0 1em; color:var(--muted);
+  font-style:italic; font-size:1rem;
+}
+
+/* ============================================================
+   CASE STUDY — CHAPTER STATS GRID
+   ============================================================ */
+.cs-stats-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:1px; background:var(--line);
+  border:1px solid var(--line); border-radius:14px;
+  overflow:hidden; margin-bottom:2.4rem;
+}
+.cs-stat {
+  background:var(--bone); padding:2rem 1.5rem;
+  display:flex; flex-direction:column; gap:.3rem;
+}
+.cs-stat-v {
+  font-family:var(--f-display); font-size:clamp(2.2rem,4vw,3.2rem);
+  font-weight:400; line-height:1; letter-spacing:-.04em;
+  color:var(--brand);
+}
+.cs-stat-k {
+  font-size:.75rem; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--muted); font-family:var(--f-mono);
+}
+.cs-stat-ctx {
+  font-size:.85rem; color:var(--muted); opacity:.6; margin-top:.2rem; line-height:1.5;
 }

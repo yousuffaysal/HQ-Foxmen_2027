@@ -6,7 +6,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
    ================================================================ */
 type Project = { id:number; monogram:string; color_cls:string; name:string; industry:string; year:string; scope:string; status:string; updated_at:string; tagline:string; overview:string; challenge:string; solution:string; results:string; tech_stack:string; timeline_duration:string; client_name:string; live_url:string; hero_image:string; thumbnail:string; gallery:string; video_url:string; challenge_img1:string; challenge_img2:string; solution_img1:string; solution_img2:string; split1_label:string; split2_label:string; slug:string; challenge_img1_label:string; challenge_img2_label:string; solution_img1_label:string; solution_img2_label:string; challenge_img1_orient:string; challenge_img2_orient:string; solution_img1_orient:string; solution_img2_orient:string; client_quote:string; client_quote_author:string; client_quote_role:string; chapters:string };
 type ChapterImage = { url:string; orient:"portrait"|"landscape"; label:string };
-type Chapter = { id:string; title:string; body:string; images:ChapterImage[]; video:string };
+type ChapterStat  = { value:string; label:string; context:string };
+type Chapter = { id:string; title:string; body:string; images:ChapterImage[]; video:string; stats:ChapterStat[]; img_layout:"side-by-side"|"stacked" };
 type Post     = { id:number; title:string; category:string; author_init:string; author_name:string; read_time:string; status:string; published_at:string|null };
 type Service  = { id:number; ord:number; name:string; descr:string; count:string; visible:boolean; badge:string|null; image:string|null };
 type Testi    = { id:number; quote:string; name:string; role:string; av:string; hi:string };
@@ -527,6 +528,10 @@ function ChapterCard({ch,index,total,onChange,onRemove,onMove}:{ch:Chapter;index
   const addImage=()=>onChange({...ch,images:[...(ch.images||[]),{url:"",orient:"landscape",label:""}]});
   const updateImg=(i:number,img:ChapterImage)=>onChange({...ch,images:(ch.images||[]).map((x,j)=>j===i?img:x)});
   const removeImg=(i:number)=>onChange({...ch,images:(ch.images||[]).filter((_,j)=>j!==i)});
+  const stats:ChapterStat[]=ch.stats||[];
+  const addStat=()=>onChange({...ch,stats:[...stats,{value:"",label:"",context:""}]});
+  const updateStat=(i:number,s:ChapterStat)=>onChange({...ch,stats:stats.map((x,j)=>j===i?s:x)});
+  const removeStat=(i:number)=>onChange({...ch,stats:stats.filter((_,j)=>j!==i)});
   return(
     <div className="ch-card">
       <div className="ch-card-head">
@@ -538,14 +543,37 @@ function ChapterCard({ch,index,total,onChange,onRemove,onMove}:{ch:Chapter;index
           <button type="button" onClick={onRemove} className="ch-rm" title="Delete chapter">✕</button>
         </div>
       </div>
-      <textarea className="ch-body-input" placeholder="Chapter body text — supports multiple paragraphs (press Enter for new paragraph)" value={ch.body} onChange={e=>onChange({...ch,body:e.target.value})} rows={4}/>
+      <textarea className="ch-body-input" placeholder={"Chapter body text\n**bold** *italic* # Heading - List > Quote"} value={ch.body} onChange={e=>onChange({...ch,body:e.target.value})} rows={4}/>
+      {/* Stats / metrics */}
+      {stats.length>0&&(
+        <div className="ch-stats-section">
+          {stats.map((s,i)=>(
+            <div key={i} className="ch-stat-row">
+              <input className="ch-stat-val" placeholder="47%" value={s.value} onChange={e=>updateStat(i,{...s,value:e.target.value})}/>
+              <input className="ch-stat-label" placeholder="Revenue increase" value={s.label} onChange={e=>updateStat(i,{...s,label:e.target.value})}/>
+              <input className="ch-stat-ctx" placeholder="Context (optional)" value={s.context} onChange={e=>updateStat(i,{...s,context:e.target.value})}/>
+              <button type="button" className="ch-stat-rm" onClick={()=>removeStat(i)}>✕</button>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="ch-img-grid-admin">
         {(ch.images||[]).map((img,i)=>(
           <ChapterImageItem key={i} img={img} onChange={v=>updateImg(i,v)} onRemove={()=>removeImg(i)}/>
         ))}
       </div>
+      {(ch.images||[]).filter(i=>i.url).length>=2&&(
+        <div className="ch-layout-toggle">
+          <span className="ch-layout-label">Image layout</span>
+          <div className="orient-toggle">
+            <button type="button" className={(ch.img_layout||"side-by-side")==="side-by-side"?"on":""} onClick={()=>onChange({...ch,img_layout:"side-by-side"})}>Side by side</button>
+            <button type="button" className={ch.img_layout==="stacked"?"on":""} onClick={()=>onChange({...ch,img_layout:"stacked"})}>One after another</button>
+          </div>
+        </div>
+      )}
       <div className="ch-add-row">
         <button type="button" className="ch-add-img-btn" onClick={addImage}>+ Add image</button>
+        <button type="button" className="ch-add-stat-btn" onClick={addStat}>+ Add metric</button>
         <input className="ch-video-input" placeholder="Video URL (YouTube, Vimeo, or .mp4)" value={ch.video} onChange={e=>onChange({...ch,video:e.target.value})}/>
       </div>
     </div>
@@ -557,7 +585,7 @@ function ChapterBuilder({value,onChange}:{value:string;onChange:(v:string)=>void
   const parse=():Chapter[]=>{try{const a=JSON.parse(value||"[]");return Array.isArray(a)?a:[];}catch{return[];}};
   const set=(chs:Chapter[])=>onChange(JSON.stringify(chs));
   const chapters=parse();
-  const add=()=>set([...chapters,{id:Math.random().toString(36).slice(2),title:"",body:"",images:[],video:""}]);
+  const add=()=>set([...chapters,{id:Math.random().toString(36).slice(2),title:"",body:"",images:[],video:"",stats:[],img_layout:"side-by-side"}]);
   const update=(id:string,ch:Chapter)=>set(chapters.map(c=>c.id===id?ch:c));
   const remove=(id:string)=>set(chapters.filter(c=>c.id!==id));
   const move=(id:string,dir:-1|1)=>{
