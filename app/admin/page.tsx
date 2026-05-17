@@ -1855,7 +1855,7 @@ export default function AdminPage() {
           /* pill CTA button — email-safe nested tables, matches site design */
           function ctaBtn(label:string, url:string, overrideColor?:string):string {
             const c=overrideColor??emailBtnColor;
-            const arrow=`<svg class="em-cta-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;"><path d="M5 12h14M13 5l7 7-7 7" stroke="${c}" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+            const arrow=`<img class="em-arr" src="https://res.cloudinary.com/djofqa3vc/image/upload/v1778990209/arrow-northeast.svg" width="18" height="18" alt="" border="0" style="display:block;margin:0 auto;"/>`;
             return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:32px 0;"><tr><td align="center">
 <a class="em-cta-a" href="${url}" style="text-decoration:none;display:inline-block;">
 <table class="em-cta-tbl" cellpadding="0" cellspacing="0" border="0" style="background:${c};border-radius:999px;overflow:hidden;">
@@ -1959,8 +1959,8 @@ export default function AdminPage() {
 .em-cta-lbl{position:relative;z-index:2;}
 .em-cta-chip{position:relative;z-index:2;transition:transform .5s cubic-bezier(.25,.46,.45,.94);}
 .em-cta-a:hover .em-cta-chip{transform:translateX(-6px);}
-.em-cta-svg{transform:rotate(-45deg);transition:transform .55s cubic-bezier(.25,.46,.45,.94);}
-.em-cta-a:hover .em-cta-svg{transform:rotate(0deg) translateX(1px);}
+.em-arr{display:inline-block;transform:rotate(-45deg);transition:transform .55s cubic-bezier(.25,.46,.45,.94);}
+.em-cta-a:hover .em-arr{transform:rotate(0deg) translateX(1px);}
 @media only screen and (max-width:600px){
   .em-outer{padding:0!important;background:#0a0a0a!important;}
   .em-card{border-radius:0!important;box-shadow:none!important;}

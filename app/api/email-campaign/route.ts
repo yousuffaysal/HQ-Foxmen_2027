@@ -13,7 +13,7 @@ function applyInline(t: string): string {
 }
 
 function ctaButton(label: string, url: string, color: string = "#0a0a0a"): string {
-  const arrow = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;"><path d="M7 17L17 7M10 7H17V14" stroke="${color}" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const arrow = `<img class="em-arr" src="https://res.cloudinary.com/djofqa3vc/image/upload/v1778990209/arrow-northeast.svg" width="18" height="18" alt="" border="0" style="display:block;margin:0 auto;"/>`;
   return `<table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin:32px 0;"><tr><td align="center">
 <a href="${url}" style="text-decoration:none;display:inline-block;">
 <table class="em-cta-tbl" cellpadding="0" cellspacing="0" border="0" role="presentation" style="background:${color};border-radius:999px;overflow:hidden;">
@@ -98,6 +98,7 @@ export function buildEmailCampaignHtml(subject: string, rawContent: string, btnC
 <title>${subject}</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
 <style>
+.em-arr{display:block;transform:rotate(-45deg);}
 @media only screen and (max-width:600px){
   .em-outer   { padding:0 !important; background:#0a0a0a !important; }
   .em-card    { border-radius:0 !important; box-shadow:none !important; }
