@@ -3115,3 +3115,214 @@ body.loading { overflow: hidden; }
 .cs-stat-ctx {
   font-size:.85rem; color:var(--muted); opacity:.6; margin-top:.2rem; line-height:1.5;
 }
+
+/* ============================================================
+   FREE TOOLS — tools section
+   ============================================================ */
+
+/* Tools landing grid */
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+@media (max-width: 900px) { .tools-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .tools-grid { grid-template-columns: 1fr; } }
+
+/* Tool card */
+.tool-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: transform .5s var(--ease-out), border-color .4s var(--ease), box-shadow .4s var(--ease);
+}
+.tool-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--brand);
+  box-shadow: 0 24px 60px -24px rgba(184,108,249,.28);
+}
+.tool-card-icon {
+  width: 52px; height: 52px;
+  border-radius: 12px;
+  background: var(--brand-soft);
+  display: grid; place-items: center;
+  color: var(--brand-deep);
+}
+.tool-card-name {
+  font-family: var(--f-display);
+  font-size: 26px;
+  line-height: 1;
+  letter-spacing: -.02em;
+  margin: 0;
+}
+.tool-card-tagline {
+  font-size: 14px;
+  color: #4a4a4a;
+  line-height: 1.55;
+  margin: 0;
+  flex: 1;
+}
+.tool-card-cta { margin-top: auto; }
+
+/* Score ring (speed checker) */
+.score-ring {
+  display: flex;
+  justify-content: center;
+}
+.score-ring-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 40px 60px;
+  border: 3px solid var(--score-color, var(--brand));
+  border-radius: 50%;
+  min-width: 180px;
+  min-height: 180px;
+  justify-content: center;
+  box-shadow: 0 0 40px -10px var(--score-color, var(--brand));
+}
+.score-ring-number {
+  font-family: var(--f-display);
+  font-size: 72px;
+  line-height: 1;
+  letter-spacing: -.04em;
+}
+.score-ring-label {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Metric grid (speed checker vitals) */
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+@media (max-width: 760px) { .metric-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.metric-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 22px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color .3s var(--ease);
+}
+.metric-card:hover { border-color: var(--brand); }
+.metric-card-value {
+  font-family: var(--f-display);
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: -.03em;
+}
+.metric-card-label {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--ink);
+  font-weight: 600;
+}
+.metric-card-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* Price calculator step */
+.calc-step {
+  display: grid;
+  gap: 0;
+}
+
+/* Agency rate table */
+.rate-table {
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  overflow: hidden;
+  background: #fff;
+}
+.rate-table-head {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.2fr;
+  gap: 16px;
+  padding: 14px 24px;
+  background: var(--ink);
+  color: rgba(255,255,255,.55);
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.rate-table-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.2fr;
+  gap: 16px;
+  padding: 20px 24px;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  transition: background .25s var(--ease);
+}
+.rate-table-row:last-child { border-bottom: 0; }
+.rate-table-row:hover { background: var(--bone); }
+.rate-table-row.highlight {
+  background: var(--brand-soft);
+  border-color: var(--brand);
+  position: relative;
+}
+.rate-table-agency {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.rate-table-flag {
+  font-size: 24px;
+  line-height: 1;
+}
+.rate-table-name {
+  font-weight: 600;
+  font-size: 15px;
+}
+.rate-table-note {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+  color: var(--muted);
+  margin-top: 2px;
+  text-transform: uppercase;
+}
+.rate-table-location {
+  font-size: 14px;
+  color: var(--muted);
+}
+.rate-table-rate-range {
+  font-family: var(--f-display);
+  font-size: 20px;
+  letter-spacing: -.02em;
+}
+@media (max-width: 760px) {
+  .rate-table-head,
+  .rate-table-row {
+    grid-template-columns: 1.5fr 1fr;
+    gap: 8px;
+  }
+  .rate-table-head > div:nth-child(3),
+  .rate-table-row > .rate-table-location { display: none; }
+}
+
+/* Tool result container */
+.tool-result {
+  display: grid;
+  gap: 0;
+}
+
