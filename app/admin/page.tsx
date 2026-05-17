@@ -681,6 +681,27 @@ export default function AdminPage() {
   const [emailUrlSuggestions, setEmailUrlSuggestions] = useState<string[]>([]);
   const [emailBtnColor,    setEmailBtnColor]    = useState("#0a0a0a");
   const emailTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const [emailTemplate,      setEmailTemplate]      = useState<"campaign"|"proposal"|"payment"|"custom">("campaign");
+  const [emailHeroImg,       setEmailHeroImg]        = useState("");
+  const [emailHeroUploading, setEmailHeroUploading]  = useState(false);
+  const [emailPropClient,    setEmailPropClient]    = useState("");
+  const [emailPropTitle,     setEmailPropTitle]     = useState("");
+  const [emailPropSummary,   setEmailPropSummary]   = useState("");
+  const [emailPropScope,     setEmailPropScope]     = useState("");
+  const [emailPropTimeline,  setEmailPropTimeline]  = useState("8–12 weeks");
+  const [emailPropInvestment,setEmailPropInvestment]= useState("");
+  const [emailPropCtaUrl,    setEmailPropCtaUrl]    = useState("");
+  const [emailPayClient,     setEmailPayClient]     = useState("");
+  const [emailPayInvoice,    setEmailPayInvoice]    = useState(`INV-${new Date().getFullYear()}-001`);
+  const [emailPayDueDate,    setEmailPayDueDate]    = useState("");
+  const [emailPayItems,      setEmailPayItems]      = useState("");
+  const [emailPayTotal,      setEmailPayTotal]      = useState("");
+  const [emailPayLink,       setEmailPayLink]       = useState("");
+  const [emailPayNotes,      setEmailPayNotes]      = useState("");
+  const [emailPdfOpen,       setEmailPdfOpen]       = useState(false);
+  const [emailPdfLabel,      setEmailPdfLabel]      = useState("Download PDF");
+  const [emailPdfUrl,        setEmailPdfUrl]        = useState("");
+  const [emailPdfUploading,  setEmailPdfUploading]  = useState(false);
   const [invAiLoading,   setInvAiLoading]   = useState(false);
   const [projAiPrompt,   setProjAiPrompt]   = useState("");
   const [projAiLoading,  setProjAiLoading]  = useState(false);
@@ -1852,6 +1873,12 @@ export default function AdminPage() {
           const IS     = "'Instrument Serif',Georgia,'Times New Roman',serif";
           const LOGO_C = "https://res.cloudinary.com/djofqa3vc/image/upload/v1778967518/logo_sn_fox_copy_e9sigm.png";
 
+          /* ── hero section ── */
+          function buildHeroSection(hero:string):string {
+            if(!hero) return "";
+            return `\n<tr><td style="padding:0;margin:0;font-size:0;line-height:0;"><img src="${hero}" alt="" width="580" style="display:block;width:100%;max-width:580px;height:auto;border:0;"/></td></tr>`;
+          }
+
           /* pill CTA button — email-safe nested tables, matches site design */
           function ctaBtn(label:string, url:string, overrideColor?:string):string {
             const c=overrideColor??emailBtnColor;
@@ -1869,86 +1896,10 @@ export default function AdminPage() {
 </td></tr></table>`;
           }
 
-          /* inline parser — luxury Instrument Serif body, brand-color headings, inline image + button */
-          function applyInline(t:string):string {
-            return t
-              .replace(/\*\*(.+?)\*\*/g,`<strong style="font-weight:700;color:#1a1a1a;">$1</strong>`)
-              .replace(/\*(.+?)\*/g,`<em style="font-style:italic;">$1</em>`);
-          }
-          function parseContent(raw:string):string {
-            const lines=raw.split(/\r?\n/);
-            const out:string[]=[];
-            let i=0;
-            while(i<lines.length){
-              const line=lines[i].trimEnd();
-              if(!line.trim()){i++;continue;}
-
-              /* ## heading — brand color, Instrument Serif italic */
-              if(line.startsWith("## ")){
-                out.push(`<h2 class="em-h2" style="font-family:${IS};font-size:24px;font-weight:400;font-style:italic;color:${BRAND};margin:32px 0 12px;letter-spacing:-.02em;line-height:1.2;">${line.slice(3)}</h2>`);
-
-              /* ### sub-heading — dark, Instrument Serif */
-              } else if(line.startsWith("### ")){
-                out.push(`<h3 class="em-h3" style="font-family:${IS};font-size:18px;font-weight:400;color:#1a1a1a;margin:24px 0 8px;letter-spacing:-.01em;">${line.slice(4)}</h3>`);
-
-              /* divider */
-              } else if(line.trim()==="---"){
-                out.push(`<div style="height:1px;background:#f0ede8;margin:28px 0;"></div>`);
-
-              /* > blockquote */
-              } else if(line.startsWith("> ")){
-                out.push(`<blockquote class="em-quote" style="margin:24px 0;padding:16px 22px;background:#faf8ff;border-left:3px solid ${BRAND};font-family:${IS};font-size:16px;color:#4a4a4a;line-height:1.75;font-style:italic;">${line.slice(2)}</blockquote>`);
-
-              /* bullet list */
-              } else if(/^[-•*]\s/.test(line)){
-                const items:string[]=[];
-                while(i<lines.length&&/^[-•*]\s/.test(lines[i].trimStart())){
-                  items.push(`<li class="em-li" style="padding:4px 0;font-family:${IS};font-size:16px;color:#3a3a3a;line-height:1.75;">${applyInline(lines[i].replace(/^[-•*]\s/,""))}</li>`);
-                  i++;
-                }
-                out.push(`<ul style="margin:12px 0 18px;padding-left:22px;">${items.join("")}</ul>`);
-                continue;
-
-              /* numbered list */
-              } else if(/^\d+[.)]\s/.test(line)){
-                const items:string[]=[];
-                while(i<lines.length&&/^\d+[.)]\s/.test(lines[i].trimStart())){
-                  items.push(`<li class="em-li" style="padding:4px 0;font-family:${IS};font-size:16px;color:#3a3a3a;line-height:1.75;">${applyInline(lines[i].replace(/^\d+[.)]\s/,""))}</li>`);
-                  i++;
-                }
-                out.push(`<ol style="margin:12px 0 18px;padding-left:22px;">${items.join("")}</ol>`);
-                continue;
-
-              /* ![caption](url) — inline image, anywhere in the email */
-              } else if(/^!\[([^\]]*)\]\((https?:\/\/[^)]+)\)$/.test(line.trim())){
-                const m=line.trim().match(/^!\[([^\]]*)\]\((https?:\/\/[^)]+)\)$/);
-                if(m){
-                  const cap=m[1];
-                  out.push(`<div class="em-img-wrap" style="margin:24px 0;">`+
-                    `<img src="${m[2]}" alt="${cap}" width="100%" style="display:block;width:100%;height:auto;border:0;border-radius:10px;"/>`+
-                    (cap?`<p style="font-family:${IS};font-size:12px;color:#a0a0a0;margin:8px 0 0;font-style:italic;text-align:center;">${cap}</p>`:``)
-                  +`</div>`);
-                }
-
-              /* [Label](url) — pill CTA button, inline anywhere */
-              } else if(/^\[([^\]]+)\]\((https?:\/\/[^)]+)\)(\{(#[0-9a-fA-F]{3,6})\})?$/.test(line.trim())){
-                const m=line.trim().match(/^\[([^\]]+)\]\((https?:\/\/[^)]+)\)(\{(#[0-9a-fA-F]{3,6})\})?$/);
-                if(m) out.push(ctaBtn(m[1],m[2],m[4]));
-
-              /* paragraph — Instrument Serif, generous line height */
-              } else {
-                out.push(`<p class="em-p" style="margin:0 0 18px;font-family:${IS};font-size:16px;line-height:1.85;color:#3a3a3a;">${applyInline(line)}</p>`);
-              }
-              i++;
-            }
-            return out.join("\n");
-          }
-
-          function buildPreviewHtml():string {
+          /* shared email HTML shell */
+          function emailShellHtml(bodyHtml:string, heroImg:string):string {
             const yr=new Date().getFullYear();
-            const body=emailRawContent
-              ? parseContent(emailRawContent)
-              : `<p style="color:#d0cdc8;font-family:${IS};font-size:16px;line-height:1.85;font-style:italic;">Start typing your email content on the left — buttons, images and headings appear here live…</p>`;
+            const heroRow=buildHeroSection(heroImg);
             return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
 <style>
@@ -1959,8 +1910,8 @@ export default function AdminPage() {
 .em-cta-lbl{position:relative;z-index:2;}
 .em-cta-chip{position:relative;z-index:2;transition:transform .5s cubic-bezier(.25,.46,.45,.94);}
 .em-cta-a:hover .em-cta-chip{transform:translateX(-6px);}
-.em-arr{display:inline-block;transform:rotate(-45deg);transition:transform .55s cubic-bezier(.25,.46,.45,.94);}
-.em-cta-a:hover .em-arr{transform:rotate(0deg) translateX(1px);}
+.em-arr{display:block;margin:0 auto;transition:transform .55s cubic-bezier(.25,.46,.45,.94);}
+.em-cta-a:hover .em-arr{transform:rotate(45deg) translateX(1px);}
 @media only screen and (max-width:600px){
   .em-outer{padding:0!important;background:#0a0a0a!important;}
   .em-card{border-radius:0!important;box-shadow:none!important;}
@@ -1997,20 +1948,27 @@ export default function AdminPage() {
     <td class="em-hd-lpad" style="vertical-align:middle;width:52px;padding-right:14px;"><img class="em-hd-logo" src="${LOGO_C}" height="44" width="44" style="display:block;border-radius:5px;"/></td>
     <td style="vertical-align:middle;">
       <div class="em-hd-name" style="font-family:${IS};font-size:24px;font-weight:400;color:#fff;letter-spacing:-.02em;line-height:1.1;">Foxmen <em style="font-style:italic;color:${BRAND};">Studio</em></div>
-      <div class="em-hd-tag" style="font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-top:7px;">Code · Craft · Care</div>
+      <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:${BRAND};margin-top:5px;">Code &middot; Craft &middot; Care</div>
     </td>
     <td class="em-hd-meta" style="text-align:right;vertical-align:middle;">
-      <div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);line-height:1.9;">Est. 2019<br/>AI-Powered</div>
+      <a href="https://foxmen.studio" style="display:block;font-size:11px;color:${BRAND};text-decoration:none;letter-spacing:.01em;margin-bottom:5px;">https://foxmen.studio</a>
+      <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:5px;">US &middot; UK &middot; International</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.38);">contact@foxmenstudio.com</div>
     </td>
   </tr></table>
   <div style="height:1px;background:rgba(255,255,255,.15);margin:20px 0 15px;"></div>
-  <div class="em-hd-info" style="font-size:11px;color:rgba(255,255,255,.55);"><strong style="color:rgba(255,255,255,.85);font-weight:500;">contact@foxmenstudio.com</strong> &nbsp;·&nbsp; foxmen.studio</div>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+      <td class="em-hd-info" style="font-size:11px;color:rgba(255,255,255,.5);line-height:1.6;">Web apps &nbsp;·&nbsp; AI-integrated products &nbsp;·&nbsp; Mobile &amp; software</td>
+      <td style="text-align:right;white-space:nowrap;font-size:11px;"><strong style="color:rgba(255,255,255,.75);font-weight:500;">contact@foxmenstudio.com</strong></td>
+    </tr>
+  </table>
 </td></tr>
 <!-- ACCENT LINE -->
 <tr><td style="height:3px;background:linear-gradient(90deg,${BRAND},#8B5DFF);font-size:0;">&nbsp;</td></tr>
-<!-- BODY -->
+${heroRow}<!-- BODY -->
 <tr><td class="em-body" style="padding:48px 58px 40px;">
-  ${body}
+  ${bodyHtml}
   <table class="em-sig" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:40px;padding-top:24px;border-top:1px solid #f0ede8;"><tr>
     <td style="vertical-align:bottom;">
       <p style="margin:0 0 3px;font-size:12px;color:#b8b5b0;">Warm regards,</p>
@@ -2033,6 +1991,143 @@ export default function AdminPage() {
   </div>
 </td></tr>
 </table></td></tr></table></body></html>`;
+          }
+
+          /* inline parser — luxury Instrument Serif body, brand-color headings, inline image + button */
+          function applyInline(t:string):string {
+            return t
+              .replace(/\*\*(.+?)\*\*/g,`<strong style="font-weight:700;color:#1a1a1a;">$1</strong>`)
+              .replace(/\*(.+?)\*/g,`<em style="font-style:italic;">$1</em>`);
+          }
+          function parseContent(raw:string):string {
+            const lines=raw.split(/\r?\n/);
+            const out:string[]=[];
+            let i=0;
+            while(i<lines.length){
+              const line=lines[i].trimEnd();
+              if(!line.trim()){i++;continue;}
+              if(line.startsWith("## ")){
+                out.push(`<h2 class="em-h2" style="font-family:${IS};font-size:24px;font-weight:400;font-style:italic;color:${BRAND};margin:32px 0 12px;letter-spacing:-.02em;line-height:1.2;">${line.slice(3)}</h2>`);
+              } else if(line.startsWith("### ")){
+                out.push(`<h3 class="em-h3" style="font-family:${IS};font-size:18px;font-weight:400;color:#1a1a1a;margin:24px 0 8px;letter-spacing:-.01em;">${line.slice(4)}</h3>`);
+              } else if(line.trim()==="---"){
+                out.push(`<div style="height:1px;background:#f0ede8;margin:28px 0;"></div>`);
+              } else if(line.startsWith("> ")){
+                out.push(`<blockquote class="em-quote" style="margin:24px 0;padding:16px 22px;background:#faf8ff;border-left:3px solid ${BRAND};font-family:${IS};font-size:16px;color:#4a4a4a;line-height:1.75;font-style:italic;">${line.slice(2)}</blockquote>`);
+              } else if(/^[-•*]\s/.test(line)){
+                const items:string[]=[];
+                while(i<lines.length&&/^[-•*]\s/.test(lines[i].trimStart())){
+                  items.push(`<li class="em-li" style="padding:4px 0;font-family:${IS};font-size:16px;color:#3a3a3a;line-height:1.75;">${applyInline(lines[i].replace(/^[-•*]\s/,""))}</li>`);
+                  i++;
+                }
+                out.push(`<ul style="margin:12px 0 18px;padding-left:22px;">${items.join("")}</ul>`);
+                continue;
+              } else if(/^\d+[.)]\s/.test(line)){
+                const items:string[]=[];
+                while(i<lines.length&&/^\d+[.)]\s/.test(lines[i].trimStart())){
+                  items.push(`<li class="em-li" style="padding:4px 0;font-family:${IS};font-size:16px;color:#3a3a3a;line-height:1.75;">${applyInline(lines[i].replace(/^\d+[.)]\s/,""))}</li>`);
+                  i++;
+                }
+                out.push(`<ol style="margin:12px 0 18px;padding-left:22px;">${items.join("")}</ol>`);
+                continue;
+              } else if(/^!\[([^\]]*)\]\((https?:\/\/[^)]+)\)$/.test(line.trim())){
+                const m=line.trim().match(/^!\[([^\]]*)\]\((https?:\/\/[^)]+)\)$/);
+                if(m){
+                  const cap=m[1];
+                  out.push(`<div class="em-img-wrap" style="margin:24px 0;">`+
+                    `<img src="${m[2]}" alt="${cap}" width="100%" style="display:block;width:100%;height:auto;border:0;border-radius:10px;"/>`+
+                    (cap?`<p style="font-family:${IS};font-size:12px;color:#a0a0a0;margin:8px 0 0;font-style:italic;text-align:center;">${cap}</p>`:``)
+                  +`</div>`);
+                }
+              } else if(/^\[([^\]]+)\]\((https?:\/\/[^)]+)\)(\{(#[0-9a-fA-F]{3,6})\})?$/.test(line.trim())){
+                const m=line.trim().match(/^\[([^\]]+)\]\((https?:\/\/[^)]+)\)(\{(#[0-9a-fA-F]{3,6})\})?$/);
+                if(m) out.push(ctaBtn(m[1],m[2],m[4]));
+              } else {
+                out.push(`<p class="em-p" style="margin:0 0 18px;font-family:${IS};font-size:16px;line-height:1.85;color:#3a3a3a;">${applyInline(line)}</p>`);
+              }
+              i++;
+            }
+            return out.join("\n");
+          }
+
+          function buildPreviewHtml():string {
+            const body=emailRawContent
+              ? parseContent(emailRawContent)
+              : `<p style="color:#d0cdc8;font-family:${IS};font-size:16px;line-height:1.85;font-style:italic;">Start typing your email content on the left — buttons, images and headings appear here live…</p>`;
+            return emailShellHtml(body, emailHeroImg);
+          }
+
+          function buildCustomPreviewHtml():string {
+            const body=emailRawContent
+              ? emailRawContent
+              : `<p style="color:#d0cdc8;font-family:${IS};font-size:16px;line-height:1.85;font-style:italic;">Paste your raw HTML content on the left…</p>`;
+            return emailShellHtml(body, emailHeroImg);
+          }
+
+          function buildProposalPreviewHtml():string {
+            const scopeRows=(emailPropScope||"").split(/\r?\n/).filter(Boolean).map(item=>
+              `<tr><td style="padding:10px 0;border-bottom:1px solid #f0ede8;font-family:${IS};font-size:16px;color:#3a3a3a;line-height:1.6;"><span style="color:${BRAND};margin-right:10px;">→</span>${item}</td></tr>`
+            ).join("");
+            const ctaHtml=emailPropCtaUrl?ctaBtn("Schedule a Call",emailPropCtaUrl,emailBtnColor):"";
+            const body=`
+<p style="margin:0 0 8px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:${BRAND};">Prepared For</p>
+<h1 style="margin:0 0 24px;font-family:${IS};font-size:36px;font-weight:400;color:#0a0a0a;line-height:1.1;letter-spacing:-.02em;">${emailPropClient||"Valued Client"}</h1>
+<div style="height:1px;background:#f0ede8;margin:0 0 24px;"></div>
+<h2 style="margin:0 0 20px;font-family:${IS};font-size:28px;font-weight:400;color:#1a1a1a;line-height:1.2;letter-spacing:-.01em;">${emailPropTitle||""}</h2>
+${emailPropSummary?`<p class="em-p" style="margin:0 0 32px;font-family:${IS};font-size:16px;line-height:1.85;color:#3a3a3a;">${emailPropSummary}</p>`:""}
+<p style="margin:0 0 12px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:${BRAND};">01 &nbsp; Scope of Work</p>
+${scopeRows?`<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:32px;">${scopeRows}</table>`:""}
+<p style="margin:0 0 10px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:${BRAND};">02 &nbsp; Timeline</p>
+<p class="em-p" style="margin:0 0 32px;font-family:${IS};font-size:16px;line-height:1.85;color:#3a3a3a;">${emailPropTimeline||""}</p>
+<p style="margin:0 0 12px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:${BRAND};">03 &nbsp; Investment</p>
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:32px;">
+  <tr><td style="background:#0a0a0a;padding:28px 32px;border-radius:8px;">
+    <div style="font-family:${IS};font-size:44px;font-weight:400;color:${BRAND};line-height:1;letter-spacing:-.02em;">${emailPropInvestment||"—"}</div>
+  </td></tr>
+</table>
+${ctaHtml}`;
+            return emailShellHtml(body, emailHeroImg);
+          }
+
+          function buildPaymentPreviewHtml():string {
+            const today=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
+            const fmtDue=emailPayDueDate?new Date(emailPayDueDate+"T00:00:00").toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}):"";
+            const itemRows=(emailPayItems||"").split(/\r?\n/).filter(Boolean).map(l=>{
+              const p=l.split(/[|·]/).map((s:string)=>s.trim());
+              const svc=p[0]||"";
+              const amt=p[1]||"";
+              return `<tr>
+<td style="padding:12px 0;border-bottom:1px solid #f0ede8;font-family:${IS};font-size:15px;color:#3a3a3a;line-height:1.5;">${svc}</td>
+<td style="padding:12px 0;border-bottom:1px solid #f0ede8;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#0a0a0a;text-align:right;white-space:nowrap;font-weight:600;">${amt}</td>
+</tr>`;
+            }).join("");
+            const payBtnHtml=emailPayLink?ctaBtn("Pay Now",emailPayLink,"#0a0a0a"):"";
+            const body=`
+<p style="margin:0 0 8px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:${BRAND};">Payment Request</p>
+<h2 style="margin:0 0 12px;font-family:${IS};font-size:28px;font-weight:400;color:#1a1a1a;line-height:1.2;letter-spacing:-.01em;">${emailPayInvoice||"Invoice"}</h2>
+<p style="margin:0 0 8px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:12px;color:#888;">
+  Issued: <strong style="color:#555;">${today}</strong>${fmtDue?` &nbsp;&middot;&nbsp; Due: <strong style="color:#555;">${fmtDue}</strong>`:""}
+</p>
+${emailPayClient?`<p style="margin:0 0 24px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#666;">Billed to: <strong style="color:#0a0a0a;">${emailPayClient}</strong></p>`:"<div style='margin-bottom:24px;'></div>"}
+<div style="height:1px;background:#f0ede8;margin:0 0 20px;"></div>
+${itemRows?`<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:0;">
+<thead><tr>
+<th style="padding:0 0 10px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#aaa;text-align:left;border-bottom:2px solid #f0ede8;">Service</th>
+<th style="padding:0 0 10px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#aaa;text-align:right;border-bottom:2px solid #f0ede8;">Amount</th>
+</tr></thead>
+<tbody>${itemRows}</tbody>
+</table>`:""}
+${emailPayTotal?`<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:4px;margin-bottom:28px;">
+<tr><td style="background:#0a0a0a;padding:18px 24px;border-radius:0 0 8px 8px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+<td style="font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.6);">Total Due</td>
+<td style="font-family:${IS};font-size:26px;font-weight:400;color:#ffffff;text-align:right;letter-spacing:-.01em;">${emailPayTotal}</td>
+</tr></table>
+</td></tr>
+</table>`:""}
+${payBtnHtml}
+${emailPayNotes?`<div style="margin-top:24px;padding:16px 20px;background:#faf8ff;border-left:3px solid ${BRAND};border-radius:0 4px 4px 0;"><p style="margin:0 0 6px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:${BRAND};">Notes</p><p style="margin:0;font-family:${IS};font-size:15px;line-height:1.75;color:#4a4a4a;">${emailPayNotes}</p></div>`:""}`;
+            return emailShellHtml(body, emailHeroImg);
           }
 
           /* insert text at cursor position in the textarea */
@@ -2064,110 +2159,301 @@ export default function AdminPage() {
             setEmailImgUploading(false);
           };
 
+          /* upload hero image */
+          const uploadHero=async(file:File)=>{
+            setEmailHeroUploading(true);
+            try{
+              const fd=new FormData(); fd.append("file",file);
+              const r=await fetch("/api/upload",{method:"POST",body:fd});
+              const d=await r.json();
+              if(d.url){setEmailHeroImg(d.url);}else{toast("Upload failed");}
+            }catch{toast("Upload failed.");}
+            setEmailHeroUploading(false);
+          };
+
           const sendEmail=async()=>{
             if(!emailTo){toast("Enter a recipient email");return;}
             if(!emailSubject){toast("Enter a subject line");return;}
-            if(!emailRawContent.trim()){toast("Write some email content first");return;}
             setEmailSending(true);
             try{
-              const r=await fetch("/api/email-campaign",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({to:emailTo,subject:emailSubject,rawContent:emailRawContent,btnColor:emailBtnColor})});
+              const body:Record<string,unknown>={
+                template:emailTemplate, to:emailTo, subject:emailSubject,
+                heroImage:emailHeroImg, btnColor:emailBtnColor,
+              };
+              if(emailTemplate==="campaign"||emailTemplate==="custom"){
+                if(!emailRawContent.trim()){toast("Write some content first");setEmailSending(false);return;}
+                body.rawContent=emailRawContent;
+              } else if(emailTemplate==="proposal"){
+                body.proposalData={clientName:emailPropClient,projectTitle:emailPropTitle,summary:emailPropSummary,scopeItems:emailPropScope.split(/\r?\n/).filter(Boolean),timeline:emailPropTimeline,investment:emailPropInvestment,ctaUrl:emailPropCtaUrl};
+              } else if(emailTemplate==="payment"){
+                body.paymentData={clientName:emailPayClient,invoiceNum:emailPayInvoice,dueDate:emailPayDueDate,items:emailPayItems.split(/\r?\n/).filter(Boolean).map((l:string)=>{const p=l.split(/[|·]/).map((s:string)=>s.trim());return{service:p[0]||"",amount:p[1]||""};}),total:emailPayTotal,payLink:emailPayLink,notes:emailPayNotes};
+              }
+              const r=await fetch("/api/email-campaign",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
               if(r.ok){toast("Email sent to "+emailTo);}else{const d=await r.json();toast(d.error||"Send failed");}
             }catch{toast("Send failed. Try again.");}
             setEmailSending(false);
           };
 
-          const copyHtml=()=>{
-            navigator.clipboard.writeText(buildPreviewHtml()).then(()=>toast("HTML copied")).catch(()=>toast("Copy failed"));
+          const getPreview=()=>{
+            if(emailTemplate==="proposal") return buildProposalPreviewHtml();
+            if(emailTemplate==="payment") return buildPaymentPreviewHtml();
+            if(emailTemplate==="custom") return buildCustomPreviewHtml();
+            return buildPreviewHtml();
           };
 
-          const preview=buildPreviewHtml();
+          const copyHtml=()=>{
+            navigator.clipboard.writeText(getPreview()).then(()=>toast("HTML copied")).catch(()=>toast("Copy failed"));
+          };
+
+          const preview=getPreview();
+
+          const TMPL_DESCS:Record<string,string>={
+            campaign:"Markdown-driven general email with buttons, images and headings.",
+            proposal:"Structured project proposal with scope, timeline and investment sections.",
+            payment:"Invoice-style payment request with line items and a Pay Now button.",
+            custom:"Raw HTML inserted directly into the email body — full control.",
+          };
 
           return(
           <section className="page active">
             <div className="page-head">
               <div>
                 <h2>Email Campaign</h2>
-                <p style={{fontSize:13,color:"var(--muted)",marginTop:4}}>Write your message — buttons and images go wherever you place them in the content.</p>
+                <p style={{fontSize:13,color:"var(--muted)",marginTop:4}}>Pick a template, fill the form — preview updates live as you type.</p>
               </div>
             </div>
 
             <div className="gen-layout">
               {/* ── FORM ── */}
               <div className="gen-form">
-                <div className="gen-form-title">Compose</div>
-                <div className="gen-form-sub">Preview updates live as you type.</div>
 
+                {/* Template tabs */}
+                <div style={{display:"flex",gap:4,marginBottom:16,padding:3,background:"var(--canvas)",borderRadius:999,width:"fit-content"}}>
+                  {(["campaign","proposal","payment","custom"] as const).map(t=>(
+                    <button key={t} onClick={()=>setEmailTemplate(t)} style={{padding:"6px 14px",borderRadius:999,fontSize:12,fontWeight:500,border:"none",cursor:"pointer",background:emailTemplate===t?"#fff":"transparent",color:emailTemplate===t?"var(--ink)":"var(--muted)",boxShadow:emailTemplate===t?"0 1px 4px rgba(0,0,0,.08)":"none",transition:"all .15s",textTransform:"capitalize"}}>
+                      {t}
+                    </button>
+                  ))}
+                </div>
+                <div style={{fontSize:12,color:"var(--muted)",marginBottom:16,lineHeight:1.5}}>{TMPL_DESCS[emailTemplate]}</div>
+
+                {/* Shared fields */}
                 <Field label="To (recipient email)" value={emailTo} onChange={setEmailTo} placeholder="client@company.com" type="email"/>
                 <Field label="Subject line" value={emailSubject} onChange={setEmailSubject} placeholder="Here's what we've been building…"/>
 
-                {/* BODY + TOOLBAR */}
+                {/* Hero image (all templates) */}
                 <div className="field" style={{marginTop:4}}>
-                  <label>Email content</label>
-
-                  {/* Toolbar */}
-                  <div style={{display:"flex",gap:6,marginBottom:8,flexWrap:"wrap",alignItems:"center"}}>
-                    {/* Insert button */}
-                    <button onClick={()=>insertAt("\n[View now](https://)\n")} style={{display:"inline-flex",alignItems:"center",gap:5,padding:"5px 11px",background:emailBtnColor,border:"none",borderRadius:999,fontSize:12,fontWeight:500,color:"#fff",cursor:"pointer",whiteSpace:"nowrap"}}>
-                      <span style={{display:"inline-block",transform:"rotate(-45deg)",fontSize:13,lineHeight:1,fontWeight:300}}>→</span> Insert button
-                    </button>
-
-                    {/* Button color swatches */}
-                    <div style={{display:"flex",alignItems:"center",gap:4,padding:"4px 8px",background:"var(--line)",borderRadius:999}}>
-                      <span style={{fontSize:10,color:"var(--muted)",marginRight:2,whiteSpace:"nowrap"}}>Color</span>
-                      {["#0a0a0a","#B86CF9","#1a1a2e","#c0392b"].map(c=>(
-                        <button key={c} onClick={()=>setEmailBtnColor(c)} title={c} style={{width:16,height:16,borderRadius:"50%",background:c,border:emailBtnColor===c?"2.5px solid #B86CF9":"2.5px solid transparent",cursor:"pointer",padding:0,flexShrink:0}}/>
-                      ))}
-                      <input type="color" value={emailBtnColor} onChange={e=>setEmailBtnColor(e.target.value)} title="Custom color" style={{width:18,height:18,borderRadius:"50%",border:"none",padding:0,cursor:"pointer",background:"transparent",appearance:"none",WebkitAppearance:"none"}}/>
-                    </div>
-
-                    {/* Suggest URL */}
-                    <button onClick={suggestUrls} style={{display:"inline-flex",alignItems:"center",gap:5,padding:"5px 11px",background:"var(--line)",border:"none",borderRadius:999,fontSize:12,fontWeight:500,color:"var(--ink)",cursor:"pointer",whiteSpace:"nowrap"}}>
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg> Suggest link
-                    </button>
-
-                    {/* Upload image */}
-                    <label style={{display:"inline-flex",alignItems:"center",gap:5,padding:"5px 11px",background:"var(--line)",border:"none",borderRadius:999,fontSize:12,fontWeight:500,color:"var(--ink)",cursor:"pointer",whiteSpace:"nowrap"}}>
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
-                      {emailImgUploading?"Uploading…":"Insert image"}
-                      <input type="file" accept="image/*" style={{display:"none"}} onChange={e=>{const f=e.target.files?.[0];if(f)uploadAndInsert(f);}}/>
+                  <label>Hero image <span style={{fontWeight:400,color:"var(--muted)"}}>(optional)</span></label>
+                  <div style={{display:"flex",gap:8,alignItems:"center"}}>
+                    <input
+                      type="text"
+                      value={emailHeroImg}
+                      onChange={e=>setEmailHeroImg(e.target.value)}
+                      placeholder="https://… or upload"
+                      style={{flex:1,fontFamily:"var(--f-mono)",fontSize:12,padding:"7px 11px",background:"var(--canvas)",border:"1px solid var(--line)",borderRadius:"var(--r-sm)",color:"var(--ink)",outline:"none"}}
+                    />
+                    <label style={{display:"inline-flex",alignItems:"center",gap:5,padding:"7px 13px",background:"var(--line)",border:"none",borderRadius:"var(--r-sm)",fontSize:12,fontWeight:500,color:"var(--ink)",cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
+                      {emailHeroUploading?"Uploading…":"Upload"}
+                      <input type="file" accept="image/*" style={{display:"none"}} onChange={e=>{const f=e.target.files?.[0];if(f)uploadHero(f);}}/>
                     </label>
                   </div>
-
-                  {/* URL suggestion chips */}
-                  {emailUrlSuggestions.length>0&&(
-                    <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:8,padding:"10px 12px",background:"#faf8ff",borderRadius:8,border:"1px solid rgba(184,108,249,.2)"}}>
-                      <span style={{fontSize:11,color:"var(--muted)",width:"100%",marginBottom:2}}>Click a URL to insert as a button:</span>
-                      {emailUrlSuggestions.map(u=>(
-                        <button key={u} onClick={()=>{insertAt(`\n[View now](${u})\n`);setEmailUrlSuggestions([]);}} style={{padding:"4px 10px",background:"#fff",border:"1px solid var(--brand)",borderRadius:999,fontSize:11,color:"var(--brand)",cursor:"pointer",fontFamily:"var(--f-mono)",maxWidth:240,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                          {u}
-                        </button>
-                      ))}
-                      <button onClick={()=>setEmailUrlSuggestions([])} style={{padding:"4px 10px",background:"transparent",border:"1px solid var(--line)",borderRadius:999,fontSize:11,color:"var(--muted)",cursor:"pointer"}}>✕</button>
+                  {emailHeroImg&&(
+                    <div style={{marginTop:8,position:"relative",display:"inline-block"}}>
+                      <img src={emailHeroImg} alt="Hero" style={{width:"100%",maxWidth:260,height:80,objectFit:"cover",borderRadius:6,display:"block"}}/>
+                      <button onClick={()=>setEmailHeroImg("")} style={{position:"absolute",top:4,right:4,background:"rgba(0,0,0,.6)",border:"none",borderRadius:"50%",width:20,height:20,cursor:"pointer",color:"#fff",fontSize:11,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
                     </div>
                   )}
-
-                  <textarea
-                    ref={emailTextareaRef}
-                    value={emailRawContent}
-                    onChange={e=>setEmailRawContent(e.target.value)}
-                    placeholder={`Hi Ahmed,\n\nHope you're doing well! Here's a quick update on the project.\n\n## What we shipped this week\n- Redesigned the onboarding flow\n- Integrated the payment gateway\n- Performance improvements across the board\n\n> "The new design feels like a completely different product." — Early feedback\n\n![Project screenshot](https://your-image-url.com)\n\n[View the staging site](https://staging.example.com)\n\nLet us know if you have any questions.`}
-                    style={{width:"100%",minHeight:280,resize:"vertical",fontFamily:"var(--f-mono)",fontSize:12.5,lineHeight:1.65,padding:"12px 14px",background:"var(--canvas)",border:"1px solid var(--line)",borderRadius:"var(--r-sm)",color:"var(--ink)",outline:"none"}}
-                  />
-
-                  {/* Cheatsheet */}
-                  <div style={{marginTop:8,padding:"10px 14px",background:"var(--line)",borderRadius:8}}>
-                    <div style={{fontSize:10,fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",color:"var(--muted)",marginBottom:7}}>Syntax</div>
-                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"3px 16px"}}>
-                      {[["## Heading","Brand-color italic heading"],["### Sub","Dark subheading"],["**bold**","Bold text"],["- item","Bullet list"],["> quote","Highlight quote"],["---","Divider"],["[Label](url)","↗ Button (global color)"],["[Label](url){#B86CF9}","↗ Button custom color"],["![caption](url)","Image (anywhere)"]].map(([s,d])=>(
-                        <div key={s} style={{display:"flex",gap:8,alignItems:"baseline",padding:"2px 0"}}>
-                          <code style={{fontFamily:"var(--f-mono)",fontSize:10,color:"var(--brand)",flexShrink:0,minWidth:120}}>{s}</code>
-                          <span style={{fontSize:10,color:"var(--muted)"}}>{d}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
                 </div>
 
+                {/* ── Campaign fields ── */}
+                {emailTemplate==="campaign"&&(
+                  <div className="field" style={{marginTop:4}}>
+                    <label>Email content</label>
+                    <div style={{display:"flex",gap:6,marginBottom:8,flexWrap:"wrap",alignItems:"center"}}>
+                      <button onClick={()=>insertAt("\n[View now](https://)\n")} style={{display:"inline-flex",alignItems:"center",gap:5,padding:"5px 11px",background:emailBtnColor,border:"none",borderRadius:999,fontSize:12,fontWeight:500,color:"#fff",cursor:"pointer",whiteSpace:"nowrap"}}>
+                        <span style={{display:"inline-block",transform:"rotate(-45deg)",fontSize:13,lineHeight:1,fontWeight:300}}>→</span> Insert button
+                      </button>
+                      <div style={{display:"flex",alignItems:"center",gap:4,padding:"4px 8px",background:"var(--line)",borderRadius:999}}>
+                        <span style={{fontSize:10,color:"var(--muted)",marginRight:2,whiteSpace:"nowrap"}}>Color</span>
+                        {["#0a0a0a","#B86CF9","#1a1a2e","#c0392b"].map(c=>(
+                          <button key={c} onClick={()=>setEmailBtnColor(c)} title={c} style={{width:16,height:16,borderRadius:"50%",background:c,border:emailBtnColor===c?"2.5px solid #B86CF9":"2.5px solid transparent",cursor:"pointer",padding:0,flexShrink:0}}/>
+                        ))}
+                        <input type="color" value={emailBtnColor} onChange={e=>setEmailBtnColor(e.target.value)} title="Custom color" style={{width:18,height:18,borderRadius:"50%",border:"none",padding:0,cursor:"pointer",background:"transparent",appearance:"none",WebkitAppearance:"none"}}/>
+                      </div>
+                      <button onClick={suggestUrls} style={{display:"inline-flex",alignItems:"center",gap:5,padding:"5px 11px",background:"var(--line)",border:"none",borderRadius:999,fontSize:12,fontWeight:500,color:"var(--ink)",cursor:"pointer",whiteSpace:"nowrap"}}>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg> Suggest link
+                      </button>
+                      <label style={{display:"inline-flex",alignItems:"center",gap:5,padding:"5px 11px",background:"var(--line)",border:"none",borderRadius:999,fontSize:12,fontWeight:500,color:"var(--ink)",cursor:"pointer",whiteSpace:"nowrap"}}>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
+                        {emailImgUploading?"Uploading…":"Insert image"}
+                        <input type="file" accept="image/*" style={{display:"none"}} onChange={e=>{const f=e.target.files?.[0];if(f)uploadAndInsert(f);}}/>
+                      </label>
+
+                      {/* PDF download button */}
+                      <button onClick={()=>setEmailPdfOpen(o=>!o)} style={{display:"inline-flex",alignItems:"center",gap:5,padding:"5px 11px",background:emailPdfOpen?"var(--brand)":"var(--line)",border:"none",borderRadius:999,fontSize:12,fontWeight:500,color:emailPdfOpen?"#fff":"var(--ink)",cursor:"pointer",whiteSpace:"nowrap"}}>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
+                        Attach PDF
+                      </button>
+                    </div>
+
+                    {/* PDF attachment panel */}
+                    {emailPdfOpen&&(
+                      <div style={{marginBottom:10,padding:"14px 16px",background:"var(--canvas)",border:"1px solid var(--brand)",borderRadius:10,display:"flex",flexDirection:"column",gap:10}}>
+                        <div style={{fontSize:11,fontWeight:600,color:"var(--ink)",letterSpacing:".04em",textTransform:"uppercase"}}>Attach a PDF as a download button</div>
+
+                        {/* Button label */}
+                        <div style={{display:"flex",flexDirection:"column",gap:4}}>
+                          <span style={{fontSize:11,color:"var(--muted)"}}>Button label</span>
+                          <input
+                            type="text"
+                            value={emailPdfLabel}
+                            onChange={e=>setEmailPdfLabel(e.target.value)}
+                            placeholder="Download Invoice"
+                            style={{fontFamily:"var(--f-sans)",fontSize:13,padding:"7px 11px",background:"var(--paper)",border:"1px solid var(--line)",borderRadius:"var(--r-sm)",color:"var(--ink)",outline:"none"}}
+                          />
+                        </div>
+
+                        {/* Upload or paste URL */}
+                        <div style={{display:"flex",flexDirection:"column",gap:4}}>
+                          <span style={{fontSize:11,color:"var(--muted)"}}>PDF file or URL</span>
+                          <div style={{display:"flex",gap:8,alignItems:"center"}}>
+                            <input
+                              type="text"
+                              value={emailPdfUrl}
+                              onChange={e=>setEmailPdfUrl(e.target.value)}
+                              placeholder="https://… or upload below"
+                              style={{flex:1,fontFamily:"var(--f-mono)",fontSize:11.5,padding:"7px 11px",background:"var(--paper)",border:"1px solid var(--line)",borderRadius:"var(--r-sm)",color:"var(--ink)",outline:"none"}}
+                            />
+                            <label style={{display:"inline-flex",alignItems:"center",gap:5,padding:"7px 13px",background:"var(--line)",border:"none",borderRadius:"var(--r-sm)",fontSize:12,fontWeight:500,color:"var(--ink)",cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                              {emailPdfUploading?"Uploading…":"Upload PDF"}
+                              <input type="file" accept=".pdf,application/pdf" style={{display:"none"}} onChange={async e=>{
+                                const f=e.target.files?.[0]; if(!f) return;
+                                setEmailPdfUploading(true);
+                                try{
+                                  const fd=new FormData(); fd.append("file",f);
+                                  const r=await fetch("/api/upload",{method:"POST",body:fd});
+                                  const d=await r.json();
+                                  if(d.url) setEmailPdfUrl(d.url); else toast("Upload failed");
+                                }catch{toast("Upload failed.");}
+                                setEmailPdfUploading(false);
+                                e.target.value="";
+                              }}/>
+                            </label>
+                          </div>
+                          {emailPdfUrl&&<div style={{fontSize:10,color:"var(--brand)",fontFamily:"var(--f-mono)",wordBreak:"break-all",marginTop:2}}>{emailPdfUrl}</div>}
+                        </div>
+
+                        {/* Actions */}
+                        <div style={{display:"flex",gap:8,marginTop:2}}>
+                          <button onClick={()=>{
+                            if(!emailPdfUrl){toast("Upload a PDF or paste a URL first");return;}
+                            if(!emailPdfLabel.trim()){toast("Enter a button label");return;}
+                            insertAt(`\n[${emailPdfLabel.trim()}](${emailPdfUrl})\n`);
+                            setEmailPdfOpen(false); setEmailPdfUrl(""); setEmailPdfLabel("Download PDF");
+                          }} style={{padding:"7px 18px",background:"var(--brand)",border:"none",borderRadius:999,fontSize:12,fontWeight:600,color:"#fff",cursor:"pointer"}}>
+                            Insert button
+                          </button>
+                          <button onClick={()=>{setEmailPdfOpen(false);setEmailPdfUrl("");}} style={{padding:"7px 14px",background:"transparent",border:"1px solid var(--line)",borderRadius:999,fontSize:12,color:"var(--muted)",cursor:"pointer"}}>
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {emailUrlSuggestions.length>0&&(
+                      <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:8,padding:"10px 12px",background:"#faf8ff",borderRadius:8,border:"1px solid rgba(184,108,249,.2)"}}>
+                        <span style={{fontSize:11,color:"var(--muted)",width:"100%",marginBottom:2}}>Click a URL to insert as a button:</span>
+                        {emailUrlSuggestions.map(u=>(
+                          <button key={u} onClick={()=>{insertAt(`\n[View now](${u})\n`);setEmailUrlSuggestions([]);}} style={{padding:"4px 10px",background:"#fff",border:"1px solid var(--brand)",borderRadius:999,fontSize:11,color:"var(--brand)",cursor:"pointer",fontFamily:"var(--f-mono)",maxWidth:240,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                            {u}
+                          </button>
+                        ))}
+                        <button onClick={()=>setEmailUrlSuggestions([])} style={{padding:"4px 10px",background:"transparent",border:"1px solid var(--line)",borderRadius:999,fontSize:11,color:"var(--muted)",cursor:"pointer"}}>✕</button>
+                      </div>
+                    )}
+                    <textarea
+                      ref={emailTextareaRef}
+                      value={emailRawContent}
+                      onChange={e=>setEmailRawContent(e.target.value)}
+                      placeholder={`Hi Ahmed,\n\nHope you're doing well! Here's a quick update on the project.\n\n## What we shipped this week\n- Redesigned the onboarding flow\n- Integrated the payment gateway\n- Performance improvements across the board\n\n> "The new design feels like a completely different product." — Early feedback\n\n![Project screenshot](https://your-image-url.com)\n\n[View the staging site](https://staging.example.com)\n\nLet us know if you have any questions.`}
+                      style={{width:"100%",minHeight:260,resize:"vertical",fontFamily:"var(--f-mono)",fontSize:12.5,lineHeight:1.65,padding:"12px 14px",background:"var(--canvas)",border:"1px solid var(--line)",borderRadius:"var(--r-sm)",color:"var(--ink)",outline:"none"}}
+                    />
+                    <div style={{marginTop:8,padding:"10px 14px",background:"var(--line)",borderRadius:8}}>
+                      <div style={{fontSize:10,fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",color:"var(--muted)",marginBottom:7}}>Syntax</div>
+                      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"3px 16px"}}>
+                        {[["## Heading","Brand-color italic heading"],["### Sub","Dark subheading"],["**bold**","Bold text"],["- item","Bullet list"],["> quote","Highlight quote"],["---","Divider"],["[Label](url)","↗ Button (global color)"],["[Label](url){#B86CF9}","↗ Button custom color"],["![caption](url)","Image (anywhere)"]].map(([s,d])=>(
+                          <div key={s} style={{display:"flex",gap:8,alignItems:"baseline",padding:"2px 0"}}>
+                            <code style={{fontFamily:"var(--f-mono)",fontSize:10,color:"var(--brand)",flexShrink:0,minWidth:120}}>{s}</code>
+                            <span style={{fontSize:10,color:"var(--muted)"}}>{d}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Proposal fields ── */}
+                {emailTemplate==="proposal"&&(
+                  <>
+                    <Field label="Client name" value={emailPropClient} onChange={setEmailPropClient} placeholder="Ahmed Al-Rashid"/>
+                    <Field label="Project title" value={emailPropTitle} onChange={setEmailPropTitle} placeholder="AI-Powered E-commerce Platform"/>
+                    <div className="field">
+                      <label>Executive summary</label>
+                      <textarea value={emailPropSummary} onChange={e=>setEmailPropSummary(e.target.value)} placeholder="A brief overview of the project and our approach…" style={{width:"100%",minHeight:100,resize:"vertical",fontFamily:"var(--f-mono)",fontSize:12.5,lineHeight:1.65,padding:"10px 12px",background:"var(--canvas)",border:"1px solid var(--line)",borderRadius:"var(--r-sm)",color:"var(--ink)",outline:"none"}}/>
+                    </div>
+                    <div className="field">
+                      <label>Scope of work <span style={{fontWeight:400,color:"var(--muted)",fontSize:11}}>(one item per line)</span></label>
+                      <textarea value={emailPropScope} onChange={e=>setEmailPropScope(e.target.value)} placeholder={"Custom e-commerce storefront\nAI product recommendation engine\nPayment gateway integration\nMobile-responsive design"} style={{width:"100%",minHeight:100,resize:"vertical",fontFamily:"var(--f-mono)",fontSize:12.5,lineHeight:1.65,padding:"10px 12px",background:"var(--canvas)",border:"1px solid var(--line)",borderRadius:"var(--r-sm)",color:"var(--ink)",outline:"none"}}/>
+                    </div>
+                    <Field label="Timeline" value={emailPropTimeline} onChange={setEmailPropTimeline} placeholder="8–12 weeks"/>
+                    <Field label="Investment / budget" value={emailPropInvestment} onChange={setEmailPropInvestment} placeholder="$24,000"/>
+                    <Field label="CTA URL (Schedule a Call)" value={emailPropCtaUrl} onChange={setEmailPropCtaUrl} placeholder="https://cal.com/foxmen"/>
+                    {/* Button color for CTA */}
+                    <div style={{display:"flex",alignItems:"center",gap:6,marginTop:4}}>
+                      <span style={{fontSize:12,color:"var(--muted)"}}>Button color:</span>
+                      {["#0a0a0a","#B86CF9","#1a1a2e","#c0392b"].map(c=>(
+                        <button key={c} onClick={()=>setEmailBtnColor(c)} title={c} style={{width:18,height:18,borderRadius:"50%",background:c,border:emailBtnColor===c?"2.5px solid #B86CF9":"2.5px solid transparent",cursor:"pointer",padding:0,flexShrink:0}}/>
+                      ))}
+                      <input type="color" value={emailBtnColor} onChange={e=>setEmailBtnColor(e.target.value)} title="Custom color" style={{width:20,height:20,borderRadius:"50%",border:"none",padding:0,cursor:"pointer",background:"transparent",appearance:"none",WebkitAppearance:"none"}}/>
+                    </div>
+                  </>
+                )}
+
+                {/* ── Payment fields ── */}
+                {emailTemplate==="payment"&&(
+                  <>
+                    <Field label="Client name" value={emailPayClient} onChange={setEmailPayClient} placeholder="Ahmed Al-Rashid"/>
+                    <Field label="Invoice #" value={emailPayInvoice} onChange={setEmailPayInvoice} placeholder="INV-2026-001"/>
+                    <Field label="Due date" value={emailPayDueDate} onChange={setEmailPayDueDate} type="date"/>
+                    <div className="field">
+                      <label>Line items <span style={{fontWeight:400,color:"var(--muted)",fontSize:11}}>(Format: Service description | $1,500)</span></label>
+                      <textarea value={emailPayItems} onChange={e=>setEmailPayItems(e.target.value)} placeholder={"UI/UX Design & Prototyping | $4,000\nReact Frontend Development | $8,000\nAPI Integration | $3,500"} style={{width:"100%",minHeight:100,resize:"vertical",fontFamily:"var(--f-mono)",fontSize:12.5,lineHeight:1.65,padding:"10px 12px",background:"var(--canvas)",border:"1px solid var(--line)",borderRadius:"var(--r-sm)",color:"var(--ink)",outline:"none"}}/>
+                    </div>
+                    <Field label="Total" value={emailPayTotal} onChange={setEmailPayTotal} placeholder="$15,500"/>
+                    <Field label="Payment link (optional)" value={emailPayLink} onChange={setEmailPayLink} placeholder="https://pay.stripe.com/…"/>
+                    <div className="field">
+                      <label>Notes <span style={{fontWeight:400,color:"var(--muted)",fontSize:11}}>(optional)</span></label>
+                      <textarea value={emailPayNotes} onChange={e=>setEmailPayNotes(e.target.value)} placeholder="Payment due within 14 days. Bank transfer or Wise accepted." style={{width:"100%",minHeight:72,resize:"vertical",fontFamily:"var(--f-mono)",fontSize:12.5,lineHeight:1.65,padding:"10px 12px",background:"var(--canvas)",border:"1px solid var(--line)",borderRadius:"var(--r-sm)",color:"var(--ink)",outline:"none"}}/>
+                    </div>
+                  </>
+                )}
+
+                {/* ── Custom fields ── */}
+                {emailTemplate==="custom"&&(
+                  <div className="field" style={{marginTop:4}}>
+                    <label>Raw HTML <span style={{fontWeight:400,color:"var(--muted)",fontSize:11}}>(inserted directly into email body)</span></label>
+                    <textarea
+                      ref={emailTextareaRef}
+                      value={emailRawContent}
+                      onChange={e=>setEmailRawContent(e.target.value)}
+                      placeholder={`<h2 style="font-family:serif;color:#B86CF9;">Your custom heading</h2>\n<p>Any HTML you want goes here…</p>`}
+                      style={{width:"100%",minHeight:280,resize:"vertical",fontFamily:"var(--f-mono)",fontSize:12.5,lineHeight:1.65,padding:"12px 14px",background:"var(--canvas)",border:"1px solid var(--line)",borderRadius:"var(--r-sm)",color:"var(--ink)",outline:"none"}}
+                    />
+                  </div>
+                )}
+
+                {/* Send + Copy buttons */}
                 <div style={{display:"flex",gap:10,marginTop:12}}>
                   <button className="btn-generate" onClick={sendEmail} disabled={emailSending} style={{flex:1}}>
                     {emailSending

@@ -84,10 +84,16 @@ function parseRawContent(raw: string, btnColor: string = "#0a0a0a"): string {
   return out.join("\n");
 }
 
-export function buildEmailCampaignHtml(subject: string, rawContent: string, btnColor: string = "#0a0a0a"): string {
-  const bodyHtml = parseRawContent(rawContent, btnColor);
-  const year = new Date().getFullYear();
+/* ── Hero image row ── */
+function buildHeroSection(heroImage: string): string {
+  if (!heroImage) return "";
+  return `\n  <tr><td style="padding:0;margin:0;font-size:0;line-height:0;"><img src="${heroImage}" alt="" width="600" style="display:block;width:100%;max-width:600px;height:auto;border:0;"/></td></tr>`;
+}
 
+/* ── Shared email shell (header + accent line + footer) ── */
+function emailShell(subject: string, bodyHtml: string, heroImage = ""): string {
+  const year = new Date().getFullYear();
+  const heroRow = buildHeroSection(heroImage);
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -98,7 +104,7 @@ export function buildEmailCampaignHtml(subject: string, rawContent: string, btnC
 <title>${subject}</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
 <style>
-.em-arr{display:block;transform:rotate(-45deg);}
+.em-arr{display:block;}
 @media only screen and (max-width:600px){
   .em-outer   { padding:0 !important; background:#0a0a0a !important; }
   .em-card    { border-radius:0 !important; box-shadow:none !important; }
@@ -141,21 +147,26 @@ export function buildEmailCampaignHtml(subject: string, rawContent: string, btnC
       </td>
       <td style="vertical-align:middle;">
         <div class="em-hd-name" style="font-family:${IS};font-size:26px;font-weight:400;color:#ffffff;letter-spacing:-.02em;line-height:1.1;">Foxmen <em style="font-style:italic;color:${BRAND_COLOR};">Studio</em></div>
-        <div class="em-hd-tag" style="font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-top:7px;">Code · Craft · Care</div>
+        <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:${BRAND_COLOR};margin-top:5px;">Code &middot; Craft &middot; Care</div>
       </td>
       <td class="em-hd-meta" style="text-align:right;vertical-align:middle;">
-        <div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);line-height:1.9;">Est. 2019<br/>AI-Powered</div>
+        <a href="https://foxmen.studio" style="display:block;font-size:11px;color:${BRAND_COLOR};text-decoration:none;letter-spacing:.01em;margin-bottom:5px;">https://foxmen.studio</a>
+        <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:5px;">US &middot; UK &middot; International</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.38);">contact@foxmenstudio.com</div>
       </td>
     </tr></table>
     <div style="height:1px;background:rgba(255,255,255,.15);margin:20px 0 16px;"></div>
-    <div class="em-hd-info" style="font-size:11px;color:rgba(255,255,255,.55);">
-      <strong style="color:rgba(255,255,255,.85);font-weight:500;">contact@foxmenstudio.com</strong> &nbsp;·&nbsp; foxmen.studio
-    </div>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
+      <tr>
+        <td class="em-hd-info" style="font-size:11px;color:rgba(255,255,255,.5);line-height:1.6;">Web apps &nbsp;·&nbsp; AI-integrated products &nbsp;·&nbsp; Mobile &amp; software</td>
+        <td style="text-align:right;white-space:nowrap;font-size:11px;"><strong style="color:rgba(255,255,255,.75);font-weight:500;">contact@foxmenstudio.com</strong></td>
+      </tr>
+    </table>
   </td></tr>
 
   <!-- ACCENT LINE -->
   <tr><td style="height:3px;background:linear-gradient(90deg,${BRAND_COLOR},${BRAND_DARK});font-size:0;line-height:0;">&nbsp;</td></tr>
-
+${heroRow}
   <!-- BODY -->
   <tr><td class="em-body" style="padding:52px 60px 44px;">
     ${bodyHtml}
@@ -202,18 +213,179 @@ export function buildEmailCampaignHtml(subject: string, rawContent: string, btnC
 </html>`;
 }
 
-export async function POST(req: Request) {
-  const { to, subject, rawContent, btnColor } = await req.json();
+export function buildEmailCampaignHtml(subject: string, rawContent: string, btnColor: string = "#0a0a0a", heroImage = "", isCustom = false): string {
+  const bodyHtml = isCustom ? rawContent : parseRawContent(rawContent, btnColor);
+  return emailShell(subject, bodyHtml, heroImage);
+}
 
-  if (!to)         return NextResponse.json({ error: "No recipient" },  { status: 400 });
-  if (!subject)    return NextResponse.json({ error: "No subject" },    { status: 400 });
-  if (!rawContent) return NextResponse.json({ error: "No content" },    { status: 400 });
+/* ── Proposal email ── */
+interface ProposalEmailData {
+  clientName: string;
+  projectTitle: string;
+  summary: string;
+  scopeItems: string[];
+  timeline: string;
+  investment: string;
+  ctaUrl: string;
+  subject: string;
+  heroImage: string;
+  btnColor: string;
+}
+
+function buildProposalHtml(data: ProposalEmailData): string {
+  const scopeRows = (data.scopeItems || []).map(item =>
+    `<tr><td style="padding:10px 0;border-bottom:1px solid #f0ede8;font-family:${IS};font-size:16px;color:#3a3a3a;line-height:1.6;">
+      <span style="color:${BRAND_COLOR};margin-right:10px;">→</span>${item}
+    </td></tr>`
+  ).join("");
+
+  const ctaHtml = data.ctaUrl ? ctaButton("Schedule a Call", data.ctaUrl, data.btnColor || "#0a0a0a") : "";
+
+  const bodyHtml = `
+    <!-- eyebrow -->
+    <p style="margin:0 0 8px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:${BRAND_COLOR};">Prepared For</p>
+
+    <!-- Client Name -->
+    <h1 style="margin:0 0 24px;font-family:${IS};font-size:36px;font-weight:400;color:#0a0a0a;line-height:1.1;letter-spacing:-.02em;">${data.clientName || "Valued Client"}</h1>
+
+    <!-- divider -->
+    <div style="height:1px;background:#f0ede8;margin:0 0 24px;"></div>
+
+    <!-- Project Title -->
+    <h2 style="margin:0 0 20px;font-family:${IS};font-size:28px;font-weight:400;color:#1a1a1a;line-height:1.2;letter-spacing:-.01em;">${data.projectTitle || ""}</h2>
+
+    <!-- Summary -->
+    ${data.summary ? `<p class="em-p" style="margin:0 0 32px;font-family:${IS};font-size:16px;line-height:1.85;color:#3a3a3a;">${data.summary}</p>` : ""}
+
+    <!-- 01 SCOPE -->
+    <p style="margin:0 0 12px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:${BRAND_COLOR};">01 &nbsp; Scope of Work</p>
+    ${scopeRows ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin-bottom:32px;">${scopeRows}</table>` : ""}
+
+    <!-- 02 TIMELINE -->
+    <p style="margin:0 0 10px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:${BRAND_COLOR};">02 &nbsp; Timeline</p>
+    <p class="em-p" style="margin:0 0 32px;font-family:${IS};font-size:16px;line-height:1.85;color:#3a3a3a;">${data.timeline || ""}</p>
+
+    <!-- 03 INVESTMENT -->
+    <p style="margin:0 0 12px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:${BRAND_COLOR};">03 &nbsp; Investment</p>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin-bottom:32px;">
+      <tr><td style="background:#0a0a0a;padding:28px 32px;border-radius:8px;">
+        <div style="font-family:${IS};font-size:44px;font-weight:400;color:${BRAND_COLOR};line-height:1;letter-spacing:-.02em;">${data.investment || ""}</div>
+      </td></tr>
+    </table>
+
+    ${ctaHtml}
+  `;
+
+  return emailShell(data.subject, bodyHtml, data.heroImage);
+}
+
+/* ── Payment email ── */
+interface PaymentItem {
+  service: string;
+  amount: string;
+}
+
+interface PaymentEmailData {
+  clientName: string;
+  invoiceNum: string;
+  dueDate: string;
+  items: PaymentItem[];
+  total: string;
+  payLink: string;
+  notes: string;
+  subject: string;
+  heroImage: string;
+}
+
+function buildPaymentHtml(data: PaymentEmailData): string {
+  const today = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+  const fmtDue = data.dueDate
+    ? new Date(data.dueDate + "T00:00:00").toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+    : "";
+
+  const itemRows = (data.items || []).filter(it => it.service || it.amount).map(it =>
+    `<tr>
+      <td style="padding:12px 0;border-bottom:1px solid #f0ede8;font-family:${IS};font-size:15px;color:#3a3a3a;line-height:1.5;">${it.service}</td>
+      <td style="padding:12px 0;border-bottom:1px solid #f0ede8;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#0a0a0a;text-align:right;white-space:nowrap;font-weight:600;">${it.amount}</td>
+    </tr>`
+  ).join("");
+
+  const payBtnHtml = data.payLink ? ctaButton("Pay Now", data.payLink, "#0a0a0a") : "";
+
+  const bodyHtml = `
+    <!-- eyebrow -->
+    <p style="margin:0 0 8px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:${BRAND_COLOR};">Payment Request</p>
+
+    <!-- Invoice # -->
+    <h2 style="margin:0 0 12px;font-family:${IS};font-size:28px;font-weight:400;color:#1a1a1a;line-height:1.2;letter-spacing:-.01em;">${data.invoiceNum || "Invoice"}</h2>
+
+    <!-- Dates -->
+    <p style="margin:0 0 8px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:12px;color:#888;">
+      Issued: <strong style="color:#555;">${today}</strong>
+      ${fmtDue ? `&nbsp;&middot;&nbsp; Due: <strong style="color:#555;">${fmtDue}</strong>` : ""}
+    </p>
+
+    <!-- Client -->
+    ${data.clientName ? `<p style="margin:0 0 24px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#666;">Billed to: <strong style="color:#0a0a0a;">${data.clientName}</strong></p>` : "<div style='margin-bottom:24px;'></div>"}
+
+    <!-- divider -->
+    <div style="height:1px;background:#f0ede8;margin:0 0 20px;"></div>
+
+    <!-- Line items -->
+    ${itemRows ? `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin-bottom:0;">
+      <thead>
+        <tr>
+          <th style="padding:0 0 10px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#aaa;text-align:left;border-bottom:2px solid #f0ede8;">Service</th>
+          <th style="padding:0 0 10px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#aaa;text-align:right;border-bottom:2px solid #f0ede8;">Amount</th>
+        </tr>
+      </thead>
+      <tbody>${itemRows}</tbody>
+    </table>` : ""}
+
+    <!-- Total row -->
+    ${data.total ? `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin-top:4px;margin-bottom:28px;">
+      <tr><td style="background:#0a0a0a;padding:18px 24px;border-radius:0 0 8px 8px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation"><tr>
+          <td style="font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.6);">Total Due</td>
+          <td style="font-family:${IS};font-size:26px;font-weight:400;color:#ffffff;text-align:right;letter-spacing:-.01em;">${data.total}</td>
+        </tr></table>
+      </td></tr>
+    </table>` : ""}
+
+    ${payBtnHtml}
+
+    <!-- Notes -->
+    ${data.notes ? `
+    <div style="margin-top:24px;padding:16px 20px;background:#faf8ff;border-left:3px solid ${BRAND_COLOR};border-radius:0 4px 4px 0;">
+      <p style="margin:0 0 6px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:${BRAND_COLOR};">Notes</p>
+      <p style="margin:0;font-family:${IS};font-size:15px;line-height:1.75;color:#4a4a4a;">${data.notes}</p>
+    </div>` : ""}
+  `;
+
+  return emailShell(data.subject, bodyHtml, data.heroImage);
+}
+
+export async function POST(req: Request) {
+  const { template, to, subject, rawContent, btnColor, heroImage, proposalData, paymentData } = await req.json();
+
+  if (!to)      return NextResponse.json({ error: "No recipient" },  { status: 400 });
+  if (!subject) return NextResponse.json({ error: "No subject" },    { status: 400 });
 
   if (!process.env.RESEND_API_KEY) {
     return NextResponse.json({ error: "RESEND_API_KEY not configured" }, { status: 500 });
   }
 
-  const html = buildEmailCampaignHtml(subject, rawContent, btnColor ?? "#0a0a0a");
+  let html: string;
+  if (template === "proposal") {
+    html = buildProposalHtml({ ...proposalData, subject, heroImage: heroImage ?? "", btnColor: btnColor ?? "#0a0a0a" });
+  } else if (template === "payment") {
+    html = buildPaymentHtml({ ...paymentData, subject, heroImage: heroImage ?? "" });
+  } else {
+    if (!rawContent) return NextResponse.json({ error: "No content" }, { status: 400 });
+    html = buildEmailCampaignHtml(subject, rawContent, btnColor ?? "#0a0a0a", heroImage ?? "", template === "custom");
+  }
 
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
