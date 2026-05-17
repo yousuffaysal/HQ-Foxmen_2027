@@ -679,6 +679,7 @@ export default function AdminPage() {
   const [emailSending,     setEmailSending]     = useState(false);
   const [emailImgUploading,setEmailImgUploading]= useState(false);
   const [emailUrlSuggestions, setEmailUrlSuggestions] = useState<string[]>([]);
+  const [emailBtnColor,    setEmailBtnColor]    = useState("#0a0a0a");
   const emailTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [invAiLoading,   setInvAiLoading]   = useState(false);
   const [projAiPrompt,   setProjAiPrompt]   = useState("");
@@ -1852,14 +1853,16 @@ export default function AdminPage() {
           const LOGO_C = "https://res.cloudinary.com/djofqa3vc/image/upload/v1778967518/logo_sn_fox_copy_e9sigm.png";
 
           /* pill CTA button — email-safe nested tables, matches site design */
-          function ctaBtn(label:string, url:string):string {
-            return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:28px 0;"><tr><td align="left">
-<a href="${url}" style="text-decoration:none;display:inline-block;">
-<table cellpadding="0" cellspacing="0" border="0" style="background:#0a0a0a;border-radius:999px;overflow:hidden;">
+          function ctaBtn(label:string, url:string, overrideColor?:string):string {
+            const c=overrideColor??emailBtnColor;
+            const arrow=`<svg class="em-cta-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;"><path d="M5 12h14M13 5l7 7-7 7" stroke="${c}" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+            return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:32px 0;"><tr><td align="center">
+<a class="em-cta-a" href="${url}" style="text-decoration:none;display:inline-block;">
+<table class="em-cta-tbl" cellpadding="0" cellspacing="0" border="0" style="background:${c};border-radius:999px;overflow:hidden;">
 <tr>
-  <td style="font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:15px;font-weight:500;color:#fff;padding:11px 8px 11px 26px;white-space:nowrap;letter-spacing:-.01em;vertical-align:middle;">${label}</td>
+  <td class="em-cta-lbl" style="font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:15px;font-weight:500;color:#fff;padding:11px 8px 11px 26px;white-space:nowrap;letter-spacing:-.01em;vertical-align:middle;">${label}</td>
   <td style="padding:8px 8px 8px 4px;vertical-align:middle;"><table cellpadding="0" cellspacing="0" border="0"><tr>
-    <td style="width:42px;height:42px;background:#fff;border-radius:50%;text-align:center;vertical-align:middle;font-size:20px;color:#0a0a0a;line-height:42px;">&#x2197;</td>
+    <td class="em-cta-chip" style="width:42px;height:42px;background:#fff;border-radius:50%;text-align:center;vertical-align:middle;">${arrow}</td>
   </tr></table></td>
 </tr>
 </table></a>
@@ -1882,11 +1885,11 @@ export default function AdminPage() {
 
               /* ## heading — brand color, Instrument Serif italic */
               if(line.startsWith("## ")){
-                out.push(`<h2 style="font-family:${IS};font-size:24px;font-weight:400;font-style:italic;color:${BRAND};margin:32px 0 12px;letter-spacing:-.02em;line-height:1.2;">${line.slice(3)}</h2>`);
+                out.push(`<h2 class="em-h2" style="font-family:${IS};font-size:24px;font-weight:400;font-style:italic;color:${BRAND};margin:32px 0 12px;letter-spacing:-.02em;line-height:1.2;">${line.slice(3)}</h2>`);
 
               /* ### sub-heading — dark, Instrument Serif */
               } else if(line.startsWith("### ")){
-                out.push(`<h3 style="font-family:${IS};font-size:18px;font-weight:400;color:#1a1a1a;margin:24px 0 8px;letter-spacing:-.01em;">${line.slice(4)}</h3>`);
+                out.push(`<h3 class="em-h3" style="font-family:${IS};font-size:18px;font-weight:400;color:#1a1a1a;margin:24px 0 8px;letter-spacing:-.01em;">${line.slice(4)}</h3>`);
 
               /* divider */
               } else if(line.trim()==="---"){
@@ -1894,13 +1897,13 @@ export default function AdminPage() {
 
               /* > blockquote */
               } else if(line.startsWith("> ")){
-                out.push(`<blockquote style="margin:24px 0;padding:16px 22px;background:#faf8ff;border-left:3px solid ${BRAND};font-family:${IS};font-size:16px;color:#4a4a4a;line-height:1.75;font-style:italic;">${line.slice(2)}</blockquote>`);
+                out.push(`<blockquote class="em-quote" style="margin:24px 0;padding:16px 22px;background:#faf8ff;border-left:3px solid ${BRAND};font-family:${IS};font-size:16px;color:#4a4a4a;line-height:1.75;font-style:italic;">${line.slice(2)}</blockquote>`);
 
               /* bullet list */
               } else if(/^[-•*]\s/.test(line)){
                 const items:string[]=[];
                 while(i<lines.length&&/^[-•*]\s/.test(lines[i].trimStart())){
-                  items.push(`<li style="padding:4px 0;font-family:${IS};font-size:16px;color:#3a3a3a;line-height:1.75;">${applyInline(lines[i].replace(/^[-•*]\s/,""))}</li>`);
+                  items.push(`<li class="em-li" style="padding:4px 0;font-family:${IS};font-size:16px;color:#3a3a3a;line-height:1.75;">${applyInline(lines[i].replace(/^[-•*]\s/,""))}</li>`);
                   i++;
                 }
                 out.push(`<ul style="margin:12px 0 18px;padding-left:22px;">${items.join("")}</ul>`);
@@ -1910,7 +1913,7 @@ export default function AdminPage() {
               } else if(/^\d+[.)]\s/.test(line)){
                 const items:string[]=[];
                 while(i<lines.length&&/^\d+[.)]\s/.test(lines[i].trimStart())){
-                  items.push(`<li style="padding:4px 0;font-family:${IS};font-size:16px;color:#3a3a3a;line-height:1.75;">${applyInline(lines[i].replace(/^\d+[.)]\s/,""))}</li>`);
+                  items.push(`<li class="em-li" style="padding:4px 0;font-family:${IS};font-size:16px;color:#3a3a3a;line-height:1.75;">${applyInline(lines[i].replace(/^\d+[.)]\s/,""))}</li>`);
                   i++;
                 }
                 out.push(`<ol style="margin:12px 0 18px;padding-left:22px;">${items.join("")}</ol>`);
@@ -1921,20 +1924,20 @@ export default function AdminPage() {
                 const m=line.trim().match(/^!\[([^\]]*)\]\((https?:\/\/[^)]+)\)$/);
                 if(m){
                   const cap=m[1];
-                  out.push(`<div style="margin:24px 0;">`+
+                  out.push(`<div class="em-img-wrap" style="margin:24px 0;">`+
                     `<img src="${m[2]}" alt="${cap}" width="100%" style="display:block;width:100%;height:auto;border:0;border-radius:10px;"/>`+
                     (cap?`<p style="font-family:${IS};font-size:12px;color:#a0a0a0;margin:8px 0 0;font-style:italic;text-align:center;">${cap}</p>`:``)
                   +`</div>`);
                 }
 
               /* [Label](url) — pill CTA button, inline anywhere */
-              } else if(/^\[([^\]]+)\]\((https?:\/\/[^)]+)\)$/.test(line.trim())){
-                const m=line.trim().match(/^\[([^\]]+)\]\((https?:\/\/[^)]+)\)$/);
-                if(m) out.push(ctaBtn(m[1],m[2]));
+              } else if(/^\[([^\]]+)\]\((https?:\/\/[^)]+)\)(\{(#[0-9a-fA-F]{3,6})\})?$/.test(line.trim())){
+                const m=line.trim().match(/^\[([^\]]+)\]\((https?:\/\/[^)]+)\)(\{(#[0-9a-fA-F]{3,6})\})?$/);
+                if(m) out.push(ctaBtn(m[1],m[2],m[4]));
 
               /* paragraph — Instrument Serif, generous line height */
               } else {
-                out.push(`<p style="margin:0 0 18px;font-family:${IS};font-size:16px;line-height:1.85;color:#3a3a3a;">${applyInline(line)}</p>`);
+                out.push(`<p class="em-p" style="margin:0 0 18px;font-family:${IS};font-size:16px;line-height:1.85;color:#3a3a3a;">${applyInline(line)}</p>`);
               }
               i++;
             }
@@ -1946,47 +1949,86 @@ export default function AdminPage() {
             const body=emailRawContent
               ? parseContent(emailRawContent)
               : `<p style="color:#d0cdc8;font-family:${IS};font-size:16px;line-height:1.85;font-style:italic;">Start typing your email content on the left — buttons, images and headings appear here live…</p>`;
-            return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/><style>*{box-sizing:border-box;}body{margin:0;padding:28px 12px;background:#f1efe9;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased;}</style></head><body>
-<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 8px 48px rgba(0,0,0,.12);">
+            return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;}body{margin:0;padding:0;background:#f1efe9;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased;}
+.em-cta-a{position:relative!important;overflow:hidden!important;isolation:isolate!important;display:inline-block!important;transition:color .4s;}
+.em-cta-a::before{content:"";position:absolute;inset:0;z-index:1;background:#B86CF9;transform:translateY(101%);transition:transform .55s cubic-bezier(.25,.46,.45,.94);border-radius:999px;}
+.em-cta-a:hover::before{transform:translateY(0);}
+.em-cta-lbl{position:relative;z-index:2;}
+.em-cta-chip{position:relative;z-index:2;transition:transform .5s cubic-bezier(.25,.46,.45,.94);}
+.em-cta-a:hover .em-cta-chip{transform:translateX(-6px);}
+.em-cta-svg{transform:rotate(-45deg);transition:transform .55s cubic-bezier(.25,.46,.45,.94);}
+.em-cta-a:hover .em-cta-svg{transform:rotate(0deg) translateX(1px);}
+@media only screen and (max-width:600px){
+  .em-outer{padding:0!important;background:#0a0a0a!important;}
+  .em-card{border-radius:0!important;box-shadow:none!important;}
+  .em-hd{padding:24px 20px 18px!important;}
+  .em-hd-lpad{width:44px!important;padding-right:12px!important;}
+  .em-hd-logo{width:36px!important;height:36px!important;}
+  .em-hd-name{font-size:19px!important;}
+  .em-hd-tag{font-size:8px!important;margin-top:4px!important;}
+  .em-hd-meta{display:none!important;font-size:0!important;max-height:0!important;overflow:hidden!important;}
+  .em-hd-info{font-size:10px!important;padding-top:10px!important;}
+  .em-body{padding:28px 20px 24px!important;}
+  .em-h2{font-size:21px!important;margin:24px 0 9px!important;}
+  .em-h3{font-size:16px!important;margin:20px 0 7px!important;}
+  .em-p{font-size:15px!important;line-height:1.75!important;margin:0 0 13px!important;}
+  .em-li{font-size:15px!important;}
+  .em-quote{padding:11px 14px!important;font-size:14px!important;margin:16px 0!important;}
+  .em-img-wrap{margin:18px 0!important;}
+  .em-cta-tbl{width:100%!important;border-radius:999px!important;}
+  .em-cta-lbl{padding:13px 8px 13px 22px!important;font-size:14px!important;}
+  .em-cta-chip{width:38px!important;height:38px!important;}
+  .em-sig{margin-top:24px!important;padding-top:18px!important;}
+  .em-sig-name{font-size:18px!important;}
+  .em-sig-logo{display:none!important;}
+  .em-ft{padding:14px 20px!important;}
+  .em-ft-name{font-size:13px!important;}
+  .em-ft-logo{display:none!important;}
+}
+</style></head><body>
+<table class="em-outer" width="100%" cellpadding="0" cellspacing="0" border="0" style="padding:28px 12px;background:#f1efe9;"><tr><td align="center">
+<table class="em-card" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 8px 48px rgba(0,0,0,.12);">
 <!-- HEADER -->
-<tr><td style="background:#0a0a0a;padding:34px 44px 26px;">
+<tr><td class="em-hd" style="background:#0a0a0a;padding:34px 58px 26px;">
   <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-    <td style="vertical-align:middle;width:50px;padding-right:15px;"><img src="${LOGO_C}" height="44" width="44" style="display:block;"/></td>
+    <td class="em-hd-lpad" style="vertical-align:middle;width:52px;padding-right:14px;"><img class="em-hd-logo" src="${LOGO_C}" height="44" width="44" style="display:block;border-radius:5px;"/></td>
     <td style="vertical-align:middle;">
-      <div style="font-family:${IS};font-size:24px;font-weight:400;color:#fff;letter-spacing:-.02em;line-height:1.1;">Foxmen <em style="font-style:italic;color:${BRAND};">Studio</em></div>
-      <div style="font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:7px;">Code · Craft · Care</div>
+      <div class="em-hd-name" style="font-family:${IS};font-size:24px;font-weight:400;color:#fff;letter-spacing:-.02em;line-height:1.1;">Foxmen <em style="font-style:italic;color:${BRAND};">Studio</em></div>
+      <div class="em-hd-tag" style="font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-top:7px;">Code · Craft · Care</div>
     </td>
-    <td style="text-align:right;vertical-align:middle;">
-      <div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.38);line-height:1.9;">Est. 2019<br/>AI-Powered</div>
+    <td class="em-hd-meta" style="text-align:right;vertical-align:middle;">
+      <div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);line-height:1.9;">Est. 2019<br/>AI-Powered</div>
     </td>
   </tr></table>
-  <div style="height:1px;background:rgba(255,255,255,.12);margin:20px 0 16px;"></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.5);"><strong style="color:rgba(255,255,255,.78);font-weight:500;">contact@foxmenstudio.com</strong> &nbsp;·&nbsp; foxmen.studio</div>
+  <div style="height:1px;background:rgba(255,255,255,.15);margin:20px 0 15px;"></div>
+  <div class="em-hd-info" style="font-size:11px;color:rgba(255,255,255,.55);"><strong style="color:rgba(255,255,255,.85);font-weight:500;">contact@foxmenstudio.com</strong> &nbsp;·&nbsp; foxmen.studio</div>
 </td></tr>
 <!-- ACCENT LINE -->
 <tr><td style="height:3px;background:linear-gradient(90deg,${BRAND},#8B5DFF);font-size:0;">&nbsp;</td></tr>
 <!-- BODY -->
-<tr><td style="padding:44px 44px 36px;">
+<tr><td class="em-body" style="padding:48px 58px 40px;">
   ${body}
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:36px;padding-top:24px;border-top:1px solid #f0ede8;"><tr>
+  <table class="em-sig" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:40px;padding-top:24px;border-top:1px solid #f0ede8;"><tr>
     <td style="vertical-align:bottom;">
       <p style="margin:0 0 3px;font-size:12px;color:#b8b5b0;">Warm regards,</p>
-      <p style="margin:0 0 4px;font-family:${IS};font-size:20px;color:#0a0a0a;font-style:italic;">The Foxmen Team</p>
+      <p class="em-sig-name" style="margin:0 0 4px;font-family:${IS};font-size:20px;color:#0a0a0a;font-style:italic;">The Foxmen Team</p>
       <p style="margin:0;font-size:11px;color:#c8c5c0;">foxmen.studio · contact@foxmenstudio.com</p>
     </td>
-    <td style="text-align:right;vertical-align:bottom;width:44px;"><img src="${LOGO_C}" height="28" width="28" style="display:block;margin-left:auto;opacity:.15;"/></td>
+    <td class="em-sig-logo" style="text-align:right;vertical-align:bottom;width:44px;"><img src="${LOGO_C}" height="28" width="28" style="display:block;margin-left:auto;opacity:.15;"/></td>
   </tr></table>
 </td></tr>
 <!-- FOOTER -->
 <tr><td style="background:#0a0a0a;">
   <div style="height:2px;background:linear-gradient(90deg,${BRAND},#8B5DFF);"></div>
-  <div style="padding:20px 44px;">
+  <div class="em-ft" style="padding:20px 58px;">
     <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-      <td><div style="font-family:${IS};font-size:14px;color:rgba(255,255,255,.6);font-style:italic;">Foxmen Studio</div>
-        <p style="margin:4px 0 0;font-size:10px;color:rgba(255,255,255,.42);line-height:1.8;"><a href="https://foxmen.studio" style="color:rgba(255,255,255,.6);text-decoration:none;">foxmen.studio</a> · contact@foxmenstudio.com<br/>© ${yr} Foxmen Studio. All rights reserved.</p>
+      <td><div class="em-ft-name" style="font-family:${IS};font-size:14px;color:rgba(255,255,255,.7);font-style:italic;">Foxmen Studio</div>
+        <p style="margin:4px 0 0;font-size:10px;color:rgba(255,255,255,.45);line-height:1.8;"><a href="https://foxmen.studio" style="color:rgba(255,255,255,.65);text-decoration:none;">foxmen.studio</a> · contact@foxmenstudio.com<br/>© ${yr} Foxmen Studio. All rights reserved.</p>
       </td>
-      <td style="text-align:right;vertical-align:middle;"><img src="${LOGO_C}" height="26" width="26" style="display:block;margin-left:auto;opacity:.15;"/></td>
+      <td class="em-ft-logo" style="text-align:right;vertical-align:middle;"><img src="${LOGO_C}" height="26" width="26" style="display:block;margin-left:auto;opacity:.15;"/></td>
     </tr></table>
   </div>
 </td></tr>
@@ -2028,7 +2070,7 @@ export default function AdminPage() {
             if(!emailRawContent.trim()){toast("Write some email content first");return;}
             setEmailSending(true);
             try{
-              const r=await fetch("/api/email-campaign",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({to:emailTo,subject:emailSubject,rawContent:emailRawContent})});
+              const r=await fetch("/api/email-campaign",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({to:emailTo,subject:emailSubject,rawContent:emailRawContent,btnColor:emailBtnColor})});
               if(r.ok){toast("Email sent to "+emailTo);}else{const d=await r.json();toast(d.error||"Send failed");}
             }catch{toast("Send failed. Try again.");}
             setEmailSending(false);
@@ -2063,11 +2105,20 @@ export default function AdminPage() {
                   <label>Email content</label>
 
                   {/* Toolbar */}
-                  <div style={{display:"flex",gap:6,marginBottom:8,flexWrap:"wrap"}}>
+                  <div style={{display:"flex",gap:6,marginBottom:8,flexWrap:"wrap",alignItems:"center"}}>
                     {/* Insert button */}
-                    <button onClick={()=>insertAt("\n[View now](https://)\n")} style={{display:"inline-flex",alignItems:"center",gap:5,padding:"5px 11px",background:"#0a0a0a",border:"none",borderRadius:999,fontSize:12,fontWeight:500,color:"#fff",cursor:"pointer",whiteSpace:"nowrap"}}>
-                      <span style={{fontSize:15,lineHeight:1}}>↗</span> Insert button
+                    <button onClick={()=>insertAt("\n[View now](https://)\n")} style={{display:"inline-flex",alignItems:"center",gap:5,padding:"5px 11px",background:emailBtnColor,border:"none",borderRadius:999,fontSize:12,fontWeight:500,color:"#fff",cursor:"pointer",whiteSpace:"nowrap"}}>
+                      <span style={{display:"inline-block",transform:"rotate(-45deg)",fontSize:13,lineHeight:1,fontWeight:300}}>→</span> Insert button
                     </button>
+
+                    {/* Button color swatches */}
+                    <div style={{display:"flex",alignItems:"center",gap:4,padding:"4px 8px",background:"var(--line)",borderRadius:999}}>
+                      <span style={{fontSize:10,color:"var(--muted)",marginRight:2,whiteSpace:"nowrap"}}>Color</span>
+                      {["#0a0a0a","#B86CF9","#1a1a2e","#c0392b"].map(c=>(
+                        <button key={c} onClick={()=>setEmailBtnColor(c)} title={c} style={{width:16,height:16,borderRadius:"50%",background:c,border:emailBtnColor===c?"2.5px solid #B86CF9":"2.5px solid transparent",cursor:"pointer",padding:0,flexShrink:0}}/>
+                      ))}
+                      <input type="color" value={emailBtnColor} onChange={e=>setEmailBtnColor(e.target.value)} title="Custom color" style={{width:18,height:18,borderRadius:"50%",border:"none",padding:0,cursor:"pointer",background:"transparent",appearance:"none",WebkitAppearance:"none"}}/>
+                    </div>
 
                     {/* Suggest URL */}
                     <button onClick={suggestUrls} style={{display:"inline-flex",alignItems:"center",gap:5,padding:"5px 11px",background:"var(--line)",border:"none",borderRadius:999,fontSize:12,fontWeight:500,color:"var(--ink)",cursor:"pointer",whiteSpace:"nowrap"}}>
@@ -2107,7 +2158,7 @@ export default function AdminPage() {
                   <div style={{marginTop:8,padding:"10px 14px",background:"var(--line)",borderRadius:8}}>
                     <div style={{fontSize:10,fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",color:"var(--muted)",marginBottom:7}}>Syntax</div>
                     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"3px 16px"}}>
-                      {[["## Heading","Brand-color italic heading"],["### Sub","Dark subheading"],["**bold**","Bold text"],["- item","Bullet list"],["> quote","Highlight quote"],["---","Divider"],["[Label](url)","↗ Button (anywhere)"],["![caption](url)","Image (anywhere)"]].map(([s,d])=>(
+                      {[["## Heading","Brand-color italic heading"],["### Sub","Dark subheading"],["**bold**","Bold text"],["- item","Bullet list"],["> quote","Highlight quote"],["---","Divider"],["[Label](url)","↗ Button (global color)"],["[Label](url){#B86CF9}","↗ Button custom color"],["![caption](url)","Image (anywhere)"]].map(([s,d])=>(
                         <div key={s} style={{display:"flex",gap:8,alignItems:"baseline",padding:"2px 0"}}>
                           <code style={{fontFamily:"var(--f-mono)",fontSize:10,color:"var(--brand)",flexShrink:0,minWidth:120}}>{s}</code>
                           <span style={{fontSize:10,color:"var(--muted)"}}>{d}</span>
