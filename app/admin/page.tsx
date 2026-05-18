@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSession, signOut } from "next-auth/react";
+import { getPusherClient } from "@/lib/pusher";
 
 /* ================================================================
    TYPES
@@ -662,6 +663,15 @@ export default function AdminPage() {
   const [milestoneModal, setMilestoneModal] = useState<{projectId:number}|null>(null);
   const [newMilestone, setNewMilestone] = useState({title:"",description:"",due_date:""});
   const portalChatEndRef = useRef<HTMLDivElement>(null);
+
+  /* floating live-chat panel */
+  const [chatPanelOpen, setChatPanelOpen] = useState(false);
+  const [chatPanelProject, setChatPanelProject] = useState<PortalProject|null>(null);
+  const [chatPanelMsgs, setChatPanelMsgs] = useState<PortalMessage[]>([]);
+  const [chatPanelInput, setChatPanelInput] = useState("");
+  const [chatPanelSending, setChatPanelSending] = useState(false);
+  const chatPanelEndRef = useRef<HTMLDivElement>(null);
+
   const [priceCat,  setPriceCat]  = useState("Website");
   const [localPrices, setLocalPrices] = useState<Record<number,{min:number;max:number}>>({});
   const [localNotes, setLocalNotes]   = useState<Record<string,string>>({});
@@ -801,6 +811,18 @@ export default function AdminPage() {
 
   useEffect(()=>{ if(authStatus==="authenticated") loadData(page); },[authStatus,page,loadData]);
   useEffect(()=>{ if(session?.user){ setProfileName(session.user.name??""); setProfileAvatar((session.user as {image?:string}).image??""); } },[session]);
+
+  useEffect(()=>{
+    if(!chatPanelProject) return;
+    const pusher = getPusherClient();
+    if(!pusher) return;
+    const ch = pusher.subscribe(`private-project-${chatPanelProject.id}`);
+    ch.bind("new-message",(msg:PortalMessage)=>{
+      setChatPanelMsgs(prev=>prev.some(m=>m.id===msg.id)?prev:[...prev,msg]);
+      setTimeout(()=>chatPanelEndRef.current?.scrollIntoView({behavior:"smooth"}),50);
+    });
+    return ()=>{ pusher.unsubscribe(`private-project-${chatPanelProject.id}`); };
+  },[chatPanelProject]);
 
   /* ── field helper ── */
   const sf = (k:string,v:string)=>setForm(f=>({...f,[k]:v}));
@@ -3235,6 +3257,136 @@ ${emailPayNotes?`<div style="margin-top:24px;padding:16px 20px;background:#faf8f
 
       {/* TOAST */}
       <div className={`toast${toastOn?" show":""}`}><span className="dot"/><span>{toastMsg}</span></div>
+
+      {/* ══ LIVE CHAT PANEL ══ */}
+      <button
+        onClick={()=>setChatPanelOpen(o=>!o)}
+        title="Live Client Chat"
+        style={{position:"fixed",bottom:28,right:28,zIndex:450,width:52,height:52,borderRadius:"50%",background:"var(--brand)",color:"#fff",border:"none",cursor:"pointer",boxShadow:"0 4px 24px rgba(184,108,249,.45)",display:"flex",alignItems:"center",justifyContent:"center",transition:"transform .15s,box-shadow .15s"}}
+        onMouseEnter={e=>{e.currentTarget.style.transform="scale(1.08)";e.currentTarget.style.boxShadow="0 6px 28px rgba(184,108,249,.55)";}}
+        onMouseLeave={e=>{e.currentTarget.style.transform="scale(1)";e.currentTarget.style.boxShadow="0 4px 24px rgba(184,108,249,.45)";}}
+      >
+        {chatPanelOpen
+          ?<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          :<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        }
+      </button>
+
+      {chatPanelOpen&&(
+        <div style={{position:"fixed",right:0,top:0,bottom:0,width:380,zIndex:440,background:"#fff",borderLeft:"1.5px solid var(--line)",display:"flex",flexDirection:"column",boxShadow:"-8px 0 40px rgba(0,0,0,.12)",fontFamily:"var(--f-sans)"}}>
+
+          {/* Panel header */}
+          <div style={{padding:"16px 18px",borderBottom:"1.5px solid var(--line)",display:"flex",alignItems:"center",gap:10,background:"#fafaf8"}}>
+            {chatPanelProject&&(
+              <button onClick={()=>{setChatPanelProject(null);setChatPanelMsgs([]);}}
+                style={{background:"none",border:"none",cursor:"pointer",padding:"4px 6px",color:"var(--muted)",display:"flex",alignItems:"center",borderRadius:6,flexShrink:0}}
+                onMouseEnter={e=>e.currentTarget.style.background="var(--canvas)"}
+                onMouseLeave={e=>e.currentTarget.style.background="none"}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+            )}
+            <div style={{display:"flex",alignItems:"center",gap:8,flex:1,minWidth:0}}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <div style={{minWidth:0}}>
+                <div style={{fontWeight:600,fontSize:14,color:"var(--ink)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                  {chatPanelProject?chatPanelProject.title:"Live Chat"}
+                </div>
+                {chatPanelProject&&<div style={{fontSize:11,color:"var(--muted)"}}>{chatPanelProject.user_name} · {chatPanelProject.user_email}</div>}
+              </div>
+            </div>
+            {!chatPanelProject&&<span style={{fontSize:11,color:"var(--muted)",flexShrink:0}}>{portalProjects.length} project{portalProjects.length!==1?"s":""}</span>}
+          </div>
+
+          {!chatPanelProject?(
+            /* ── Project list ── */
+            <div style={{flex:1,overflowY:"auto"}}>
+              {portalProjects.length===0&&(
+                <div style={{padding:"48px 20px",textAlign:"center",color:"var(--muted)",fontSize:13}}>No client projects yet.</div>
+              )}
+              {portalProjects.map(p=>(
+                <button key={p.id}
+                  onClick={async()=>{
+                    setChatPanelProject(p);
+                    const r=await fetch(`/api/portal/messages?project_id=${p.id}`).then(r=>r.json());
+                    setChatPanelMsgs(Array.isArray(r)?r:[]);
+                    setTimeout(()=>chatPanelEndRef.current?.scrollIntoView({behavior:"smooth"}),120);
+                  }}
+                  style={{width:"100%",display:"flex",alignItems:"center",gap:12,padding:"12px 18px",background:"none",border:"none",borderBottom:"1px solid var(--line)",cursor:"pointer",textAlign:"left",transition:"background .12s"}}
+                  onMouseEnter={e=>e.currentTarget.style.background="#faf5ff"}
+                  onMouseLeave={e=>e.currentTarget.style.background="none"}
+                >
+                  <div style={{width:38,height:38,borderRadius:"50%",background:"var(--brand)",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:700,flexShrink:0}}>
+                    {(p.user_name??"U").split(" ").map((w:string)=>w[0]).join("").toUpperCase().slice(0,2)}
+                  </div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:13,fontWeight:600,color:"var(--ink)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.user_name}</div>
+                    <div style={{fontSize:11,color:"var(--muted)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.title}</div>
+                  </div>
+                  <span style={{fontSize:10,fontWeight:600,padding:"2px 8px",borderRadius:50,flexShrink:0,
+                    background:({pending:"#fef3c7",in_progress:"rgba(184,108,249,.12)",review:"#dbeafe",completed:"#dcfce7",on_hold:"#f3f4f6"} as Record<string,string>)[p.status]??"#f3f4f6",
+                    color:({pending:"#92400e",in_progress:"var(--brand)",review:"#1d4ed8",completed:"#15803d",on_hold:"#6b7280"} as Record<string,string>)[p.status]??"#6b7280",
+                  }}>{p.status.replace("_"," ")}</span>
+                </button>
+              ))}
+            </div>
+          ):(
+            /* ── Chat thread ── */
+            <>
+              <div style={{flex:1,overflowY:"auto",padding:"16px 16px 8px",display:"flex",flexDirection:"column",gap:8}}>
+                {chatPanelMsgs.length===0&&(
+                  <div style={{textAlign:"center",color:"var(--muted)",fontSize:13,marginTop:48,lineHeight:1.7}}>No messages yet.<br/>Start the conversation.</div>
+                )}
+                {chatPanelMsgs.map(m=>(
+                  <div key={m.id} style={{display:"flex",flexDirection:"column",alignItems:m.sender_role==="admin"?"flex-end":"flex-start"}}>
+                    <div style={{fontSize:10,color:"var(--muted)",marginBottom:3,paddingLeft:4,paddingRight:4}}>{m.sender_name}</div>
+                    <div style={{
+                      maxWidth:"80%",padding:"9px 13px",borderRadius:14,fontSize:13,lineHeight:1.55,wordBreak:"break-word",
+                      background:m.sender_role==="admin"?"var(--brand)":"var(--canvas)",
+                      color:m.sender_role==="admin"?"#fff":"var(--ink)",
+                      border:m.sender_role==="admin"?"none":"1px solid var(--line)",
+                      borderBottomRightRadius:m.sender_role==="admin"?3:14,
+                      borderBottomLeftRadius:m.sender_role==="admin"?14:3,
+                    }}>{m.message}</div>
+                    <div style={{fontSize:9,color:"var(--muted)",marginTop:3,paddingLeft:4,paddingRight:4}}>
+                      {new Date(m.created_at).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"})}
+                    </div>
+                  </div>
+                ))}
+                <div ref={chatPanelEndRef}/>
+              </div>
+              <form
+                onSubmit={async e=>{
+                  e.preventDefault();
+                  if(!chatPanelInput.trim()||chatPanelSending) return;
+                  setChatPanelSending(true);
+                  const res=await fetch("/api/portal/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({project_id:chatPanelProject.id,message:chatPanelInput.trim()})});
+                  if(res.ok){
+                    const msg=await res.json();
+                    setChatPanelMsgs(prev=>prev.some(m=>m.id===msg.id)?prev:[...prev,msg]);
+                    setChatPanelInput("");
+                    setTimeout(()=>chatPanelEndRef.current?.scrollIntoView({behavior:"smooth"}),50);
+                  }
+                  setChatPanelSending(false);
+                }}
+                style={{padding:"12px 14px",borderTop:"1.5px solid var(--line)",display:"flex",gap:8,background:"#fafaf8"}}
+              >
+                <input
+                  value={chatPanelInput}
+                  onChange={e=>setChatPanelInput(e.target.value)}
+                  placeholder="Message client…"
+                  style={{flex:1,padding:"9px 14px",borderRadius:50,border:"1.5px solid var(--line)",fontSize:13,fontFamily:"inherit",outline:"none",background:"#fff"}}
+                />
+                <button type="submit" disabled={!chatPanelInput.trim()||chatPanelSending}
+                  style={{background:"var(--brand)",color:"#fff",border:"none",borderRadius:50,padding:"9px 18px",fontSize:13,fontWeight:500,cursor:"pointer",opacity:chatPanelSending?0.6:1,flexShrink:0}}
+                >
+                  Send
+                </button>
+              </form>
+            </>
+          )}
+        </div>
+      )}
 
     </div>
   );
