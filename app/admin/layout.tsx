@@ -1,5 +1,12 @@
 import "./admin.css";
+import { SessionProvider } from "next-auth/react";
+import { auth } from "@/lib/auth";
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return <div className="adm-root">{children}</div>;
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const session = await auth();
+  return (
+    <SessionProvider session={session}>
+      <div className="adm-root">{children}</div>
+    </SessionProvider>
+  );
 }

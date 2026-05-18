@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useSession, signOut } from "next-auth/react";
 
 /* ================================================================
    TYPES
@@ -632,7 +633,7 @@ const MODAL_TITLE:Record<string,string>={
    ================================================================ */
 export default function AdminPage() {
   /* auth */
-  const [loggedIn, setLoggedIn] = useState(false);
+  const { data: session, status: authStatus } = useSession();
   const [page, setPage]         = useState("dashboard");
 
   /* data */
@@ -741,6 +742,9 @@ export default function AdminPage() {
   const [toastOn,  setToastOn]      = useState(false);
   const [sidebarOpen,setSidebarOpen]= useState(false);
   const [settingsTab,setSettingsTab]= useState("brand");
+  const [profileName, setProfileName] = useState("");
+  const [profileAvatar, setProfileAvatar] = useState("");
+  const [profileSaving, setProfileSaving] = useState(false);
   const [activeIdx,  setActiveIdx]  = useState(0);
   const [brandT, setBrandT]         = useState([true,true,true,false]);
   const [seoT,   setSeoT]           = useState([true,true]);
@@ -795,7 +799,8 @@ export default function AdminPage() {
     setLoading(false);
   },[toast]);
 
-  useEffect(()=>{ if(loggedIn) loadData(page); },[loggedIn,page,loadData]);
+  useEffect(()=>{ if(authStatus==="authenticated") loadData(page); },[authStatus,page,loadData]);
+  useEffect(()=>{ if(session?.user){ setProfileName(session.user.name??""); setProfileAvatar((session.user as {image?:string}).image??""); } },[session]);
 
   /* ── field helper ── */
   const sf = (k:string,v:string)=>setForm(f=>({...f,[k]:v}));
@@ -992,7 +997,8 @@ export default function AdminPage() {
 
   /* ── page meta ── */
   const CRUMBS:Record<string,string>={ dashboard:"Workspace / Dashboard", analytics:"Workspace / Analytics", projects:"Content / Projects", blog:"Content / Journal", services:"Content / Services", testimonials:"Content / Testimonials", media:"Content / Media", clients:"People / Clients", messages:"People / Inbox", leads:"People / Leads", "service-orders":"People / Service Orders", team:"People / Team", settings:"System / Settings", "fox-prices":"System / Fox Pricing", proposals:"Generate / Proposals", invoices:"Generate / Invoices", email:"Generate / Email Campaign", "portal-projects":"Client Portal / Projects", "portal-offers":"Client Portal / Offers" };
-  const TITLES:Record<string,React.ReactNode>={ dashboard:<>Good evening, <span className="it">Arif.</span></>, analytics:"Analytics", projects:"Projects", blog:"Journal", services:"Services", testimonials:"Testimonials", media:"Media library", clients:"Clients", messages:"Inbox", leads:"Estimator Leads", "service-orders":"Service Orders", team:"Team", settings:"Settings", "fox-prices":"Fox Pricing", proposals:"Proposals", invoices:"Invoices", email:"Email Campaign", "portal-projects":"Client Projects", "portal-offers":"Client Offers" };
+  const TITLES:Record<string,React.ReactNode>={ dashboard:<>Good {new Date().getHours()<12?"morning":new Date().getHours()<17?"afternoon":"evening"}, <span className="it">{session?.user?.name?.split(" ")[0]??""}</span>.</>
+, analytics:"Analytics", projects:"Projects", blog:"Journal", services:"Services", testimonials:"Testimonials", media:"Media library", clients:"Clients", messages:"Inbox", leads:"Estimator Leads", "service-orders":"Service Orders", team:"Team", settings:"Settings", "fox-prices":"Fox Pricing", proposals:"Proposals", invoices:"Invoices", email:"Email Campaign", "portal-projects":"Client Projects", "portal-offers":"Client Offers" };
 
   /* ── dashboard derived ── */
   const liveProjects = projects.filter(p=>p.status==="live").length;
@@ -1001,33 +1007,12 @@ export default function AdminPage() {
   const engStatus=(eng:string)=>eng==="Retainer"?"live":eng==="Active build"?"review":eng==="Discovery"?"review":"archived";
 
   /* ────────────────────────────────────────────────────────
-     LOGIN
+     AUTH GUARD — proxy handles redirect, this is just a loading state
      ──────────────────────────────────────────────────────── */
-  if(!loggedIn) return (
-    <section className="login">
-      <aside className="pane">
-        <div className="brand"><img src="/assets/logo-mark.svg" alt=""/><span>Foxmen <em style={{fontStyle:"italic",color:"var(--brand)"}}>Studio</em></span></div>
-        <h1>Welcome <span className="it">back.</span><br/>Let&apos;s ship<br/>something good.</h1>
-        <div className="meta"><span>v 4.2 — admin</span><span>Foxmen Studio</span></div>
-      </aside>
-      <form onSubmit={e=>{e.preventDefault();setLoggedIn(true);}}>
-        <h2>Sign in to <span className="it">admin.</span></h2>
-        <p>Use your studio email to access the dashboard. Two-factor is required for owners.</p>
-        <div className="field"><label>Work email</label><input type="email" defaultValue="admin@foxmen.studio" placeholder="you@foxmen.studio" required/></div>
-        <div className="field"><label>Password</label><input type="password" defaultValue="•••••••••••••" required/></div>
-        <div className="helper">
-          <label style={{display:"flex",gap:8,alignItems:"center",cursor:"pointer"}}><input type="checkbox" defaultChecked style={{width:16,height:16,accentColor:"#0a0a0a"}}/> Remember this device</label>
-          <a href="#">Forgot password?</a>
-        </div>
-        <button type="submit">Sign in to dashboard <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h18M13 5l7 7-7 7"/></svg></button>
-        <div className="or">or continue with</div>
-        <div className="sso">
-          <button type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M21.35 11.1h-9.18v2.92h5.26c-.23 1.5-1.69 4.4-5.26 4.4-3.17 0-5.75-2.62-5.75-5.85s2.58-5.85 5.75-5.85c1.8 0 3.01.77 3.7 1.43l2.52-2.43C16.85 4.2 14.74 3.2 12.17 3.2 6.86 3.2 2.6 7.5 2.6 12.57s4.26 9.37 9.57 9.37c5.52 0 9.18-3.87 9.18-9.33 0-.63-.07-1.1-.15-1.51Z"/></svg>Google</button>
-          <button type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.92.58.1.79-.25.79-.55v-2.16c-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.27-1.69-1.27-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.69 1.25 3.34.95.1-.74.4-1.25.72-1.54-2.55-.29-5.24-1.27-5.24-5.66 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.18 1.17a11.05 11.05 0 0 1 5.78 0c2.21-1.48 3.18-1.17 3.18-1.17.62 1.58.23 2.75.11 3.04.73.8 1.18 1.82 1.18 3.07 0 4.4-2.69 5.36-5.25 5.65.41.36.78 1.05.78 2.12v3.14c0 .3.21.66.79.55C20.21 21.39 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5Z"/></svg>GitHub</button>
-        </div>
-      </form>
-    </section>
+  if(authStatus==="loading") return (
+    <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",color:"var(--muted)",fontSize:14}}>Loading…</div>
   );
+  if(authStatus==="unauthenticated") return null;
 
   /* ────────────────────────────────────────────────────────
      APP SHELL
@@ -1078,9 +1063,13 @@ export default function AdminPage() {
           <a className={page==="settings"?"active":""} onClick={()=>nav("settings")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.8 1.3V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-2.8-1.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.3-2.8H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.3-2.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 2.8-1.3V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.8 1.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0 1.3 2.8H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.3 2.8Z"/></svg>Settings</a>
         </nav>
         <div className="side-foot">
-          <div className="av">AR</div>
-          <div className="info"><div className="n">Arif Rahman</div><div className="r">Owner · admin</div></div>
-          <a href="#" className="ic" title="Sign out" onClick={e=>{e.preventDefault();if(confirm("Sign out?"))setLoggedIn(false);}}>
+          <div className="av" style={{overflow:"hidden",padding:0}}>
+            {profileAvatar
+              ? <img src={profileAvatar} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+              : (profileName||session?.user?.name||"A").split(" ").map((w:string)=>w[0]).join("").toUpperCase().slice(0,2)}
+          </div>
+          <div className="info"><div className="n">{profileName||session?.user?.name||""}</div><div className="r">Owner · admin</div></div>
+          <a href="#" className="ic" title="Sign out" onClick={e=>{e.preventDefault();signOut({callbackUrl:"/login"});}}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
           </a>
         </div>
@@ -2970,7 +2959,7 @@ ${emailPayNotes?`<div style="margin-top:24px;padding:16px 20px;background:#faf8f
               <div><h2>Settings</h2><p>Brand, SEO, integrations and security for the workspace.</p></div>
               <div className="page-actions">
                 <div style={{display:"flex",gap:2,padding:2,background:"var(--canvas)",borderRadius:999}}>
-                  {["brand","seo","integrations","security","billing"].map(tab=>(
+                  {["profile","brand","seo","integrations","security","billing"].map(tab=>(
                     <button key={tab} onClick={()=>setSettingsTab(tab)} style={{padding:"6px 14px",borderRadius:999,fontSize:12,background:settingsTab===tab?"#fff":"transparent",color:settingsTab===tab?"var(--ink)":"var(--muted)"}}>
                       {tab.charAt(0).toUpperCase()+tab.slice(1)}
                     </button>
@@ -2979,6 +2968,56 @@ ${emailPayNotes?`<div style="margin-top:24px;padding:16px 20px;background:#faf8f
               </div>
             </div>
             <div className="card" style={{padding:"0 28px"}}>
+              {settingsTab==="profile" && <div>
+                <div className="form-section"><div className="lhs"><h3>Profile</h3><p>Your name and photo shown in the admin panel.</p></div><div className="rhs">
+                  {/* Avatar */}
+                  <div className="field">
+                    <label>Profile photo</label>
+                    <div style={{display:"flex",alignItems:"center",gap:16,marginTop:4}}>
+                      <div style={{width:72,height:72,borderRadius:"50%",background:"var(--ink)",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,fontWeight:600,overflow:"hidden",flexShrink:0}}>
+                        {profileAvatar
+                          ? <img src={profileAvatar} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                          : profileName.split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2)||"A"}
+                      </div>
+                      <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                        <label style={{display:"inline-flex",alignItems:"center",gap:8,background:"var(--ink)",color:"#fff",borderRadius:8,padding:"8px 16px",fontSize:13,fontWeight:500,cursor:"pointer"}}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                          Upload photo
+                          <input type="file" accept="image/*" style={{display:"none"}} onChange={async e=>{
+                            const file=e.target.files?.[0]; if(!file) return;
+                            const fd=new FormData(); fd.append("file",file);
+                            fd.append("upload_preset",process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET||"foxmen-studio");
+                            fd.append("folder","admin-avatars");
+                            const cloud=process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME||"djofqa3vc";
+                            const res=await fetch(`https://api.cloudinary.com/v1_1/${cloud}/image/upload`,{method:"POST",body:fd});
+                            const j=await res.json();
+                            if(j.secure_url) setProfileAvatar(j.secure_url);
+                          }}/>
+                        </label>
+                        {profileAvatar && <button type="button" onClick={()=>setProfileAvatar("")} style={{fontSize:12,color:"var(--muted)",background:"none",border:"none",cursor:"pointer",textAlign:"left",padding:0}}>Remove photo</button>}
+                      </div>
+                    </div>
+                  </div>
+                  {/* Name */}
+                  <div className="field" style={{marginTop:8}}>
+                    <label>Display name</label>
+                    <input type="text" value={profileName} onChange={e=>setProfileName(e.target.value)} placeholder="Your name"/>
+                  </div>
+                </div></div>
+                <div className="savebar">
+                  <div className="hint">Changes apply after save</div>
+                  <div style={{display:"flex",gap:8}}>
+                    <button className="btn-ghost" onClick={()=>{ setProfileName(session?.user?.name??""); setProfileAvatar((session?.user as {image?:string})?.image??""); }}>Discard</button>
+                    <button className="btn-primary" disabled={profileSaving} onClick={async()=>{
+                      setProfileSaving(true);
+                      const uid=(session?.user as {id?:string})?.id;
+                      await fetch("/api/auth/profile",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:uid,name:profileName,avatar:profileAvatar})});
+                      toast("Profile saved — refresh to see name update");
+                      setProfileSaving(false);
+                    }}>{profileSaving?"Saving…":"Save changes"} <ArrowChip/></button>
+                  </div>
+                </div>
+              </div>}
               {settingsTab==="brand" && <div>
                 <div className="form-section"><div className="lhs"><h3>Brand identity</h3><p>Name, tagline and description.</p></div><div className="rhs">
                   <div className="field"><label>Studio name</label><input type="text" data-setting="studio_name" defaultValue="Foxmen Studio"/></div>

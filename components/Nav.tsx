@@ -71,6 +71,14 @@ export default function Nav() {
             <span className="dot" />
             <span>{clock}</span>
           </span>
+          <Link href="/portal" className="btn btn--ghost" style={{ marginRight: 4 }}>
+            <span className="label">Client Portal</span>
+            <span className="chip" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>
+              </svg>
+            </span>
+          </Link>
           <Link href="/contact" className="btn">
             <span className="label">Start a project</span>
             <span className="chip" aria-hidden="true">

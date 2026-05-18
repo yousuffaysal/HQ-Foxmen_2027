@@ -13,101 +13,85 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const err = searchParams.get("error");
-    if (err === "CredentialsSignin") setError("Invalid email or password.");
+    if (searchParams.get("error") === "CredentialsSignin") setError("Invalid email or password.");
   }, [searchParams]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
-    const from = searchParams.get("from") ?? "/portal";
+    const from = searchParams.get("from");
     const res = await signIn("credentials", { email, password, redirect: false });
     setLoading(false);
     if (res?.error) { setError("Invalid email or password."); return; }
-    router.push(from);
+    // check role to decide where to land
+    const session = await fetch("/api/auth/session").then(r => r.json());
+    const role = session?.user?.role;
+    router.push(from ?? (role === "admin" ? "/admin" : "/portal"));
     router.refresh();
   }
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--paper)", padding: "24px" }}>
-      <div style={{ width: "100%", maxWidth: 420 }}>
-        <a href="/" style={{ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 40, textDecoration: "none" }}>
-          <img src="/assets/logo-mark.svg" alt="Foxmen" style={{ height: 28 }} />
-          <span style={{ fontWeight: 600, fontSize: 15 }}>Foxmen <em style={{ fontStyle: "italic", color: "var(--brand)" }}>Studio</em></span>
-        </a>
+    <div className="adm-root" style={{ position: "fixed", inset: 0, overflowY: "auto" }}>
+      <section className="login">
+        <aside className="pane">
+          <div className="brand">
+            <img src="/assets/logo-mark.svg" alt="" />
+            <span>Foxmen <em style={{ fontStyle: "italic", color: "var(--brand)" }}>Studio</em></span>
+          </div>
+          <h1>Welcome <span className="it">back.</span><br />Your work<br />is waiting.</h1>
+          <div className="meta"><span>Client Portal</span><span>Foxmen Studio</span></div>
+        </aside>
 
-        <h1 style={{ fontSize: 32, fontWeight: 400, letterSpacing: "-0.02em", marginBottom: 8 }}>
-          Welcome back
-        </h1>
-        <p style={{ color: "var(--muted)", fontSize: 14, marginBottom: 32 }}>
-          Sign in to your client portal
-        </p>
+        <form onSubmit={handleSubmit}>
+          <h2>Sign in to <span className="it">portal.</span></h2>
+          <p>Enter your email and password to access your client dashboard.</p>
 
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <span style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>Email</span>
+          <div className="field">
+            <label>Email address</label>
             <input
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              required
               placeholder="you@example.com"
-              style={inputStyle}
+              required
+              autoFocus
             />
-          </label>
+          </div>
 
-          <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <span style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>Password</span>
+          <div className="field">
+            <label>Password</label>
             <input
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              required
               placeholder="••••••••"
-              style={inputStyle}
+              required
             />
-          </label>
+          </div>
 
           {error && (
-            <div style={{ background: "#fff0f0", border: "1px solid #ffd0d0", borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "#c00" }}>
+            <div style={{ background: "#fff0f0", border: "1px solid #ffd0d0", borderRadius: 10, padding: "10px 14px", fontSize: 13, color: "#c00", marginTop: -8 }}>
               {error}
             </div>
           )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{ marginTop: 8, background: "var(--ink)", color: "#fff", border: "none", borderRadius: 50, padding: "14px 28px", fontSize: 15, fontWeight: 500, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1, transition: "opacity 0.15s" }}
-          >
-            {loading ? "Signing in…" : "Sign in"}
+          <button type="submit" disabled={loading} style={{ opacity: loading ? 0.7 : 1 }}>
+            {loading ? "Signing in…" : "Sign in to portal"}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h18M13 5l7 7-7 7" /></svg>
           </button>
-        </form>
 
-        <p style={{ marginTop: 28, fontSize: 13, color: "var(--muted)", textAlign: "center" }}>
-          Don&apos;t have an account?{" "}
-          <Link href="/register" style={{ color: "var(--brand)", fontWeight: 500, textDecoration: "none" }}>
-            Create one
-          </Link>
-        </p>
-      </div>
+          <div className="or">or</div>
+
+          <div style={{ textAlign: "center", fontSize: 13, color: "var(--muted)" }}>
+            No account yet?{" "}
+            <Link href="/register" style={{ color: "var(--brand)", fontWeight: 500 }}>Create one →</Link>
+          </div>
+        </form>
+      </section>
     </div>
   );
 }
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "11px 14px",
-  borderRadius: 10,
-  border: "1.5px solid var(--line)",
-  fontSize: 15,
-  background: "var(--paper)",
-  color: "var(--ink)",
-  outline: "none",
-  boxSizing: "border-box",
-  fontFamily: "inherit",
-  transition: "border-color 0.15s",
-};
 
 export default function LoginPage() {
   return (
