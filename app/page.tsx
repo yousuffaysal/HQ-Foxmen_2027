@@ -72,7 +72,13 @@ function Hero() {
               <span className="label">See our work</span>
               <span className="chip" aria-hidden="true"><ArrowIcon /></span>
             </Link>
-            <Link href="/contact" className="tlink">Book a 20-min call →</Link>
+            <button
+              className="tlink"
+              data-cal-link="yousuf-faysal/project-discussion-call"
+              data-cal-namespace="project-discussion-call"
+              data-cal-config='{"layout":"week_view","useSlotsViewOnSmallScreen":"true","theme":"auto"}'
+              style={{ background: "none", border: "none", padding: 0, cursor: "pointer", font: "inherit" }}
+            >Book a 20-min call →</button>
           </div>
         </div>
       </div>
@@ -204,6 +210,9 @@ const techItems    = ["React","Next.js","Swift","Flutter","OpenAI","Anthropic","
 
 type DbService = { id:number; ord:number; name:string; descr:string; count:string; visible:boolean; badge:string|null; image:string|null };
 type DbProject = { id:number; name:string; tagline:string; industry:string; year:string; scope:string; status:string; thumbnail:string; slug:string; color_cls:string; live_url:string };
+type DbClient  = { id:number; name:string; industry:string; country:string };
+
+const PROOF_SYMBOLS = ["◆","●","▲","✦","◇","★","◐","⬡","⌬","⟁","⌖","◈","◉","▼","◫","⌑","⌀","⊕","⟐","⌘"];
 
 function toSlug(n: string) { return n.toLowerCase().replace(/[—–]/g,"-").replace(/[^a-z0-9\s-]/g,"").replace(/\s+/g,"-").replace(/-+/g,"-").trim(); }
 
@@ -212,6 +221,7 @@ export default function Home() {
 
   const [dbServices, setDbServices]   = useState<DbService[]>([]);
   const [dbProjects, setDbProjects]   = useState<DbProject[]>([]);
+  const [dbClients,  setDbClients]    = useState<DbClient[]>([]);
 
   useEffect(() => {
     fetch("/api/services?visible=true").then(r => r.json()).then(rows => {
@@ -219,6 +229,9 @@ export default function Home() {
     }).catch(() => {});
     fetch("/api/projects").then(r => r.json()).then(rows => {
       if (Array.isArray(rows)) setDbProjects(rows.filter((p:DbProject) => p.status === "live").slice(0, 6));
+    }).catch(() => {});
+    fetch("/api/clients").then(r => r.json()).then(rows => {
+      if (Array.isArray(rows) && rows.length > 0) setDbClients(rows);
     }).catch(() => {});
   }, []);
 
@@ -254,8 +267,9 @@ export default function Home() {
                   desc: s.descr,
                   tags: s.count,
                   preview: s.badge || s.name.split(" ")[0],
+                  image: s.image || null,
                 }))
-              : svcRows
+              : svcRows.map(s => ({ ...s, image: null as string | null }))
             ).map((s, i) => (
               <Link className="svc-row" href="/services" key={i}>
                 <span className="idx">{s.idx}</span>
@@ -263,7 +277,11 @@ export default function Home() {
                 <span className="desc">{s.desc}</span>
                 <span className="tags">{s.tags}</span>
                 <span className="arrow"><SmArrow /></span>
-                <span className="preview">{s.preview}</span>
+                <span className="preview">
+                  {s.image
+                    ? <img src={s.image} alt={s.title} style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:15,display:"block"}} />
+                    : s.preview}
+                </span>
               </Link>
             ))}
           </div>
@@ -388,17 +406,24 @@ export default function Home() {
             <div>
               <div className="fade"><span className="eyebrow">Trusted worldwide</span></div>
               <h3 className="fade d1" style={{ marginTop: 14 }}>
-                42 active clients across <span className="it">17 countries</span> — from seed-stage to listed.
+                {dbClients.length > 0 ? dbClients.length : 42} active clients across{" "}
+                <span className="it">
+                  {dbClients.length > 0
+                    ? new Set(dbClients.map(c => c.country).filter(Boolean)).size || 17
+                    : 17}{" "}
+                  countries
+                </span>{" "}
+                — from seed-stage to listed.
               </h3>
             </div>
             <Link href="/work" className="tlink fade d2">See the work →</Link>
           </div>
         </div>
         <div className="proof-grid fade">
-          {proofCells.map((c, i) => (
+          {(dbClients.length > 0 ? dbClients : proofCells.map(c => ({ name: c.name, industry: c.badge, country: "" }))).map((c, i) => (
             <div className="cell" key={i}>
-              <span className="mk">{c.mk}</span> {c.name}
-              <span className="badge">{c.badge}</span>
+              <span className="mk">{PROOF_SYMBOLS[i % PROOF_SYMBOLS.length]}</span> {c.name}
+              <span className="badge">{c.industry}</span>
             </div>
           ))}
         </div>
@@ -532,10 +557,15 @@ export default function Home() {
                 <span className="label">hello@foxmen.studio</span>
                 <span className="chip"><ArrowIcon /></span>
               </a>
-              <Link href="/contact" className="btn btn--ghost btn--lg">
+              <button
+                className="btn btn--ghost btn--lg"
+                data-cal-link="yousuf-faysal/project-discussion-call"
+                data-cal-namespace="project-discussion-call"
+                data-cal-config='{"layout":"week_view","useSlotsViewOnSmallScreen":"true","theme":"auto"}'
+              >
                 <span className="label">Book a 20-min call</span>
                 <span className="chip"><ArrowIcon /></span>
-              </Link>
+              </button>
             </div>
             <div className="ic fade d3">Replies within 24 hours · Mon–Fri</div>
           </div>

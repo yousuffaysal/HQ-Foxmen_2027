@@ -15,6 +15,7 @@ type Client   = { id:number; name:string; industry:string; country:string; conta
 type Message  = { id:number; av:string; sender:string; subject:string; preview:string; body:string; source:string; interested:string; budget:string; country:string; unread:boolean; received_at:string };
 type Member   = { id:number; av:string; name:string; role:string; bio:string };
 type FoxPrice    = { id:number; category:string; feature_id:string; label:string; price_min:number; price_max:number; is_base:boolean; ord:number; note:string };
+type ServiceOrder = { id:number; service_name:string; name:string; email:string; company:string; description:string; budget:string; timeline:string; website:string; status:string; submitted_at:string };
 type InvoiceItem = { service:string; description:string; quantity:number; unit:string; rate:number };
 type ProposalData= { executive_summary:string; scope_items:string[]; deliverables:string[]; timeline:{period:string;milestone:string;desc:string}[]; investment_note:string; terms:string };
 
@@ -637,6 +638,7 @@ export default function AdminPage() {
   const [clients,   setClients]   = useState<Client[]>([]);
   const [msgs,      setMsgs]      = useState<Message[]>([]);
   const [team,      setTeam]      = useState<Member[]>([]);
+  const [serviceOrders, setServiceOrders] = useState<ServiceOrder[]>([]);
   const [foxPrices, setFoxPrices] = useState<FoxPrice[]>([]);
   const [priceCat,  setPriceCat]  = useState("Website");
   const [localPrices, setLocalPrices] = useState<Record<number,{min:number;max:number}>>({});
@@ -748,7 +750,8 @@ export default function AdminPage() {
       else if(p==="testimonials"){const r=await fetch("/api/testimonials").then(r=>r.json()); setTestis(Array.isArray(r)?r:[]); }
       else if(p==="clients"){     const r=await fetch("/api/clients").then(r=>r.json()); setClients(Array.isArray(r)?r:[]); }
       else if(p==="messages"){    const r=await fetch("/api/messages").then(r=>r.json()); setMsgs(Array.isArray(r)?r:[]); setActiveIdx(0); }
-      else if(p==="leads"){       const r=await fetch("/api/messages").then(r=>r.json()); setMsgs(Array.isArray(r)?r:[]); }
+      else if(p==="leads"){         const r=await fetch("/api/messages").then(r=>r.json()); setMsgs(Array.isArray(r)?r:[]); }
+      else if(p==="service-orders"){ const r=await fetch("/api/service-orders").then(r=>r.json()); setServiceOrders(Array.isArray(r)?r:[]); }
       else if(p==="team"){        const r=await fetch("/api/team").then(r=>r.json()); setTeam(Array.isArray(r)?r:[]); }
       else if(p==="fox-prices"){
         const r=await fetch("/api/fox-prices").then(r=>r.json());
@@ -960,8 +963,8 @@ export default function AdminPage() {
   };
 
   /* ── page meta ── */
-  const CRUMBS:Record<string,string>={ dashboard:"Workspace / Dashboard", analytics:"Workspace / Analytics", projects:"Content / Projects", blog:"Content / Journal", services:"Content / Services", testimonials:"Content / Testimonials", media:"Content / Media", clients:"People / Clients", messages:"People / Inbox", leads:"People / Leads", team:"People / Team", settings:"System / Settings", "fox-prices":"System / Fox Pricing", proposals:"Generate / Proposals", invoices:"Generate / Invoices", email:"Generate / Email Campaign" };
-  const TITLES:Record<string,React.ReactNode>={ dashboard:<>Good evening, <span className="it">Arif.</span></>, analytics:"Analytics", projects:"Projects", blog:"Journal", services:"Services", testimonials:"Testimonials", media:"Media library", clients:"Clients", messages:"Inbox", leads:"Estimator Leads", team:"Team", settings:"Settings", "fox-prices":"Fox Pricing", proposals:"Proposals", invoices:"Invoices", email:"Email Campaign" };
+  const CRUMBS:Record<string,string>={ dashboard:"Workspace / Dashboard", analytics:"Workspace / Analytics", projects:"Content / Projects", blog:"Content / Journal", services:"Content / Services", testimonials:"Content / Testimonials", media:"Content / Media", clients:"People / Clients", messages:"People / Inbox", leads:"People / Leads", "service-orders":"People / Service Orders", team:"People / Team", settings:"System / Settings", "fox-prices":"System / Fox Pricing", proposals:"Generate / Proposals", invoices:"Generate / Invoices", email:"Generate / Email Campaign" };
+  const TITLES:Record<string,React.ReactNode>={ dashboard:<>Good evening, <span className="it">Arif.</span></>, analytics:"Analytics", projects:"Projects", blog:"Journal", services:"Services", testimonials:"Testimonials", media:"Media library", clients:"Clients", messages:"Inbox", leads:"Estimator Leads", "service-orders":"Service Orders", team:"Team", settings:"Settings", "fox-prices":"Fox Pricing", proposals:"Proposals", invoices:"Invoices", email:"Email Campaign" };
 
   /* ── dashboard derived ── */
   const liveProjects = projects.filter(p=>p.status==="live").length;
@@ -1030,6 +1033,7 @@ export default function AdminPage() {
           {[["clients","Clients",<svg key="c" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>,`${clients.length||42}`],
            ["messages","Messages",<svg key="msg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M4 4h16v12H5l-1 4Z"/></svg>,unreadMsgs>0?String(unreadMsgs):null],
            ["leads","Est. Leads",<svg key="leads" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 2a7 7 0 0 1 7 7c0 4-4 9-7 11C9 18 5 13 5 9a7 7 0 0 1 7-7Z"/><circle cx="12" cy="9" r="2.5"/></svg>,msgs.filter(m=>m.source==="estimator"&&m.unread).length>0?String(msgs.filter(m=>m.source==="estimator"&&m.unread).length):null],
+           ["service-orders","Service Orders",<svg key="so" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>,serviceOrders.filter(o=>o.status==="new").length>0?String(serviceOrders.filter(o=>o.status==="new").length):null],
            ["team","Team",<svg key="tm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>,null],
           ].map(([p,label,icon,badge])=>(
             <a key={p as string} className={page===p?"active":""} onClick={()=>nav(p as string)}>{icon as React.ReactNode}{label as string}{badge&&<span className="badge">{badge as string}</span>}</a>
@@ -1451,6 +1455,110 @@ export default function AdminPage() {
             </div>
           </section>
         )}
+
+        {/* ══════════ SERVICE ORDERS ══════════ */}
+        {page==="service-orders" && (()=>{
+          const statusColor:Record<string,{bg:string;color:string}> = {
+            new:      {bg:"#ede9ff",color:"#6c3fc5"},
+            reviewing:{bg:"#fff4cc",color:"#8a6000"},
+            quoted:   {bg:"#d4f7e0",color:"#1a6636"},
+            closed:   {bg:"#f0f0f0",color:"#666"},
+          };
+          const updateStatus = async(id:number,status:string)=>{
+            await fetch("/api/service-orders",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,status})});
+            setServiceOrders(prev=>prev.map(o=>o.id===id?{...o,status}:o));
+          };
+          const deleteOrder = async(id:number)=>{
+            await fetch("/api/service-orders",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({id})});
+            setServiceOrders(prev=>prev.filter(o=>o.id!==id));
+            toast("Order removed");
+          };
+          return (
+            <section className="page active">
+              <div className="page-head">
+                <div>
+                  <h2>Service Orders <span className="it">— {serviceOrders.length}</span></h2>
+                  <p>Inbound project requests from the Services page inquiry form.</p>
+                </div>
+                <div className="page-actions">
+                  <button className="btn-ghost" onClick={()=>loadData("service-orders")}>Refresh</button>
+                </div>
+              </div>
+              {serviceOrders.length===0 ? (
+                <div className="empty">
+                  <h3>No orders <span style={{fontStyle:"italic",color:"var(--brand)"}}>yet.</span></h3>
+                  <p>When someone submits the inquiry form on the services page, it appears here.</p>
+                </div>
+              ) : (
+                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(360px,1fr))",gap:16}}>
+                  {serviceOrders.map(o=>{
+                    const sc = statusColor[o.status] ?? {bg:"#f0f0f0",color:"#666"};
+                    return (
+                      <div key={o.id} style={{background:"#fff",border:`1.5px solid ${o.status==="new"?"var(--brand)":"var(--line)"}`,borderRadius:16,overflow:"hidden",transition:"border-color .25s",display:"flex",flexDirection:"column"}}>
+
+                        {/* ── service requested banner ── */}
+                        <div style={{padding:"12px 18px",background:"#f8f5ff",borderBottom:"1px solid #ede9ff",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
+                          <div style={{display:"flex",alignItems:"center",gap:8}}>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2.2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>
+                            <span style={{fontSize:10,fontFamily:"var(--f-mono)",letterSpacing:".14em",textTransform:"uppercase",color:"var(--brand)",fontWeight:700}}>Service requested</span>
+                          </div>
+                          <span style={{fontSize:13,fontWeight:700,color:"#3d1a7a",background:"#ede9ff",padding:"3px 12px",borderRadius:999}}>{o.service_name||"General Inquiry"}</span>
+                        </div>
+
+                        {/* ── contact header ── */}
+                        <div style={{padding:"14px 18px",borderBottom:"1px solid var(--line)",display:"flex",alignItems:"center",gap:12}}>
+                          <div style={{width:38,height:38,borderRadius:"50%",background:"#ede9ff",color:"var(--brand)",display:"grid",placeItems:"center",fontWeight:700,fontSize:13,flexShrink:0}}>
+                            {o.name.slice(0,2).toUpperCase()}
+                          </div>
+                          <div style={{flex:1,minWidth:0}}>
+                            <div style={{fontWeight:600,fontSize:14,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{o.name}</div>
+                            <div style={{fontSize:11,color:"var(--muted)",fontFamily:"var(--f-mono)",letterSpacing:".08em"}}>{relTime(o.submitted_at)}</div>
+                          </div>
+                          <span style={{padding:"4px 10px",borderRadius:999,fontSize:10,fontWeight:700,letterSpacing:".08em",textTransform:"uppercase",...sc}}>{o.status}</span>
+                        </div>
+
+                        {/* ── body ── */}
+                        <div style={{padding:"14px 18px",display:"grid",gap:10,flex:1}}>
+                          {/* budget + timeline chips */}
+                          <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                            {o.budget&&<span style={{padding:"4px 12px",borderRadius:999,background:"#f5f5f5",border:"1px solid #e8e8e8",fontSize:11,fontWeight:500,color:"#333"}}>{o.budget}</span>}
+                            {o.timeline&&<span style={{padding:"4px 12px",borderRadius:999,background:"#f5f5f5",border:"1px solid #e8e8e8",fontSize:11,fontWeight:500,color:"#333"}}>{o.timeline}</span>}
+                          </div>
+                          {/* description */}
+                          {o.description&&<div style={{fontSize:13,color:"#444",lineHeight:1.6,display:"-webkit-box",WebkitLineClamp:3,WebkitBoxOrient:"vertical",overflow:"hidden"}}>{o.description}</div>}
+                          {/* contact info */}
+                          <div style={{display:"flex",flexDirection:"column",gap:3,paddingTop:2}}>
+                            <a href={`mailto:${o.email}`} style={{fontSize:12,color:"var(--brand)",fontFamily:"var(--f-mono)",fontWeight:500}}>{o.email}</a>
+                            {o.company&&<span style={{fontSize:12,color:"var(--muted)"}}>{o.company}</span>}
+                            {o.website&&<a href={o.website} target="_blank" rel="noreferrer" style={{fontSize:12,color:"var(--muted)",textDecoration:"underline",textUnderlineOffset:2}}>{o.website}</a>}
+                          </div>
+                        </div>
+
+                        {/* ── footer ── */}
+                        <div style={{padding:"12px 18px",borderTop:"1px solid var(--line)",display:"flex",gap:8,alignItems:"center"}}>
+                          <select value={o.status} onChange={e=>updateStatus(o.id,e.target.value)} style={{flex:1,padding:"7px 10px",borderRadius:8,border:"1px solid var(--line)",fontSize:12,fontFamily:"inherit",background:"#fff",cursor:"pointer",color:"var(--ink)"}}>
+                            <option value="new">New</option>
+                            <option value="reviewing">Reviewing</option>
+                            <option value="quoted">Quoted</option>
+                            <option value="closed">Closed</option>
+                          </select>
+                          <a
+                            href={`mailto:${o.email}?subject=Re: Your ${encodeURIComponent(o.service_name||"project")} inquiry`}
+                            style={{padding:"7px 16px",borderRadius:8,background:"var(--ink)",color:"#fff",fontSize:12,fontWeight:600,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:6,flexShrink:0,lineHeight:1}}
+                          >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M4 4h16v12H5l-1 4Z"/></svg>
+                            Reply
+                          </a>
+                          <button className="btn-icon danger" title="Delete" onClick={()=>deleteOrder(o.id)}><TrashSvg/></button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+          );
+        })()}
 
         {/* ══════════ PROPOSALS ══════════ */}
         {page==="proposals" && (()=>{
@@ -2867,8 +2975,7 @@ ${emailPayNotes?`<div style="margin-top:24px;padding:16px 20px;background:#faf8f
                 <FieldArea label="Description" value={form.descr||""} onChange={v=>sf("descr",v)} placeholder="One sentence summary…"/>
                 <Field label="Client count label" value={form.count||""} onChange={v=>sf("count",v)} placeholder="e.g. 12 clients"/>
                 <Field label="Badge (optional)" value={form.badge||""} onChange={v=>sf("badge",v)} placeholder="e.g. New"/>
-                <Field label="Image URL (optional)" value={form.image||""} onChange={v=>sf("image",v)} placeholder="https://…"/>
-                {form.image && <img src={form.image} alt="preview" style={{width:"100%",height:120,objectFit:"cover",borderRadius:10,marginTop:4}}/>}
+                <ImageUpload label="Service image (optional)" value={form.image||""} onChange={v=>sf("image",v)} accept="image/*"/>
               </>}
             </div>
             <div className="modal-foot">

@@ -60,7 +60,7 @@ const LAYER_LABELS: Record<string, string> = {
 };
 
 export default function TechStackRecommenderPage() {
-  useScrollReveal();
+  useScrollReveal(".fade, .reveal");
 
   const [projectType, setProjectType] = useState("");
   const [requirements, setRequirements] = useState<string[]>([]);
@@ -129,7 +129,7 @@ export default function TechStackRecommenderPage() {
             <span className="sep">/</span>
             <span>Tech Stack Recommender</span>
           </div>
-          <h1>
+          <h1 className="display">
             <span className="reveal in"><span className="reveal-inner">The right</span></span>
             <span className="reveal in reveal-delay-1"><span className="reveal-inner">stack for <span className="it">you.</span></span></span>
           </h1>
@@ -234,38 +234,39 @@ export default function TechStackRecommenderPage() {
                 </h2>
               </div>
 
-              <div style={{ display: "grid", gap: 16 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16 }}>
                 {(["frontend", "backend", "database", "infrastructure", ...(result.ai_layer ? ["ai_layer"] : [])] as (keyof typeof LAYER_LABELS)[]).map((layer, i) => {
                   const value = result[layer as keyof StackResult];
                   if (!value || typeof value !== "string") return null;
                   const rationale = result.rationale?.[layer];
                   return (
-                    <div key={layer} className={`fade d${i}`} style={{ padding: 24, background: "#fff", border: "1px solid var(--line)", borderRadius: 14, display: "grid", gridTemplateColumns: "auto 1fr", gap: 16, alignItems: "start" }}>
-                      <div style={{ width: 44, height: 44, borderRadius: 10, background: "var(--brand-soft)", display: "grid", placeItems: "center", color: "var(--brand-deep)", flexShrink: 0 }}>
-                        {LAYER_ICONS[layer]}
-                      </div>
-                      <div>
-                        <div style={{ fontFamily: "var(--f-mono)", fontSize: 10, letterSpacing: ".16em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 6 }}>
-                          {LAYER_LABELS[layer]}
+                    <div key={layer} className={`stack-layer-card fade d${i}`}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <div style={{ width: 36, height: 36, borderRadius: 9, background: "var(--brand-soft)", display: "grid", placeItems: "center", color: "var(--brand-deep)", flexShrink: 0 }}>
+                          {LAYER_ICONS[layer]}
                         </div>
-                        <div style={{ fontFamily: "var(--f-display)", fontSize: 22, letterSpacing: "-.02em", lineHeight: 1.1, marginBottom: 6 }}>{value}</div>
-                        {rationale && <div style={{ fontSize: 14, color: "#4a4a4a", lineHeight: 1.55 }}>{rationale}</div>}
+                        <div className="stack-layer-label">{LAYER_LABELS[layer]}</div>
                       </div>
+                      <div className="stack-layer-value">{value}</div>
+                      {rationale && <div className="stack-layer-why">{rationale}</div>}
                     </div>
                   );
                 })}
               </div>
 
               {/* Email capture */}
-              <div className="fade" style={{ marginTop: 40, padding: 32, background: "var(--ink)", borderRadius: 15, color: "#fff" }}>
-                <h3 style={{ fontFamily: "var(--f-display)", fontSize: 28, letterSpacing: "-.02em", color: "#fff", margin: "0 0 8px" }}>
-                  Get the full architecture doc via email
+              <div className="fade" style={{ marginTop: 48, padding: 36, background: "var(--ink)", borderRadius: 20, color: "#fff" }}>
+                <div style={{ fontFamily: "var(--f-mono)", fontSize: 10, letterSpacing: ".18em", textTransform: "uppercase", color: "var(--brand)", marginBottom: 10 }}>
+                  Free architecture doc
+                </div>
+                <h3 style={{ fontFamily: "var(--f-display)", fontSize: 30, letterSpacing: "-.02em", color: "#fff", margin: "0 0 8px" }}>
+                  Want a full architecture breakdown?
                 </h3>
-                <p style={{ color: "rgba(255,255,255,.7)", fontSize: 14, margin: "0 0 20px" }}>
-                  We&apos;ll send you a detailed architecture document with rationale and alternatives — from Foxmen Studio.
+                <p style={{ color: "rgba(255,255,255,.6)", fontSize: 14, margin: "0 0 24px", lineHeight: 1.6 }}>
+                  We&apos;ll send you a detailed architecture doc with rationale and alternatives — from Foxmen Studio.
                 </p>
                 {emailSent ? (
-                  <p style={{ color: "var(--brand)", fontFamily: "var(--f-mono)", fontSize: 13, letterSpacing: ".12em" }}>Doc sent! Check your inbox.</p>
+                  <p style={{ color: "var(--brand)", fontFamily: "var(--f-mono)", fontSize: 13, letterSpacing: ".12em" }}>✓ Doc sent — check your inbox.</p>
                 ) : (
                   <form onSubmit={handleEmailCapture} style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                     <input
@@ -275,20 +276,17 @@ export default function TechStackRecommenderPage() {
                       onChange={e => setEmail(e.target.value)}
                       required
                       style={{
-                        flex: 1,
-                        minWidth: 220,
-                        padding: "12px 18px",
+                        flex: 1, minWidth: 220,
+                        padding: "13px 18px",
                         borderRadius: "var(--r-pill)",
-                        border: "1px solid rgba(255,255,255,.2)",
-                        background: "rgba(255,255,255,.08)",
+                        border: "1px solid rgba(255,255,255,.15)",
+                        background: "rgba(255,255,255,.07)",
                         color: "#fff",
-                        fontFamily: "var(--f-sans)",
-                        fontSize: 15,
-                        outline: "none",
+                        fontFamily: "var(--f-sans)", fontSize: 15, outline: "none",
                       }}
                     />
                     <button type="submit" className="btn" disabled={emailLoading}
-                      style={{ "--bg": "#fff", "--fg": "var(--ink)", "--chip": "var(--ink)", "--chipfg": "#fff" } as React.CSSProperties}>
+                      style={{ "--bg": "var(--brand)", "--fg": "#fff", "--chip": "rgba(0,0,0,.2)", "--chipfg": "#fff" } as React.CSSProperties}>
                       <span className="label">{emailLoading ? "Sending…" : "Send doc"}</span>
                       <span className="chip"><ArrowIcon /></span>
                     </button>

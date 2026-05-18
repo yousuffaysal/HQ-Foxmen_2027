@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import Link from "next/link";
 
 type EstResult = {
   price_min: number;
@@ -266,14 +265,19 @@ export default function ProjectEstimator() {
               )}
 
               <div className="est-actions">
-                <Link href="/contact" className="btn btn--lg">
+                <button
+                  className="btn btn--lg"
+                  data-cal-link="yousuf-faysal/project-discussion-call"
+                  data-cal-namespace="project-discussion-call"
+                  data-cal-config='{"layout":"week_view","useSlotsViewOnSmallScreen":"true","theme":"auto"}'
+                >
                   <span className="label">Book a free call</span>
                   <span className="chip" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
                       <path d="M3 12h18M13 5l7 7-7 7" />
                     </svg>
                   </span>
-                </Link>
+                </button>
                 <button
                   className="est-restart"
                   onClick={() => { setStep(1); setType(""); setComplexity(""); setTimeline(""); setEmail(""); setResult(null); }}

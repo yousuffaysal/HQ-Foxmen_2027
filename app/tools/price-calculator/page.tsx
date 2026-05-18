@@ -74,7 +74,7 @@ function calcRange(base: [number, number], features: string[], timelineIdx: numb
 }
 
 export default function PriceCalculatorPage() {
-  useScrollReveal();
+  useScrollReveal(".fade, .reveal");
 
   const [step, setStep] = useState(0);
   const [projectType, setProjectType] = useState("");
@@ -131,7 +131,7 @@ export default function PriceCalculatorPage() {
             <span className="sep">/</span>
             <span>Price Calculator</span>
           </div>
-          <h1>
+          <h1 className="display">
             <span className="reveal in"><span className="reveal-inner">What should</span></span>
             <span className="reveal in reveal-delay-1"><span className="reveal-inner">it <span className="it">cost?</span></span></span>
           </h1>
@@ -312,24 +312,33 @@ export default function PriceCalculatorPage() {
                 {projectType} <span className="it">cost estimate</span>
               </h2>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 32 }}>
+              <div className="calc-compare-grid" style={{ marginBottom: 32 }}>
                 {/* Foxmen Studio */}
-                <div style={{ padding: 32, background: "var(--ink)", borderRadius: 15, color: "#fff", position: "relative" }}>
-                  <span style={{ position: "absolute", top: 16, right: 16, fontFamily: "var(--f-mono)", fontSize: 9, letterSpacing: ".18em", textTransform: "uppercase", background: "var(--brand)", color: "#fff", padding: "4px 10px", borderRadius: 999 }}>Recommended</span>
-                  <p style={{ fontFamily: "var(--f-mono)", fontSize: 10, letterSpacing: ".18em", textTransform: "uppercase", color: "rgba(255,255,255,.5)", margin: "0 0 16px" }}>Foxmen Studio</p>
-                  <p style={{ fontFamily: "var(--f-display)", fontSize: "clamp(28px,4vw,48px)", letterSpacing: "-.03em", color: "var(--brand)", margin: 0, lineHeight: 1 }}>
-                    {fmt(prices.boutique[0])} – {fmt(prices.boutique[1])}
-                  </p>
-                  <p style={{ color: "rgba(255,255,255,.55)", fontSize: 13, margin: "12px 0 0" }}>Boutique studio · Senior team · $65–95/hr</p>
+                <div className="calc-compare-col highlight" style={{ position: "relative" }}>
+                  <span style={{ position: "absolute", top: 16, right: 16, fontFamily: "var(--f-mono)", fontSize: 9, letterSpacing: ".18em", textTransform: "uppercase", background: "var(--brand)", color: "#fff", padding: "4px 10px", borderRadius: 999 }}>Best value</span>
+                  {/* Logo mark */}
+                  <img src="/assets/logo-mark.svg" alt="Foxmen Studio" style={{ width: 36, height: 36, objectFit: "contain" }} />
+                  <div className="calc-compare-name">Foxmen Studio</div>
+                  <div className="calc-compare-price">{fmt(prices.boutique[0])} – {fmt(prices.boutique[1])}</div>
+                  <div className="calc-compare-note">Boutique studio · Senior team · $65–95/hr</div>
                 </div>
 
                 {/* UK/US Agency */}
-                <div style={{ padding: 32, background: "#fff", border: "1px solid var(--line)", borderRadius: 15 }}>
-                  <p style={{ fontFamily: "var(--f-mono)", fontSize: 10, letterSpacing: ".18em", textTransform: "uppercase", color: "var(--muted)", margin: "0 0 16px" }}>UK / US Agency</p>
-                  <p style={{ fontFamily: "var(--f-display)", fontSize: "clamp(28px,4vw,48px)", letterSpacing: "-.03em", color: "var(--ink)", margin: 0, lineHeight: 1 }}>
-                    {fmt(prices.agency[0])} – {fmt(prices.agency[1])}
-                  </p>
-                  <p style={{ color: "var(--muted)", fontSize: 13, margin: "12px 0 0" }}>Traditional agency · $150–300/hr</p>
+                <div className="calc-compare-col">
+                  <span className="calc-compare-flag">🇬🇧🇺🇸</span>
+                  <div className="calc-compare-name">UK / US Agency</div>
+                  <div className="calc-compare-price" style={{ fontSize: "clamp(24px,3vw,36px)" }}>{fmt(prices.agency[0])} – {fmt(prices.agency[1])}</div>
+                  <div className="calc-compare-note">Traditional agency · $150–300/hr</div>
+                </div>
+
+                {/* Offshore */}
+                <div className="calc-compare-col">
+                  <span className="calc-compare-flag">🌏</span>
+                  <div className="calc-compare-name">Offshore only</div>
+                  <div className="calc-compare-price" style={{ fontSize: "clamp(24px,3vw,36px)" }}>
+                    {fmt(Math.round(prices.boutique[0] * 0.6 / 500) * 500)} – {fmt(Math.round(prices.boutique[1] * 0.75 / 500) * 500)}
+                  </div>
+                  <div className="calc-compare-note">Lower cost · Higher management overhead</div>
                 </div>
               </div>
 
@@ -354,22 +363,25 @@ export default function PriceCalculatorPage() {
                   <span className="label">Compare agency rates</span>
                   <span className="chip"><ArrowIcon /></span>
                 </Link>
-                <button onClick={() => setStep(0)} className="btn btn--ghost">
+                <button onClick={() => setStep(0)} className="btn btn--ghost btn--lg">
                   <span className="label">Start over</span>
                   <span className="chip"><ArrowIcon /></span>
                 </button>
               </div>
 
               {/* Email capture */}
-              <div className="fade" style={{ padding: 32, background: "var(--ink)", borderRadius: 15, color: "#fff" }}>
-                <h3 style={{ fontFamily: "var(--f-display)", fontSize: 28, letterSpacing: "-.02em", color: "#fff", margin: "0 0 8px" }}>
-                  Get a detailed breakdown via email
+              <div className="fade" style={{ padding: 36, background: "var(--ink)", borderRadius: 20, color: "#fff" }}>
+                <div style={{ fontFamily: "var(--f-mono)", fontSize: 10, letterSpacing: ".18em", textTransform: "uppercase", color: "var(--brand)", marginBottom: 10 }}>
+                  Free detailed breakdown
+                </div>
+                <h3 style={{ fontFamily: "var(--f-display)", fontSize: 30, letterSpacing: "-.02em", color: "#fff", margin: "0 0 8px" }}>
+                  Want a line-by-line quote?
                 </h3>
-                <p style={{ color: "rgba(255,255,255,.7)", fontSize: 14, margin: "0 0 20px" }}>
-                  We&apos;ll send you a line-by-line cost breakdown from Foxmen Studio — no commitment required.
+                <p style={{ color: "rgba(255,255,255,.6)", fontSize: 14, margin: "0 0 24px", lineHeight: 1.6 }}>
+                  We&apos;ll send you a full cost breakdown — no commitment required, from Foxmen Studio.
                 </p>
                 {emailSent ? (
-                  <p style={{ color: "var(--brand)", fontFamily: "var(--f-mono)", fontSize: 13, letterSpacing: ".12em" }}>Breakdown sent! Check your inbox.</p>
+                  <p style={{ color: "var(--brand)", fontFamily: "var(--f-mono)", fontSize: 13, letterSpacing: ".12em" }}>✓ Breakdown sent — check your inbox.</p>
                 ) : (
                   <form onSubmit={handleEmailCapture} style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                     <input
@@ -379,20 +391,17 @@ export default function PriceCalculatorPage() {
                       onChange={e => setEmail(e.target.value)}
                       required
                       style={{
-                        flex: 1,
-                        minWidth: 220,
-                        padding: "12px 18px",
+                        flex: 1, minWidth: 220,
+                        padding: "13px 18px",
                         borderRadius: "var(--r-pill)",
-                        border: "1px solid rgba(255,255,255,.2)",
-                        background: "rgba(255,255,255,.08)",
+                        border: "1px solid rgba(255,255,255,.15)",
+                        background: "rgba(255,255,255,.07)",
                         color: "#fff",
-                        fontFamily: "var(--f-sans)",
-                        fontSize: 15,
-                        outline: "none",
+                        fontFamily: "var(--f-sans)", fontSize: 15, outline: "none",
                       }}
                     />
                     <button type="submit" className="btn" disabled={emailLoading}
-                      style={{ "--bg": "#fff", "--fg": "var(--ink)", "--chip": "var(--ink)", "--chipfg": "#fff" } as React.CSSProperties}>
+                      style={{ "--bg": "var(--brand)", "--fg": "#fff", "--chip": "rgba(0,0,0,.2)", "--chipfg": "#fff" } as React.CSSProperties}>
                       <span className="label">{emailLoading ? "Sending…" : "Send breakdown"}</span>
                       <span className="chip"><ArrowIcon /></span>
                     </button>

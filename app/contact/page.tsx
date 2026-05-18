@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const services = ["Web", "Mobile", "AI integration", "Ecommerce", "Real estate", "Brand · UI · UX", "Marketing"];
@@ -19,6 +19,24 @@ export default function ContactPage() {
   const [sent, setSent] = useState(false);
   const [checkedServices, setCheckedServices] = useState<string[]>([]);
   const [budget, setBudget] = useState("");
+
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const w = window as any;
+    const init = () => {
+      if (w.Cal?.ns?.["project-discussion-call"]) {
+        w.Cal.ns["project-discussion-call"]("inline", {
+          elementOrSelector: "#cal-inline-contact",
+          config: { layout: "month_view", useSlotsViewOnSmallScreen: "true" },
+          calLink: "yousuf-faysal/project-discussion-call",
+        });
+        w.Cal.ns["project-discussion-call"]("ui", { hideEventTypeDetails: false, layout: "month_view" });
+      } else {
+        setTimeout(init, 150);
+      }
+    };
+    init();
+  }, []);
 
   function toggleService(s: string) {
     setCheckedServices((prev) =>
@@ -154,23 +172,27 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section style={{ padding: "60px 0" }}>
-        <div className="cta">
-          <div className="wrap-tight">
-            <div className="fade in"><span className="eyebrow">Or — book a call</span></div>
-            <h2 className="fade in d1">A <span className="it">20-min</span> intro,<br />no slides.</h2>
-            <div className="row fade in d2">
-              <a href="#" className="btn btn--lg">
-                <span className="label">Pick a time</span>
-                <span className="chip"><ArrowIcon /></span>
-              </a>
-              <Link href="/work" className="btn btn--ghost btn--lg">
-                <span className="label">See the work</span>
-                <span className="chip"><ArrowIcon /></span>
-              </Link>
-            </div>
+      {/* Inline calendar */}
+      <section style={{ padding: "80px 0 100px" }}>
+        <div className="wrap">
+          <div className="fade in" style={{ marginBottom: 10 }}>
+            <span className="eyebrow">Or — book a call</span>
           </div>
+          <h2 className="fade in d1" style={{ marginBottom: 40 }}>
+            A <span className="it">20-min</span> intro,<br />no slides.
+          </h2>
+          <div
+            id="cal-inline-contact"
+            className="fade in d2"
+            style={{
+              width: "100%",
+              height: 700,
+              overflow: "scroll",
+              borderRadius: 20,
+              border: "1px solid var(--line)",
+              background: "var(--bone)",
+            }}
+          />
         </div>
       </section>
     </>
