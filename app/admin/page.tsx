@@ -18,6 +18,11 @@ type FoxPrice    = { id:number; category:string; feature_id:string; label:string
 type ServiceOrder = { id:number; service_name:string; name:string; email:string; company:string; description:string; budget:string; timeline:string; website:string; status:string; submitted_at:string };
 type InvoiceItem = { service:string; description:string; quantity:number; unit:string; rate:number };
 type ProposalData= { executive_summary:string; scope_items:string[]; deliverables:string[]; timeline:{period:string;milestone:string;desc:string}[]; investment_note:string; terms:string };
+type PortalMilestone = { id:number; title:string; description:string; status:string; due_date:string; completed_at:string|null; ord:number };
+type PortalProject = { id:number; user_id:number; title:string; service_type:string; status:string; description:string; budget:string; timeline:string; website:string; admin_note:string; created_at:string; updated_at:string; milestones:PortalMilestone[]; user_name:string; user_email:string };
+type PortalUser = { id:number; name:string; email:string; role:string; created_at:string };
+type PortalOffer = { id:number; user_id:number; project_id:number|null; title:string; description:string; price:string; status:string; created_at:string; user_name?:string };
+type PortalMessage = { id:number; project_id:number; sender_id:number; sender_name:string; sender_role:string; message:string; created_at:string };
 
 /* ── PDF template helpers (open in new window → print as PDF) ── */
 function proposalPdfHtml(client:string,company:string,service:string,timeline:string,budget:string,data:ProposalData):string{
@@ -640,6 +645,22 @@ export default function AdminPage() {
   const [team,      setTeam]      = useState<Member[]>([]);
   const [serviceOrders, setServiceOrders] = useState<ServiceOrder[]>([]);
   const [foxPrices, setFoxPrices] = useState<FoxPrice[]>([]);
+
+  /* portal */
+  const [portalProjects, setPortalProjects] = useState<PortalProject[]>([]);
+  const [portalUsers,    setPortalUsers]    = useState<PortalUser[]>([]);
+  const [portalOffers,   setPortalOffers]   = useState<PortalOffer[]>([]);
+  const [selectedPortalProject, setSelectedPortalProject] = useState<PortalProject|null>(null);
+  const [portalMessages, setPortalMessages] = useState<PortalMessage[]>([]);
+  const [portalChatText, setPortalChatText] = useState("");
+  const [portalChatSending, setPortalChatSending] = useState(false);
+  const [newOfferUserId, setNewOfferUserId] = useState("");
+  const [newOfferTitle, setNewOfferTitle] = useState("");
+  const [newOfferDesc, setNewOfferDesc] = useState("");
+  const [newOfferPrice, setNewOfferPrice] = useState("");
+  const [milestoneModal, setMilestoneModal] = useState<{projectId:number}|null>(null);
+  const [newMilestone, setNewMilestone] = useState({title:"",description:"",due_date:""});
+  const portalChatEndRef = useRef<HTMLDivElement>(null);
   const [priceCat,  setPriceCat]  = useState("Website");
   const [localPrices, setLocalPrices] = useState<Record<number,{min:number;max:number}>>({});
   const [localNotes, setLocalNotes]   = useState<Record<string,string>>({});
@@ -753,6 +774,13 @@ export default function AdminPage() {
       else if(p==="leads"){         const r=await fetch("/api/messages").then(r=>r.json()); setMsgs(Array.isArray(r)?r:[]); }
       else if(p==="service-orders"){ const r=await fetch("/api/service-orders").then(r=>r.json()); setServiceOrders(Array.isArray(r)?r:[]); }
       else if(p==="team"){        const r=await fetch("/api/team").then(r=>r.json()); setTeam(Array.isArray(r)?r:[]); }
+      else if(p==="portal-projects"){
+        const r=await fetch("/api/portal/projects").then(r=>r.json());
+        setPortalProjects(Array.isArray(r)?r:[]);
+        const ur=await fetch("/api/auth/portal-users").then(r=>r.json()).catch(()=>[]);
+        setPortalUsers(Array.isArray(ur)?ur:[]);
+      }
+      else if(p==="portal-offers"){ const r=await fetch("/api/portal/offers").then(r=>r.json()); setPortalOffers(Array.isArray(r)?r:[]); }
       else if(p==="fox-prices"){
         const r=await fetch("/api/fox-prices").then(r=>r.json());
         if(Array.isArray(r)){
@@ -963,8 +991,8 @@ export default function AdminPage() {
   };
 
   /* ── page meta ── */
-  const CRUMBS:Record<string,string>={ dashboard:"Workspace / Dashboard", analytics:"Workspace / Analytics", projects:"Content / Projects", blog:"Content / Journal", services:"Content / Services", testimonials:"Content / Testimonials", media:"Content / Media", clients:"People / Clients", messages:"People / Inbox", leads:"People / Leads", "service-orders":"People / Service Orders", team:"People / Team", settings:"System / Settings", "fox-prices":"System / Fox Pricing", proposals:"Generate / Proposals", invoices:"Generate / Invoices", email:"Generate / Email Campaign" };
-  const TITLES:Record<string,React.ReactNode>={ dashboard:<>Good evening, <span className="it">Arif.</span></>, analytics:"Analytics", projects:"Projects", blog:"Journal", services:"Services", testimonials:"Testimonials", media:"Media library", clients:"Clients", messages:"Inbox", leads:"Estimator Leads", "service-orders":"Service Orders", team:"Team", settings:"Settings", "fox-prices":"Fox Pricing", proposals:"Proposals", invoices:"Invoices", email:"Email Campaign" };
+  const CRUMBS:Record<string,string>={ dashboard:"Workspace / Dashboard", analytics:"Workspace / Analytics", projects:"Content / Projects", blog:"Content / Journal", services:"Content / Services", testimonials:"Content / Testimonials", media:"Content / Media", clients:"People / Clients", messages:"People / Inbox", leads:"People / Leads", "service-orders":"People / Service Orders", team:"People / Team", settings:"System / Settings", "fox-prices":"System / Fox Pricing", proposals:"Generate / Proposals", invoices:"Generate / Invoices", email:"Generate / Email Campaign", "portal-projects":"Client Portal / Projects", "portal-offers":"Client Portal / Offers" };
+  const TITLES:Record<string,React.ReactNode>={ dashboard:<>Good evening, <span className="it">Arif.</span></>, analytics:"Analytics", projects:"Projects", blog:"Journal", services:"Services", testimonials:"Testimonials", media:"Media library", clients:"Clients", messages:"Inbox", leads:"Estimator Leads", "service-orders":"Service Orders", team:"Team", settings:"Settings", "fox-prices":"Fox Pricing", proposals:"Proposals", invoices:"Invoices", email:"Email Campaign", "portal-projects":"Client Projects", "portal-offers":"Client Offers" };
 
   /* ── dashboard derived ── */
   const liveProjects = projects.filter(p=>p.status==="live").length;
@@ -1038,6 +1066,9 @@ export default function AdminPage() {
           ].map(([p,label,icon,badge])=>(
             <a key={p as string} className={page===p?"active":""} onClick={()=>nav(p as string)}>{icon as React.ReactNode}{label as string}{badge&&<span className="badge">{badge as string}</span>}</a>
           ))}
+          <span className="label">Client Portal</span>
+          <a className={page==="portal-projects"?"active":""} onClick={()=>nav("portal-projects")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>Client Projects{portalProjects.filter(p=>p.status==="pending").length>0&&<span className="badge">{portalProjects.filter(p=>p.status==="pending").length}</span>}</a>
+          <a className={page==="portal-offers"?"active":""} onClick={()=>nav("portal-offers")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg>Offers & Upgrades</a>
           <span className="label">Generate</span>
           <a className={page==="proposals"?"active":""} onClick={()=>nav("proposals")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>Proposals</a>
           <a className={page==="invoices"?"active":""} onClick={()=>nav("invoices")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4M14 15h4"/></svg>Invoices</a>
@@ -2754,6 +2785,183 @@ ${emailPayNotes?`<div style="margin-top:24px;padding:16px 20px;background:#faf8f
           </section>
           );
         })()}
+
+        {/* ══════════ PORTAL PROJECTS ══════════ */}
+        {page==="portal-projects" && (
+          <section className="page active">
+            <div className="page-head">
+              <div><h2>Client Projects</h2><p>Manage all client portal projects, timelines and chat.</p></div>
+              <div className="page-actions"><button className="btn-ghost" onClick={()=>loadData("portal-projects")}>Refresh</button></div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:selectedPortalProject?"1fr 1fr":"1fr",gap:20,height:"calc(100vh - 180px)",overflow:"hidden"}}>
+              {/* project list */}
+              <div style={{overflowY:"auto",display:"flex",flexDirection:"column",gap:12}}>
+                {portalProjects.length===0&&<div style={{textAlign:"center",padding:40,color:"var(--muted)",fontSize:13}}>No client projects yet.</div>}
+                {portalProjects.map(p=>(
+                  <div key={p.id} onClick={async()=>{setSelectedPortalProject(p);const r=await fetch(`/api/portal/messages?project_id=${p.id}`).then(r=>r.json());setPortalMessages(Array.isArray(r)?r:[]);setTimeout(()=>portalChatEndRef.current?.scrollIntoView({behavior:"smooth"}),100);}}
+                    style={{background:"#fff",border:`1.5px solid ${selectedPortalProject?.id===p.id?"var(--brand)":"var(--line)"}`,borderRadius:12,padding:"14px 16px",cursor:"pointer",transition:"border-color .15s"}}>
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
+                      <span style={{fontWeight:600,fontSize:14}}>{p.title}</span>
+                      <span style={{fontSize:11,fontWeight:600,padding:"2px 9px",borderRadius:50,background:{pending:"#fef3c7",in_progress:"#ede1ff",review:"#dbeafe",completed:"#dcfce7",on_hold:"#f3f4f6"}[p.status]??"#f3f4f6",color:{pending:"#b45309",in_progress:"var(--brand)",review:"#1d4ed8",completed:"#166534",on_hold:"#888"}[p.status]??"#888"}}>{p.status.replace("_"," ")}</span>
+                    </div>
+                    <div style={{fontSize:12,color:"var(--muted)"}}>{p.user_name} · {p.user_email}</div>
+                    {p.service_type&&<div style={{fontSize:12,color:"var(--muted)",marginTop:2}}>{p.service_type}</div>}
+                    <div style={{marginTop:8,display:"flex",gap:8}}>
+                      {(["pending","in_progress","review","completed","on_hold"] as const).map(s=>(
+                        <button key={s} onClick={async(e)=>{e.stopPropagation();await fetch(`/api/portal/projects/${p.id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:s})});loadData("portal-projects");}}
+                          style={{fontSize:10,padding:"2px 8px",borderRadius:50,border:"1px solid var(--line)",background:p.status===s?"var(--ink)":"transparent",color:p.status===s?"#fff":"var(--muted)",cursor:"pointer",fontWeight:p.status===s?600:400}}>
+                          {s.replace("_"," ")}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* project detail + chat */}
+              {selectedPortalProject && (
+                <div style={{background:"#fff",border:"1.5px solid var(--line)",borderRadius:14,overflow:"hidden",display:"flex",flexDirection:"column"}}>
+                  <div style={{padding:"14px 16px",borderBottom:"1px solid var(--line)",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                    <div>
+                      <div style={{fontWeight:600,fontSize:15}}>{selectedPortalProject.title}</div>
+                      <div style={{fontSize:12,color:"var(--muted)"}}>{selectedPortalProject.user_name}</div>
+                    </div>
+                    <button onClick={()=>setSelectedPortalProject(null)} style={{background:"none",border:"none",fontSize:18,cursor:"pointer",color:"var(--muted)",lineHeight:1}}>×</button>
+                  </div>
+
+                  {/* tabs */}
+                  <div style={{display:"flex",gap:0,borderBottom:"1px solid var(--line)"}}>
+                    {["chat","milestones","info"].map(t=>(
+                      <button key={t} id={`ptab-${t}`} onClick={()=>{document.querySelectorAll("[id^='ptab-']").forEach(b=>(b as HTMLButtonElement).style.borderBottom="none");(document.getElementById(`ptab-${t}`) as HTMLButtonElement).style.borderBottom="2px solid var(--brand)";document.querySelectorAll("[id^='ppanel-']").forEach(el=>(el as HTMLDivElement).style.display="none");(document.getElementById(`ppanel-${t}`) as HTMLDivElement).style.display="flex";}}
+                        style={{flex:1,padding:"10px",fontSize:12,fontWeight:500,border:"none",background:"none",cursor:"pointer",color:"var(--muted)",borderBottom:t==="chat"?"2px solid var(--brand)":"none"}}>
+                        {t.charAt(0).toUpperCase()+t.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* chat panel */}
+                  <div id="ppanel-chat" style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+                    <div style={{flex:1,overflowY:"auto",padding:"14px",display:"flex",flexDirection:"column",gap:10}}>
+                      {portalMessages.map(m=>(
+                        <div key={m.id} style={{display:"flex",gap:8,flexDirection:m.sender_role==="admin"?"row-reverse":"row",alignItems:"flex-end"}}>
+                          <div style={{width:26,height:26,borderRadius:"50%",background:m.sender_role==="admin"?"var(--brand)":"var(--line)",color:m.sender_role==="admin"?"#fff":"var(--muted)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:600,flexShrink:0}}>{m.sender_name.charAt(0).toUpperCase()}</div>
+                          <div style={{maxWidth:"72%",background:m.sender_role==="admin"?"var(--ink)":"#f3f4f6",color:m.sender_role==="admin"?"#fff":"var(--ink)",borderRadius:m.sender_role==="admin"?"12px 12px 4px 12px":"12px 12px 12px 4px",padding:"8px 12px",fontSize:13,lineHeight:1.5,wordBreak:"break-word"}}>{m.message}</div>
+                        </div>
+                      ))}
+                      <div ref={portalChatEndRef}/>
+                    </div>
+                    <form onSubmit={async(e)=>{e.preventDefault();if(!portalChatText.trim()||portalChatSending)return;setPortalChatSending(true);const res=await fetch("/api/portal/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({project_id:selectedPortalProject.id,message:portalChatText.trim()})});if(res.ok){const msg=await res.json();setPortalMessages(prev=>prev.some(m=>m.id===msg.id)?prev:[...prev,msg]);setPortalChatText("");setTimeout(()=>portalChatEndRef.current?.scrollIntoView({behavior:"smooth"}),50);}setPortalChatSending(false);}}
+                      style={{display:"flex",gap:8,padding:"12px",borderTop:"1px solid var(--line)"}}>
+                      <input value={portalChatText} onChange={e=>setPortalChatText(e.target.value)} placeholder="Reply to client…" style={{flex:1,padding:"8px 12px",borderRadius:50,border:"1.5px solid var(--line)",fontSize:13,fontFamily:"inherit",outline:"none"}}/>
+                      <button type="submit" disabled={!portalChatText.trim()||portalChatSending} style={{background:"var(--brand)",color:"#fff",border:"none",borderRadius:50,padding:"8px 16px",fontSize:13,fontWeight:500,cursor:"pointer"}}>Send</button>
+                    </form>
+                  </div>
+
+                  {/* milestones panel */}
+                  <div id="ppanel-milestones" style={{flex:1,display:"none",flexDirection:"column",overflow:"hidden",padding:14,gap:10,overflowY:"auto"}}>
+                    <button onClick={()=>setMilestoneModal({projectId:selectedPortalProject.id})} style={{background:"var(--brand)",color:"#fff",border:"none",borderRadius:50,padding:"7px 16px",fontSize:12,fontWeight:500,cursor:"pointer",alignSelf:"flex-start"}}>+ Add milestone</button>
+                    {selectedPortalProject.milestones.sort((a,b)=>a.ord-b.ord).map(m=>(
+                      <div key={m.id} style={{background:"#f8f7f5",borderRadius:10,padding:"10px 12px",border:"1px solid var(--line)"}}>
+                        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
+                          <span style={{fontWeight:600,fontSize:13}}>{m.title}</span>
+                          <select value={m.status} onChange={async(e)=>{await fetch("/api/portal/milestones",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:m.id,status:e.target.value})});setSelectedPortalProject(p=>p?{...p,milestones:p.milestones.map(ms=>ms.id===m.id?{...ms,status:e.target.value}:ms)}:null);}} style={{fontSize:11,borderRadius:6,border:"1px solid var(--line)",padding:"2px 6px",cursor:"pointer"}}>
+                            <option value="pending">Pending</option>
+                            <option value="active">Active</option>
+                            <option value="completed">Completed</option>
+                          </select>
+                        </div>
+                        {m.description&&<div style={{fontSize:12,color:"var(--muted)"}}>{m.description}</div>}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* info panel */}
+                  <div id="ppanel-info" style={{flex:1,display:"none",flexDirection:"column",overflowY:"auto",padding:14,gap:10}}>
+                    {[["Budget",selectedPortalProject.budget],["Timeline",selectedPortalProject.timeline],["Website",selectedPortalProject.website],["Description",selectedPortalProject.description]].filter(([,v])=>v).map(([k,v])=>(
+                      <div key={k} style={{display:"grid",gridTemplateColumns:"100px 1fr",gap:8,fontSize:13}}>
+                        <span style={{color:"var(--muted)",fontWeight:500}}>{k}</span><span>{v}</span>
+                      </div>
+                    ))}
+                    <div>
+                      <div style={{fontSize:12,fontWeight:500,marginBottom:6}}>Admin note</div>
+                      <textarea defaultValue={selectedPortalProject.admin_note} rows={3} style={{width:"100%",borderRadius:8,border:"1px solid var(--line)",padding:"8px 10px",fontSize:13,fontFamily:"inherit",resize:"vertical",boxSizing:"border-box"}} id="portal-admin-note"/>
+                      <button onClick={async()=>{const note=(document.getElementById("portal-admin-note") as HTMLTextAreaElement).value;await fetch(`/api/portal/projects/${selectedPortalProject.id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({admin_note:note})});toast("Note saved");}} style={{marginTop:6,background:"var(--ink)",color:"#fff",border:"none",borderRadius:8,padding:"6px 14px",fontSize:12,fontWeight:500,cursor:"pointer"}}>Save note</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* milestone modal */}
+            {milestoneModal && (
+              <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.5)",zIndex:600,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={e=>{if(e.target===e.currentTarget)setMilestoneModal(null);}}>
+                <div style={{background:"#fff",borderRadius:16,padding:24,width:380,display:"flex",flexDirection:"column",gap:14}}>
+                  <div style={{fontWeight:600,fontSize:16}}>Add Milestone</div>
+                  <input placeholder="Title *" value={newMilestone.title} onChange={e=>setNewMilestone(m=>({...m,title:e.target.value}))} style={{padding:"9px 12px",borderRadius:8,border:"1px solid var(--line)",fontSize:13,fontFamily:"inherit"}}/>
+                  <textarea placeholder="Description" value={newMilestone.description} onChange={e=>setNewMilestone(m=>({...m,description:e.target.value}))} rows={2} style={{padding:"9px 12px",borderRadius:8,border:"1px solid var(--line)",fontSize:13,fontFamily:"inherit",resize:"vertical"}}/>
+                  <input type="text" placeholder="Due date (e.g. Week 2)" value={newMilestone.due_date} onChange={e=>setNewMilestone(m=>({...m,due_date:e.target.value}))} style={{padding:"9px 12px",borderRadius:8,border:"1px solid var(--line)",fontSize:13,fontFamily:"inherit"}}/>
+                  <div style={{display:"flex",gap:8,justifyContent:"flex-end"}}>
+                    <button onClick={()=>setMilestoneModal(null)} style={{background:"none",border:"1px solid var(--line)",borderRadius:8,padding:"7px 16px",fontSize:13,cursor:"pointer"}}>Cancel</button>
+                    <button disabled={!newMilestone.title} onClick={async()=>{await fetch("/api/portal/milestones",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({project_id:milestoneModal.projectId,title:newMilestone.title,description:newMilestone.description,due_date:newMilestone.due_date,ord:selectedPortalProject?.milestones.length??0})});setMilestoneModal(null);setNewMilestone({title:"",description:"",due_date:""});loadData("portal-projects");}} style={{background:"var(--brand)",color:"#fff",border:"none",borderRadius:8,padding:"7px 16px",fontSize:13,fontWeight:500,cursor:"pointer",opacity:!newMilestone.title?0.5:1}}>Add</button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* ══════════ PORTAL OFFERS ══════════ */}
+        {page==="portal-offers" && (
+          <section className="page active">
+            <div className="page-head">
+              <div><h2>Offers & Upgrades</h2><p>Send upgrade proposals and service offers to clients.</p></div>
+              <div className="page-actions"><button className="btn-ghost" onClick={()=>loadData("portal-offers")}>Refresh</button></div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 360px",gap:20}}>
+              {/* send offer form */}
+              <div style={{background:"#fff",border:"1.5px solid var(--line)",borderRadius:14,padding:20,display:"flex",flexDirection:"column",gap:14}}>
+                <div style={{fontWeight:600,fontSize:15,marginBottom:4}}>Send New Offer</div>
+                <div>
+                  <div style={{fontSize:12,fontWeight:500,marginBottom:5}}>Client</div>
+                  <select value={newOfferUserId} onChange={e=>setNewOfferUserId(e.target.value)} style={{width:"100%",padding:"9px 12px",borderRadius:8,border:"1px solid var(--line)",fontSize:13,fontFamily:"inherit"}}>
+                    <option value="">Select a client…</option>
+                    {portalUsers.map(u=><option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
+                  </select>
+                </div>
+                <div>
+                  <div style={{fontSize:12,fontWeight:500,marginBottom:5}}>Offer title *</div>
+                  <input value={newOfferTitle} onChange={e=>setNewOfferTitle(e.target.value)} placeholder="e.g. SEO Upgrade Package" style={{width:"100%",padding:"9px 12px",borderRadius:8,border:"1px solid var(--line)",fontSize:13,fontFamily:"inherit",boxSizing:"border-box"}}/>
+                </div>
+                <div>
+                  <div style={{fontSize:12,fontWeight:500,marginBottom:5}}>Description</div>
+                  <textarea value={newOfferDesc} onChange={e=>setNewOfferDesc(e.target.value)} rows={3} placeholder="Describe what's included…" style={{width:"100%",padding:"9px 12px",borderRadius:8,border:"1px solid var(--line)",fontSize:13,fontFamily:"inherit",resize:"vertical",boxSizing:"border-box"}}/>
+                </div>
+                <div>
+                  <div style={{fontSize:12,fontWeight:500,marginBottom:5}}>Price</div>
+                  <input value={newOfferPrice} onChange={e=>setNewOfferPrice(e.target.value)} placeholder="e.g. $499 one-time" style={{width:"100%",padding:"9px 12px",borderRadius:8,border:"1px solid var(--line)",fontSize:13,fontFamily:"inherit",boxSizing:"border-box"}}/>
+                </div>
+                <button disabled={!newOfferUserId||!newOfferTitle} onClick={async()=>{const res=await fetch("/api/portal/offers",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({user_id:Number(newOfferUserId),title:newOfferTitle,description:newOfferDesc,price:newOfferPrice})});if(res.ok){toast("Offer sent!");setNewOfferTitle("");setNewOfferDesc("");setNewOfferPrice("");setNewOfferUserId("");loadData("portal-offers");}}} style={{background:"var(--brand)",color:"#fff",border:"none",borderRadius:50,padding:"11px",fontSize:14,fontWeight:500,cursor:"pointer",opacity:!newOfferUserId||!newOfferTitle?0.5:1}}>Send Offer</button>
+              </div>
+
+              {/* offer history */}
+              <div style={{display:"flex",flexDirection:"column",gap:12,overflowY:"auto",maxHeight:"calc(100vh - 200px)"}}>
+                <div style={{fontWeight:500,fontSize:13,color:"var(--muted)"}}>Recent offers</div>
+                {portalOffers.length===0&&<div style={{fontSize:13,color:"var(--muted)",textAlign:"center",padding:20}}>No offers sent yet.</div>}
+                {portalOffers.map(o=>(
+                  <div key={o.id} style={{background:"#fff",border:"1.5px solid var(--line)",borderRadius:12,padding:"12px 14px"}}>
+                    <div style={{fontWeight:600,fontSize:13,marginBottom:3}}>{o.title}</div>
+                    {o.user_name&&<div style={{fontSize:11,color:"var(--muted)",marginBottom:4}}>→ {o.user_name}</div>}
+                    {o.description&&<div style={{fontSize:12,color:"var(--muted)",marginBottom:6}}>{o.description}</div>}
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                      {o.price&&<span style={{fontSize:12,color:"var(--brand)",fontWeight:500}}>{o.price}</span>}
+                      <span style={{fontSize:11,fontWeight:600,padding:"2px 9px",borderRadius:50,background:{pending:"#fef3c7",accepted:"#dcfce7",declined:"#fee2e2"}[o.status]??"#f3f4f6",color:{pending:"#b45309",accepted:"#166534",declined:"#c00"}[o.status]??"#888"}}>{o.status}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* ══════════ SETTINGS ══════════ */}
         {page==="settings" && (
