@@ -85,7 +85,8 @@ export async function POST(req: Request) {
       `;
       userId = rows[0].id;
     }
-    const foxId = await assignFoxId(userId);
+    const foxId    = await assignFoxId(userId);
+    const isNewUser = existing.length === 0;
 
     const projectRows = await sql`
       INSERT INTO client_projects (user_id, title, service_type, description, budget, timeline, website, status)
@@ -105,6 +106,24 @@ export async function POST(req: Request) {
     const host      = req.headers.get("host") ?? "localhost:3000";
     const proto     = host.startsWith("localhost") ? "http" : "https";
     const inviteUrl = `${proto}://${host}/portal/invite/${token}`;
+
+    // Fire welcome email for brand-new users — non-blocking, never fails the invite
+    if (isNewUser && foxId) {
+      fetch(`${proto}://${host}/api/portal/welcome-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // forward auth cookie so the admin check inside passes
+          cookie: req.headers.get("cookie") ?? "",
+        },
+        body: JSON.stringify({
+          client_name: name.trim(),
+          email:       emailLower,
+          fox_id:      foxId,
+          portal_url:  `${proto}://${host}/portal`,
+        }),
+      }).catch((e) => console.error("[welcome-email trigger]", e));
+    }
 
     return NextResponse.json({
       invite_url: inviteUrl,
