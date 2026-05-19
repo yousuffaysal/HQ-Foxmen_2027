@@ -64,7 +64,9 @@ export function buildWelcomeEmail(data: {
           style="background:linear-gradient(135deg,rgba(184,108,249,.08) 0%,rgba(139,93,255,.06) 100%);border:1.5px solid rgba(184,108,249,.25);border-radius:14px;overflow:hidden;width:100%;">
           <tr><td style="padding:18px 24px;">
             <table cellpadding="0" cellspacing="0" border="0" role="presentation"><tr>
-              <td style="vertical-align:middle;padding-right:16px;font-size:28px;line-height:1;">🦊</td>
+              <td style="vertical-align:middle;padding-right:16px;">
+                <img src="${LOGO}" width="36" height="36" alt="Foxmen Studio" style="display:block;border-radius:8px;"/>
+              </td>
               <td style="vertical-align:middle;">
                 <p style="margin:0 0 3px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(184,108,249,.7);">Your Foxmen ID</p>
                 <p style="margin:0;font-family:monospace;font-size:22px;font-weight:800;color:${BRAND};letter-spacing:.04em;">${data.fox_id}</p>
