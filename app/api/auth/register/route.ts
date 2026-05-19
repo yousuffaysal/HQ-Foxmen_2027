@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { randomBytes } from "crypto";
 import { sql } from "@/lib/db";
+import { sendWelcomeEmail } from "@/lib/welcome-email";
 
 async function ensureUsersTable() {
   await sql`
@@ -14,6 +16,18 @@ async function ensureUsersTable() {
       created_at    TIMESTAMPTZ  NOT NULL DEFAULT now()
     )
   `;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS fox_id TEXT UNIQUE`.catch(() => {});
+}
+
+async function assignFoxId(userId: number): Promise<string> {
+  const existing = await sql`SELECT fox_id FROM users WHERE id = ${userId}`;
+  if (existing[0]?.fox_id) return existing[0].fox_id as string;
+  for (let i = 0; i < 10; i++) {
+    const fid = "FXM-" + randomBytes(3).toString("hex").toUpperCase();
+    const ok = await sql`UPDATE users SET fox_id = ${fid} WHERE id = ${userId} AND fox_id IS NULL`.catch(() => null);
+    if (ok) return fid;
+  }
+  return "";
 }
 
 export async function POST(req: Request) {
@@ -34,5 +48,18 @@ export async function POST(req: Request) {
     VALUES (${name}, ${email}, ${hash})
     RETURNING id, name, email, role, created_at
   `;
-  return NextResponse.json(rows[0], { status: 201 });
+  const user  = rows[0];
+  const foxId = await assignFoxId(user.id);
+
+  // Send welcome email — non-blocking, never fails the registration
+  const host      = req.headers.get("host") ?? "foxmen.studio";
+  const proto     = host.startsWith("localhost") ? "http" : "https";
+  sendWelcomeEmail({
+    client_name: name,
+    email,
+    fox_id:      foxId,
+    portal_url:  `${proto}://${host}/portal`,
+  }).catch((e) => console.error("[welcome-email]", e));
+
+  return NextResponse.json({ ...user, fox_id: foxId }, { status: 201 });
 }
