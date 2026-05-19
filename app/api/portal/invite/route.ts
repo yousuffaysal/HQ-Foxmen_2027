@@ -85,6 +85,7 @@ export async function POST(req: Request) {
       `;
       userId = rows[0].id;
     }
+    const foxId = await assignFoxId(userId);
 
     const projectRows = await sql`
       INSERT INTO client_projects (user_id, title, service_type, description, budget, timeline, website, status)
@@ -110,6 +111,7 @@ export async function POST(req: Request) {
       email:      emailLower,
       password:   plainPass,
       user_id:    userId,
+      fox_id:     foxId,
       project_id: projectId,
       token,
       expires_at: expiresAt.toISOString(),
