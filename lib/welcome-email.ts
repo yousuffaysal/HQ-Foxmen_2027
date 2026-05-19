@@ -53,7 +53,7 @@ export function buildWelcomeEmail(data: {
     <p style="margin:0 0 10px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:${BRAND};">Welcome · Member since ${year}</p>
 
     <h1 style="margin:0 0 8px;font-family:${IS};font-size:40px;font-weight:400;color:#0a0a0a;line-height:1.08;letter-spacing:-.025em;">
-      Welcome to the<br/><em style="font-style:italic;color:${BRAND};">family, ${first}.</em>
+      Welcome to the family,<br/><em style="font-style:italic;color:${BRAND};">${first}.</em>
     </h1>
     <p style="margin:0 0 32px;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:12px;color:#b8b5b0;letter-spacing:.01em;">You're now one of us.</p>
 
