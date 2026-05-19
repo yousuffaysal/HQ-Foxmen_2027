@@ -16,6 +16,18 @@ async function ensureTable() {
       created_at TIMESTAMPTZ DEFAULT now()
     )
   `;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS fox_id TEXT UNIQUE`.catch(() => {});
+}
+
+async function assignFoxId(userId: number): Promise<string> {
+  const existing = await sql`SELECT fox_id FROM users WHERE id = ${userId}`;
+  if (existing[0]?.fox_id) return existing[0].fox_id as string;
+  for (let i = 0; i < 10; i++) {
+    const fid = "FXM-" + randomBytes(3).toString("hex").toUpperCase();
+    const ok = await sql`UPDATE users SET fox_id = ${fid} WHERE id = ${userId} AND fox_id IS NULL`.catch(() => null);
+    if (ok) return fid;
+  }
+  return "";
 }
 
 export async function GET(req: Request) {

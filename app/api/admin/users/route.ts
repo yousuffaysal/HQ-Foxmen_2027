@@ -2,14 +2,33 @@ import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import bcrypt from "bcryptjs";
+import { randomBytes } from "crypto";
+
+function makeFoxId(): string {
+  return "FXM-" + randomBytes(3).toString("hex").toUpperCase();
+}
+
+async function ensureFoxId() {
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS fox_id TEXT UNIQUE`.catch(() => {});
+  const missing = await sql`SELECT id FROM users WHERE fox_id IS NULL`;
+  for (const u of missing) {
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const fid = makeFoxId();
+      const ok = await sql`UPDATE users SET fox_id = ${fid} WHERE id = ${u.id} AND fox_id IS NULL`.catch(() => null);
+      if (ok) break;
+    }
+  }
+}
 
 export async function GET() {
   const session = await auth();
   const role = (session?.user as { role?: string })?.role;
   if (role !== "admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
+  await ensureFoxId();
+
   const rows = await sql`
-    SELECT u.id, u.name, u.email, u.role, u.created_at,
+    SELECT u.id, u.name, u.email, u.role, u.fox_id, u.created_at,
            COUNT(cp.id)::int AS project_count
     FROM users u
     LEFT JOIN client_projects cp ON cp.user_id = u.id
