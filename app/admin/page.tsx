@@ -1590,7 +1590,7 @@ export default function AdminPage() {
                   <div><div className="n">{m.name}</div><div className="r">{m.role}</div></div>
                   <div className="bio">{m.bio}</div>
                   <div className="adm-foot">
-                    <button className="btn-icon" title="Edit" onClick={()=>openModal("edit-team",{id:m.id,name:m.name,role:m.role,bio:m.bio,av:m.av})}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
+                    <button className="btn-icon" title="Edit" onClick={()=>openModal("edit-team",{id:String(m.id),name:m.name,role:m.role||"",bio:m.bio||"",av:m.av||""})}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
                     <button className="btn-icon danger" title="Remove" onClick={()=>deleteMember(m.id)}><TrashSvg/></button>
                   </div>
                 </div>
