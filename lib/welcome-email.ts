@@ -185,7 +185,7 @@ export function buildWelcomeEmail(data: {
       <tr>
         <td style="vertical-align:bottom;">
           <p style="margin:0 0 3px;font-size:12px;color:#b8b5b0;">With excitement,</p>
-          <p style="margin:0 0 4px;font-family:${IS};font-size:22px;font-weight:400;color:#0a0a0a;font-style:italic;">The Foxmen Team</p>
+          <p style="margin:0 0 4px;font-family:${IS};font-size:22px;font-weight:400;color:#0a0a0a;font-style:italic;">The Foxmen Studio Team</p>
           <p style="margin:0;font-size:11px;color:#c8c5c0;">foxmen.studio &nbsp;·&nbsp; contact@foxmenstudio.com</p>
         </td>
         <td class="em-sig-logo" style="text-align:right;vertical-align:bottom;width:44px;">
