@@ -227,7 +227,7 @@ export default function SiteLiveChat() {
           <span className="flc-badge" style={{
             position: "absolute", top: -3, right: -3,
             width: 20, height: 20, borderRadius: "50%",
-            background: BRAND, color: "#fff",
+            background: "#ef4444", color: "#fff",
             fontSize: 11, fontWeight: 700,
             display: "flex", alignItems: "center", justifyContent: "center",
             border: "2px solid #fff",
