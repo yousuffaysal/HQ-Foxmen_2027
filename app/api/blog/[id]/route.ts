@@ -12,7 +12,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       author_name  = COALESCE(${body.author_name},  author_name),
       read_time    = COALESCE(${body.read_time},    read_time),
       status       = COALESCE(${body.status},       status),
-      published_at = COALESCE(${body.published_at}, published_at)
+      published_at = COALESCE(${body.published_at}, published_at),
+      body         = COALESCE(${body.body},         body),
+      cover_image  = COALESCE(${body.cover_image},  cover_image),
+      excerpt      = COALESCE(${body.excerpt},      excerpt),
+      tags         = COALESCE(${body.tags},         tags),
+      slug         = COALESCE(${body.slug},         slug)
     WHERE id = ${id}
     RETURNING *
   `;

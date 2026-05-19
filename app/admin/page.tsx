@@ -4,6 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import AdminLiveChat from "@/components/AdminLiveChat";
 import AdminInviteClient from "@/components/AdminInviteClient"
 import AdminManageUsers from "@/components/AdminManageUsers";
+import AdminBlogEditor from "@/components/AdminBlogEditor";
 import { getPusherClient } from "@/lib/pusher";
 
 /* ================================================================
@@ -13,7 +14,7 @@ type Project = { id:number; monogram:string; color_cls:string; name:string; indu
 type ChapterImage = { url:string; orient:"portrait"|"landscape"; label:string };
 type ChapterStat  = { value:string; label:string; context:string };
 type Chapter = { id:string; title:string; body:string; images:ChapterImage[]; video:string; stats:ChapterStat[]; img_layout:"side-by-side"|"stacked" };
-type Post     = { id:number; title:string; category:string; author_init:string; author_name:string; read_time:string; status:string; published_at:string|null };
+type Post     = { id:number; title:string; category:string; author_init:string; author_name:string; read_time:string; status:string; published_at:string|null; slug:string; excerpt:string; body:string; cover_image:string; tags:string };
 type Service  = { id:number; ord:number; name:string; descr:string; count:string; visible:boolean; badge:string|null; image:string|null };
 type Testi    = { id:number; quote:string; name:string; role:string; av:string; hi:string };
 type Client   = { id:number; name:string; industry:string; country:string; contact:string; eng:string; mrr:string; av:string; cls:string };
@@ -644,6 +645,7 @@ export default function AdminPage() {
   /* data */
   const [projects,  setProjects]  = useState<Project[]>([]);
   const [posts,     setPosts]     = useState<Post[]>([]);
+  const [blogEditorPost, setBlogEditorPost] = useState<Partial<Post> | null>(null);
   const [services,  setServices]  = useState<Service[]>([]);
   const [testis,    setTestis]    = useState<Testi[]>([]);
   const [clients,   setClients]   = useState<Client[]>([]);
@@ -1081,7 +1083,7 @@ export default function AdminPage() {
   /* ── NEW button per page ── */
   const handleNewBtn = ()=>{
     if(page==="projects"||page==="dashboard") openModal("new-project");
-    else if(page==="blog") openModal("new-post");
+    else if(page==="blog") setBlogEditorPost({status:"draft",category:"Design"});
     else if(page==="testimonials") openModal("new-testimonial");
     else if(page==="clients") openModal("new-client");
     else if(page==="team") openModal("new-team");
@@ -1339,11 +1341,23 @@ export default function AdminPage() {
         )}
 
         {/* ══════════ BLOG ══════════ */}
-        {page==="blog" && (
+        {page==="blog" && blogEditorPost && (
+          <AdminBlogEditor
+            post={blogEditorPost}
+            onSave={(row)=>{
+              const saved = row as Post;
+              setPosts(p => blogEditorPost.id ? p.map(x=>x.id===saved.id?saved:x) : [saved,...p]);
+              setBlogEditorPost(null);
+              toast(blogEditorPost.id ? "Post updated" : "Post created");
+            }}
+            onClose={()=>setBlogEditorPost(null)}
+          />
+        )}
+        {page==="blog" && !blogEditorPost && (
           <section className="page active">
             <div className="page-head">
               <div><h2>Journal <span className="it">— {posts.length}</span></h2><p>Essays, deep-dives and case notes.</p></div>
-              <div className="page-actions"><button className="btn-primary" onClick={()=>openModal("new-post")}>New post <PlusChip/></button></div>
+              <div className="page-actions"><button className="btn-primary" onClick={()=>setBlogEditorPost({status:"draft",category:"Design"})}>New post <PlusChip/></button></div>
             </div>
             <div className="table-wrap">
               <div className="table-tools"><div className="search"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg><input placeholder="Search posts…"/></div></div>
@@ -1359,7 +1373,7 @@ export default function AdminPage() {
                       <td><span className={`status ${p.status}`}>{p.status}</span></td>
                       <td><span style={{color:"var(--muted)",fontFamily:"var(--f-mono)",fontSize:11}}>{fmtDate(p.published_at)}</span></td>
                       <td><div className="acts">
-                        <button className="btn-icon" title="Edit" onClick={()=>openModal("edit-post",{title:p.title,category:p.category,author_name:p.author_name,read_time:p.read_time,status:p.status},p.id)}><EditSvg/></button>
+                        <button className="btn-icon" title="Edit" onClick={()=>setBlogEditorPost(p)}><EditSvg/></button>
                         <button className="btn-icon danger" title="Delete" onClick={()=>deletePost(p.id)}><TrashSvg/></button>
                       </div></td>
                     </tr>
