@@ -6,6 +6,7 @@ type User = {
   name: string;
   email: string;
   role: string;
+  fox_id: string | null;
   created_at: string;
   project_count: number;
 };
@@ -24,11 +25,11 @@ function initials(name: string) {
   return name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
 }
 
-const ROLE_COLOR: Record<string, { bg: string; color: string }> = {
+const ROLE_STYLE: Record<string, { bg: string; color: string }> = {
   admin:  { bg: "#f0e9ff", color: "#6c3fc5" },
-  client: { bg: "#e9f5ff", color: "#1a6fa8" },
+  client: { bg: "#e9f0ff", color: "#1a52a8" },
 };
-const AV_COLOR: Record<string, string> = {
+const AV_GRAD: Record<string, string> = {
   admin:  "linear-gradient(135deg,#b86cf9,#7c3aed)",
   client: "linear-gradient(135deg,#60a5fa,#2563eb)",
 };
@@ -38,6 +39,7 @@ export default function AdminManageUsers() {
   const [loading, setLoading] = useState(true);
   const [search,  setSearch]  = useState("");
   const [filter,  setFilter]  = useState<"all"|"admin"|"client">("all");
+  const [selected, setSelected] = useState<number | null>(null);
   const [editUser, setEditUser] = useState<User | null>(null);
   const [editName,  setEditName]  = useState("");
   const [editEmail, setEditEmail] = useState("");
@@ -98,6 +100,7 @@ export default function AdminManageUsers() {
     });
     if (res.ok) {
       setUsers(prev => prev.filter(x => x.id !== u.id));
+      if (selected === u.id) setSelected(null);
       showToast("User removed");
     } else {
       const t = await res.text();
@@ -107,35 +110,41 @@ export default function AdminManageUsers() {
 
   const filtered = users.filter(u => {
     const q = search.toLowerCase();
-    const matchSearch = !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
+    const matchSearch = !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || (u.fox_id ?? "").toLowerCase().includes(q);
     const matchRole   = filter === "all" || u.role === filter;
     return matchSearch && matchRole;
   });
 
-  const counts = { all: users.length, admin: users.filter(u => u.role === "admin").length, client: users.filter(u => u.role === "client").length };
+  const counts = {
+    all:    users.length,
+    admin:  users.filter(u => u.role === "admin").length,
+    client: users.filter(u => u.role === "client").length,
+  };
+
+  const selectedUser = selected !== null ? users.find(u => u.id === selected) : null;
 
   return (
     <section className="page active">
       <div className="page-head">
         <div>
           <h2>Manage Users <span className="it">— {users.length}</span></h2>
-          <p>All registered accounts — portal clients and admin staff.</p>
+          <p>All registered accounts. Every user has a unique Foxmen ID.</p>
         </div>
         <div className="page-actions">
           <button className="btn-ghost" onClick={load}>Refresh</button>
         </div>
       </div>
 
-      {/* Search + filters */}
+      {/* Search + filter */}
       <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap", alignItems: "center" }}>
-        <div style={{ position: "relative", flex: 1, minWidth: 200 }}>
+        <div style={{ position: "relative", flex: 1, minWidth: 220 }}>
           <svg style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}
             width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
           <input
             value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search by name or email…"
+            placeholder="Search by name, email, or FXM ID…"
             style={{ width: "100%", paddingLeft: 36, paddingRight: 12, paddingTop: 9, paddingBottom: 9, border: "1.5px solid var(--line)", borderRadius: 10, fontSize: 13, outline: "none", background: "#fff", boxSizing: "border-box" }}
           />
         </div>
@@ -148,7 +157,7 @@ export default function AdminManageUsers() {
               boxShadow: filter === f ? "0 1px 4px rgba(0,0,0,.08)" : "none",
               transition: "all .15s",
             }}>
-              {f.charAt(0).toUpperCase() + f.slice(1)} <span style={{ opacity: 0.55 }}>{counts[f]}</span>
+              {f.charAt(0).toUpperCase() + f.slice(1)} <span style={{ opacity: 0.5, fontWeight: 400 }}>{counts[f]}</span>
             </button>
           ))}
         </div>
@@ -162,101 +171,171 @@ export default function AdminManageUsers() {
           <p>{search ? "Try a different search term." : "No users match this filter."}</p>
         </div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(320px,1fr))", gap: 14 }}>
-          {filtered.map(u => {
-            const rc = ROLE_COLOR[u.role] ?? { bg: "#f0f0f0", color: "#666" };
-            return (
-              <div key={u.id} style={{
-                background: "#fff", border: "1.5px solid var(--line)", borderRadius: 16,
-                padding: "18px 20px", display: "flex", flexDirection: "column", gap: 14,
-                transition: "box-shadow .2s, border-color .2s",
-              }}
-                onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.borderColor = "var(--brand)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "0 4px 20px rgba(184,108,249,.1)"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.borderColor = "var(--line)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}
-              >
-                {/* Header row */}
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{
-                    width: 44, height: 44, borderRadius: "50%", flexShrink: 0,
-                    background: AV_COLOR[u.role] ?? "linear-gradient(135deg,#888,#555)",
-                    display: "grid", placeItems: "center",
-                    fontWeight: 700, fontSize: 14, color: "#fff", letterSpacing: ".02em",
-                  }}>
-                    {initials(u.name || u.email)}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: 14, color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.name}</div>
-                    <div style={{ fontSize: 11, color: "var(--muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: "var(--f-mono)", letterSpacing: ".04em" }}>{u.email}</div>
-                  </div>
-                  <span style={{ padding: "3px 10px", borderRadius: 999, fontSize: 10, fontWeight: 700, letterSpacing: ".07em", textTransform: "uppercase", ...rc, flexShrink: 0 }}>
-                    {u.role}
-                  </span>
-                </div>
+        <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
 
-                {/* Stats row */}
-                <div style={{ display: "flex", gap: 0, borderTop: "1px solid var(--line)", paddingTop: 12 }}>
-                  <div style={{ flex: 1, textAlign: "center" }}>
-                    <div style={{ fontSize: 20, fontWeight: 800, color: "var(--ink)", letterSpacing: "-.03em" }}>{u.project_count}</div>
-                    <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 1, fontWeight: 500, letterSpacing: ".06em", textTransform: "uppercase" }}>Projects</div>
-                  </div>
-                  <div style={{ width: 1, background: "var(--line)" }}/>
-                  <div style={{ flex: 1, textAlign: "center" }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>{relTime(u.created_at)}</div>
-                    <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 1, fontWeight: 500, letterSpacing: ".06em", textTransform: "uppercase" }}>Joined</div>
-                  </div>
-                  <div style={{ width: 1, background: "var(--line)" }}/>
-                  <div style={{ flex: 1, textAlign: "center" }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)" }}>#{u.id}</div>
-                    <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 1, fontWeight: 500, letterSpacing: ".06em", textTransform: "uppercase" }}>User ID</div>
-                  </div>
-                </div>
+          {/* ── LIST ── */}
+          <div style={{ flex: 1, background: "#fff", border: "1.5px solid var(--line)", borderRadius: 16, overflow: "hidden" }}>
+            {/* Table header */}
+            <div style={{ display: "grid", gridTemplateColumns: "2fr 1.4fr 90px 80px 90px 80px", gap: 0, padding: "10px 18px", borderBottom: "1.5px solid var(--line)", background: "var(--canvas)" }}>
+              {["User", "Fox ID", "Role", "Projects", "Joined", ""].map((h, i) => (
+                <div key={i} style={{ fontSize: 10, fontWeight: 700, color: "var(--muted)", letterSpacing: ".1em", textTransform: "uppercase" }}>{h}</div>
+              ))}
+            </div>
 
-                {/* Actions */}
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button onClick={() => openEdit(u)} style={{
-                    flex: 1, padding: "8px 0", border: "1.5px solid var(--line)", borderRadius: 9,
-                    background: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 600, color: "var(--ink)",
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6, transition: "all .15s",
+            {filtered.map((u, idx) => {
+              const isSelected = selected === u.id;
+              const rc = ROLE_STYLE[u.role] ?? { bg: "#f0f0f0", color: "#666" };
+              return (
+                <div key={u.id} onClick={() => setSelected(isSelected ? null : u.id)}
+                  style={{
+                    display: "grid", gridTemplateColumns: "2fr 1.4fr 90px 80px 90px 80px",
+                    gap: 0, padding: "13px 18px", alignItems: "center", cursor: "pointer",
+                    borderBottom: idx < filtered.length - 1 ? "1px solid var(--line)" : "none",
+                    background: isSelected ? "rgba(184,108,249,.05)" : "#fff",
+                    borderLeft: isSelected ? "3px solid var(--brand)" : "3px solid transparent",
+                    transition: "all .12s",
                   }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--brand)"; (e.currentTarget as HTMLButtonElement).style.color = "var(--brand)"; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--line)"; (e.currentTarget as HTMLButtonElement).style.color = "var(--ink)"; }}
-                  >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-                    Edit
-                  </button>
-                  {u.role !== "admin" && (
-                    <button onClick={() => deleteUser(u)} style={{
-                      padding: "8px 12px", border: "1.5px solid #fee2e2", borderRadius: 9,
-                      background: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 600, color: "#ef4444",
-                      display: "flex", alignItems: "center", gap: 6, transition: "all .15s",
+                  onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLDivElement).style.background = "#fafafa"; }}
+                  onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLDivElement).style.background = "#fff"; }}
+                >
+                  {/* Name + email */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                    <div style={{
+                      width: 34, height: 34, borderRadius: "50%", flexShrink: 0,
+                      background: AV_GRAD[u.role] ?? "#888",
+                      display: "grid", placeItems: "center",
+                      fontWeight: 700, fontSize: 12, color: "#fff",
+                    }}>
+                      {initials(u.name || u.email)}
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: 13, color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.name}</div>
+                      <div style={{ fontSize: 11, color: "var(--muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.email}</div>
+                    </div>
+                  </div>
+
+                  {/* Fox ID */}
+                  <div style={{ fontFamily: "var(--f-mono)", fontSize: 12, fontWeight: 700, color: "var(--brand)", letterSpacing: ".06em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {u.fox_id ?? "—"}
+                  </div>
+
+                  {/* Role */}
+                  <div>
+                    <span style={{ padding: "3px 10px", borderRadius: 999, fontSize: 10, fontWeight: 700, letterSpacing: ".07em", textTransform: "uppercase", ...rc }}>
+                      {u.role}
+                    </span>
+                  </div>
+
+                  {/* Projects */}
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>{u.project_count}</div>
+
+                  {/* Joined */}
+                  <div style={{ fontSize: 12, color: "var(--muted)" }}>{relTime(u.created_at)}</div>
+
+                  {/* Actions */}
+                  <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }} onClick={e => e.stopPropagation()}>
+                    <button title="Edit" onClick={() => openEdit(u)} style={{
+                      width: 30, height: 30, border: "1.5px solid var(--line)", borderRadius: 7,
+                      background: "#fff", cursor: "pointer", display: "grid", placeItems: "center", color: "var(--muted)", transition: "all .12s",
                     }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "#fef2f2"; }}
-                      onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "#fff"; }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--brand)"; (e.currentTarget as HTMLButtonElement).style.color = "var(--brand)"; }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--line)"; (e.currentTarget as HTMLButtonElement).style.color = "var(--muted)"; }}
                     >
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
                     </button>
-                  )}
+                    {u.role !== "admin" && (
+                      <button title="Delete" onClick={() => deleteUser(u)} style={{
+                        width: 30, height: 30, border: "1.5px solid #fee2e2", borderRadius: 7,
+                        background: "#fff", cursor: "pointer", display: "grid", placeItems: "center", color: "#ef4444", transition: "all .12s",
+                      }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "#fef2f2"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "#fff"; }}
+                      >
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* ── DETAIL PANEL ── */}
+          {selectedUser && (
+            <div style={{ width: 260, flexShrink: 0, background: "#fff", border: "1.5px solid var(--line)", borderRadius: 16, overflow: "hidden", position: "sticky", top: 80 }}>
+              {/* Avatar + name */}
+              <div style={{ background: "linear-gradient(160deg,#0a0a0a,#1a0f2e)", padding: "24px 20px 20px", textAlign: "center" }}>
+                <div style={{
+                  width: 56, height: 56, borderRadius: "50%", margin: "0 auto 12px",
+                  background: AV_GRAD[selectedUser.role] ?? "#888",
+                  display: "grid", placeItems: "center",
+                  fontWeight: 800, fontSize: 18, color: "#fff",
+                }}>
+                  {initials(selectedUser.name || selectedUser.email)}
+                </div>
+                <div style={{ fontWeight: 700, fontSize: 15, color: "#fff", marginBottom: 3 }}>{selectedUser.name}</div>
+                <div style={{ fontSize: 11, color: "rgba(255,255,255,.4)" }}>{selectedUser.email}</div>
+                {/* Fox ID badge */}
+                <div style={{ marginTop: 14, display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(184,108,249,.15)", border: "1px solid rgba(184,108,249,.3)", padding: "6px 14px", borderRadius: 8 }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#b86cf9" strokeWidth="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  <span style={{ fontFamily: "var(--f-mono)", fontSize: 13, fontWeight: 700, color: "#b86cf9", letterSpacing: ".06em" }}>{selectedUser.fox_id ?? "—"}</span>
                 </div>
               </div>
-            );
-          })}
+              {/* Stats */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: "1px solid var(--line)" }}>
+                <div style={{ padding: "14px 16px", borderRight: "1px solid var(--line)", textAlign: "center" }}>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: "var(--ink)", letterSpacing: "-.03em" }}>{selectedUser.project_count}</div>
+                  <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 2, textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 600 }}>Projects</div>
+                </div>
+                <div style={{ padding: "14px 16px", textAlign: "center" }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>{relTime(selectedUser.created_at)}</div>
+                  <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 2, textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 600 }}>Joined</div>
+                </div>
+              </div>
+              {/* Info rows */}
+              <div style={{ padding: "14px 18px", display: "flex", flexDirection: "column", gap: 12 }}>
+                <div>
+                  <div style={{ fontSize: 10, color: "var(--muted)", fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", marginBottom: 4 }}>Role</div>
+                  <span style={{ padding: "3px 11px", borderRadius: 999, fontSize: 11, fontWeight: 700, letterSpacing: ".07em", textTransform: "uppercase", ...(ROLE_STYLE[selectedUser.role] ?? { bg: "#f0f0f0", color: "#666" }) }}>
+                    {selectedUser.role}
+                  </span>
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, color: "var(--muted)", fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", marginBottom: 4 }}>DB User ID</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", fontFamily: "var(--f-mono)" }}>#{selectedUser.id}</div>
+                </div>
+              </div>
+              {/* Actions */}
+              <div style={{ padding: "0 18px 18px", display: "flex", flexDirection: "column", gap: 8 }}>
+                <button onClick={() => openEdit(selectedUser)} style={{ width: "100%", padding: "9px 0", border: "1.5px solid var(--brand)", borderRadius: 9, background: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 700, color: "var(--brand)", transition: "all .15s" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(184,108,249,.06)"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "#fff"; }}
+                >
+                  Edit user
+                </button>
+                {selectedUser.role !== "admin" && (
+                  <button onClick={() => deleteUser(selectedUser)} style={{ width: "100%", padding: "9px 0", border: "1.5px solid #fee2e2", borderRadius: 9, background: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 700, color: "#ef4444", transition: "all .15s" }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "#fef2f2"; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "#fff"; }}
+                  >
+                    Remove user
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Edit modal */}
+      {/* ── EDIT MODAL ── */}
       {editUser && (
-        <div style={{
-          position: "fixed", inset: 0, background: "rgba(0,0,0,.45)", zIndex: 1100,
-          display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
-        }} onClick={e => { if (e.target === e.currentTarget) setEditUser(null); }}>
-          <div style={{
-            background: "#fff", borderRadius: 18, width: "100%", maxWidth: 440,
-            boxShadow: "0 32px 80px rgba(0,0,0,.3)",
-          }}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.45)", zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
+          onClick={e => { if (e.target === e.currentTarget) setEditUser(null); }}>
+          <div style={{ background: "#fff", borderRadius: 18, width: "100%", maxWidth: 440, boxShadow: "0 32px 80px rgba(0,0,0,.3)" }}>
             <div style={{ padding: "22px 24px 18px", borderBottom: "1px solid var(--line)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div>
                 <div style={{ fontWeight: 800, fontSize: 16, color: "var(--ink)", letterSpacing: "-.02em" }}>Edit user</div>
-                <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 2 }}>#{editUser.id} · {editUser.role}</div>
+                <div style={{ fontSize: 12, color: "var(--brand)", marginTop: 2, fontFamily: "var(--f-mono)", fontWeight: 700 }}>{editUser.fox_id ?? `#${editUser.id}`}</div>
               </div>
               <button onClick={() => setEditUser(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)", padding: 4 }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
@@ -266,20 +345,19 @@ export default function AdminManageUsers() {
               <div>
                 <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "var(--ink)", marginBottom: 5, letterSpacing: ".04em", textTransform: "uppercase" }}>Full name *</label>
                 <input value={editName} onChange={e => setEditName(e.target.value)}
-                  style={{ width: "100%", padding: "10px 12px", border: "1.5px solid var(--line)", borderRadius: 9, fontSize: 13, outline: "none", boxSizing: "border-box" }}
-                />
+                  style={{ width: "100%", padding: "10px 12px", border: "1.5px solid var(--line)", borderRadius: 9, fontSize: 13, outline: "none", boxSizing: "border-box" }} />
               </div>
               <div>
                 <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "var(--ink)", marginBottom: 5, letterSpacing: ".04em", textTransform: "uppercase" }}>Email *</label>
                 <input value={editEmail} onChange={e => setEditEmail(e.target.value)} type="email"
-                  style={{ width: "100%", padding: "10px 12px", border: "1.5px solid var(--line)", borderRadius: 9, fontSize: 13, outline: "none", boxSizing: "border-box" }}
-                />
+                  style={{ width: "100%", padding: "10px 12px", border: "1.5px solid var(--line)", borderRadius: 9, fontSize: 13, outline: "none", boxSizing: "border-box" }} />
               </div>
               <div>
-                <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "var(--ink)", marginBottom: 5, letterSpacing: ".04em", textTransform: "uppercase" }}>New password <span style={{ fontWeight: 400, color: "var(--muted)", textTransform: "none" }}>(leave blank to keep current)</span></label>
+                <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "var(--ink)", marginBottom: 5, letterSpacing: ".04em", textTransform: "uppercase" }}>
+                  New password <span style={{ fontWeight: 400, color: "var(--muted)", textTransform: "none" }}>(blank = keep current)</span>
+                </label>
                 <input value={editPass} onChange={e => setEditPass(e.target.value)} type="password" placeholder="••••••••"
-                  style={{ width: "100%", padding: "10px 12px", border: "1.5px solid var(--line)", borderRadius: 9, fontSize: 13, outline: "none", boxSizing: "border-box" }}
-                />
+                  style={{ width: "100%", padding: "10px 12px", border: "1.5px solid var(--line)", borderRadius: 9, fontSize: 13, outline: "none", boxSizing: "border-box" }} />
               </div>
             </div>
             <div style={{ padding: "14px 24px 22px", display: "flex", gap: 10 }}>
@@ -294,14 +372,8 @@ export default function AdminManageUsers() {
         </div>
       )}
 
-      {/* Toast */}
       {toast && (
-        <div style={{
-          position: "fixed", bottom: 28, left: "50%", transform: "translateX(-50%)",
-          background: "#0a0a0a", color: "#fff", padding: "10px 20px", borderRadius: 10,
-          fontSize: 13, fontWeight: 600, zIndex: 2000, pointerEvents: "none",
-          animation: "fadeInUp .2s ease",
-        }}>
+        <div style={{ position: "fixed", bottom: 28, left: "50%", transform: "translateX(-50%)", background: "#0a0a0a", color: "#fff", padding: "10px 20px", borderRadius: 10, fontSize: 13, fontWeight: 600, zIndex: 2000, pointerEvents: "none" }}>
           {toast}
         </div>
       )}

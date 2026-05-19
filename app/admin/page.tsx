@@ -25,7 +25,7 @@ type InvoiceItem = { service:string; description:string; quantity:number; unit:s
 type ProposalData= { executive_summary:string; scope_items:string[]; deliverables:string[]; timeline:{period:string;milestone:string;desc:string}[]; investment_note:string; terms:string };
 type PortalMilestone = { id:number; title:string; description:string; status:string; due_date:string; completed_at:string|null; ord:number };
 type PortalProject = { id:number; user_id:number; title:string; service_type:string; status:string; description:string; budget:string; timeline:string; website:string; admin_note:string; created_at:string; updated_at:string; milestones:PortalMilestone[]; user_name:string; user_email:string };
-type PortalUser = { id:number; name:string; email:string; role:string; created_at:string };
+type PortalUser = { id:number; name:string; email:string; role:string; fox_id:string|null; created_at:string };
 type PortalOffer = { id:number; user_id:number; project_id:number|null; title:string; description:string; price:string; status:string; created_at:string; user_name?:string };
 type PortalMessage = { id:number; project_id:number; sender_id:number; sender_name:string; sender_role:string; message:string; created_at:string };
 
@@ -666,6 +666,11 @@ export default function AdminPage() {
   const [newOfferPrice, setNewOfferPrice] = useState("");
   const [milestoneModal, setMilestoneModal] = useState<{projectId:number}|null>(null);
   const [newMilestone, setNewMilestone] = useState({title:"",description:"",due_date:""});
+  const [newProjModal,  setNewProjModal]  = useState(false);
+  const [newProjForm,   setNewProjForm]   = useState({user_id:"",title:"",service_type:"",description:"",budget:"",timeline:"",website:""});
+  const [newProjSaving, setNewProjSaving] = useState(false);
+  const [projEditMode,  setProjEditMode]  = useState(false);
+  const [projEditForm,  setProjEditForm]  = useState({title:"",service_type:"",description:"",budget:"",timeline:"",website:"",admin_note:""});
   const portalChatEndRef = useRef<HTMLDivElement>(null);
   const [priceCat,  setPriceCat]  = useState("Website");
   const [localPrices, setLocalPrices] = useState<Record<number,{min:number;max:number}>>({});
@@ -793,6 +798,7 @@ export default function AdminPage() {
       else if(p==="service-orders"){ const r=await fetch("/api/service-orders").then(r=>r.json()); setServiceOrders(Array.isArray(r)?r:[]); }
       else if(p==="team"){        const r=await fetch("/api/team").then(r=>r.json()); setTeam(Array.isArray(r)?r:[]); }
       else if(p==="manage-users"){ /* loaded inside AdminManageUsers */ }
+      else if(p==="admin-notifications"){ /* live-only — already in adminNotifs state */ }
       else if(p==="portal-projects"){
         const r=await fetch("/api/portal/projects").then(r=>r.json());
         setPortalProjects(Array.isArray(r)?r:[]);
@@ -1001,6 +1007,38 @@ export default function AdminPage() {
     setSubmitting(false);
   };
 
+  /* ── PORTAL PROJECTS CRUD ── */
+  const createPortalProject = async()=>{
+    if(!newProjForm.title.trim()||!newProjForm.user_id){ toast("Client and title are required"); return; }
+    setNewProjSaving(true);
+    const res=await fetch("/api/portal/projects",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...newProjForm,user_id:Number(newProjForm.user_id),status:"pending"})});
+    if(res.ok){ loadData("portal-projects"); setNewProjModal(false); setNewProjForm({user_id:"",title:"",service_type:"",description:"",budget:"",timeline:"",website:""}); toast("Project created"); }
+    else toast("Failed to create project");
+    setNewProjSaving(false);
+  };
+  const deletePortalProject=async(id:number)=>{
+    if(!confirm("Delete this project? This cannot be undone.")) return;
+    await fetch(`/api/portal/projects/${id}`,{method:"DELETE"});
+    setPortalProjects(prev=>prev.filter(p=>p.id!==id));
+    if(selectedPortalProject?.id===id){ setSelectedPortalProject(null); setProjEditMode(false); }
+    toast("Project deleted");
+  };
+  const openProjEdit=(p:PortalProject)=>{
+    setProjEditForm({title:p.title,service_type:p.service_type,description:p.description,budget:p.budget,timeline:p.timeline,website:p.website,admin_note:p.admin_note});
+    setProjEditMode(true);
+  };
+  const saveProjEdit=async()=>{
+    if(!selectedPortalProject) return;
+    const res=await fetch(`/api/portal/projects/${selectedPortalProject.id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(projEditForm)});
+    if(res.ok){
+      const updated=await res.json();
+      setPortalProjects(prev=>prev.map(p=>p.id===updated.id?{...p,...updated}:p));
+      setSelectedPortalProject(prev=>prev?{...prev,...updated}:null);
+      setProjEditMode(false);
+      toast("Project saved");
+    }
+  };
+
   /* ── FOX PRICES ── */
   const saveFoxPrice = async(id:number)=>{
     const lp = localPrices[id]; if(!lp) return;
@@ -1052,9 +1090,9 @@ export default function AdminPage() {
   };
 
   /* ── page meta ── */
-  const CRUMBS:Record<string,string>={ dashboard:"Workspace / Dashboard", analytics:"Workspace / Analytics", projects:"Content / Projects", blog:"Content / Journal", services:"Content / Services", testimonials:"Content / Testimonials", media:"Content / Media", clients:"People / Clients", messages:"People / Inbox", leads:"People / Leads", "service-orders":"People / Service Orders", team:"People / Team", "manage-users":"People / Manage Users", settings:"System / Settings", "fox-prices":"System / Fox Pricing", proposals:"Generate / Proposals", invoices:"Generate / Invoices", email:"Generate / Email Campaign", "portal-projects":"Client Portal / Projects", "portal-offers":"Client Portal / Offers", "portal-invite":"Client Portal / Invite Client" };
+  const CRUMBS:Record<string,string>={ dashboard:"Workspace / Dashboard", analytics:"Workspace / Analytics", "admin-notifications":"Workspace / Notifications", projects:"Content / Projects", blog:"Content / Journal", services:"Content / Services", testimonials:"Content / Testimonials", media:"Content / Media", clients:"People / Clients", messages:"People / Inbox", leads:"People / Leads", "service-orders":"People / Service Orders", team:"People / Team", "manage-users":"People / Manage Users", settings:"System / Settings", "fox-prices":"System / Fox Pricing", proposals:"Generate / Proposals", invoices:"Generate / Invoices", email:"Generate / Email Campaign", "portal-projects":"Client Portal / Projects", "portal-offers":"Client Portal / Offers", "portal-invite":"Client Portal / Invite Client" };
   const TITLES:Record<string,React.ReactNode>={ dashboard:<>Good {new Date().getHours()<12?"morning":new Date().getHours()<17?"afternoon":"evening"}, <span className="it">{session?.user?.name?.split(" ")[0]??""}</span>.</>
-, analytics:"Analytics", projects:"Projects", blog:"Journal", services:"Services", testimonials:"Testimonials", media:"Media library", clients:"Clients", messages:"Inbox", leads:"Estimator Leads", "service-orders":"Service Orders", team:"Team", "manage-users":"Manage Users", settings:"Settings", "fox-prices":"Fox Pricing", proposals:"Proposals", invoices:"Invoices", email:"Email Campaign", "portal-projects":"Client Projects", "portal-offers":"Client Offers", "portal-invite":"Invite Client" };
+, analytics:"Analytics", "admin-notifications":"Notifications", projects:"Projects", blog:"Journal", services:"Services", testimonials:"Testimonials", media:"Media library", clients:"Clients", messages:"Inbox", leads:"Estimator Leads", "service-orders":"Service Orders", team:"Team", "manage-users":"Manage Users", settings:"Settings", "fox-prices":"Fox Pricing", proposals:"Proposals", invoices:"Invoices", email:"Email Campaign", "portal-projects":"Client Projects", "portal-offers":"Client Offers", "portal-invite":"Invite Client" };
 
   /* ── dashboard derived ── */
   const liveProjects = projects.filter(p=>p.status==="live").length;
@@ -1085,10 +1123,15 @@ export default function AdminPage() {
         <nav className="side-nav">
           <span className="label">Workspace</span>
           {[["dashboard","Dashboard",<svg key="d" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>],
-           ["analytics","Analytics",<svg key="a" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 3v18h18M7 14l4-4 4 4 5-7"/></svg>]
+           ["analytics","Analytics",<svg key="a" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 3v18h18M7 14l4-4 4 4 5-7"/></svg>],
           ].map(([p,label,icon])=>(
             <a key={p as string} className={page===p?"active":""} onClick={()=>nav(p as string)}>{icon as React.ReactNode}{label as string}</a>
           ))}
+          <a className={page==="admin-notifications"?"active":""} onClick={()=>nav("admin-notifications")} style={{position:"relative"}}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+            Notifications
+            {(adminNotifs.length+unreadMsgs)>0&&<span className="badge">{adminNotifs.length+unreadMsgs}</span>}
+          </a>
           <span className="label">Content</span>
           {[["projects","Projects",<svg key="p" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M8 5V3M16 5V3"/></svg>,`${projects.length||38}`],
            ["blog","Blog posts",<svg key="b" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M4 5h16M4 12h16M4 19h10"/></svg>,`${posts.length||24}`],
@@ -2903,57 +2946,105 @@ ${emailPayNotes?`<div style="margin-top:24px;padding:16px 20px;background:#faf8f
         {page==="portal-projects" && (
           <section className="page active">
             <div className="page-head">
-              <div><h2>Client Projects</h2><p>Manage all client portal projects, timelines and chat.</p></div>
-              <div className="page-actions"><button className="btn-ghost" onClick={()=>loadData("portal-projects")}>Refresh</button></div>
+              <div><h2>Client Projects <span className="it">— {portalProjects.length}</span></h2><p>Create, edit, and manage all client portal projects.</p></div>
+              <div className="page-actions">
+                <button className="btn-ghost" onClick={()=>loadData("portal-projects")}>Refresh</button>
+                <button className="btn-primary" onClick={()=>{setNewProjModal(true);const ur=portalUsers;if(!ur.length)fetch("/api/auth/portal-users").then(r=>r.json()).then(r=>{setPortalUsers(Array.isArray(r)?r:[]);})}}>New Project <PlusChip/></button>
+              </div>
             </div>
             <div style={{display:"grid",gridTemplateColumns:selectedPortalProject?"1fr 1fr":"1fr",gap:20,height:"calc(100vh - 180px)",overflow:"hidden"}}>
               {/* project list */}
-              <div style={{overflowY:"auto",display:"flex",flexDirection:"column",gap:12}}>
-                {portalProjects.length===0&&<div style={{textAlign:"center",padding:40,color:"var(--muted)",fontSize:13}}>No client projects yet.</div>}
-                {portalProjects.map(p=>(
-                  <div key={p.id} onClick={async()=>{setSelectedPortalProject(p);const r=await fetch(`/api/portal/messages?project_id=${p.id}`).then(r=>r.json());setPortalMessages(Array.isArray(r)?r:[]);setTimeout(()=>portalChatEndRef.current?.scrollIntoView({behavior:"smooth"}),100);}}
-                    style={{background:"#fff",border:`1.5px solid ${selectedPortalProject?.id===p.id?"var(--brand)":"var(--line)"}`,borderRadius:12,padding:"14px 16px",cursor:"pointer",transition:"border-color .15s"}}>
-                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
-                      <span style={{fontWeight:600,fontSize:14}}>{p.title}</span>
-                      <span style={{fontSize:11,fontWeight:600,padding:"2px 9px",borderRadius:50,background:{pending:"#fef3c7",in_progress:"#ede1ff",review:"#dbeafe",completed:"#dcfce7",on_hold:"#f3f4f6"}[p.status]??"#f3f4f6",color:{pending:"#b45309",in_progress:"var(--brand)",review:"#1d4ed8",completed:"#166534",on_hold:"#888"}[p.status]??"#888"}}>{p.status.replace("_"," ")}</span>
+              <div style={{overflowY:"auto",display:"flex",flexDirection:"column",gap:10}}>
+                {portalProjects.length===0&&<div style={{textAlign:"center",padding:40,color:"var(--muted)",fontSize:13}}>No client projects yet. Create one above.</div>}
+                {portalProjects.map(p=>{
+                  const statusBg:Record<string,string>={pending:"#fef3c7",in_progress:"#ede1ff",review:"#dbeafe",completed:"#dcfce7",on_hold:"#f3f4f6"};
+                  const statusCol:Record<string,string>={pending:"#b45309",in_progress:"var(--brand)",review:"#1d4ed8",completed:"#166534",on_hold:"#888"};
+                  return (
+                    <div key={p.id} onClick={async()=>{setSelectedPortalProject(p);setProjEditMode(false);const r=await fetch(`/api/portal/messages?project_id=${p.id}`).then(r=>r.json());setPortalMessages(Array.isArray(r)?r:[]);setTimeout(()=>portalChatEndRef.current?.scrollIntoView({behavior:"smooth"}),100);}}
+                      style={{background:"#fff",border:`1.5px solid ${selectedPortalProject?.id===p.id?"var(--brand)":"var(--line)"}`,borderRadius:12,padding:"14px 16px",cursor:"pointer",transition:"border-color .15s"}}>
+                      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
+                        <span style={{fontWeight:600,fontSize:14}}>{p.title}</span>
+                        <div style={{display:"flex",gap:6,alignItems:"center"}}>
+                          <span style={{fontSize:11,fontWeight:600,padding:"2px 9px",borderRadius:50,background:statusBg[p.status]??"#f3f4f6",color:statusCol[p.status]??"#888"}}>{p.status.replace("_"," ")}</span>
+                          <button title="Edit" onClick={e=>{e.stopPropagation();setSelectedPortalProject(p);setProjEditMode(false);fetch(`/api/portal/messages?project_id=${p.id}`).then(r=>r.json()).then(r=>{setPortalMessages(Array.isArray(r)?r:[]);});openProjEdit(p);}} style={{width:26,height:26,border:"1.5px solid var(--line)",borderRadius:7,background:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--muted)"}}>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                          </button>
+                          <button title="Delete" onClick={e=>{e.stopPropagation();deletePortalProject(p.id);}} style={{width:26,height:26,border:"1.5px solid #fee2e2",borderRadius:7,background:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#ef4444"}}>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+                          </button>
+                        </div>
+                      </div>
+                      <div style={{fontSize:12,color:"var(--muted)"}}>{p.user_name} · {p.user_email}</div>
+                      {p.service_type&&<div style={{fontSize:12,color:"var(--muted)",marginTop:2}}>{p.service_type}</div>}
+                      <div style={{marginTop:8,display:"flex",gap:6,flexWrap:"wrap"}}>
+                        {(["pending","in_progress","review","completed","on_hold"] as const).map(s=>(
+                          <button key={s} onClick={async(e)=>{e.stopPropagation();await fetch(`/api/portal/projects/${p.id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:s})});setPortalProjects(prev=>prev.map(x=>x.id===p.id?{...x,status:s}:x));if(selectedPortalProject?.id===p.id)setSelectedPortalProject(prev=>prev?{...prev,status:s}:null);}}
+                            style={{fontSize:10,padding:"2px 8px",borderRadius:50,border:"1px solid var(--line)",background:p.status===s?"var(--ink)":"transparent",color:p.status===s?"#fff":"var(--muted)",cursor:"pointer",fontWeight:p.status===s?600:400}}>
+                            {s.replace("_"," ")}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <div style={{fontSize:12,color:"var(--muted)"}}>{p.user_name} · {p.user_email}</div>
-                    {p.service_type&&<div style={{fontSize:12,color:"var(--muted)",marginTop:2}}>{p.service_type}</div>}
-                    <div style={{marginTop:8,display:"flex",gap:8}}>
-                      {(["pending","in_progress","review","completed","on_hold"] as const).map(s=>(
-                        <button key={s} onClick={async(e)=>{e.stopPropagation();await fetch(`/api/portal/projects/${p.id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:s})});loadData("portal-projects");}}
-                          style={{fontSize:10,padding:"2px 8px",borderRadius:50,border:"1px solid var(--line)",background:p.status===s?"var(--ink)":"transparent",color:p.status===s?"#fff":"var(--muted)",cursor:"pointer",fontWeight:p.status===s?600:400}}>
-                          {s.replace("_"," ")}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
-              {/* project detail + chat */}
+              {/* project detail panel */}
               {selectedPortalProject && (
                 <div style={{background:"#fff",border:"1.5px solid var(--line)",borderRadius:14,overflow:"hidden",display:"flex",flexDirection:"column"}}>
-                  <div style={{padding:"14px 16px",borderBottom:"1px solid var(--line)",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                  <div style={{padding:"12px 16px",borderBottom:"1px solid var(--line)",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                     <div>
                       <div style={{fontWeight:600,fontSize:15}}>{selectedPortalProject.title}</div>
                       <div style={{fontSize:12,color:"var(--muted)"}}>{selectedPortalProject.user_name}</div>
                     </div>
-                    <button onClick={()=>setSelectedPortalProject(null)} style={{background:"none",border:"none",fontSize:18,cursor:"pointer",color:"var(--muted)",lineHeight:1}}>×</button>
+                    <div style={{display:"flex",gap:6}}>
+                      {!projEditMode&&<button onClick={()=>openProjEdit(selectedPortalProject)} className="btn-ghost" style={{padding:"5px 10px",fontSize:11}}>Edit</button>}
+                      <button onClick={()=>{setSelectedPortalProject(null);setProjEditMode(false);}} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:"var(--muted)",lineHeight:1}}>×</button>
+                    </div>
                   </div>
 
-                  {/* tabs */}
-                  <div style={{display:"flex",gap:0,borderBottom:"1px solid var(--line)"}}>
-                    {["chat","milestones","info"].map(t=>(
-                      <button key={t} id={`ptab-${t}`} onClick={()=>{document.querySelectorAll("[id^='ptab-']").forEach(b=>(b as HTMLButtonElement).style.borderBottom="none");(document.getElementById(`ptab-${t}`) as HTMLButtonElement).style.borderBottom="2px solid var(--brand)";document.querySelectorAll("[id^='ppanel-']").forEach(el=>(el as HTMLDivElement).style.display="none");(document.getElementById(`ppanel-${t}`) as HTMLDivElement).style.display="flex";}}
-                        style={{flex:1,padding:"10px",fontSize:12,fontWeight:500,border:"none",background:"none",cursor:"pointer",color:"var(--muted)",borderBottom:t==="chat"?"2px solid var(--brand)":"none"}}>
-                        {t.charAt(0).toUpperCase()+t.slice(1)}
+                  {/* tabs — only show when not editing */}
+                  {!projEditMode && (
+                    <div style={{display:"flex",gap:0,borderBottom:"1px solid var(--line)"}}>
+                      {["chat","milestones","info"].map(t=>(
+                        <button key={t} id={`ptab-${t}`} onClick={()=>{document.querySelectorAll("[id^='ptab-']").forEach(b=>(b as HTMLButtonElement).style.borderBottom="none");(document.getElementById(`ptab-${t}`) as HTMLButtonElement).style.borderBottom="2px solid var(--brand)";document.querySelectorAll("[id^='ppanel-']").forEach(el=>(el as HTMLDivElement).style.display="none");(document.getElementById(`ppanel-${t}`) as HTMLDivElement).style.display="flex";}}
+                          style={{flex:1,padding:"10px",fontSize:12,fontWeight:500,border:"none",background:"none",cursor:"pointer",color:"var(--muted)",borderBottom:t==="chat"?"2px solid var(--brand)":"none"}}>
+                          {t.charAt(0).toUpperCase()+t.slice(1)}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* EDIT FORM */}
+                  {projEditMode && (
+                    <div style={{flex:1,overflowY:"auto",padding:"16px",display:"flex",flexDirection:"column",gap:12}}>
+                      <div style={{fontSize:12,fontWeight:700,color:"var(--brand)",letterSpacing:".06em",textTransform:"uppercase",marginBottom:4}}>Edit project</div>
+                      {([["Title *","title","text"],["Service type","service_type","text"],["Budget","budget","text"],["Timeline","timeline","text"],["Website","website","text"]] as [string,string,string][]).map(([lbl,key])=>(
+                        <div key={key}>
+                          <label style={{fontSize:11,fontWeight:600,color:"var(--muted)",display:"block",marginBottom:4,textTransform:"uppercase",letterSpacing:".05em"}}>{lbl}</label>
+                          <input value={projEditForm[key as keyof typeof projEditForm]} onChange={e=>setProjEditForm(f=>({...f,[key]:e.target.value}))} style={{width:"100%",padding:"8px 11px",borderRadius:8,border:"1px solid var(--line)",fontSize:13,fontFamily:"inherit",boxSizing:"border-box"}}/>
+                        </div>
+                      ))}
+                      <div>
+                        <label style={{fontSize:11,fontWeight:600,color:"var(--muted)",display:"block",marginBottom:4,textTransform:"uppercase",letterSpacing:".05em"}}>Description</label>
+                        <textarea value={projEditForm.description} onChange={e=>setProjEditForm(f=>({...f,description:e.target.value}))} rows={3} style={{width:"100%",padding:"8px 11px",borderRadius:8,border:"1px solid var(--line)",fontSize:13,fontFamily:"inherit",resize:"vertical",boxSizing:"border-box"}}/>
+                      </div>
+                      <div>
+                        <label style={{fontSize:11,fontWeight:600,color:"var(--muted)",display:"block",marginBottom:4,textTransform:"uppercase",letterSpacing:".05em"}}>Admin note</label>
+                        <textarea value={projEditForm.admin_note} onChange={e=>setProjEditForm(f=>({...f,admin_note:e.target.value}))} rows={2} style={{width:"100%",padding:"8px 11px",borderRadius:8,border:"1px solid var(--line)",fontSize:13,fontFamily:"inherit",resize:"vertical",boxSizing:"border-box"}}/>
+                      </div>
+                      <div style={{display:"flex",gap:8,paddingTop:4}}>
+                        <button onClick={()=>setProjEditMode(false)} style={{flex:1,padding:"9px",border:"1.5px solid var(--line)",borderRadius:9,background:"#fff",cursor:"pointer",fontSize:13,fontWeight:600,color:"var(--muted)"}}>Cancel</button>
+                        <button onClick={saveProjEdit} style={{flex:2,padding:"9px",border:"none",borderRadius:9,background:"var(--brand)",cursor:"pointer",fontSize:13,fontWeight:700,color:"#fff"}}>Save changes</button>
+                      </div>
+                      <button onClick={()=>deletePortalProject(selectedPortalProject.id)} style={{padding:"8px",border:"1.5px solid #fee2e2",borderRadius:9,background:"#fff",cursor:"pointer",fontSize:12,fontWeight:600,color:"#ef4444",marginTop:4}}>
+                        Delete this project
                       </button>
-                    ))}
-                  </div>
+                    </div>
+                  )}
 
                   {/* chat panel */}
-                  <div id="ppanel-chat" style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+                  {!projEditMode && <div id="ppanel-chat" style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
                     <div style={{flex:1,overflowY:"auto",padding:"14px",display:"flex",flexDirection:"column",gap:10}}>
                       {portalMessages.map(m=>(
                         <div key={m.id} style={{display:"flex",gap:8,flexDirection:m.sender_role==="admin"?"row-reverse":"row",alignItems:"flex-end"}}>
@@ -2968,42 +3059,81 @@ ${emailPayNotes?`<div style="margin-top:24px;padding:16px 20px;background:#faf8f
                       <input value={portalChatText} onChange={e=>setPortalChatText(e.target.value)} placeholder="Reply to client…" style={{flex:1,padding:"8px 12px",borderRadius:50,border:"1.5px solid var(--line)",fontSize:13,fontFamily:"inherit",outline:"none"}}/>
                       <button type="submit" disabled={!portalChatText.trim()||portalChatSending} style={{background:"var(--brand)",color:"#fff",border:"none",borderRadius:50,padding:"8px 16px",fontSize:13,fontWeight:500,cursor:"pointer"}}>Send</button>
                     </form>
-                  </div>
+                  </div>}
 
                   {/* milestones panel */}
-                  <div id="ppanel-milestones" style={{flex:1,display:"none",flexDirection:"column",overflow:"hidden",padding:14,gap:10,overflowY:"auto"}}>
+                  {!projEditMode && <div id="ppanel-milestones" style={{flex:1,display:"none",flexDirection:"column",overflow:"hidden",padding:14,gap:10,overflowY:"auto"}}>
                     <button onClick={()=>setMilestoneModal({projectId:selectedPortalProject.id})} style={{background:"var(--brand)",color:"#fff",border:"none",borderRadius:50,padding:"7px 16px",fontSize:12,fontWeight:500,cursor:"pointer",alignSelf:"flex-start"}}>+ Add milestone</button>
                     {selectedPortalProject.milestones.sort((a,b)=>a.ord-b.ord).map(m=>(
                       <div key={m.id} style={{background:"#f8f7f5",borderRadius:10,padding:"10px 12px",border:"1px solid var(--line)"}}>
                         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
                           <span style={{fontWeight:600,fontSize:13}}>{m.title}</span>
-                          <select value={m.status} onChange={async(e)=>{await fetch("/api/portal/milestones",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:m.id,status:e.target.value})});setSelectedPortalProject(p=>p?{...p,milestones:p.milestones.map(ms=>ms.id===m.id?{...ms,status:e.target.value}:ms)}:null);}} style={{fontSize:11,borderRadius:6,border:"1px solid var(--line)",padding:"2px 6px",cursor:"pointer"}}>
-                            <option value="pending">Pending</option>
-                            <option value="active">Active</option>
-                            <option value="completed">Completed</option>
-                          </select>
+                          <div style={{display:"flex",gap:6,alignItems:"center"}}>
+                            <select value={m.status} onChange={async(e)=>{await fetch("/api/portal/milestones",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:m.id,status:e.target.value})});setSelectedPortalProject(p=>p?{...p,milestones:p.milestones.map(ms=>ms.id===m.id?{...ms,status:e.target.value}:ms)}:null);}} style={{fontSize:11,borderRadius:6,border:"1px solid var(--line)",padding:"2px 6px",cursor:"pointer"}}>
+                              <option value="pending">Pending</option>
+                              <option value="active">Active</option>
+                              <option value="completed">Completed</option>
+                            </select>
+                            <button onClick={async()=>{if(!confirm("Delete milestone?"))return;await fetch("/api/portal/milestones",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:m.id})});setSelectedPortalProject(p=>p?{...p,milestones:p.milestones.filter(ms=>ms.id!==m.id)}:null);}} style={{width:22,height:22,border:"1.5px solid #fee2e2",borderRadius:6,background:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#ef4444",padding:0}}>
+                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+                            </button>
+                          </div>
                         </div>
                         {m.description&&<div style={{fontSize:12,color:"var(--muted)"}}>{m.description}</div>}
                       </div>
                     ))}
-                  </div>
+                  </div>}
 
                   {/* info panel */}
-                  <div id="ppanel-info" style={{flex:1,display:"none",flexDirection:"column",overflowY:"auto",padding:14,gap:10}}>
+                  {!projEditMode && <div id="ppanel-info" style={{flex:1,display:"none",flexDirection:"column",overflowY:"auto",padding:14,gap:10}}>
                     {[["Budget",selectedPortalProject.budget],["Timeline",selectedPortalProject.timeline],["Website",selectedPortalProject.website],["Description",selectedPortalProject.description]].filter(([,v])=>v).map(([k,v])=>(
                       <div key={k} style={{display:"grid",gridTemplateColumns:"100px 1fr",gap:8,fontSize:13}}>
                         <span style={{color:"var(--muted)",fontWeight:500}}>{k}</span><span>{v}</span>
                       </div>
                     ))}
-                    <div>
-                      <div style={{fontSize:12,fontWeight:500,marginBottom:6}}>Admin note</div>
-                      <textarea defaultValue={selectedPortalProject.admin_note} rows={3} style={{width:"100%",borderRadius:8,border:"1px solid var(--line)",padding:"8px 10px",fontSize:13,fontFamily:"inherit",resize:"vertical",boxSizing:"border-box"}} id="portal-admin-note"/>
-                      <button onClick={async()=>{const note=(document.getElementById("portal-admin-note") as HTMLTextAreaElement).value;await fetch(`/api/portal/projects/${selectedPortalProject.id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({admin_note:note})});toast("Note saved");}} style={{marginTop:6,background:"var(--ink)",color:"#fff",border:"none",borderRadius:8,padding:"6px 14px",fontSize:12,fontWeight:500,cursor:"pointer"}}>Save note</button>
-                    </div>
-                  </div>
+                    {selectedPortalProject.admin_note&&<div style={{fontSize:13,color:"var(--muted)",marginTop:4,padding:"8px 10px",background:"#f8f7f5",borderRadius:8}}><span style={{fontWeight:600,color:"var(--ink)"}}>Note: </span>{selectedPortalProject.admin_note}</div>}
+                    <button onClick={()=>openProjEdit(selectedPortalProject)} className="btn-ghost" style={{alignSelf:"flex-start",marginTop:4}}>Edit project details</button>
+                  </div>}
                 </div>
               )}
             </div>
+
+            {/* New Project modal */}
+            {newProjModal&&(
+              <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.5)",zIndex:600,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={e=>{if(e.target===e.currentTarget)setNewProjModal(false);}}>
+                <div style={{background:"#fff",borderRadius:18,width:"100%",maxWidth:480,maxHeight:"90vh",overflowY:"auto",boxShadow:"0 24px 80px rgba(0,0,0,.25)"}}>
+                  <div style={{padding:"22px 24px 16px",borderBottom:"1px solid var(--line)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <div style={{fontWeight:800,fontSize:16,letterSpacing:"-.02em"}}>New Client Project</div>
+                    <button onClick={()=>setNewProjModal(false)} style={{background:"none",border:"none",cursor:"pointer",color:"var(--muted)",fontSize:20}}>×</button>
+                  </div>
+                  <div style={{padding:"20px 24px",display:"flex",flexDirection:"column",gap:14}}>
+                    <div>
+                      <label style={{fontSize:11,fontWeight:600,color:"var(--muted)",display:"block",marginBottom:5,textTransform:"uppercase",letterSpacing:".05em"}}>Assign to client *</label>
+                      <select value={newProjForm.user_id} onChange={e=>setNewProjForm(f=>({...f,user_id:e.target.value}))} style={{width:"100%",padding:"9px 12px",borderRadius:9,border:"1.5px solid var(--line)",fontSize:13,fontFamily:"inherit",outline:"none",background:"#fff"}}>
+                        <option value="">— select client —</option>
+                        {portalUsers.map(u=><option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
+                      </select>
+                    </div>
+                    {([["Project title *","title"],["Service type","service_type"],["Budget","budget"],["Timeline","timeline"],["Website","website"]] as [string,string][]).map(([lbl,key])=>(
+                      <div key={key}>
+                        <label style={{fontSize:11,fontWeight:600,color:"var(--muted)",display:"block",marginBottom:5,textTransform:"uppercase",letterSpacing:".05em"}}>{lbl}</label>
+                        <input value={newProjForm[key as keyof typeof newProjForm]} onChange={e=>setNewProjForm(f=>({...f,[key]:e.target.value}))} style={{width:"100%",padding:"9px 12px",borderRadius:9,border:"1.5px solid var(--line)",fontSize:13,fontFamily:"inherit",boxSizing:"border-box"}}/>
+                      </div>
+                    ))}
+                    <div>
+                      <label style={{fontSize:11,fontWeight:600,color:"var(--muted)",display:"block",marginBottom:5,textTransform:"uppercase",letterSpacing:".05em"}}>Description</label>
+                      <textarea value={newProjForm.description} onChange={e=>setNewProjForm(f=>({...f,description:e.target.value}))} rows={3} style={{width:"100%",padding:"9px 12px",borderRadius:9,border:"1.5px solid var(--line)",fontSize:13,fontFamily:"inherit",resize:"vertical",boxSizing:"border-box"}}/>
+                    </div>
+                  </div>
+                  <div style={{padding:"0 24px 22px",display:"flex",gap:10}}>
+                    <button onClick={()=>setNewProjModal(false)} style={{flex:1,padding:"10px",border:"1.5px solid var(--line)",borderRadius:9,background:"#fff",cursor:"pointer",fontSize:13,fontWeight:600,color:"var(--muted)"}}>Cancel</button>
+                    <button onClick={createPortalProject} disabled={newProjSaving||!newProjForm.title||!newProjForm.user_id} style={{flex:2,padding:"10px",border:"none",borderRadius:9,background:"var(--brand)",cursor:"pointer",fontSize:13,fontWeight:700,color:"#fff",opacity:!newProjForm.title||!newProjForm.user_id?0.5:1}}>
+                      {newProjSaving?"Creating…":"Create project"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* milestone modal */}
             {milestoneModal && (
@@ -3079,6 +3209,56 @@ ${emailPayNotes?`<div style="margin-top:24px;padding:16px 20px;background:#faf8f
         {/* ══════════ PORTAL INVITE ══════════ */}
         {page==="portal-invite" && <AdminInviteClient />}
         {page==="manage-users" && <AdminManageUsers />}
+
+        {/* ══════════ NOTIFICATIONS ══════════ */}
+        {page==="admin-notifications" && (
+          <section className="page active">
+            <div className="page-head">
+              <div><h2>Notifications <span className="it">— {adminNotifs.length+unreadMsgs}</span></h2><p>Real-time activity alerts from clients and the portal.</p></div>
+              <div className="page-actions">
+                {(adminNotifs.length>0||unreadMsgs>0)&&<button className="btn-ghost" onClick={()=>setAdminNotifs([])}>Clear all</button>}
+              </div>
+            </div>
+            {(adminNotifs.length===0&&unreadMsgs===0) ? (
+              <div className="empty">
+                <h3>All caught up <span style={{fontStyle:"italic",color:"var(--brand)"}}>—</span></h3>
+                <p>Notifications from clients and portal activity will appear here in real time.</p>
+              </div>
+            ) : (
+              <div style={{display:"flex",flexDirection:"column",gap:8,maxWidth:680}}>
+                {adminNotifs.map((n,i)=>(
+                  <div key={i} style={{background:"#fff",border:"1.5px solid var(--line)",borderRadius:12,padding:"14px 16px",display:"flex",gap:12,alignItems:"flex-start"}}>
+                    <div style={{width:36,height:36,borderRadius:10,background:"rgba(184,108,249,.1)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontWeight:600,fontSize:13,color:"var(--ink)"}}>{n.title}</div>
+                      <div style={{fontSize:12,color:"var(--muted)",marginTop:2}}>{n.body}</div>
+                      <div style={{fontSize:10,color:"#b0b0b0",marginTop:4,fontFamily:"var(--f-mono)"}}>{new Date(n.ts).toLocaleTimeString()}</div>
+                    </div>
+                    <button onClick={()=>setAdminNotifs(prev=>prev.filter((_,j)=>j!==i))} style={{background:"none",border:"none",cursor:"pointer",color:"var(--muted)",padding:4,flexShrink:0,borderRadius:6,transition:"color .12s"}} title="Dismiss"
+                      onMouseEnter={e=>(e.currentTarget.style.color="#ef4444")} onMouseLeave={e=>(e.currentTarget.style.color="var(--muted)")}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    </button>
+                  </div>
+                ))}
+                {msgs.filter(m=>m.unread).map(m=>(
+                  <div key={m.id} style={{background:"#fff",border:"1.5px solid #fee2e2",borderRadius:12,padding:"14px 16px",display:"flex",gap:12,alignItems:"flex-start",cursor:"pointer"}} onClick={()=>nav("messages")}>
+                    <div style={{width:36,height:36,borderRadius:10,background:"rgba(239,68,68,.08)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2"><path d="M4 4h16v12H5l-1 4Z"/></svg>
+                    </div>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontWeight:600,fontSize:13,color:"var(--ink)"}}>{m.sender}</div>
+                      <div style={{fontSize:12,color:"var(--muted)",marginTop:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.subject}</div>
+                      <div style={{fontSize:10,color:"#b0b0b0",marginTop:4}}>New message · click to open inbox</div>
+                    </div>
+                    <span style={{padding:"2px 8px",borderRadius:50,background:"#fef2f2",color:"#ef4444",fontSize:10,fontWeight:700,flexShrink:0}}>unread</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
         {/* ══════════ SETTINGS ══════════ */}
         {page==="settings" && (

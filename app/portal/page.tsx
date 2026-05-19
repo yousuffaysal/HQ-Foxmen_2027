@@ -54,6 +54,7 @@ export default function PortalPage() {
   // settings
   const [settingName,   setSettingName]   = useState("");
   const [settingSaving, setSettingSaving] = useState(false);
+  const [foxId,         setFoxId]         = useState<string | null>(null);
   const [settingPwOld,  setSettingPwOld]  = useState("");
   const [settingPwNew,  setSettingPwNew]  = useState("");
   const [settingPwMsg,  setSettingPwMsg]  = useState("");
@@ -72,7 +73,11 @@ export default function PortalPage() {
 
   useEffect(() => {
     if (status === "unauthenticated") { router.push("/login"); return; }
-    if (status === "authenticated") { loadData(); setSettingName(session.user?.name ?? ""); }
+    if (status === "authenticated") {
+      loadData();
+      setSettingName(session.user?.name ?? "");
+      fetch("/api/auth/profile").then(r => r.json()).then(d => { if (d.fox_id) setFoxId(d.fox_id); }).catch(() => {});
+    }
   }, [status, router, loadData, session]);
 
   // Pusher — notifications + project messages
@@ -214,7 +219,7 @@ export default function PortalPage() {
           <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#b86cf9", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, flexShrink: 0 }}>{initials}</div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 13, fontWeight: 500, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.name}</div>
-            <div style={{ fontSize: 10, color: "rgba(255,255,255,.3)", textTransform: "capitalize" }}>{user?.role ?? "client"}</div>
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,.3)", fontFamily: "monospace", letterSpacing: ".04em" }}>{foxId ?? (user?.role ?? "client")}</div>
           </div>
           <button onClick={() => signOut({ callbackUrl: "/login" })} title="Sign out"
             style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,.3)", padding: 4, borderRadius: 6, transition: "color .15s" }}
@@ -549,6 +554,17 @@ export default function PortalPage() {
               <div style={{ background: "#fff", border: "1.5px solid #e7e5e2", borderRadius: 14, overflow: "hidden", marginBottom: 16 }}>
                 <div style={{ padding: "18px 22px", borderBottom: "1px solid #e7e5e2", fontWeight: 600, fontSize: 14 }}>Profile</div>
                 <div style={{ padding: "20px 22px", display: "flex", flexDirection: "column", gap: 14 }}>
+                  {foxId && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, background: "linear-gradient(135deg,rgba(184,108,249,.08),rgba(124,58,237,.06))", border: "1.5px solid rgba(184,108,249,.2)", borderRadius: 12, padding: "12px 16px" }}>
+                      <div style={{ width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg,#b86cf9,#7c3aed)", display: "grid", placeItems: "center", flexShrink: 0 }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 10, color: "#9a6bc9", fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", marginBottom: 2 }}>Your Foxmen ID</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 800, color: "#6c3fc5", letterSpacing: ".06em" }}>{foxId}</div>
+                      </div>
+                    </div>
+                  )}
                   <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                     <span style={{ fontSize: 12, fontWeight: 500, color: "#6b6b6b" }}>Display name</span>
                     <input value={settingName} onChange={e => setSettingName(e.target.value)} style={inputS} />
