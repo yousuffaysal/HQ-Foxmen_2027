@@ -13,7 +13,9 @@ export default auth((req) => {
   }
 
   if (pathname.startsWith("/portal")) {
+    if (pathname.startsWith("/portal/invite/")) return NextResponse.next();
     if (!isLoggedIn) return NextResponse.redirect(new URL("/login?from=" + encodeURIComponent(pathname), req.url));
+    if (role === "admin") return NextResponse.redirect(new URL("/admin", req.url));
   }
 
   if ((pathname === "/login" || pathname === "/register") && isLoggedIn) {

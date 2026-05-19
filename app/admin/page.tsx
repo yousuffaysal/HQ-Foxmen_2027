@@ -2,6 +2,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSession, signOut } from "next-auth/react";
 import AdminLiveChat from "@/components/AdminLiveChat";
+import AdminInviteClient from "@/components/AdminInviteClient"
+import AdminManageUsers from "@/components/AdminManageUsers";
 import { getPusherClient } from "@/lib/pusher";
 
 /* ================================================================
@@ -627,6 +629,7 @@ const MODAL_TITLE:Record<string,string>={
   "new-testimonial":"New testimonial","edit-testimonial":"Edit testimonial",
   "new-client":"Add client",
   "new-team":"Invite member",
+  "edit-team":"Edit member",
   "new-service":"New service",
 };
 
@@ -789,6 +792,7 @@ export default function AdminPage() {
       else if(p==="leads"){         const r=await fetch("/api/messages").then(r=>r.json()); setMsgs(Array.isArray(r)?r:[]); }
       else if(p==="service-orders"){ const r=await fetch("/api/service-orders").then(r=>r.json()); setServiceOrders(Array.isArray(r)?r:[]); }
       else if(p==="team"){        const r=await fetch("/api/team").then(r=>r.json()); setTeam(Array.isArray(r)?r:[]); }
+      else if(p==="manage-users"){ /* loaded inside AdminManageUsers */ }
       else if(p==="portal-projects"){
         const r=await fetch("/api/portal/projects").then(r=>r.json());
         setPortalProjects(Array.isArray(r)?r:[]);
@@ -988,6 +992,14 @@ export default function AdminPage() {
     if(res.ok){ const row:Member=await res.json(); setTeam(t=>[...t,row]); closeModal(); toast("Member invited"); }
     setSubmitting(false);
   };
+  const editMember = async()=>{
+    if(!form.name?.trim()){ toast("Name is required"); return; }
+    if(!form.id){ return; }
+    setSubmitting(true);
+    const res = await fetch(`/api/team/${form.id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({av:form.av||autoAv(form.name),name:form.name,role:form.role||"",bio:form.bio||""})});
+    if(res.ok){ const row:Member=await res.json(); setTeam(t=>t.map(x=>x.id===row.id?row:x)); closeModal(); toast("Member updated"); }
+    setSubmitting(false);
+  };
 
   /* ── FOX PRICES ── */
   const saveFoxPrice = async(id:number)=>{
@@ -1024,6 +1036,7 @@ export default function AdminPage() {
     else if(modalType==="new-testimonial"||modalType==="edit-testimonial") submitTesti();
     else if(modalType==="new-client") submitClient();
     else if(modalType==="new-team") submitMember();
+    else if(modalType==="edit-team") editMember();
     else if(modalType==="new-service") submitService();
   };
 
@@ -1039,9 +1052,9 @@ export default function AdminPage() {
   };
 
   /* ── page meta ── */
-  const CRUMBS:Record<string,string>={ dashboard:"Workspace / Dashboard", analytics:"Workspace / Analytics", projects:"Content / Projects", blog:"Content / Journal", services:"Content / Services", testimonials:"Content / Testimonials", media:"Content / Media", clients:"People / Clients", messages:"People / Inbox", leads:"People / Leads", "service-orders":"People / Service Orders", team:"People / Team", settings:"System / Settings", "fox-prices":"System / Fox Pricing", proposals:"Generate / Proposals", invoices:"Generate / Invoices", email:"Generate / Email Campaign", "portal-projects":"Client Portal / Projects", "portal-offers":"Client Portal / Offers" };
+  const CRUMBS:Record<string,string>={ dashboard:"Workspace / Dashboard", analytics:"Workspace / Analytics", projects:"Content / Projects", blog:"Content / Journal", services:"Content / Services", testimonials:"Content / Testimonials", media:"Content / Media", clients:"People / Clients", messages:"People / Inbox", leads:"People / Leads", "service-orders":"People / Service Orders", team:"People / Team", "manage-users":"People / Manage Users", settings:"System / Settings", "fox-prices":"System / Fox Pricing", proposals:"Generate / Proposals", invoices:"Generate / Invoices", email:"Generate / Email Campaign", "portal-projects":"Client Portal / Projects", "portal-offers":"Client Portal / Offers", "portal-invite":"Client Portal / Invite Client" };
   const TITLES:Record<string,React.ReactNode>={ dashboard:<>Good {new Date().getHours()<12?"morning":new Date().getHours()<17?"afternoon":"evening"}, <span className="it">{session?.user?.name?.split(" ")[0]??""}</span>.</>
-, analytics:"Analytics", projects:"Projects", blog:"Journal", services:"Services", testimonials:"Testimonials", media:"Media library", clients:"Clients", messages:"Inbox", leads:"Estimator Leads", "service-orders":"Service Orders", team:"Team", settings:"Settings", "fox-prices":"Fox Pricing", proposals:"Proposals", invoices:"Invoices", email:"Email Campaign", "portal-projects":"Client Projects", "portal-offers":"Client Offers" };
+, analytics:"Analytics", projects:"Projects", blog:"Journal", services:"Services", testimonials:"Testimonials", media:"Media library", clients:"Clients", messages:"Inbox", leads:"Estimator Leads", "service-orders":"Service Orders", team:"Team", "manage-users":"Manage Users", settings:"Settings", "fox-prices":"Fox Pricing", proposals:"Proposals", invoices:"Invoices", email:"Email Campaign", "portal-projects":"Client Projects", "portal-offers":"Client Offers", "portal-invite":"Invite Client" };
 
   /* ── dashboard derived ── */
   const liveProjects = projects.filter(p=>p.status==="live").length;
@@ -1091,12 +1104,14 @@ export default function AdminPage() {
            ["leads","Est. Leads",<svg key="leads" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 2a7 7 0 0 1 7 7c0 4-4 9-7 11C9 18 5 13 5 9a7 7 0 0 1 7-7Z"/><circle cx="12" cy="9" r="2.5"/></svg>,msgs.filter(m=>m.source==="estimator"&&m.unread).length>0?String(msgs.filter(m=>m.source==="estimator"&&m.unread).length):null],
            ["service-orders","Service Orders",<svg key="so" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>,serviceOrders.filter(o=>o.status==="new").length>0?String(serviceOrders.filter(o=>o.status==="new").length):null],
            ["team","Team",<svg key="tm" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>,null],
+           ["manage-users","Manage Users",<svg key="mu" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>,null],
           ].map(([p,label,icon,badge])=>(
             <a key={p as string} className={page===p?"active":""} onClick={()=>nav(p as string)}>{icon as React.ReactNode}{label as string}{badge&&<span className="badge">{badge as string}</span>}</a>
           ))}
           <span className="label">Client Portal</span>
           <a className={page==="portal-projects"?"active":""} onClick={()=>nav("portal-projects")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>Client Projects{portalProjects.filter(p=>p.status==="pending").length>0&&<span className="badge">{portalProjects.filter(p=>p.status==="pending").length}</span>}</a>
           <a className={page==="portal-offers"?"active":""} onClick={()=>nav("portal-offers")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg>Offers & Upgrades</a>
+          <a className={page==="portal-invite"?"active":""} onClick={()=>nav("portal-invite")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>Invite Client</a>
           <span className="label">Generate</span>
           <a className={page==="proposals"?"active":""} onClick={()=>nav("proposals")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>Proposals</a>
           <a className={page==="invoices"?"active":""} onClick={()=>nav("invoices")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4M14 15h4"/></svg>Invoices</a>
@@ -1575,7 +1590,7 @@ export default function AdminPage() {
                   <div><div className="n">{m.name}</div><div className="r">{m.role}</div></div>
                   <div className="bio">{m.bio}</div>
                   <div className="adm-foot">
-                    <button className="btn-icon" title="Message"><MsgSvg/></button>
+                    <button className="btn-icon" title="Edit" onClick={()=>openModal("edit-team",{id:m.id,name:m.name,role:m.role,bio:m.bio,av:m.av})}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
                     <button className="btn-icon danger" title="Remove" onClick={()=>deleteMember(m.id)}><TrashSvg/></button>
                   </div>
                 </div>
@@ -3061,6 +3076,10 @@ ${emailPayNotes?`<div style="margin-top:24px;padding:16px 20px;background:#faf8f
           </section>
         )}
 
+        {/* ══════════ PORTAL INVITE ══════════ */}
+        {page==="portal-invite" && <AdminInviteClient />}
+        {page==="manage-users" && <AdminManageUsers />}
+
         {/* ══════════ SETTINGS ══════════ */}
         {page==="settings" && (
           <section className="page active">
@@ -3319,7 +3338,7 @@ ${emailPayNotes?`<div style="margin-top:24px;padding:16px 20px;background:#faf8f
                 <Field label="MRR / value" value={form.mrr||""} onChange={v=>sf("mrr",v)} placeholder="e.g. $12k/mo or $180k total"/>
               </>}
               {/* TEAM */}
-              {modalType==="new-team" && <>
+              {(modalType==="new-team"||modalType==="edit-team") && <>
                 <Field label="Full name *" value={form.name||""} onChange={v=>sf("name",v)} placeholder="e.g. Sara Köhler"/>
                 <Field label="Role" value={form.role||""} onChange={v=>sf("role",v)} placeholder="e.g. Design Director"/>
                 <FieldArea label="Bio" value={form.bio||""} onChange={v=>sf("bio",v)} placeholder="One sentence about what they do…"/>

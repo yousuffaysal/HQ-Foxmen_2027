@@ -111,7 +111,7 @@ export default function PortalPage() {
   const unread        = notifs.filter(n => !n.read).length;
   const pendingOffers = offers.filter(o => o.status === "pending");
   const activeProjects= projects.filter(p => p.status === "in_progress" || p.status === "review");
-  const user          = session?.user as { name?: string; email?: string; id?: string } | undefined;
+  const user          = session?.user as { name?: string; email?: string; id?: string; role?: string } | undefined;
   const initials      = (user?.name ?? "U").split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
   const totalChatUnread = Object.values(projectUnreads).reduce((a, b) => a + b, 0);
 
@@ -214,7 +214,7 @@ export default function PortalPage() {
           <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#b86cf9", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, flexShrink: 0 }}>{initials}</div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 13, fontWeight: 500, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.name}</div>
-            <div style={{ fontSize: 10, color: "rgba(255,255,255,.3)" }}>Client</div>
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,.3)", textTransform: "capitalize" }}>{user?.role ?? "client"}</div>
           </div>
           <button onClick={() => signOut({ callbackUrl: "/login" })} title="Sign out"
             style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,.3)", padding: 4, borderRadius: 6, transition: "color .15s" }}
