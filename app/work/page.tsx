@@ -1,7 +1,6 @@
-"use client";
 import Link from "next/link";
-import { useState, useEffect } from "react";
-import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { sql } from "@/lib/db";
+import WorkGrid from "./WorkGrid";
 
 function ArrowIcon() {
   return (
@@ -11,8 +10,6 @@ function ArrowIcon() {
   );
 }
 
-const filters = ["All","Web","Mobile","AI","Ecommerce","Real Estate","Brand"];
-
 type DbProject = {
   id: number; name: string; tagline: string; industry: string;
   year: string; scope: string; status: string;
@@ -20,31 +17,20 @@ type DbProject = {
   live_url: string; slug: string;
 };
 
-const TONE: Record<string, string> = { "(purple)": "violet", "": "violet", b: "dark", c: "brand", d: "bone" };
-const STATUS_LABEL: Record<string, string> = { draft: "Draft", review: "In review", live: "Live", archived: "Archived" };
-
-function toSlug(name: string): string {
-  return name.toLowerCase().replace(/[—–]/g, "-").replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").trim();
-}
-
-export default function WorkPage() {
-  useScrollReveal(".fade, .reveal");
-
-  const [active, setActive]       = useState("All");
-  const [projects, setProjects]   = useState<DbProject[] | null>(null);
-
-  useEffect(() => {
-    fetch("/api/projects")
-      .then(r => r.json())
-      .then(rows => setProjects(Array.isArray(rows) ? rows.filter((p: DbProject) => p.status !== "archived") : []))
-      .catch(() => setProjects([]));
-  }, []);
-
-  const visible = (projects ?? []).filter(p => {
-    if (active === "All") return true;
-    const haystack = `${p.name} ${p.industry} ${p.scope} ${p.tagline}`.toLowerCase();
-    return haystack.includes(active.toLowerCase());
-  });
+export default async function WorkPage() {
+  let projects: DbProject[] = [];
+  try {
+    const rows = await sql`
+      SELECT id, name, tagline, industry, year, scope, status,
+             thumbnail, hero_image, color_cls, live_url, slug
+      FROM projects
+      WHERE status != 'archived'
+      ORDER BY id DESC
+    `;
+    projects = rows as unknown as DbProject[];
+  } catch {
+    projects = [];
+  }
 
   return (
     <>
@@ -64,92 +50,8 @@ export default function WorkPage() {
         </div>
       </section>
 
-      {/* ── GRID ── */}
-      <section className="section" style={{ paddingTop: 48 }}>
-        <div className="wrap">
-
-          {/* filters */}
-          <div className="proj-filters fade in">
-            {filters.map(f => (
-              <button key={f} className={active === f ? "on" : ""} onClick={() => setActive(f)}>{f}</button>
-            ))}
-          </div>
-
-          {/* loading skeleton */}
-          {projects === null && (
-            <div className="proj-grid">
-              {[0,1,2,3].map(i => (
-                <div key={i} className="proj-item-skeleton" />
-              ))}
-            </div>
-          )}
-
-          {/* empty state */}
-          {projects !== null && visible.length === 0 && (
-            <div className="work-empty">
-              <p>No projects yet. Add one from the <Link href="/admin">admin panel</Link>.</p>
-            </div>
-          )}
-
-          {/* project cards */}
-          {visible.length > 0 && (
-            <div className="proj-grid">
-              {visible.map((p, i) => {
-                const tone = TONE[p.color_cls] ?? "violet";
-                const img  = p.thumbnail || p.hero_image || "";
-                const href = `/work/${p.slug || toSlug(p.name)}`;
-                const num  = String(i + 1).padStart(2, "0");
-
-                return (
-                  <article key={p.id} className={`item ${tone} fade${i % 4 === 0 ? "" : ` d${i % 4}`}`}>
-
-                    {/* thumbnail — full image, no crop */}
-                    <div className="thumb">
-                      {img
-                        ? <img src={img} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }} />
-                        : <span style={{ fontFamily: "var(--f-mono)", fontSize: 11, letterSpacing: ".16em", textTransform: "uppercase", opacity: .4 }}>No image yet</span>
-                      }
-                      {p.status !== "live" && (
-                        <span className="proj-status-badge">{STATUS_LABEL[p.status] ?? p.status}</span>
-                      )}
-                    </div>
-
-                    {/* body */}
-                    <div className="body">
-                      <div className="meta">
-                        <span>Case {num}</span>
-                        <span>{p.year}</span>
-                      </div>
-                      <h3>{p.name}</h3>
-                      {p.tagline && <p style={{ color: "#3a3a3a", margin: 0, fontSize: 15, lineHeight: 1.55 }}>{p.tagline}</p>}
-                      {p.scope && (
-                        <div style={{ fontFamily: "var(--f-mono)", fontSize: 10, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--muted)" }}>
-                          {p.scope}
-                        </div>
-                      )}
-
-                      {/* CTA row */}
-                      <div className="proj-cta-row">
-                        {p.live_url && (
-                          <a href={p.live_url} target="_blank" rel="noopener noreferrer" className="btn btn--ghost btn--sm">
-                            <span className="label">Live site</span>
-                            <span className="chip"><ArrowIcon /></span>
-                          </a>
-                        )}
-                        <Link href={href} className="btn btn--sm">
-                          <span className="label">Case study</span>
-                          <span className="chip"><ArrowIcon /></span>
-                        </Link>
-                      </div>
-                    </div>
-
-                  </article>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </section>
+      {/* ── GRID + FILTERS (client component) ── */}
+      <WorkGrid projects={projects} />
 
       {/* ── CTA ── */}
       <section id="contact" style={{ padding: "60px 0" }}>

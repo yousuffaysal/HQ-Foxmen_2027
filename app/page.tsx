@@ -211,6 +211,7 @@ const techItems    = ["React","Next.js","Swift","Flutter","OpenAI","Anthropic","
 type DbService = { id:number; ord:number; name:string; descr:string; count:string; visible:boolean; badge:string|null; image:string|null };
 type DbProject = { id:number; name:string; tagline:string; industry:string; year:string; scope:string; status:string; thumbnail:string; slug:string; color_cls:string; live_url:string };
 type DbClient  = { id:number; name:string; industry:string; country:string };
+type DbTesti   = { id:number; quote:string; name:string; role:string; av:string; hi:string; rating:number };
 
 const PROOF_SYMBOLS = ["◆","●","▲","✦","◇","★","◐","⬡","⌬","⟁","⌖","◈","◉","▼","◫","⌑","⌀","⊕","⟐","⌘"];
 
@@ -222,6 +223,7 @@ export default function Home() {
   const [dbServices, setDbServices]   = useState<DbService[]>([]);
   const [dbProjects, setDbProjects]   = useState<DbProject[]>([]);
   const [dbClients,  setDbClients]    = useState<DbClient[]>([]);
+  const [dbTestis,   setDbTestis]     = useState<DbTesti[]>([]);
 
   useEffect(() => {
     fetch("/api/services?visible=true").then(r => r.json()).then(rows => {
@@ -232,6 +234,9 @@ export default function Home() {
     }).catch(() => {});
     fetch("/api/clients").then(r => r.json()).then(rows => {
       if (Array.isArray(rows) && rows.length > 0) setDbClients(rows);
+    }).catch(() => {});
+    fetch("/api/testimonials?public=1").then(r => r.json()).then(rows => {
+      if (Array.isArray(rows) && rows.length > 0) setDbTestis(rows);
     }).catch(() => {});
   }, []);
 
@@ -525,20 +530,38 @@ export default function Home() {
             <h2 className="display fade d1">What it feels like to <span className="it">work</span> with us.</h2>
           </div>
           <div className="testimonials">
-            {[
-              { stars:"★★★★★", av:"SK", who:"Sara Köhler",  role:"CEO · Nestaro",            q:<>&ldquo;Foxmen turned a vague pitch deck into a product our investors <span className="it">actually used</span> during the round. They ship like a product team, not an agency.&rdquo;</> },
-              { stars:"★★★★★", av:"DA", who:"Devon Arias",  role:"Head of Product · Pulse",   q:<>&ldquo;The AI copilot they built drove our <span className="it">activation rate</span> from 28% to 71%. Every meeting felt like we got our money back twice.&rdquo;</> },
-              { stars:"★★★★★", av:"RM", who:"Rina Mehta",   role:"CTO · Marketo",             q:<>&ldquo;Care is in the name and it shows. Our launch had <span className="it">zero</span> P0s in week one — a first for us across three agencies.&rdquo;</> },
-            ].map((t, i) => (
-              <div className={`testimonial fade${i ? ` d${i}` : ""}`} key={i}>
-                <div className="stars">{t.stars}</div>
-                <p className="quote">{t.q}</p>
-                <div className="meta">
-                  <div className="avatar">{t.av}</div>
-                  <div className="who">{t.who}<span>{t.role}</span></div>
-                </div>
-              </div>
-            ))}
+            {dbTestis.length > 0
+              ? dbTestis.map((t, i) => {
+                  const hi = t.hi?.trim();
+                  const quoteNode = hi && t.quote.includes(hi)
+                    ? <>{t.quote.slice(0, t.quote.indexOf(hi))}<span className="it">{hi}</span>{t.quote.slice(t.quote.indexOf(hi) + hi.length)}</>
+                    : <>{t.quote}</>;
+                  return (
+                    <div className={`testimonial fade${i ? ` d${i}` : ""}`} key={t.id}>
+                      <div className="stars" style={{ color: "#f59e0b" }}>{"★".repeat(t.rating || 5)}</div>
+                      <p className="quote">&ldquo;{quoteNode}&rdquo;</p>
+                      <div className="meta">
+                        <div className="avatar">{t.av}</div>
+                        <div className="who">{t.name}<span>{t.role}</span></div>
+                      </div>
+                    </div>
+                  );
+                })
+              : [
+                  { av:"SK", who:"Sara Köhler",  role:"CEO · Nestaro",          q:<>&ldquo;Foxmen turned a vague pitch deck into a product our investors <span className="it">actually used</span> during the round. They ship like a product team, not an agency.&rdquo;</> },
+                  { av:"DA", who:"Devon Arias",  role:"Head of Product · Pulse", q:<>&ldquo;The AI copilot they built drove our <span className="it">activation rate</span> from 28% to 71%. Every meeting felt like we got our money back twice.&rdquo;</> },
+                  { av:"RM", who:"Rina Mehta",   role:"CTO · Marketo",           q:<>&ldquo;Care is in the name and it shows. Our launch had <span className="it">zero</span> P0s in week one — a first for us across three agencies.&rdquo;</> },
+                ].map((t, i) => (
+                  <div className={`testimonial fade${i ? ` d${i}` : ""}`} key={i}>
+                    <div className="stars">★★★★★</div>
+                    <p className="quote">{t.q}</p>
+                    <div className="meta">
+                      <div className="avatar">{t.av}</div>
+                      <div className="who">{t.who}<span>{t.role}</span></div>
+                    </div>
+                  </div>
+                ))
+            }
           </div>
         </div>
       </section>

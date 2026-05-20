@@ -6,11 +6,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const body = await req.json();
   const rows = await sql`
     UPDATE testimonials SET
-      quote = COALESCE(${body.quote}, quote),
-      name  = COALESCE(${body.name},  name),
-      role  = COALESCE(${body.role},  role),
-      av    = COALESCE(${body.av},    av),
-      hi    = COALESCE(${body.hi},    hi)
+      quote   = COALESCE(${body.quote ?? null},   quote),
+      name    = COALESCE(${body.name  ?? null},   name),
+      role    = COALESCE(${body.role  ?? null},   role),
+      av      = COALESCE(${body.av    ?? null},   av),
+      hi      = COALESCE(${body.hi    ?? null},   hi),
+      visible = COALESCE(${body.visible ?? null}, visible),
+      rating  = COALESCE(${body.rating  ?? null}, rating)
     WHERE id = ${id} RETURNING *
   `;
   if (!rows.length) return NextResponse.json({ error: "not found" }, { status: 404 });

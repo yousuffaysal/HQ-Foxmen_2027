@@ -45,7 +45,12 @@ async function ensureMigrated() {
 
 export async function GET() {
   await ensureMigrated();
-  const rows = await sql`SELECT * FROM projects ORDER BY id DESC`;
+  const rows = await sql`
+    SELECT id, name, tagline, industry, year, scope, status,
+           thumbnail, hero_image, color_cls, live_url, slug,
+           monogram, client_name, timeline_duration
+    FROM projects ORDER BY id DESC
+  `;
   return NextResponse.json(rows);
 }
 

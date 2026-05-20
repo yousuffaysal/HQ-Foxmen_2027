@@ -16,7 +16,7 @@ type ChapterStat  = { value:string; label:string; context:string };
 type Chapter = { id:string; title:string; body:string; images:ChapterImage[]; video:string; stats:ChapterStat[]; img_layout:"side-by-side"|"stacked" };
 type Post     = { id:number; title:string; category:string; author_init:string; author_name:string; read_time:string; status:string; published_at:string|null; slug:string; excerpt:string; body:string; cover_image:string; tags:string };
 type Service  = { id:number; ord:number; name:string; descr:string; count:string; visible:boolean; badge:string|null; image:string|null };
-type Testi    = { id:number; quote:string; name:string; role:string; av:string; hi:string };
+type Testi    = { id:number; quote:string; name:string; role:string; av:string; hi:string; visible:boolean; rating:number };
 type Client   = { id:number; name:string; industry:string; country:string; contact:string; eng:string; mrr:string; av:string; cls:string };
 type Message  = { id:number; av:string; sender:string; subject:string; preview:string; body:string; source:string; interested:string; budget:string; country:string; unread:boolean; received_at:string };
 type Member   = { id:number; av:string; name:string; role:string; bio:string };
@@ -940,18 +940,23 @@ export default function AdminPage() {
     setTestis(t=>t.filter(x=>x.id!==id)); toast("Testimonial deleted");
   };
   const editTesti = (t:Testi)=>{
-    setForm({quote:t.quote,name:t.name,role:t.role,av:t.av,hi:t.hi||""});
+    setForm({quote:t.quote,name:t.name,role:t.role,av:t.av,hi:t.hi||"",rating:String(t.rating||5)});
     setEditTarget(t.id);
     setModalType("edit-testimonial");
+  };
+  const toggleTestiVisible = async(t:Testi)=>{
+    const res = await fetch(`/api/testimonials/${t.id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({visible:!t.visible})});
+    if(res.ok){ const row:Testi=await res.json(); setTestis(prev=>prev.map(x=>x.id===t.id?row:x)); toast(row.visible?"Visible on site":"Hidden from site"); }
   };
   const submitTesti = async()=>{
     if(!form.quote?.trim()||!form.name?.trim()){ toast("Quote and name are required"); return; }
     setSubmitting(true);
+    const rating = Number(form.rating||"5");
     if(editTarget){
-      const res = await fetch(`/api/testimonials/${editTarget}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({quote:form.quote,name:form.name,role:form.role||"",av:autoAv(form.name),hi:form.hi||""})});
+      const res = await fetch(`/api/testimonials/${editTarget}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({quote:form.quote,name:form.name,role:form.role||"",av:autoAv(form.name),hi:form.hi||"",rating})});
       if(res.ok){ const row:Testi=await res.json(); setTestis(t=>t.map(x=>x.id===editTarget?row:x)); closeModal(); toast("Testimonial updated"); }
     } else {
-      const res = await fetch("/api/testimonials",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({quote:form.quote,name:form.name,role:form.role||"",av:autoAv(form.name),hi:form.hi||""})});
+      const res = await fetch("/api/testimonials",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({quote:form.quote,name:form.name,role:form.role||"",av:autoAv(form.name),hi:form.hi||"",rating})});
       if(res.ok){ const row:Testi=await res.json(); setTestis(t=>[...t,row]); closeModal(); toast("Testimonial added"); }
     }
     setSubmitting(false);
@@ -1433,11 +1438,16 @@ export default function AdminPage() {
             </div>
             <div className="test-grid">
               {testis.map(t=>(
-                <div key={t.id} className="test-card">
-                  <div className="stars">★★★★★</div>
+                <div key={t.id} className="test-card" style={{opacity:t.visible===false?.55:1,transition:"opacity .3s"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+                    <div className="stars" style={{color:"#f59e0b",letterSpacing:1}}>{"★".repeat(t.rating||5)}</div>
+                    <button onClick={()=>toggleTestiVisible(t)} title="Toggle site visibility" style={{background:t.visible!==false?"rgba(34,197,94,.12)":"rgba(0,0,0,.06)",border:"none",cursor:"pointer",fontFamily:"var(--f-mono)",fontSize:10,letterSpacing:".16em",textTransform:"uppercase",color:t.visible!==false?"#16a34a":"var(--muted)",borderRadius:999,padding:"4px 10px",lineHeight:1}}>
+                      {t.visible!==false?"● Live":"○ Hidden"}
+                    </button>
+                  </div>
                   <div className="q">&ldquo;{t.quote}&rdquo;</div>
                   <div className="who"><div className="av">{t.av}</div><div><div className="n">{t.name}</div><div className="r">{t.role}</div></div></div>
-                  <div style={{display:"flex",gap:6,marginTop:4}}>
+                  <div style={{display:"flex",gap:6,marginTop:10}}>
                     <button className="btn-icon" title="Edit" onClick={()=>editTesti(t)}><EditSvg/></button>
                     <button className="btn-icon danger" title="Delete" onClick={()=>deleteTesti(t.id)}><TrashSvg/></button>
                   </div>
@@ -3520,7 +3530,15 @@ ${emailPayNotes?`<div style="margin-top:24px;padding:16px 20px;background:#faf8f
                 <FieldArea label="Quote *" value={form.quote||""} onChange={v=>sf("quote",v)} placeholder="What the client said…"/>
                 <Field label="Client name *" value={form.name||""} onChange={v=>sf("name",v)} placeholder="e.g. Sara Köhler"/>
                 <Field label="Role" value={form.role||""} onChange={v=>sf("role",v)} placeholder="e.g. CEO · Nestaro"/>
-                <Field label="Highlight phrase" value={form.hi||""} onChange={v=>sf("hi",v)} placeholder="Word to italicise in the quote"/>
+                <Field label="Highlight phrase" value={form.hi||""} onChange={v=>sf("hi",v)} placeholder="Word or phrase to italicise in the quote"/>
+                <div style={{marginBottom:18}}>
+                  <label style={{display:"block",fontSize:11,fontFamily:"var(--f-mono)",letterSpacing:".14em",textTransform:"uppercase",color:"var(--muted)",marginBottom:8}}>Rating</label>
+                  <div style={{display:"flex",gap:4}}>
+                    {[1,2,3,4,5].map(n=>(
+                      <button key={n} type="button" onClick={()=>sf("rating",String(n))} style={{background:"none",border:"none",cursor:"pointer",fontSize:26,lineHeight:1,padding:"0 3px",color:Number(form.rating||5)>=n?"#f59e0b":"var(--line)",transition:"color .15s"}}>★</button>
+                    ))}
+                  </div>
+                </div>
               </>}
               {/* CLIENT */}
               {modalType==="new-client" && <>

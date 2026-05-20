@@ -24,6 +24,7 @@ export default function Footer() {
             <ul>
               <li><Link href="/work">Work</Link></li>
               <li><Link href="/services">Services</Link></li>
+              <li><Link href="/about">About</Link></li>
               <li><Link href="/#process">Process</Link></li>
               <li><Link href="/journal">Journal</Link></li>
               <li>
@@ -48,10 +49,10 @@ export default function Footer() {
           <div className="foot-col">
             <h4>Contact</h4>
             <ul>
-              <li><a href="mailto:hello@foxmen.studio">hello@foxmen.studio</a></li>
-              <li><a href="tel:+10000000000">+1 (000) 000–0000</a></li>
-              <li className="with-dot">Remote · Worldwide</li>
-              <li className="with-dot">HQ — Dhaka · Berlin</li>
+              <li><a href="mailto:contact@foxmenstudio.com">contact@foxmenstudio.com</a></li>
+              <li><a href="mailto:team@foxmenstudio.com">team@foxmenstudio.com</a></li>
+              <li className="with-dot">Remote-first · Worldwide</li>
+              <li className="with-dot">Working hours: 9am–6pm GMT</li>
             </ul>
           </div>
         </div>
