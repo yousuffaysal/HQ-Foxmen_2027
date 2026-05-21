@@ -52,12 +52,14 @@ export default function PortalPage() {
   const [submitting, setSubmitting] = useState(false);
 
   // settings
-  const [settingName,   setSettingName]   = useState("");
-  const [settingSaving, setSettingSaving] = useState(false);
-  const [foxId,         setFoxId]         = useState<string | null>(null);
-  const [settingPwOld,  setSettingPwOld]  = useState("");
-  const [settingPwNew,  setSettingPwNew]  = useState("");
-  const [settingPwMsg,  setSettingPwMsg]  = useState("");
+  const [settingName,      setSettingName]      = useState("");
+  const [settingSaving,    setSettingSaving]    = useState(false);
+  const [foxId,            setFoxId]            = useState<string | null>(null);
+  const [settingAvatar,    setSettingAvatar]    = useState("");
+  const [avatarUploading,  setAvatarUploading]  = useState(false);
+  const [settingPwOld,     setSettingPwOld]     = useState("");
+  const [settingPwNew,     setSettingPwNew]     = useState("");
+  const [settingPwMsg,     setSettingPwMsg]     = useState("");
 
   const loadData = useCallback(async () => {
     const [pRes, oRes, nRes] = await Promise.all([
@@ -76,7 +78,10 @@ export default function PortalPage() {
     if (status === "authenticated") {
       loadData();
       setSettingName(session.user?.name ?? "");
-      fetch("/api/auth/profile").then(r => r.json()).then(d => { if (d.fox_id) setFoxId(d.fox_id); }).catch(() => {});
+      fetch("/api/auth/profile").then(r => r.json()).then((d: { fox_id?: string; avatar?: string }) => {
+        if (d.fox_id) setFoxId(d.fox_id);
+        if (d.avatar) setSettingAvatar(d.avatar);
+      }).catch(() => {});
     }
   }, [status, router, loadData, session]);
 
