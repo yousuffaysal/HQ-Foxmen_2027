@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Instrument_Serif, Instrument_Sans } from "next/font/google";
 import "./globals.css";
 import SiteShell from "@/components/SiteShell";
+import Providers from "@/components/Providers";
 import Script from "next/script";
 
 const geistSans = Geist({
