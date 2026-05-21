@@ -14,7 +14,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       role = COALESCE(${body.role}, role),
       bio  = COALESCE(${body.bio},  bio)
     WHERE id = ${id} RETURNING *
-  `;
+  ` as Record<string, unknown>[];
   if (!rows.length) return NextResponse.json({ error: "not found" }, { status: 404 });
   return NextResponse.json(rows[0]);
 }

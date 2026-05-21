@@ -52,7 +52,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       updated_at             = now()
     WHERE id = ${id}
     RETURNING *
-  `;
+  ` as Record<string, unknown>[];
   if (!rows.length) return NextResponse.json({ error: "not found" }, { status: 404 });
   return NextResponse.json(rows[0]);
 }
