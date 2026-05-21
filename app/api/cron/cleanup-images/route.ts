@@ -17,7 +17,7 @@ export async function GET(req: Request) {
     WHERE image_url != ''
       AND created_at < now() - interval '2 days'
     RETURNING id
-  `;
+  ` as Record<string, unknown>[];
 
   return NextResponse.json({ cleared: rows.length });
 }
