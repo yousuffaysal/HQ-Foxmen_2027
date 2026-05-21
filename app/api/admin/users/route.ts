@@ -10,7 +10,7 @@ function makeFoxId(): string {
 
 async function ensureFoxId() {
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS fox_id TEXT UNIQUE`.catch(() => {});
-  const missing = await sql`SELECT id FROM users WHERE fox_id IS NULL`;
+  const missing = await sql`SELECT id FROM users WHERE fox_id IS NULL` as { id: number }[];
   for (const u of missing) {
     for (let attempt = 0; attempt < 10; attempt++) {
       const fid = makeFoxId();
