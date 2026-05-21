@@ -9,7 +9,7 @@ type Project = {
   admin_note: string; created_at: string; updated_at: string;
   milestones: Milestone[];
 };
-type Message = { id: number; project_id: number; sender_id: number; sender_name: string; sender_role: string; message: string; created_at: string };
+type Message = { id: number; project_id: number; sender_id: number; sender_name: string; sender_role: string; message: string; image_url?: string; created_at: string };
 
 interface Props {
   project: Project;
@@ -44,6 +44,8 @@ function inject() {
     .pp-tab:hover { color: #0a0a0a !important }
     .pp-chat-input:focus { border-color:#b86cf9!important;box-shadow:0 0 0 3px rgba(184,108,249,.12)!important;outline:none }
     .pp-send:not(:disabled):hover { background:#a05ce8!important }
+    .pp-img-btn:hover { background:rgba(184,108,249,.12)!important;color:#b86cf9!important }
+    .pp-img-thumb { animation: ppMsg .2s both }
     .pp-ms-item { transition: box-shadow .15s }
     .pp-ms-item:hover { box-shadow: 0 2px 12px rgba(0,0,0,.08) }
     .pp-overlay { animation: ppFade .2s ease both }
@@ -58,8 +60,12 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [loadingMsgs, setLoadingMsgs] = useState(false);
+  const [imgFile, setImgFile] = useState<File | null>(null);
+  const [imgPreview, setImgPreview] = useState<string | null>(null);
+  const [lightbox, setLightbox] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
   const handledIds = useRef(new Set<number>());
 
   const done  = project.milestones.filter(m => m.status === "completed").length;

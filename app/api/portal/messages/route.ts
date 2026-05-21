@@ -11,10 +11,11 @@ async function ensureTable() {
       sender_id    INTEGER      NOT NULL,
       sender_name  TEXT         NOT NULL,
       sender_role  VARCHAR(20)  NOT NULL DEFAULT 'client',
-      message      TEXT         NOT NULL,
+      message      TEXT         NOT NULL DEFAULT '',
       created_at   TIMESTAMPTZ  NOT NULL DEFAULT now()
     )
   `;
+  await sql`ALTER TABLE project_messages ADD COLUMN IF NOT EXISTS image_url TEXT NOT NULL DEFAULT ''`.catch(() => {});
 }
 
 export async function GET(req: Request) {
@@ -45,8 +46,9 @@ export async function POST(req: Request) {
 
   const uid = (session.user as { id?: string }).id;
   const role = (session.user as { role?: string }).role;
-  const { project_id, message } = await req.json();
-  if (!project_id || !message?.trim()) return NextResponse.json({ error: "project_id and message required" }, { status: 400 });
+  const { project_id, message, image_url } = await req.json();
+  if (!project_id || (!message?.trim() && !image_url))
+    return NextResponse.json({ error: "project_id and message or image_url required" }, { status: 400 });
 
   if (role !== "admin") {
     const owns = await sql`SELECT id FROM client_projects WHERE id = ${project_id} AND user_id = ${uid}`;
@@ -54,8 +56,8 @@ export async function POST(req: Request) {
   }
 
   const rows = await sql`
-    INSERT INTO project_messages (project_id, sender_id, sender_name, sender_role, message)
-    VALUES (${project_id}, ${uid}, ${session.user.name ?? "User"}, ${role ?? "client"}, ${message.trim()})
+    INSERT INTO project_messages (project_id, sender_id, sender_name, sender_role, message, image_url)
+    VALUES (${project_id}, ${uid}, ${session.user.name ?? "User"}, ${role ?? "client"}, ${message?.trim() ?? ""}, ${image_url ?? ""})
     RETURNING *
   `;
   const msg = rows[0];
