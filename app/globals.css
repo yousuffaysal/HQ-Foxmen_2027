@@ -3885,3 +3885,147 @@ body.loading { overflow: hidden; }
   .calc-compare-grid { grid-template-columns: 1fr; }
 }
 
+/* ============================================================
+   NAV — hamburger (desktop: hidden; mobile: visible)
+   ============================================================ */
+.nav-hamburger {
+  display: none;
+  flex-direction: column; justify-content: center; align-items: center;
+  gap: 5px;
+  width: 44px; height: 44px;
+  background: none; border: none; cursor: pointer; padding: 8px;
+  flex-shrink: 0;
+}
+.hb {
+  display: block; width: 22px; height: 2px;
+  background: var(--ink); border-radius: 2px;
+  transition: transform .3s var(--ease), opacity .3s var(--ease);
+  transform-origin: center;
+}
+.nav-hamburger:nth-child(1) .hb.open { transform: translateY(7px) rotate(45deg); }
+.nav-hamburger .hb:nth-child(1).open { transform: translateY(7px) rotate(45deg); }
+.nav-hamburger .hb:nth-child(2).open { opacity: 0; transform: scaleX(0); }
+.nav-hamburger .hb:nth-child(3).open { transform: translateY(-7px) rotate(-45deg); }
+
+/* Mobile menu backdrop + panel */
+.mob-menu-backdrop {
+  position: fixed; inset: 0; z-index: 48;
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.mob-menu {
+  position: absolute; top: 0; left: 0; right: 0;
+  background: #fafaf9;
+  border-bottom: 1px solid var(--line);
+  padding: 82px 24px 32px;
+  display: flex; flex-direction: column;
+  box-shadow: 0 24px 60px -10px rgba(0,0,0,.18);
+}
+.mob-link {
+  display: block;
+  font-family: var(--f-display); font-size: 36px; letter-spacing: -.025em; line-height: 1;
+  color: var(--ink);
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+  transition: color .2s;
+}
+.mob-link.active { color: var(--brand); }
+.mob-link:last-of-type { border-bottom: none; }
+.mob-cta { margin-top: 28px; width: 100%; justify-content: space-between; min-height: 52px; }
+
+/* ============================================================
+   MOBILE — 768px and below
+   All rules below are ADDITIONS only. Desktop unchanged.
+   ============================================================ */
+@media (max-width: 768px) {
+
+  /* NAV */
+  .nav-time     { display: none !important; }
+  .nav-start-btn { display: none !important; }
+  .nav-hamburger { display: flex !important; }
+
+  /* HERO */
+  .hero { padding-top: 96px !important; padding-bottom: 40px !important; min-height: 0 !important; }
+  .hero h1 { font-size: clamp(36px, 11vw, 46px) !important; margin-top: 20px !important; }
+  .hero h1 .row { gap: 8px !important; }
+  .hero-bottom { grid-template-columns: 1fr !important; gap: 24px !important; padding-top: 24px !important; }
+  .hero-bottom p { font-size: 15px !important; }
+  .hero-actions { flex-direction: column !important; gap: 10px !important; align-items: stretch !important; }
+  .hero-actions .btn { width: 100% !important; justify-content: space-between !important; min-height: 52px !important; }
+  .hero-actions .tlink {
+    display: flex !important; align-items: center !important; justify-content: center !important;
+    min-height: 44px !important; font-size: 15px !important;
+  }
+  .hero-orbit { display: none !important; }
+
+  /* SERVICES */
+  .svc-head { grid-template-columns: 1fr !important; gap: 16px !important; margin-bottom: 32px !important; }
+  .svc-row {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important; padding: 24px 12px !important;
+  }
+  .svc-row .idx   { display: block !important; }
+  .svc-row .title { font-size: clamp(24px, 7vw, 36px) !important; }
+  .svc-row .desc  { display: block !important; font-size: 15px !important; color: #3a3a3a !important; }
+  .svc-row .tags  { display: block !important; }
+  .svc-row .arrow { display: none !important; }
+  .svc-row .preview { display: none !important; }
+
+  /* FEATURED WORK CARDS */
+  .card-inner { grid-template-columns: 1fr !important; min-height: 0 !important; }
+  .card-media { min-height: 260px !important; }
+  .card-body  { padding: 24px !important; }
+  .card-body h3   { font-size: clamp(26px, 8vw, 38px) !important; }
+  .card-body .copy { font-size: 15px !important; }
+
+  /* PROCESS */
+  .process { margin: 0 !important; border-radius: 0 !important; padding: 80px 0 !important; }
+  .process .wrap { width: min(100%, 100% - 48px) !important; }
+  .process-head { grid-template-columns: 1fr !important; gap: 20px !important; margin-bottom: 48px !important; }
+  .step { grid-template-columns: 1fr !important; gap: 12px !important; padding: 32px 0 !important; }
+  .step .num { font-size: 56px !important; }
+
+  /* METRICS / STATS BAR */
+  .metrics { grid-template-columns: repeat(2, 1fr) !important; }
+  .metric { border-bottom: 1px solid var(--line) !important; }
+  .metric:nth-child(odd)  { border-right: 1px solid var(--line) !important; }
+  .metric:nth-child(even) { border-right: 0 !important; }
+
+  /* TESTIMONIALS */
+  .testimonials { grid-template-columns: 1fr !important; }
+  .testimonial .quote { font-size: 20px !important; }
+
+  /* AI SECTION */
+  .ai { grid-template-columns: 1fr !important; gap: 32px !important; }
+
+  /* SOCIAL PROOF GRID */
+  .proof-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .proof-grid .cell:nth-child(3n)  { border-right: 1px solid var(--line) !important; }
+  .proof-grid .cell:nth-child(2n)  { border-right: 0 !important; }
+  .proof-grid .cell { font-size: 17px !important; }
+
+  /* CTA SECTION */
+  .cta { margin: 0 12px !important; padding: 60px 0 !important; }
+  .cta h2 { font-size: clamp(38px, 13vw, 72px) !important; }
+  .cta .row { flex-direction: column !important; align-items: stretch !important; padding: 0 24px !important; }
+  .cta .row .btn {
+    width: 100% !important; justify-content: space-between !important; min-height: 52px !important;
+  }
+
+  /* FOOTER */
+  .foot-top { grid-template-columns: 1fr !important; gap: 40px !important; }
+  .foot-bottom {
+    flex-direction: column !important; align-items: center !important;
+    text-align: center !important; gap: 20px !important;
+  }
+  .foot-bottom .socials { justify-content: center !important; gap: 12px !important; }
+
+  /* GENERAL */
+  body { overflow-x: hidden; }
+  .section { padding: 80px 0 !important; }
+  h1, h2, h3, h4, h5 { overflow-wrap: break-word; word-break: break-word; }
+  img, video, iframe { max-width: 100%; }
+  .btn { min-height: 44px; }
+  p, li, span { font-size: max(15px, 1em); }
+}
