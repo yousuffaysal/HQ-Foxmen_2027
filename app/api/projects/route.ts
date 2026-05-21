@@ -97,6 +97,6 @@ export async function POST(req: Request) {
       ${chapters ?? "[]"}
     )
     RETURNING *
-  `;
+  ` as Record<string, unknown>[];
   return NextResponse.json(rows[0], { status: 201 });
 }

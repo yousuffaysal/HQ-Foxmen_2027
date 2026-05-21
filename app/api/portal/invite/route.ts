@@ -21,8 +21,8 @@ async function ensureTable() {
 }
 
 async function assignFoxId(userId: number): Promise<string> {
-  const existing = await sql`SELECT fox_id FROM users WHERE id = ${userId}`;
-  if (existing[0]?.fox_id) return existing[0].fox_id as string;
+  const existing = await sql`SELECT fox_id FROM users WHERE id = ${userId}` as { fox_id?: string }[];
+  if (existing[0]?.fox_id) return existing[0].fox_id;
   for (let i = 0; i < 10; i++) {
     const fid = "FXM-" + randomBytes(3).toString("hex").toUpperCase();
     const ok = await sql`UPDATE users SET fox_id = ${fid} WHERE id = ${userId} AND fox_id IS NULL`.catch(() => null);
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
     const hashed    = await bcrypt.hash(plainPass, 12);
 
     const emailLower = email.trim().toLowerCase();
-    const existing   = await sql`SELECT id, role FROM users WHERE email = ${emailLower}`;
+    const existing   = await sql`SELECT id, role FROM users WHERE email = ${emailLower}` as { id: number; role: string }[];
     let userId: number;
 
     if (existing.length > 0) {
@@ -83,7 +83,7 @@ export async function POST(req: Request) {
         INSERT INTO users (name, email, password_hash, role)
         VALUES (${name.trim()}, ${emailLower}, ${hashed}, 'client')
         RETURNING id
-      `;
+      ` as { id: number }[];
       userId = rows[0].id;
     }
     const foxId    = await assignFoxId(userId);
@@ -93,7 +93,7 @@ export async function POST(req: Request) {
       INSERT INTO client_projects (user_id, title, service_type, description, budget, timeline, website, status)
       VALUES (${userId}, ${project_title.trim()}, ${service_type || ""}, ${description || ""}, ${budget || ""}, ${timeline || ""}, ${website || ""}, 'pending')
       RETURNING id
-    `;
+    ` as { id: number }[];
     const projectId = projectRows[0].id;
 
     const token     = randomBytes(28).toString("base64url");

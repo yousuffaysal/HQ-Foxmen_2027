@@ -28,6 +28,6 @@ export async function POST(req: Request) {
     INSERT INTO testimonials (quote, name, role, av, hi, visible, rating)
     VALUES (${quote}, ${name}, ${role ?? ""}, ${av ?? ""}, ${hi ?? ""}, true, ${rating ?? 5})
     RETURNING *
-  `;
+  ` as Record<string, unknown>[];
   return NextResponse.json(rows[0], { status: 201 });
 }

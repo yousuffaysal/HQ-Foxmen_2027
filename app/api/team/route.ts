@@ -14,6 +14,6 @@ export async function POST(req: Request) {
   if (!name) return NextResponse.json({ error: "name is required" }, { status: 400 });
   const rows = await sql`
     INSERT INTO team (av, name, role, bio) VALUES (${av ?? ""}, ${name}, ${role ?? ""}, ${bio ?? ""}) RETURNING *
-  `;
+  ` as Record<string, unknown>[];
   return NextResponse.json(rows[0], { status: 201 });
 }

@@ -45,13 +45,13 @@ export async function POST(req: Request) {
     INSERT INTO service_orders (service_name, name, email, company, description, budget, budget_custom, timeline, website)
     VALUES (${service_name ?? ""}, ${name}, ${email}, ${company ?? ""}, ${description ?? ""}, ${budget ?? ""}, ${budget_custom ?? ""}, ${timeline ?? ""}, ${website ?? ""})
     RETURNING *
-  `;
+  ` as Record<string, unknown>[];
   return NextResponse.json(rows[0], { status: 201 });
 }
 
 export async function PATCH(req: Request) {
   const { id, status } = await req.json();
-  const rows = await sql`UPDATE service_orders SET status = ${status} WHERE id = ${id} RETURNING *`;
+  const rows = await sql`UPDATE service_orders SET status = ${status} WHERE id = ${id} RETURNING *` as Record<string, unknown>[];
   return NextResponse.json(rows[0]);
 }
 

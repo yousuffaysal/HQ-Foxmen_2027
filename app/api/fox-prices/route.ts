@@ -71,8 +71,8 @@ export async function GET() {
   // Add note column if this is an older table without it
   await sql`ALTER TABLE fox_prices ADD COLUMN IF NOT EXISTS note TEXT DEFAULT ''`;
 
-  const count = await sql`SELECT COUNT(*) AS n FROM fox_prices`;
-  if (Number((count[0] as { n: string }).n) === 0) {
+  const count = await sql`SELECT COUNT(*) AS n FROM fox_prices` as { n: string }[];
+  if (Number(count[0].n) === 0) {
     for (const s of SEED) {
       await sql`
         INSERT INTO fox_prices (category, feature_id, label, price_min, price_max, is_base, ord, note)
@@ -92,13 +92,13 @@ export async function PATCH(req: Request) {
   const { id } = body;
 
   if ("note" in body) {
-    const rows = await sql`UPDATE fox_prices SET note = ${body.note} WHERE id = ${id} RETURNING *`;
+    const rows = await sql`UPDATE fox_prices SET note = ${body.note} WHERE id = ${id} RETURNING *` as Record<string, unknown>[];
     return NextResponse.json(rows[0]);
   }
 
   const rows = await sql`
     UPDATE fox_prices SET price_min = ${body.price_min}, price_max = ${body.price_max}
     WHERE id = ${id} RETURNING *
-  `;
+  ` as Record<string, unknown>[];
   return NextResponse.json(rows[0]);
 }

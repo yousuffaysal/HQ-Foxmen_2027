@@ -53,9 +53,9 @@ export async function GET() {
   const uid = (session.user as { id?: string }).id;
   const role = (session.user as { role?: string }).role;
 
-  const projects = role === "admin"
+  const projects = (role === "admin"
     ? await sql`SELECT p.*, u.name as user_name, u.email as user_email FROM client_projects p JOIN users u ON u.id = p.user_id ORDER BY p.updated_at DESC`
-    : await sql`SELECT p.*, u.name as user_name, u.email as user_email FROM client_projects p JOIN users u ON u.id = p.user_id WHERE p.user_id = ${uid} ORDER BY p.updated_at DESC`;
+    : await sql`SELECT p.*, u.name as user_name, u.email as user_email FROM client_projects p JOIN users u ON u.id = p.user_id WHERE p.user_id = ${uid} ORDER BY p.updated_at DESC`) as Record<string, unknown>[];
 
   for (const p of projects) {
     p.milestones = await sql`SELECT * FROM project_milestones WHERE project_id = ${p.id} ORDER BY ord, created_at`;
@@ -76,6 +76,6 @@ export async function POST(req: Request) {
     INSERT INTO client_projects (user_id, title, service_type, description, budget, timeline, website)
     VALUES (${uid}, ${title}, ${service_type ?? ""}, ${description ?? ""}, ${budget ?? ""}, ${timeline ?? ""}, ${website ?? ""})
     RETURNING *
-  `;
+  ` as Record<string, unknown>[];
   return NextResponse.json(rows[0], { status: 201 });
 }

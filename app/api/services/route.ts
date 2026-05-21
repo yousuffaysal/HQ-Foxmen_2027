@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     INSERT INTO services (ord, name, descr, count, visible, badge, image)
     VALUES ((SELECT COALESCE(MAX(ord), 0) + 1 FROM services), ${name}, ${descr ?? ""}, ${count ?? ""}, ${visible ?? true}, ${badge ?? null}, ${image ?? null})
     RETURNING *
-  `;
+  ` as Record<string, unknown>[];
   return NextResponse.json(rows[0], { status: 201 });
 }
 
@@ -30,7 +30,7 @@ export async function PATCH(req: Request) {
   const { id } = body;
 
   if ("visible" in body && !("image" in body)) {
-    const rows = await sql`UPDATE services SET visible = ${body.visible} WHERE id = ${id} RETURNING *`;
+    const rows = await sql`UPDATE services SET visible = ${body.visible} WHERE id = ${id} RETURNING *` as Record<string, unknown>[];
     return NextResponse.json(rows[0]);
   }
 
@@ -43,6 +43,6 @@ export async function PATCH(req: Request) {
       image   = COALESCE(${body.image},   image),
       visible = COALESCE(${body.visible}, visible)
     WHERE id = ${id} RETURNING *
-  `;
+  ` as Record<string, unknown>[];
   return NextResponse.json(rows[0]);
 }

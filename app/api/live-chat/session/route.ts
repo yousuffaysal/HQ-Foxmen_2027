@@ -38,7 +38,7 @@ export async function POST(req: Request) {
   const name = visitor_name?.trim() || session?.user?.name || "Visitor";
 
   if (session_id) {
-    const rows = await sql`SELECT * FROM live_chats WHERE session_id = ${session_id}`;
+    const rows = await sql`SELECT * FROM live_chats WHERE session_id = ${session_id}` as Record<string, unknown>[];
     if (rows[0]) {
       if (visitor_name?.trim() || visitor_email) {
         await sql`
@@ -57,7 +57,7 @@ export async function POST(req: Request) {
     INSERT INTO live_chats (session_id, visitor_name, visitor_email, user_id)
     VALUES (${newId}, ${name}, ${visitor_email ?? null}, ${userId ?? null})
     RETURNING *
-  `;
+  ` as Record<string, unknown>[];
   return NextResponse.json(rows[0], { status: 201 });
 }
 
@@ -66,7 +66,7 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const session_id = searchParams.get("session_id");
   if (!session_id) return NextResponse.json({ error: "session_id required" }, { status: 400 });
-  const rows = await sql`SELECT * FROM live_chats WHERE session_id = ${session_id}`;
+  const rows = await sql`SELECT * FROM live_chats WHERE session_id = ${session_id}` as Record<string, unknown>[];
   if (!rows[0]) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(rows[0]);
 }

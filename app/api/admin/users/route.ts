@@ -70,7 +70,7 @@ export async function DELETE(req: Request) {
     const { id } = await req.json();
     if (!id) return NextResponse.json({ error: "User ID required." }, { status: 400 });
 
-    const existing = await sql`SELECT role FROM users WHERE id = ${id}`;
+    const existing = await sql`SELECT role FROM users WHERE id = ${id}` as { role: string }[];
     if (!existing.length) return NextResponse.json({ error: "User not found." }, { status: 404 });
     if (existing[0].role === "admin") return NextResponse.json({ error: "Cannot delete admin users." }, { status: 403 });
 

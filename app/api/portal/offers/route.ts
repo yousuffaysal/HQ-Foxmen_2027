@@ -51,7 +51,7 @@ export async function POST(req: Request) {
     INSERT INTO admin_offers (user_id, project_id, title, description, price)
     VALUES (${user_id}, ${project_id ?? null}, ${title}, ${description ?? ""}, ${price ?? ""})
     RETURNING *
-  `;
+  ` as Record<string, unknown>[];
   await pusherServer.trigger(`private-user-${user_id}`, "notification", {
     type: "new_offer",
     title: "New offer from Foxmen",
@@ -70,9 +70,9 @@ export async function PATCH(req: Request) {
   await ensureTable();
 
   const { id, status } = await req.json();
-  const rows = role === "admin"
+  const rows = (role === "admin"
     ? await sql`UPDATE admin_offers SET status = ${status} WHERE id = ${id} RETURNING *`
-    : await sql`UPDATE admin_offers SET status = ${status} WHERE id = ${id} AND user_id = ${uid} RETURNING *`;
+    : await sql`UPDATE admin_offers SET status = ${status} WHERE id = ${id} AND user_id = ${uid} RETURNING *`) as Record<string, unknown>[];
 
   if (!rows[0]) return NextResponse.json({ error: "Not found" }, { status: 404 });
 

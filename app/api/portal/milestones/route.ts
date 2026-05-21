@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     INSERT INTO project_milestones (project_id, title, description, due_date, ord)
     VALUES (${project_id}, ${title}, ${description ?? ""}, ${due_date ?? ""}, ${ord ?? 0})
     RETURNING *
-  `;
+  ` as Record<string, unknown>[];
   await pusherServer.trigger(`private-project-${project_id}`, "milestone-added", rows[0]).catch(() => {});
   return NextResponse.json(rows[0], { status: 201 });
 }
@@ -37,7 +37,7 @@ export async function PATCH(req: Request) {
       completed_at = CASE WHEN ${status ?? null} = 'completed' THEN ${completedAt}::timestamptz ELSE completed_at END
     WHERE id = ${id}
     RETURNING *
-  `;
+  ` as Record<string, unknown>[];
   if (!rows[0]) return NextResponse.json({ error: "Not found" }, { status: 404 });
   await pusherServer.trigger(`private-project-${rows[0].project_id}`, "milestone-updated", rows[0]).catch(() => {});
   return NextResponse.json(rows[0]);

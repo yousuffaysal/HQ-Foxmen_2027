@@ -17,7 +17,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ token: 
     WHERE pi.token = ${token}
       AND pi.used  = false
       AND (pi.expires_at IS NULL OR pi.expires_at > now())
-  `;
+  ` as Record<string, unknown>[];
 
   if (!rows[0]) {
     return NextResponse.json({ error: "Invalid or expired invite link." }, { status: 404 });

@@ -13,7 +13,7 @@ export async function GET(req: Request) {
 
   let chatId = chat_id;
   if (session_id) {
-    const rows = await sql`SELECT id FROM live_chats WHERE session_id = ${session_id}`;
+    const rows = await sql`SELECT id FROM live_chats WHERE session_id = ${session_id}` as { id: number }[];
     if (!rows[0]) return NextResponse.json([]);
     chatId = String(rows[0].id);
   }
@@ -37,10 +37,10 @@ export async function POST(req: Request) {
   let chatRow: any = null;
 
   if (session_id) {
-    const rows = await sql`SELECT * FROM live_chats WHERE session_id = ${session_id}`;
+    const rows = await sql`SELECT * FROM live_chats WHERE session_id = ${session_id}` as Record<string, unknown>[];
     chatRow = rows[0] ?? null;
   } else {
-    const rows = await sql`SELECT * FROM live_chats WHERE id = ${chat_id}`;
+    const rows = await sql`SELECT * FROM live_chats WHERE id = ${chat_id}` as Record<string, unknown>[];
     chatRow = rows[0] ?? null;
   }
 
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
     INSERT INTO live_chat_messages (chat_id, sender_type, sender_name, message, read)
     VALUES (${chatRow.id}, ${senderType}, ${senderName}, ${message.trim()}, ${senderType === "admin"})
     RETURNING *
-  `;
+  ` as Record<string, unknown>[];
   const msg = msgRows[0];
 
   await sql`

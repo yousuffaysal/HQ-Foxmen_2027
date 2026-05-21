@@ -14,12 +14,12 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     SELECT p.*, u.name as user_name, u.email as user_email
     FROM client_projects p JOIN users u ON u.id = p.user_id
     WHERE p.id = ${id}
-  `;
+  ` as Record<string, unknown>[];
   if (!rows[0]) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  if (role !== "admin" && String(rows[0].user_id) !== String(uid))
+  if (role !== "admin" && String((rows[0] as { user_id: unknown }).user_id) !== String(uid))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const project = rows[0];
+  const project = rows[0] as Record<string, unknown>;
   project.milestones = await sql`SELECT * FROM project_milestones WHERE project_id = ${id} ORDER BY ord, created_at`;
   return NextResponse.json(project);
 }
@@ -48,11 +48,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       updated_at   = now()
     WHERE id = ${id}
     RETURNING *
-  `;
+  ` as Record<string, unknown>[];
   if (!rows[0]) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   await pusherServer.trigger(`private-project-${id}`, "project-updated", rows[0]).catch(() => {});
-  const userRows = await sql`SELECT id FROM users WHERE id = (SELECT user_id FROM client_projects WHERE id = ${id})`;
+  const userRows = await sql`SELECT id FROM users WHERE id = (SELECT user_id FROM client_projects WHERE id = ${id})` as { id: number }[];
   if (userRows[0]) {
     await pusherServer.trigger(`private-user-${userRows[0].id}`, "notification", {
       type: "project_update",

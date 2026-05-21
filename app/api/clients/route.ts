@@ -17,6 +17,6 @@ export async function POST(req: Request) {
     INSERT INTO clients (name, industry, country, contact, eng, mrr, av, cls)
     VALUES (${name}, ${industry ?? ""}, ${country ?? ""}, ${contact ?? ""}, ${eng ?? ""}, ${mrr ?? ""}, ${av ?? ""}, ${cls ?? ""})
     RETURNING *
-  `;
+  ` as Record<string, unknown>[];
   return NextResponse.json(rows[0], { status: 201 });
 }

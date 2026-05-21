@@ -18,6 +18,6 @@ export async function POST(req: Request) {
     INSERT INTO messages (av, sender, subject, preview, body, source, interested, budget, country)
     VALUES (${av ?? ""}, ${sender}, ${subject}, ${preview ?? ""}, ${body ?? ""}, ${source ?? ""}, ${interested ?? ""}, ${budget ?? ""}, ${country ?? ""})
     RETURNING *
-  `;
+  ` as Record<string, unknown>[];
   return NextResponse.json(rows[0], { status: 201 });
 }

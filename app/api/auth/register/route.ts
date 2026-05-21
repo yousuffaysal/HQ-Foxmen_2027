@@ -20,8 +20,8 @@ async function ensureUsersTable() {
 }
 
 async function assignFoxId(userId: number): Promise<string> {
-  const existing = await sql`SELECT fox_id FROM users WHERE id = ${userId}`;
-  if (existing[0]?.fox_id) return existing[0].fox_id as string;
+  const existing = await sql`SELECT fox_id FROM users WHERE id = ${userId}` as { fox_id?: string }[];
+  if (existing[0]?.fox_id) return existing[0].fox_id;
   for (let i = 0; i < 10; i++) {
     const fid = "FXM-" + randomBytes(3).toString("hex").toUpperCase();
     const ok = await sql`UPDATE users SET fox_id = ${fid} WHERE id = ${userId} AND fox_id IS NULL`.catch(() => null);
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
   if (password.length < 8)
     return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
 
-  const existing = await sql`SELECT id FROM users WHERE email = ${email} LIMIT 1`;
+  const existing = await sql`SELECT id FROM users WHERE email = ${email} LIMIT 1` as Record<string, unknown>[];
   if (existing.length > 0)
     return NextResponse.json({ error: "Email already registered" }, { status: 409 });
 
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
     INSERT INTO users (name, email, password_hash)
     VALUES (${name}, ${email}, ${hash})
     RETURNING id, name, email, role, created_at
-  `;
+  ` as { id: number; name: string; email: string; role: string; created_at: string }[];
   const user  = rows[0];
   const foxId = await assignFoxId(user.id);
 

@@ -5,7 +5,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ slug: stri
   const { slug } = await params;
 
   /* Try exact slug match first */
-  let rows = await sql`SELECT * FROM projects WHERE slug = ${slug} LIMIT 1`;
+  let rows = await sql`SELECT * FROM projects WHERE slug = ${slug} LIMIT 1` as Record<string, unknown>[];
 
   /* Fallback: match by name-derived slug for projects saved before slug column existed */
   if (!rows.length) {
@@ -13,7 +13,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ slug: stri
       SELECT * FROM projects
       WHERE lower(regexp_replace(trim(name), '[^a-zA-Z0-9]+', '-', 'g')) = ${slug}
       LIMIT 1
-    `;
+    ` as Record<string, unknown>[];
   }
 
   if (!rows.length) return NextResponse.json({ error: "not found" }, { status: 404 });

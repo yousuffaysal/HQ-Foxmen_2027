@@ -32,7 +32,7 @@ export async function GET(req: Request) {
   const role = (session.user as { role?: string }).role;
 
   if (role !== "admin") {
-    const owns = await sql`SELECT id FROM client_projects WHERE id = ${projectId} AND user_id = ${uid}`;
+    const owns = await sql`SELECT id FROM client_projects WHERE id = ${projectId} AND user_id = ${uid}` as Record<string, unknown>[];
     if (!owns.length) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "project_id and message or image_url required" }, { status: 400 });
 
   if (role !== "admin") {
-    const owns = await sql`SELECT id FROM client_projects WHERE id = ${project_id} AND user_id = ${uid}`;
+    const owns = await sql`SELECT id FROM client_projects WHERE id = ${project_id} AND user_id = ${uid}` as Record<string, unknown>[];
     if (!owns.length) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -61,12 +61,12 @@ export async function POST(req: Request) {
     INSERT INTO project_messages (project_id, sender_id, sender_name, sender_role, message, image_url, had_image)
     VALUES (${project_id}, ${uid}, ${session.user.name ?? "User"}, ${role ?? "client"}, ${message?.trim() ?? ""}, ${image_url ?? ""}, ${hasImage})
     RETURNING *
-  `;
+  ` as Record<string, unknown>[];
   const msg = rows[0];
 
   await pusherServer.trigger(`private-project-${project_id}`, "new-message", msg).catch(() => {});
 
-  const projectRows = await sql`SELECT user_id, title FROM client_projects WHERE id = ${project_id}`;
+  const projectRows = await sql`SELECT user_id, title FROM client_projects WHERE id = ${project_id}` as { user_id: number; title: string }[];
   if (projectRows[0]) {
     const notifyUserId = role === "admin" ? projectRows[0].user_id : null;
     if (notifyUserId) {

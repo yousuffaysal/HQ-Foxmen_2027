@@ -6,7 +6,7 @@ export async function GET() {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const uid = (session.user as { id?: string }).id;
-  const rows = await sql`SELECT id, name, email, role, fox_id, avatar FROM users WHERE id = ${uid}`.catch(() => []);
+  const rows = await sql`SELECT id, name, email, role, fox_id, avatar FROM users WHERE id = ${uid}`.catch(() => []) as Record<string, unknown>[];
   return NextResponse.json(rows[0] ?? {});
 }
 
@@ -25,6 +25,6 @@ export async function PATCH(req: Request) {
         avatar = ${avatar ?? ""}
     WHERE id = ${uid}
     RETURNING id, name, avatar, role
-  `;
+  ` as Record<string, unknown>[];
   return NextResponse.json(rows[0]);
 }

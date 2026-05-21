@@ -38,7 +38,7 @@ export async function POST(req: Request) {
     INSERT INTO notifications (user_id, type, title, body, link)
     VALUES (${user_id}, ${type}, ${title}, ${body ?? ""}, ${link ?? ""})
     RETURNING *
-  `;
+  ` as Record<string, unknown>[];
   return NextResponse.json(rows[0], { status: 201 });
 }
 

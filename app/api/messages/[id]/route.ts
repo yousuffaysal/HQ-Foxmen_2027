@@ -7,7 +7,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (deny) return deny;
   const { id } = await params;
   const { unread } = await req.json();
-  const rows = await sql`UPDATE messages SET unread = ${unread} WHERE id = ${id} RETURNING *`;
+  const rows = await sql`UPDATE messages SET unread = ${unread} WHERE id = ${id} RETURNING *` as Record<string, unknown>[];
   if (!rows.length) return NextResponse.json({ error: "not found" }, { status: 404 });
   return NextResponse.json(rows[0]);
 }

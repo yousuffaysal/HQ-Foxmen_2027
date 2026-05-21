@@ -15,7 +15,7 @@ export async function POST(req: Request) {
   if (newPassword.length < 8)
     return NextResponse.json({ error: "New password must be at least 8 characters" }, { status: 400 });
 
-  const rows = await sql`SELECT password_hash FROM users WHERE id = ${uid} LIMIT 1`;
+  const rows = await sql`SELECT password_hash FROM users WHERE id = ${uid} LIMIT 1` as { password_hash: string }[];
   if (!rows[0]) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
   const valid = await bcrypt.compare(oldPassword, rows[0].password_hash);
