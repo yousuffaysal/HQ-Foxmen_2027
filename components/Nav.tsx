@@ -98,7 +98,7 @@ export default function Nav() {
               <span className="dot" />
               <span>{clock}</span>
             </span>
-            <Link href="/portal" className="btn btn--ghost" style={{ marginRight: 4 }}>
+            <Link href="/portal" className="btn btn--ghost nav-portal-btn" style={{ marginRight: 4 }}>
               <span className="label">{isLoggedIn ? firstName : "Client Portal"}</span>
               <span className="chip" aria-hidden="true">
                 {isLoggedIn ? (

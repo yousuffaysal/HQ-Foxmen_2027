@@ -3941,9 +3941,37 @@ body.loading { overflow: hidden; }
 @media (max-width: 768px) {
 
   /* NAV */
-  .nav-time     { display: none !important; }
+  .nav-time      { display: none !important; }
   .nav-start-btn { display: none !important; }
   .nav-hamburger { display: flex !important; }
+
+  /* Logo: hide the "Code · Craft · Care" sub-tagline on mobile */
+  .brand .wm .small { display: none !important; }
+  .brand { font-size: 20px !important; gap: 10px !important; }
+  .brand .mark { width: 30px !important; height: 30px !important; }
+
+  /* Portal button: icon-only circle on mobile */
+  .nav-portal-btn {
+    padding: 0 !important;
+    width: 44px !important; height: 44px !important;
+    border-radius: 50% !important;
+    justify-content: center !important;
+    margin-right: 0 !important;
+    flex-shrink: 0 !important;
+  }
+  .nav-portal-btn .label { display: none !important; }
+  .nav-portal-btn .chip {
+    width: 36px !important; height: 36px !important;
+    border-radius: 50% !important;
+  }
+
+  /* Hamburger: modern circle */
+  .nav-hamburger {
+    width: 44px !important; height: 44px !important;
+    border-radius: 50% !important;
+    border: 1px solid var(--line) !important;
+    background: rgba(255,255,255,.55) !important;
+  }
 
   /* HERO */
   .hero { padding-top: 96px !important; padding-bottom: 40px !important; min-height: 0 !important; }
