@@ -219,9 +219,24 @@ export default function PortalPage() {
           )}
         </nav>
 
+        {/* Home link */}
+        <div style={{ padding: "8px 10px", borderTop: "1px solid rgba(255,255,255,.07)" }}>
+          <a href="/"
+            style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 10, textDecoration: "none", color: "rgba(255,255,255,.5)", fontSize: 13, fontWeight: 500, transition: "background .15s, color .15s" }}
+            onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,.06)"; e.currentTarget.style.color = "#fff"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "rgba(255,255,255,.5)"; }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" style={{ flexShrink: 0, opacity: 0.7 }}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Back to website
+          </a>
+        </div>
+
         {/* User footer */}
-        <div style={{ padding: "14px 16px", borderTop: "1px solid rgba(255,255,255,.07)", display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#b86cf9", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, flexShrink: 0 }}>{initials}</div>
+        <div style={{ padding: "12px 16px", borderTop: "1px solid rgba(255,255,255,.07)", display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 32, height: 32, borderRadius: "50%", flexShrink: 0, overflow: "hidden", background: "#b86cf9", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#fff" }}>
+            {settingAvatar
+              ? <img src={settingAvatar} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              : initials}
+          </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 13, fontWeight: 500, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.name}</div>
             <div style={{ fontSize: 10, color: "rgba(255,255,255,.3)", fontFamily: "monospace", letterSpacing: ".04em" }}>{foxId ?? (user?.role ?? "client")}</div>
@@ -558,7 +573,45 @@ export default function PortalPage() {
               </div>
               <div style={{ background: "#fff", border: "1.5px solid #e7e5e2", borderRadius: 14, overflow: "hidden", marginBottom: 16 }}>
                 <div style={{ padding: "18px 22px", borderBottom: "1px solid #e7e5e2", fontWeight: 600, fontSize: 14 }}>Profile</div>
-                <div style={{ padding: "20px 22px", display: "flex", flexDirection: "column", gap: 14 }}>
+                <div style={{ padding: "20px 22px", display: "flex", flexDirection: "column", gap: 16 }}>
+                  {/* Avatar upload */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                    <label style={{ cursor: "pointer", position: "relative", flexShrink: 0 }}>
+                      <input type="file" accept="image/*" hidden onChange={async e => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setAvatarUploading(true);
+                        const fd = new FormData();
+                        fd.append("file", file);
+                        const res = await fetch("/api/portal/upload", { method: "POST", body: fd });
+                        if (res.ok) {
+                          const { url } = await res.json() as { url: string };
+                          setSettingAvatar(url);
+                        }
+                        setAvatarUploading(false);
+                        e.target.value = "";
+                      }} />
+                      <div style={{ width: 68, height: 68, borderRadius: "50%", background: settingAvatar ? "transparent" : "#b86cf9", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", border: "2px solid #e7e5e2" }}>
+                        {settingAvatar
+                          ? <img src={settingAvatar} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          : <span style={{ fontSize: 22, fontWeight: 700, color: "#fff" }}>{(settingName || user?.name || "U").split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2)}</span>
+                        }
+                        <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.45)", display: "flex", alignItems: "center", justifyContent: "center", opacity: avatarUploading ? 1 : 0, transition: "opacity .15s" }}
+                          onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
+                          onMouseLeave={e => (e.currentTarget.style.opacity = avatarUploading ? "1" : "0")}>
+                          {avatarUploading
+                            ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4"/></svg>
+                            : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                          }
+                        </div>
+                      </div>
+                    </label>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "#0a0a0a", marginBottom: 3 }}>Profile photo</div>
+                      <div style={{ fontSize: 12, color: "#9a9a9a", lineHeight: 1.5 }}>Click the circle to upload.<br/>JPG, PNG or WebP · max 10 MB</div>
+                    </div>
+                  </div>
+
                   {foxId && (
                     <div style={{ display: "flex", alignItems: "center", gap: 12, background: "linear-gradient(135deg,rgba(184,108,249,.08),rgba(124,58,237,.06))", border: "1.5px solid rgba(184,108,249,.2)", borderRadius: 12, padding: "12px 16px" }}>
                       <div style={{ width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg,#b86cf9,#7c3aed)", display: "grid", placeItems: "center", flexShrink: 0 }}>
@@ -580,7 +633,7 @@ export default function PortalPage() {
                   </label>
                   <button disabled={settingSaving} onClick={async () => {
                     setSettingSaving(true);
-                    await fetch("/api/auth/profile", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: settingName, avatar: "" }) });
+                    await fetch("/api/auth/profile", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: settingName, avatar: settingAvatar }) });
                     setSettingSaving(false);
                   }} style={{ alignSelf: "flex-start", background: "#0a0a0a", color: "#fff", border: "none", borderRadius: 50, padding: "9px 22px", fontSize: 13, fontWeight: 500, cursor: "pointer", opacity: settingSaving ? 0.6 : 1 }}>
                     {settingSaving ? "Saving…" : "Save changes"}
