@@ -27,7 +27,8 @@ export default function Nav() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [clock, setClock] = useState("— : —");
-  const { data: session } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
   const [avatar, setAvatar] = useState<string | null>(null);
 
   useEffect(() => {
