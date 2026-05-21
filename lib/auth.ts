@@ -18,7 +18,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
-        const rows = await sql`SELECT * FROM users WHERE email = ${credentials.email as string} LIMIT 1`;
+        const rows = await sql`SELECT * FROM users WHERE email = ${credentials.email as string} LIMIT 1` as { id: string; name: string; email: string; role: string; password_hash: string }[];
         const user = rows[0];
         if (!user) return null;
         const valid = await bcrypt.compare(credentials.password as string, user.password_hash);
