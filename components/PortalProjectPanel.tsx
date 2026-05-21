@@ -97,26 +97,56 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
     return () => { pusher.unsubscribe(`private-project-${project.id}`); };
   }, [project.id, tab, onUnread]);
 
+  function pickImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImgFile(file);
+    setImgPreview(URL.createObjectURL(file));
+    e.target.value = "";
+  }
+
+  function clearImage() {
+    if (imgPreview) URL.revokeObjectURL(imgPreview);
+    setImgFile(null);
+    setImgPreview(null);
+  }
+
   async function send(e: { preventDefault(): void }) {
     e.preventDefault();
     const text = input.trim();
-    if (!text || sending) return;
-    setInput("");
+    if ((!text && !imgFile) || sending) return;
     setSending(true);
+    setInput("");
+
+    let uploadedUrl = "";
+    if (imgFile) {
+      const fd = new FormData();
+      fd.append("file", imgFile);
+      const upRes = await fetch("/api/portal/upload", { method: "POST", body: fd });
+      if (upRes.ok) uploadedUrl = (await upRes.json()).url as string;
+      clearImage();
+    }
+
     const optId = `opt-${Date.now()}`;
-    const opt: Message = { id: optId as unknown as number, project_id: project.id, sender_id: 0, sender_name: "You", sender_role: "client", message: text, created_at: new Date().toISOString() };
+    const opt: Message = {
+      id: optId as unknown as number, project_id: project.id,
+      sender_id: 0, sender_name: "You", sender_role: "client",
+      message: text, image_url: uploadedUrl || undefined,
+      created_at: new Date().toISOString(),
+    };
     setMsgs(prev => [...prev, opt]);
     setTimeout(() => endRef.current?.scrollIntoView({ behavior: "smooth" }), 40);
+
     const res = await fetch("/api/portal/messages", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ project_id: project.id, message: text }),
+      body: JSON.stringify({ project_id: project.id, message: text, image_url: uploadedUrl }),
     });
     if (res.ok) {
       const msg = await res.json();
       handledIds.current.add(msg.id);
       setMsgs(prev => {
-        const withoutOpt = prev.filter(m => (m.id as unknown as string) !== optId);
-        return withoutOpt.some(m => m.id === msg.id) ? withoutOpt : [...withoutOpt, msg];
+        const without = prev.filter(m => (m.id as unknown as string) !== optId);
+        return without.some(m => m.id === msg.id) ? without : [...without, msg];
       });
     }
     setSending(false);
@@ -141,6 +171,14 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
     <>
       {/* Overlay */}
       <div className="pp-overlay" onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,.18)", backdropFilter: "blur(2px)" }} />
+
+      {/* Lightbox */}
+      {lightbox && (
+        <div onClick={() => setLightbox(null)} style={{ position: "fixed", inset: 0, zIndex: 400, background: "rgba(0,0,0,.88)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, cursor: "zoom-out" }}>
+          <img src={lightbox} alt="full size" style={{ maxWidth: "100%", maxHeight: "90vh", borderRadius: 12, boxShadow: "0 24px 80px rgba(0,0,0,.5)", objectFit: "contain" }} />
+          <button onClick={() => setLightbox(null)} style={{ position: "absolute", top: 20, right: 20, width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,.15)", border: "none", cursor: "pointer", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, lineHeight: 1 }}>×</button>
+        </div>
+      )}
 
       {/* Panel */}
       <div className="pp-panel" style={{
@@ -303,53 +341,81 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
                     No messages yet.<br/>Send a message to your project team.
                   </div>
                 )}
-                {msgs.map(m => (
-                  <div key={m.id} className="pp-msg" style={{ display: "flex", flexDirection: "column", alignItems: m.sender_role === "client" ? "flex-end" : "flex-start" }}>
-                    <div style={{ fontSize: 10, color: "#9a9a9a", marginBottom: 3, paddingLeft: 2, paddingRight: 2 }}>
-                      {m.sender_role === "admin" ? "Foxmen Studio" : "You"}
+                {msgs.map(m => {
+                  const isClient = m.sender_role === "client";
+                  return (
+                    <div key={m.id} className="pp-msg" style={{ display: "flex", flexDirection: "column", alignItems: isClient ? "flex-end" : "flex-start" }}>
+                      <div style={{ fontSize: 10, color: "#9a9a9a", marginBottom: 3, paddingLeft: 2, paddingRight: 2 }}>
+                        {isClient ? "You" : "Foxmen Studio"}
+                      </div>
+                      <div style={{
+                        maxWidth: "78%", padding: m.image_url && !m.message ? "4px" : "10px 14px",
+                        borderRadius: isClient ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+                        fontSize: 13.5, lineHeight: 1.55, wordBreak: "break-word",
+                        background: isClient ? "#b86cf9" : "#f4f3f1",
+                        color: isClient ? "#fff" : "#0a0a0a",
+                        overflow: "hidden",
+                      }}>
+                        {m.image_url && (
+                          <img
+                            src={m.image_url} alt="attachment"
+                            onClick={() => setLightbox(m.image_url!)}
+                            style={{ display: "block", maxWidth: "100%", maxHeight: 260, borderRadius: m.message ? "10px 10px 0 0" : 12, cursor: "zoom-in", objectFit: "cover" }}
+                          />
+                        )}
+                        {m.message && (
+                          <span style={{ display: "block", padding: m.image_url ? "8px 10px 4px" : undefined }}>{m.message}</span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: 10, color: "#b0b0b0", marginTop: 3, paddingLeft: 2, paddingRight: 2 }}>
+                        {new Date(m.created_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+                      </div>
                     </div>
-                    <div style={{
-                      maxWidth: "78%", padding: "10px 14px",
-                      borderRadius: m.sender_role === "client" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-                      fontSize: 13.5, lineHeight: 1.55, wordBreak: "break-word",
-                      background: m.sender_role === "client" ? "#b86cf9" : "#f4f3f1",
-                      color: m.sender_role === "client" ? "#fff" : "#0a0a0a",
-                    }}>{m.message}</div>
-                    <div style={{ fontSize: 10, color: "#b0b0b0", marginTop: 3, paddingLeft: 2, paddingRight: 2 }}>
-                      {new Date(m.created_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
                 <div ref={endRef} />
               </div>
 
-              <form onSubmit={send} style={{ padding: "10px 14px 16px", borderTop: "1.5px solid #f0ede8", display: "flex", gap: 8, background: "#fafaf8", flexShrink: 0 }}>
-                <input
-                  ref={inputRef}
-                  className="pp-chat-input"
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
-                  placeholder="Message the team…"
-                  style={{
-                    flex: 1, padding: "11px 16px", borderRadius: 50,
-                    border: "1.5px solid #e7e5e2", fontSize: 13.5,
-                    fontFamily: "inherit", background: "#fff", color: "#0a0a0a",
-                    transition: "border-color .15s, box-shadow .15s",
-                  }}
-                />
-                <button type="submit" className="pp-send" disabled={!input.trim() || sending}
-                  style={{
-                    width: 44, height: 44, borderRadius: "50%",
-                    background: "#b86cf9", color: "#fff", border: "none",
-                    cursor: input.trim() ? "pointer" : "not-allowed",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    flexShrink: 0, opacity: !input.trim() ? 0.4 : 1,
-                    transition: "opacity .15s, background .15s",
-                  }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>
-                </button>
-              </form>
+              <div style={{ borderTop: "1.5px solid #f0ede8", background: "#fafaf8", flexShrink: 0 }}>
+                {/* Image preview strip */}
+                {imgPreview && (
+                  <div className="pp-img-thumb" style={{ padding: "10px 14px 0", display: "flex", alignItems: "flex-start", gap: 8 }}>
+                    <div style={{ position: "relative", display: "inline-flex" }}>
+                      <img src={imgPreview} alt="preview" style={{ height: 72, width: 72, objectFit: "cover", borderRadius: 10, border: "1.5px solid #e7e5e2" }} />
+                      <button onClick={clearImage}
+                        style={{ position: "absolute", top: -6, right: -6, width: 18, height: 18, borderRadius: "50%", background: "#0a0a0a", color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, lineHeight: 1, fontWeight: 700 }}>
+                        ×
+                      </button>
+                    </div>
+                    <span style={{ fontSize: 11, color: "#9a9a9a", paddingTop: 4 }}>Image ready to send</span>
+                  </div>
+                )}
+                <form onSubmit={send} style={{ padding: "10px 14px 16px", display: "flex", gap: 8, alignItems: "center" }}>
+                  {/* Hidden file input */}
+                  <input ref={fileRef} type="file" accept="image/*" hidden onChange={pickImage} />
+                  {/* Attachment button */}
+                  <button type="button" className="pp-img-btn" onClick={() => fileRef.current?.click()}
+                    title="Attach image"
+                    style={{ width: 38, height: 38, borderRadius: "50%", background: imgPreview ? "rgba(184,108,249,.15)" : "#f0ede8", color: imgPreview ? "#b86cf9" : "#9a9a9a", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "background .15s, color .15s" }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.41 17.41a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                  </button>
+                  <input
+                    ref={inputRef}
+                    className="pp-chat-input"
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
+                    placeholder={imgPreview ? "Add a caption… (optional)" : "Message the team…"}
+                    style={{ flex: 1, padding: "11px 16px", borderRadius: 50, border: "1.5px solid #e7e5e2", fontSize: 13.5, fontFamily: "inherit", background: "#fff", color: "#0a0a0a", transition: "border-color .15s, box-shadow .15s" }}
+                  />
+                  <button type="submit" className="pp-send" disabled={(!input.trim() && !imgFile) || sending}
+                    style={{ width: 44, height: 44, borderRadius: "50%", background: "#b86cf9", color: "#fff", border: "none", cursor: (!input.trim() && !imgFile) ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, opacity: (!input.trim() && !imgFile) ? 0.4 : 1, transition: "opacity .15s, background .15s" }}>
+                    {sending
+                      ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
+                      : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+                    }
+                  </button>
+                </form>
+              </div>
             </div>
           )}
         </div>
