@@ -38,6 +38,6 @@ export async function POST(req: Request) {
       ${slug ?? ""}
     )
     RETURNING *
-  `;
+  ` as Record<string, unknown>[];
   return NextResponse.json(rows[0], { status: 201 });
 }
