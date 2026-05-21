@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { requireAdmin } from "@/lib/require-admin";
 
 let migrated = false;
 async function ensureColumns() {
@@ -19,6 +20,8 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const deny = await requireAdmin();
+  if (deny) return deny;
   await ensureColumns();
   const { quote, name, role, av, hi, rating } = await req.json();
   const rows = await sql`

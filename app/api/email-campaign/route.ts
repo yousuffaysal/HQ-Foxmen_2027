@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/require-admin";
 
 const LOGO        = "https://res.cloudinary.com/djofqa3vc/image/upload/v1778967518/logo_sn_fox_copy_e9sigm.png";
 const BRAND_COLOR = "#B86CF9";
@@ -368,6 +369,8 @@ function buildPaymentHtml(data: PaymentEmailData): string {
 }
 
 export async function POST(req: Request) {
+  const deny = await requireAdmin();
+  if (deny) return deny;
   const { template, to, subject, rawContent, btnColor, heroImage, proposalData, paymentData } = await req.json();
 
   if (!to)      return NextResponse.json({ error: "No recipient" },  { status: 400 });

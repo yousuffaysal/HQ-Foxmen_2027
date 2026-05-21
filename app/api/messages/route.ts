@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { requireAdmin } from "@/lib/require-admin";
 
 export async function GET() {
+  const deny = await requireAdmin();
+  if (deny) return deny;
   const rows = await sql`SELECT * FROM messages ORDER BY received_at DESC`;
   return NextResponse.json(rows);
 }

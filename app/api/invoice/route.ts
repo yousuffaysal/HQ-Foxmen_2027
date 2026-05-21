@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/require-admin";
 
 interface Item { service: string; description: string; quantity: number; unit: string; rate: number }
 
@@ -215,6 +216,8 @@ function buildEmailHtml(data: {
 }
 
 export async function POST(req: Request) {
+  const deny = await requireAdmin();
+  if (deny) return deny;
   const body = await req.json();
   const { status, client, company, email, phone, num, date, due, projectName, projectType, timeline, items, taxRate, discount, notes, payment, total } = body;
 

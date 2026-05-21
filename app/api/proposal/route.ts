@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
+import { requireAdmin } from "@/lib/require-admin";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
@@ -8,6 +9,8 @@ Write compelling, professional project proposals that win high-value clients.
 Respond with valid JSON only — no markdown fences, no extra text.`;
 
 export async function POST(req: Request) {
+  const deny = await requireAdmin();
+  if (deny) return deny;
   const { client, company, service, scope, timeline, budget } = await req.json();
 
   const prompt = `Write a full project proposal for:

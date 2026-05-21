@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { requireAdmin } from "@/lib/require-admin";
 
 const SEED = [
   { category: "Website",    feature_id: "__base__",     label: "Base Price",                price_min: 3000,  price_max: 6000,  is_base: true,  ord: 0 },
@@ -85,6 +86,8 @@ export async function GET() {
 }
 
 export async function PATCH(req: Request) {
+  const deny = await requireAdmin();
+  if (deny) return deny;
   const body = await req.json();
   const { id } = body;
 

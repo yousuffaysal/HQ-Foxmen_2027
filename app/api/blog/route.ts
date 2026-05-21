@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { requireAdmin } from "@/lib/require-admin";
 
 async function ensureColumns() {
   await sql`ALTER TABLE posts ADD COLUMN IF NOT EXISTS body         TEXT    NOT NULL DEFAULT ''`.catch(() => {});
@@ -16,6 +17,8 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const deny = await requireAdmin();
+  if (deny) return deny;
   await ensureColumns();
   const { title, category, author_init, author_name, read_time, status, published_at, body, cover_image, excerpt, tags, slug } = await req.json();
   const rows = await sql`

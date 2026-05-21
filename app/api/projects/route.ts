@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { requireAdmin } from "@/lib/require-admin";
 
 /* Run all column migrations once per process lifetime (not on every request) */
 let migrated = false;
@@ -55,6 +56,8 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const deny = await requireAdmin();
+  if (deny) return deny;
   await ensureMigrated();
   const {
     monogram, color_cls, name, industry, year, scope, status,

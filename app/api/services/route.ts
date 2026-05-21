@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { requireAdmin } from "@/lib/require-admin";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -11,6 +12,8 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const deny = await requireAdmin();
+  if (deny) return deny;
   const { name, descr, count, visible, badge, image } = await req.json();
   const rows = await sql`
     INSERT INTO services (ord, name, descr, count, visible, badge, image)
@@ -21,6 +24,8 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
+  const deny = await requireAdmin();
+  if (deny) return deny;
   const body = await req.json();
   const { id } = body;
 

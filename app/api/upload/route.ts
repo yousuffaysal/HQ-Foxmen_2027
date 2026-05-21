@@ -1,11 +1,29 @@
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/require-admin";
 
 export const runtime = "nodejs";
 
+const ALLOWED_TYPES = new Set([
+  "image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml",
+  "video/mp4", "video/webm",
+  "application/pdf",
+]);
+const MAX_BYTES = 20 * 1024 * 1024; // 20 MB
+
 export async function POST(req: Request) {
+  const deny = await requireAdmin();
+  if (deny) return deny;
+
   const data = await req.formData();
   const file = data.get("file") as File | null;
   if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
+
+  if (!ALLOWED_TYPES.has(file.type)) {
+    return NextResponse.json({ error: "File type not allowed" }, { status: 415 });
+  }
+  if (file.size > MAX_BYTES) {
+    return NextResponse.json({ error: "File exceeds 20 MB limit" }, { status: 413 });
+  }
 
   const cloud  = process.env.CLOUDINARY_CLOUD_NAME;
   const preset = process.env.CLOUDINARY_UPLOAD_PRESET;
