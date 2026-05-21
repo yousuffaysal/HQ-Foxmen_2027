@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 
 type User = {
   id: number;
@@ -7,6 +8,7 @@ type User = {
   email: string;
   role: string;
   fox_id: string | null;
+  blocked: boolean;
   created_at: string;
   project_count: number;
 };
@@ -35,17 +37,20 @@ const AV_GRAD: Record<string, string> = {
 };
 
 export default function AdminManageUsers() {
-  const [users,   setUsers]   = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search,  setSearch]  = useState("");
-  const [filter,  setFilter]  = useState<"all"|"admin"|"client">("all");
+  const { data: session } = useSession();
+  const selfId = (session?.user as { id?: string })?.id;
+
+  const [users,    setUsers]    = useState<User[]>([]);
+  const [loading,  setLoading]  = useState(true);
+  const [search,   setSearch]   = useState("");
+  const [filter,   setFilter]   = useState<"all"|"admin"|"client"|"blocked">("all");
   const [selected, setSelected] = useState<number | null>(null);
-  const [editUser, setEditUser] = useState<User | null>(null);
+  const [editUser,  setEditUser]  = useState<User | null>(null);
   const [editName,  setEditName]  = useState("");
   const [editEmail, setEditEmail] = useState("");
   const [editPass,  setEditPass]  = useState("");
-  const [saving,  setSaving]  = useState(false);
-  const [toast,   setToast]   = useState("");
+  const [saving,   setSaving]   = useState(false);
+  const [toast,    setToast]    = useState("");
 
   useEffect(() => { load(); }, []);
 
@@ -108,20 +113,57 @@ export default function AdminManageUsers() {
     }
   };
 
+  const changeRole = async (u: User, newRole: "admin" | "client") => {
+    const action = newRole === "admin" ? "promote" : "demote";
+    if (!confirm(`${newRole === "admin" ? "Make" : "Remove admin from"} ${u.name}? ${newRole === "admin" ? "They will have full access to this panel." : "They will lose admin access."}`)) return;
+    const res = await fetch("/api/admin/users", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: u.id, newRole }),
+    });
+    if (res.ok) {
+      setUsers(prev => prev.map(x => x.id === u.id ? { ...x, role: newRole } : x));
+      showToast(newRole === "admin" ? "User promoted to admin" : "Admin access removed");
+    } else {
+      const t = await res.json().catch(() => ({})) as { error?: string };
+      showToast(t.error || "Error");
+    }
+    void action;
+  };
+
+  const toggleBlock = async (u: User) => {
+    const blocking = !u.blocked;
+    if (blocking && !confirm(`Block ${u.name}? They won't be able to log in.`)) return;
+    const res = await fetch("/api/admin/users", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: u.id, blocked: blocking }),
+    });
+    if (res.ok) {
+      setUsers(prev => prev.map(x => x.id === u.id ? { ...x, blocked: blocking } : x));
+      showToast(blocking ? "User blocked" : "User unblocked");
+    } else {
+      const t = await res.json().catch(() => ({})) as { error?: string };
+      showToast(t.error || "Error");
+    }
+  };
+
   const filtered = users.filter(u => {
     const q = search.toLowerCase();
     const matchSearch = !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || (u.fox_id ?? "").toLowerCase().includes(q);
-    const matchRole   = filter === "all" || u.role === filter;
+    const matchRole = filter === "all" || (filter === "blocked" ? u.blocked : u.role === filter);
     return matchSearch && matchRole;
   });
 
   const counts = {
-    all:    users.length,
-    admin:  users.filter(u => u.role === "admin").length,
-    client: users.filter(u => u.role === "client").length,
+    all:     users.length,
+    admin:   users.filter(u => u.role === "admin").length,
+    client:  users.filter(u => u.role === "client").length,
+    blocked: users.filter(u => u.blocked).length,
   };
 
   const selectedUser = selected !== null ? users.find(u => u.id === selected) : null;
+  const isSelf = (u: User) => String(u.id) === String(selfId);
 
   return (
     <section className="page active">
@@ -149,11 +191,11 @@ export default function AdminManageUsers() {
           />
         </div>
         <div style={{ display: "flex", gap: 4, background: "var(--canvas)", border: "1.5px solid var(--line)", borderRadius: 10, padding: 3 }}>
-          {(["all","admin","client"] as const).map(f => (
+          {(["all","admin","client","blocked"] as const).map(f => (
             <button key={f} onClick={() => setFilter(f)} style={{
               padding: "6px 14px", borderRadius: 7, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600,
-              background: filter === f ? "#fff" : "transparent",
-              color: filter === f ? "var(--ink)" : "var(--muted)",
+              background: filter === f ? (f === "blocked" ? "#fef2f2" : "#fff") : "transparent",
+              color: filter === f ? (f === "blocked" ? "#ef4444" : "var(--ink)") : "var(--muted)",
               boxShadow: filter === f ? "0 1px 4px rgba(0,0,0,.08)" : "none",
               transition: "all .15s",
             }}>
@@ -176,7 +218,7 @@ export default function AdminManageUsers() {
           {/* ── LIST ── */}
           <div style={{ flex: 1, background: "#fff", border: "1.5px solid var(--line)", borderRadius: 16, overflow: "hidden" }}>
             {/* Table header */}
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 1.4fr 90px 80px 90px 80px", gap: 0, padding: "10px 18px", borderBottom: "1.5px solid var(--line)", background: "var(--canvas)" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "2fr 1.4fr 110px 80px 90px 80px", gap: 0, padding: "10px 18px", borderBottom: "1.5px solid var(--line)", background: "var(--canvas)" }}>
               {["User", "Fox ID", "Role", "Projects", "Joined", ""].map((h, i) => (
                 <div key={i} style={{ fontSize: 10, fontWeight: 700, color: "var(--muted)", letterSpacing: ".1em", textTransform: "uppercase" }}>{h}</div>
               ))}
@@ -188,21 +230,22 @@ export default function AdminManageUsers() {
               return (
                 <div key={u.id} onClick={() => setSelected(isSelected ? null : u.id)}
                   style={{
-                    display: "grid", gridTemplateColumns: "2fr 1.4fr 90px 80px 90px 80px",
+                    display: "grid", gridTemplateColumns: "2fr 1.4fr 110px 80px 90px 80px",
                     gap: 0, padding: "13px 18px", alignItems: "center", cursor: "pointer",
                     borderBottom: idx < filtered.length - 1 ? "1px solid var(--line)" : "none",
-                    background: isSelected ? "rgba(184,108,249,.05)" : "#fff",
-                    borderLeft: isSelected ? "3px solid var(--brand)" : "3px solid transparent",
+                    background: isSelected ? "rgba(184,108,249,.05)" : u.blocked ? "rgba(239,68,68,.03)" : "#fff",
+                    borderLeft: isSelected ? "3px solid var(--brand)" : u.blocked ? "3px solid #ef4444" : "3px solid transparent",
+                    opacity: u.blocked ? 0.75 : 1,
                     transition: "all .12s",
                   }}
                   onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLDivElement).style.background = "#fafafa"; }}
-                  onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLDivElement).style.background = "#fff"; }}
+                  onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLDivElement).style.background = u.blocked ? "rgba(239,68,68,.03)" : "#fff"; }}
                 >
                   {/* Name + email */}
                   <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
                     <div style={{
                       width: 34, height: 34, borderRadius: "50%", flexShrink: 0,
-                      background: AV_GRAD[u.role] ?? "#888",
+                      background: u.blocked ? "linear-gradient(135deg,#f87171,#dc2626)" : (AV_GRAD[u.role] ?? "#888"),
                       display: "grid", placeItems: "center",
                       fontWeight: 700, fontSize: 12, color: "#fff",
                     }}>
@@ -219,11 +262,16 @@ export default function AdminManageUsers() {
                     {u.fox_id ?? "—"}
                   </div>
 
-                  {/* Role */}
-                  <div>
+                  {/* Role + blocked badge */}
+                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                     <span style={{ padding: "3px 10px", borderRadius: 999, fontSize: 10, fontWeight: 700, letterSpacing: ".07em", textTransform: "uppercase", ...rc }}>
                       {u.role}
                     </span>
+                    {u.blocked && (
+                      <span style={{ padding: "3px 8px", borderRadius: 999, fontSize: 10, fontWeight: 700, letterSpacing: ".07em", textTransform: "uppercase", background: "#fef2f2", color: "#ef4444" }}>
+                        blocked
+                      </span>
+                    )}
                   </div>
 
                   {/* Projects */}
@@ -267,7 +315,7 @@ export default function AdminManageUsers() {
               <div style={{ background: "linear-gradient(160deg,#0a0a0a,#1a0f2e)", padding: "24px 20px 20px", textAlign: "center" }}>
                 <div style={{
                   width: 56, height: 56, borderRadius: "50%", margin: "0 auto 12px",
-                  background: AV_GRAD[selectedUser.role] ?? "#888",
+                  background: selectedUser.blocked ? "linear-gradient(135deg,#f87171,#dc2626)" : (AV_GRAD[selectedUser.role] ?? "#888"),
                   display: "grid", placeItems: "center",
                   fontWeight: 800, fontSize: 18, color: "#fff",
                 }}>
@@ -275,7 +323,6 @@ export default function AdminManageUsers() {
                 </div>
                 <div style={{ fontWeight: 700, fontSize: 15, color: "#fff", marginBottom: 3 }}>{selectedUser.name}</div>
                 <div style={{ fontSize: 11, color: "rgba(255,255,255,.4)" }}>{selectedUser.email}</div>
-                {/* Fox ID badge */}
                 <div style={{ marginTop: 14, display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(184,108,249,.15)", border: "1px solid rgba(184,108,249,.3)", padding: "6px 14px", borderRadius: 8 }}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#b86cf9" strokeWidth="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                   <span style={{ fontFamily: "var(--f-mono)", fontSize: 13, fontWeight: 700, color: "#b86cf9", letterSpacing: ".06em" }}>{selectedUser.fox_id ?? "—"}</span>
@@ -296,9 +343,16 @@ export default function AdminManageUsers() {
               <div style={{ padding: "14px 18px", display: "flex", flexDirection: "column", gap: 12 }}>
                 <div>
                   <div style={{ fontSize: 10, color: "var(--muted)", fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", marginBottom: 4 }}>Role</div>
-                  <span style={{ padding: "3px 11px", borderRadius: 999, fontSize: 11, fontWeight: 700, letterSpacing: ".07em", textTransform: "uppercase", ...(ROLE_STYLE[selectedUser.role] ?? { bg: "#f0f0f0", color: "#666" }) }}>
-                    {selectedUser.role}
-                  </span>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    <span style={{ padding: "3px 11px", borderRadius: 999, fontSize: 11, fontWeight: 700, letterSpacing: ".07em", textTransform: "uppercase", ...(ROLE_STYLE[selectedUser.role] ?? { bg: "#f0f0f0", color: "#666" }) }}>
+                      {selectedUser.role}
+                    </span>
+                    {selectedUser.blocked && (
+                      <span style={{ padding: "3px 11px", borderRadius: 999, fontSize: 11, fontWeight: 700, letterSpacing: ".07em", textTransform: "uppercase", background: "#fef2f2", color: "#ef4444" }}>
+                        blocked
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <div style={{ fontSize: 10, color: "var(--muted)", fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", marginBottom: 4 }}>DB User ID</div>
@@ -313,6 +367,40 @@ export default function AdminManageUsers() {
                 >
                   Edit user
                 </button>
+
+                {/* Make Admin / Remove Admin */}
+                {!isSelf(selectedUser) && selectedUser.role === "client" && (
+                  <button onClick={() => changeRole(selectedUser, "admin")} style={{ width: "100%", padding: "9px 0", border: "1.5px solid #e9d5ff", borderRadius: 9, background: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 700, color: "#7c3aed", transition: "all .15s" }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "#faf5ff"; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "#fff"; }}
+                  >
+                    Make admin
+                  </button>
+                )}
+                {!isSelf(selectedUser) && selectedUser.role === "admin" && (
+                  <button onClick={() => changeRole(selectedUser, "client")} style={{ width: "100%", padding: "9px 0", border: "1.5px solid var(--line)", borderRadius: 9, background: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 700, color: "var(--muted)", transition: "all .15s" }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "#fafafa"; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "#fff"; }}
+                  >
+                    Remove admin
+                  </button>
+                )}
+
+                {/* Block / Unblock */}
+                {!isSelf(selectedUser) && (
+                  <button onClick={() => toggleBlock(selectedUser)} style={{
+                    width: "100%", padding: "9px 0", borderRadius: 9, cursor: "pointer", fontSize: 12, fontWeight: 700, transition: "all .15s",
+                    border: selectedUser.blocked ? "1.5px solid #d1fae5" : "1.5px solid #fee2e2",
+                    background: "#fff",
+                    color: selectedUser.blocked ? "#059669" : "#ef4444",
+                  }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = selectedUser.blocked ? "#f0fdf4" : "#fef2f2"; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "#fff"; }}
+                  >
+                    {selectedUser.blocked ? "Unblock user" : "Block user"}
+                  </button>
+                )}
+
                 {selectedUser.role !== "admin" && (
                   <button onClick={() => deleteUser(selectedUser)} style={{ width: "100%", padding: "9px 0", border: "1.5px solid #fee2e2", borderRadius: 9, background: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 700, color: "#ef4444", transition: "all .15s" }}
                     onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "#fef2f2"; }}

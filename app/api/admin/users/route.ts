@@ -8,8 +8,9 @@ function makeFoxId(): string {
   return "FXM-" + randomBytes(3).toString("hex").toUpperCase();
 }
 
-async function ensureFoxId() {
+async function ensureColumns() {
   await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS fox_id TEXT UNIQUE`.catch(() => {});
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS blocked BOOLEAN NOT NULL DEFAULT false`.catch(() => {});
   const missing = await sql`SELECT id FROM users WHERE fox_id IS NULL` as { id: number }[];
   for (const u of missing) {
     for (let attempt = 0; attempt < 10; attempt++) {
@@ -25,10 +26,10 @@ export async function GET() {
   const role = (session?.user as { role?: string })?.role;
   if (role !== "admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  await ensureFoxId();
+  await ensureColumns();
 
   const rows = await sql`
-    SELECT u.id, u.name, u.email, u.role, u.fox_id, u.created_at,
+    SELECT u.id, u.name, u.email, u.role, u.fox_id, u.blocked, u.created_at,
            COUNT(cp.id)::int AS project_count
     FROM users u
     LEFT JOIN client_projects cp ON cp.user_id = u.id
@@ -41,13 +42,33 @@ export async function GET() {
 
 export async function PATCH(req: Request) {
   const session = await auth();
+  const selfId = (session?.user as { id?: string })?.id;
   const role = (session?.user as { role?: string })?.role;
   if (role !== "admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {
-    const { id, name, email, password } = await req.json();
+    const body = await req.json();
+    const { id } = body;
     if (!id) return NextResponse.json({ error: "User ID required." }, { status: 400 });
 
+    // Role promotion / demotion
+    if ("newRole" in body) {
+      if (String(id) === String(selfId))
+        return NextResponse.json({ error: "Cannot change your own role." }, { status: 400 });
+      await sql`UPDATE users SET role = ${body.newRole} WHERE id = ${id}`;
+      return NextResponse.json({ ok: true });
+    }
+
+    // Block / unblock
+    if ("blocked" in body) {
+      if (String(id) === String(selfId))
+        return NextResponse.json({ error: "Cannot block yourself." }, { status: 400 });
+      await sql`UPDATE users SET blocked = ${body.blocked} WHERE id = ${id}`;
+      return NextResponse.json({ ok: true });
+    }
+
+    // Name / email / password edit
+    const { name, email, password } = body;
     if (password?.trim()) {
       const hashed = await bcrypt.hash(password.trim(), 12);
       await sql`UPDATE users SET name = ${name}, email = ${email?.toLowerCase()}, password_hash = ${hashed} WHERE id = ${id}`;
