@@ -9,7 +9,7 @@ type Project = {
   admin_note: string; created_at: string; updated_at: string;
   milestones: Milestone[];
 };
-type Message = { id: number; project_id: number; sender_id: number; sender_name: string; sender_role: string; message: string; image_url?: string; created_at: string };
+type Message = { id: number; project_id: number; sender_id: number; sender_name: string; sender_role: string; message: string; image_url?: string; had_image?: boolean; created_at: string };
 
 interface Props {
   project: Project;
@@ -356,15 +356,20 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
                         color: isClient ? "#fff" : "#0a0a0a",
                         overflow: "hidden",
                       }}>
-                        {m.image_url && (
+                        {m.image_url ? (
                           <img
                             src={m.image_url} alt="attachment"
                             onClick={() => setLightbox(m.image_url!)}
                             style={{ display: "block", maxWidth: "100%", maxHeight: 260, borderRadius: m.message ? "10px 10px 0 0" : 12, cursor: "zoom-in", objectFit: "cover" }}
                           />
-                        )}
+                        ) : m.had_image ? (
+                          <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, opacity: 0.6, padding: m.message ? "0 0 4px" : undefined }}>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                            Image expired
+                          </span>
+                        ) : null}
                         {m.message && (
-                          <span style={{ display: "block", padding: m.image_url ? "8px 10px 4px" : undefined }}>{m.message}</span>
+                          <span style={{ display: "block", padding: (m.image_url || m.had_image) ? "8px 10px 4px" : undefined }}>{m.message}</span>
                         )}
                       </div>
                       <div style={{ fontSize: 10, color: "#b0b0b0", marginTop: 3, paddingLeft: 2, paddingRight: 2 }}>

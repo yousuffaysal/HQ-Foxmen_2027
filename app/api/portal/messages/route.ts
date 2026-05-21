@@ -15,7 +15,8 @@ async function ensureTable() {
       created_at   TIMESTAMPTZ  NOT NULL DEFAULT now()
     )
   `;
-  await sql`ALTER TABLE project_messages ADD COLUMN IF NOT EXISTS image_url TEXT NOT NULL DEFAULT ''`.catch(() => {});
+  await sql`ALTER TABLE project_messages ADD COLUMN IF NOT EXISTS image_url  TEXT    NOT NULL DEFAULT ''`.catch(() => {});
+  await sql`ALTER TABLE project_messages ADD COLUMN IF NOT EXISTS had_image BOOLEAN NOT NULL DEFAULT false`.catch(() => {});
 }
 
 export async function GET(req: Request) {
@@ -55,9 +56,10 @@ export async function POST(req: Request) {
     if (!owns.length) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const hasImage = !!image_url;
   const rows = await sql`
-    INSERT INTO project_messages (project_id, sender_id, sender_name, sender_role, message, image_url)
-    VALUES (${project_id}, ${uid}, ${session.user.name ?? "User"}, ${role ?? "client"}, ${message?.trim() ?? ""}, ${image_url ?? ""})
+    INSERT INTO project_messages (project_id, sender_id, sender_name, sender_role, message, image_url, had_image)
+    VALUES (${project_id}, ${uid}, ${session.user.name ?? "User"}, ${role ?? "client"}, ${message?.trim() ?? ""}, ${image_url ?? ""}, ${hasImage})
     RETURNING *
   `;
   const msg = rows[0];
