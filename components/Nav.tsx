@@ -3,7 +3,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { useSession } from "next-auth/react";
 
 const links = [
   { href: "/work",     label: "Work" },
@@ -23,13 +22,13 @@ function ArrowIcon() {
   );
 }
 
+type Profile = { name?: string; avatar?: string };
+
 export default function Nav() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [clock, setClock] = useState("— : —");
-  const sessionResult = useSession();
-  const session = sessionResult?.data;
-  const [avatar, setAvatar] = useState<string | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -49,19 +48,15 @@ export default function Nav() {
   }, []);
 
   useEffect(() => {
-    if (session?.user) {
-      fetch("/api/auth/profile")
-        .then(r => r.ok ? r.json() : {})
-        .then((d: { avatar?: string }) => { if (d.avatar) setAvatar(d.avatar); })
-        .catch(() => {});
-    } else {
-      setAvatar(null);
-    }
-  }, [session]);
+    fetch("/api/auth/profile")
+      .then(r => r.ok ? r.json() : null)
+      .then((d: Profile | null) => setProfile(d))
+      .catch(() => {});
+  }, []);
 
-  const isLoggedIn = !!session?.user;
-  const firstName = session?.user?.name?.split(" ")[0] ?? "Portal";
-  const initials = (session?.user?.name ?? "U").split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
+  const isLoggedIn = !!profile;
+  const firstName  = profile?.name?.split(" ")[0] ?? "Portal";
+  const initials   = (profile?.name ?? "U").split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
 
   return (
     <header className={`nav${scrolled ? " scrolled" : ""}`} id="nav">
@@ -95,8 +90,8 @@ export default function Nav() {
             <span className="label">{isLoggedIn ? firstName : "Client Portal"}</span>
             <span className="chip" aria-hidden="true">
               {isLoggedIn ? (
-                avatar
-                  ? <img src={avatar} alt="" style={{ width: 22, height: 22, borderRadius: "50%", objectFit: "cover", display: "block" }} />
+                profile?.avatar
+                  ? <img src={profile.avatar} alt="" style={{ width: 22, height: 22, borderRadius: "50%", objectFit: "cover", display: "block" }} />
                   : <span style={{ width: 22, height: 22, borderRadius: "50%", background: "#b86cf9", color: "#fff", fontSize: 9, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1 }}>{initials}</span>
               ) : (
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ transform: "rotate(0deg)" }}>
