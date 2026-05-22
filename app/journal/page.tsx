@@ -63,7 +63,7 @@ export default function JournalPage() {
       </section>
 
       {/* FEATURED */}
-      <section style={{ padding: "80px 0 0" }}>
+      <section className="blog-feat-section">
         <div className="wrap">
           <div className="blog-featured">
             <div className="img fade">
@@ -99,7 +99,7 @@ export default function JournalPage() {
       </section>
 
       {/* GRID */}
-      <section className="section" style={{ paddingTop: 48 }}>
+      <section className="section blog-articles-section">
         <div className="wrap">
           <div className="blog-toolbar fade in">
             <div className="cats">
@@ -125,7 +125,7 @@ export default function JournalPage() {
                 <div className="body">
                   <h3>{a.title}</h3>
                   <p>{a.desc}</p>
-                  <div className="foot">
+                  <div className="card-foot">
                     <div className="av">{a.av}</div>
                     <span className="who">{a.who}</span>
                     <span className="date">{a.date}</span>
