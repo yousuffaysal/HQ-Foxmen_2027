@@ -7,6 +7,7 @@ async function ensureColumns() {
   if (migrated) return;
   await sql`ALTER TABLE testimonials ADD COLUMN IF NOT EXISTS visible BOOLEAN NOT NULL DEFAULT true`.catch(() => {});
   await sql`ALTER TABLE testimonials ADD COLUMN IF NOT EXISTS rating  INTEGER NOT NULL DEFAULT 5`.catch(() => {});
+  await sql`ALTER TABLE testimonials ADD COLUMN IF NOT EXISTS img     TEXT    NOT NULL DEFAULT ''`.catch(() => {});
   migrated = true;
 }
 
@@ -23,10 +24,10 @@ export async function POST(req: Request) {
   const deny = await requireAdmin();
   if (deny) return deny;
   await ensureColumns();
-  const { quote, name, role, av, hi, rating } = await req.json();
+  const { quote, name, role, av, hi, rating, img } = await req.json();
   const rows = await sql`
-    INSERT INTO testimonials (quote, name, role, av, hi, visible, rating)
-    VALUES (${quote}, ${name}, ${role ?? ""}, ${av ?? ""}, ${hi ?? ""}, true, ${rating ?? 5})
+    INSERT INTO testimonials (quote, name, role, av, hi, visible, rating, img)
+    VALUES (${quote}, ${name}, ${role ?? ""}, ${av ?? ""}, ${hi ?? ""}, true, ${rating ?? 5}, ${img ?? ""})
     RETURNING *
   ` as Record<string, unknown>[];
   return NextResponse.json(rows[0], { status: 201 });

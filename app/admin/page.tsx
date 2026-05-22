@@ -16,7 +16,7 @@ type ChapterStat  = { value:string; label:string; context:string };
 type Chapter = { id:string; title:string; body:string; images:ChapterImage[]; video:string; stats:ChapterStat[]; img_layout:"side-by-side"|"stacked" };
 type Post     = { id:number; title:string; category:string; author_init:string; author_name:string; read_time:string; status:string; published_at:string|null; slug:string; excerpt:string; body:string; cover_image:string; tags:string };
 type Service  = { id:number; ord:number; name:string; descr:string; count:string; visible:boolean; badge:string|null; image:string|null };
-type Testi    = { id:number; quote:string; name:string; role:string; av:string; hi:string; visible:boolean; rating:number };
+type Testi    = { id:number; quote:string; name:string; role:string; av:string; hi:string; visible:boolean; rating:number; img:string };
 type Client   = { id:number; name:string; industry:string; country:string; contact:string; eng:string; mrr:string; av:string; cls:string };
 type Message  = { id:number; av:string; sender:string; subject:string; preview:string; body:string; source:string; interested:string; budget:string; country:string; unread:boolean; received_at:string };
 type Member   = { id:number; av:string; name:string; role:string; bio:string };
@@ -940,7 +940,7 @@ export default function AdminPage() {
     setTestis(t=>t.filter(x=>x.id!==id)); toast("Testimonial deleted");
   };
   const editTesti = (t:Testi)=>{
-    setForm({quote:t.quote,name:t.name,role:t.role,av:t.av,hi:t.hi||"",rating:String(t.rating||5)});
+    setForm({quote:t.quote,name:t.name,role:t.role,av:t.av,hi:t.hi||"",rating:String(t.rating||5),img:t.img||""});
     setEditTarget(t.id);
     setModalType("edit-testimonial");
   };
@@ -953,10 +953,10 @@ export default function AdminPage() {
     setSubmitting(true);
     const rating = Number(form.rating||"5");
     if(editTarget){
-      const res = await fetch(`/api/testimonials/${editTarget}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({quote:form.quote,name:form.name,role:form.role||"",av:autoAv(form.name),hi:form.hi||"",rating})});
+      const res = await fetch(`/api/testimonials/${editTarget}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({quote:form.quote,name:form.name,role:form.role||"",av:autoAv(form.name),hi:form.hi||"",rating,img:form.img||""})});
       if(res.ok){ const row:Testi=await res.json(); setTestis(t=>t.map(x=>x.id===editTarget?row:x)); closeModal(); toast("Testimonial updated"); }
     } else {
-      const res = await fetch("/api/testimonials",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({quote:form.quote,name:form.name,role:form.role||"",av:autoAv(form.name),hi:form.hi||"",rating})});
+      const res = await fetch("/api/testimonials",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({quote:form.quote,name:form.name,role:form.role||"",av:autoAv(form.name),hi:form.hi||"",rating,img:form.img||""})});
       if(res.ok){ const row:Testi=await res.json(); setTestis(t=>[...t,row]); closeModal(); toast("Testimonial added"); }
     }
     setSubmitting(false);
@@ -3539,6 +3539,7 @@ ${emailPayNotes?`<div style="margin-top:24px;padding:16px 20px;background:#faf8f
                     ))}
                   </div>
                 </div>
+                <ImageUpload label="Avatar photo (optional)" value={form.img||""} onChange={v=>sf("img",v)} accept="image/*"/>
               </>}
               {/* CLIENT */}
               {modalType==="new-client" && <>

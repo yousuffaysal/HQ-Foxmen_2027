@@ -309,11 +309,193 @@ const techItems    = ["React","Next.js","Swift","Flutter","OpenAI","Anthropic","
 type DbService = { id:number; ord:number; name:string; descr:string; count:string; visible:boolean; badge:string|null; image:string|null };
 type DbProject = { id:number; name:string; tagline:string; industry:string; year:string; scope:string; status:string; thumbnail:string; slug:string; color_cls:string; live_url:string };
 type DbClient  = { id:number; name:string; industry:string; country:string };
-type DbTesti   = { id:number; quote:string; name:string; role:string; av:string; hi:string; rating:number };
+type DbTesti   = { id:number; quote:string; name:string; role:string; av:string; hi:string; rating:number; img:string };
 
 const PROOF_SYMBOLS = ["◆","●","▲","✦","◇","★","◐","⬡","⌬","⟁","⌖","◈","◉","▼","◫","⌑","⌀","⊕","⟐","⌘"];
 
 function toSlug(n: string) { return n.toLowerCase().replace(/[—–]/g,"-").replace(/[^a-z0-9\s-]/g,"").replace(/\s+/g,"-").replace(/-+/g,"-").trim(); }
+
+const STATIC_TESTIS = [
+  { id:-1, av:"SK", img:"", name:"Sara Köhler",  role:"CEO · Nestaro",          hi:"actually used", rating:5, quote:"Foxmen turned a vague pitch deck into a product our investors actually used during the round. They ship like a product team, not an agency." },
+  { id:-2, av:"DA", img:"", name:"Devon Arias",  role:"Head of Product · Pulse", hi:"activation rate", rating:5, quote:"The AI copilot they built drove our activation rate from 28% to 71%. Every meeting felt like we got our money back twice." },
+  { id:-3, av:"RM", img:"", name:"Rina Mehta",   role:"CTO · Marketo",           hi:"zero", rating:5, quote:"Care is in the name and it shows. Our launch had zero P0s in week one — a first for us across three agencies." },
+];
+
+const BRAND_REPLIES = [
+  "Means the world to us 🙏",
+  "So grateful for this ✨",
+  "This made our day 💜",
+];
+
+function splitQuote(q: string): string[] {
+  const words = q.split(/\s+/);
+  if (words.length <= 13) return [q];
+  const mid = Math.floor(words.length * 0.46);
+  let cut = mid;
+  for (let i = mid; i < Math.min(mid + 7, words.length - 4); i++) {
+    if (/[,;.!?—]$/.test(words[i])) { cut = i + 1; break; }
+  }
+  const a = words.slice(0, cut).join(" ");
+  const b = words.slice(cut).join(" ");
+  if (words.length > 28) {
+    const mid2 = Math.floor(words.slice(cut).length * 0.5) + cut;
+    return [a, words.slice(cut, mid2).join(" "), words.slice(mid2).join(" ")].filter(s => s.trim().length > 1);
+  }
+  return [a, b].filter(s => s.trim().length > 1);
+}
+
+function SignalIcon() {
+  return (
+    <svg width="17" height="12" viewBox="0 0 17 12" fill="none">
+      <rect x="0" y="8" width="3" height="4" rx="0.8" fill="black" fillOpacity=".4"/>
+      <rect x="4.5" y="5.5" width="3" height="6.5" rx="0.8" fill="black" fillOpacity=".65"/>
+      <rect x="9" y="3" width="3" height="9" rx="0.8" fill="black" fillOpacity=".85"/>
+      <rect x="13.5" y="0" width="3" height="12" rx="0.8" fill="black"/>
+    </svg>
+  );
+}
+function BatteryIcon() {
+  return (
+    <svg width="25" height="12" viewBox="0 0 25 12" fill="none">
+      <rect x=".5" y=".5" width="20" height="11" rx="3.5" stroke="#30d158" strokeOpacity=".6"/>
+      <rect x="1.5" y="1.5" width="16.5" height="8.5" rx="2.5" fill="#30d158"/>
+      <path d="M22 4.5v3a1.5 1.5 0 0 0 0-3Z" fill="black" fillOpacity=".4"/>
+    </svg>
+  );
+}
+
+function TestimonialsSection({ testis }: { testis: DbTesti[] }) {
+  const items    = testis.length > 0 ? testis : STATIC_TESTIS;
+  const [idx,    setIdx]    = useState(0);
+  const [show,   setShow]   = useState(true);
+  const [bKey,   setBKey]   = useState(0);
+
+  useEffect(() => {
+    if (items.length <= 1) return;
+    const id = setInterval(() => {
+      setShow(false);
+      setTimeout(() => {
+        setIdx(p => (p + 1) % items.length);
+        setBKey(k => k + 1);
+        setShow(true);
+      }, 380);
+    }, 5500);
+    return () => clearInterval(id);
+  }, [items.length]);
+
+  const t       = items[idx];
+  const bubbles = splitQuote(t.quote);
+  const reply   = BRAND_REPLIES[idx % BRAND_REPLIES.length];
+  const stars   = "★".repeat(t.rating || 5);
+
+  return (
+    <section className="section" style={{ paddingTop: 0 }}>
+      <div className="wrap">
+        <div className="svc-head">
+          <div className="fade"><span className="eyebrow">Words from clients</span></div>
+          <h2 className="display fade d1">What it feels like to <span className="it">work</span> with us.</h2>
+        </div>
+
+        {/* ── Desktop: grid cards ── */}
+        <div className="testimonials testi-desktop">
+          {items.map((t, i) => {
+            const hi = t.hi?.trim();
+            const qn = hi && t.quote.includes(hi)
+              ? <>{t.quote.slice(0,t.quote.indexOf(hi))}<span className="it">{hi}</span>{t.quote.slice(t.quote.indexOf(hi)+hi.length)}</>
+              : <>{t.quote}</>;
+            return (
+              <div className={`testimonial fade${i ? ` d${i}` : ""}`} key={t.id}>
+                <div className="stars" style={{color:"#f59e0b"}}>{"★".repeat(t.rating||5)}</div>
+                <p className="quote">&ldquo;{qn}&rdquo;</p>
+                <div className="meta">
+                  <div className="avatar">
+                    {t.img ? <img src={t.img} alt={t.name} style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:"50%",display:"block"}}/> : t.av}
+                  </div>
+                  <div className="who">{t.name}<span>{t.role}</span></div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Mobile: iPhone 16 mockup ── */}
+        <div className="testi-phone-wrap">
+          <div className="testi-phone">
+            {/* Screen */}
+            <div
+              className="testi-screen"
+              style={{ opacity: show ? 1 : 0, transform: show ? "scale(1)" : "scale(.95)", transition: "opacity .35s ease, transform .35s ease" }}
+            >
+              {/* Status bar with inline Dynamic Island */}
+              <div className="testi-status">
+                <span className="testi-time">9:41</span>
+                <div className="testi-island" />
+                <div className="testi-status-r">
+                  <SignalIcon /><BatteryIcon />
+                </div>
+              </div>
+
+              {/* iMessage header */}
+              <div className="testi-chat-hd">
+                <div className="testi-back">
+                  <svg width="9" height="15" viewBox="0 0 9 15" fill="none"><path d="M8 1 1.5 7.5 8 14" stroke="var(--brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <div className="testi-chat-center">
+                    <div className="testi-chat-av">
+                      {t.img ? <img src={t.img} alt={t.name} style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:"50%",display:"block"}}/> : t.av}
+                    </div>
+                    <div className="testi-chat-info" key={bKey}>
+                      <div className="testi-chat-name">{t.name}</div>
+                      <div className="testi-chat-role">{t.role}</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="testi-chat-actions">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.62 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  <svg width="19" height="14" viewBox="0 0 22 16" fill="none"><rect x=".5" y=".5" width="13" height="15" rx="2.5" stroke="var(--brand)" strokeWidth="1.5"/><path d="M14 5.5l7-3.5v12l-7-3.5V5.5Z" stroke="var(--brand)" strokeWidth="1.5" strokeLinejoin="round"/></svg>
+                </div>
+              </div>
+
+              {/* Bubbles */}
+              <div className="testi-bubbles" key={bKey}>
+                <div className="testi-chat-date">Today</div>
+                <div className="testi-stars-bubble">{stars}</div>
+                {bubbles.map((msg, i) => (
+                  <div
+                    key={i}
+                    className="testi-bubble testi-bubble--in"
+                    style={{ animationDelay: `${0.15 + i * 0.9}s` }}
+                  >{msg}</div>
+                ))}
+                <div
+                  className="testi-bubble testi-bubble--out"
+                  style={{ animationDelay: `${0.15 + bubbles.length * 0.9}s` }}
+                >{reply}</div>
+              </div>
+
+              {/* Input bar */}
+              <div className="testi-input-row">
+                <div className="testi-add-btn">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7.5" stroke="rgba(0,0,0,.2)"/><path d="M8 4v8M4 8h8" stroke="rgba(0,0,0,.4)" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                </div>
+                <div className="testi-input-bar">iMessage</div>
+                <div className="testi-send-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Progress dots */}
+          <div className="testi-dots">
+            {items.map((_, i) => (
+              <span key={i} className={`testi-dot${i === idx ? " active" : ""}`} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function Home() {
   useScrollReveal(".fade, .reveal, .bento .tile, .split .shot");
@@ -621,48 +803,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="section" style={{ paddingTop: 0 }}>
-        <div className="wrap">
-          <div className="svc-head">
-            <div className="fade"><span className="eyebrow">Words from clients</span></div>
-            <h2 className="display fade d1">What it feels like to <span className="it">work</span> with us.</h2>
-          </div>
-          <div className="testimonials">
-            {dbTestis.length > 0
-              ? dbTestis.map((t, i) => {
-                  const hi = t.hi?.trim();
-                  const quoteNode = hi && t.quote.includes(hi)
-                    ? <>{t.quote.slice(0, t.quote.indexOf(hi))}<span className="it">{hi}</span>{t.quote.slice(t.quote.indexOf(hi) + hi.length)}</>
-                    : <>{t.quote}</>;
-                  return (
-                    <div className={`testimonial fade${i ? ` d${i}` : ""}`} key={t.id}>
-                      <div className="stars" style={{ color: "#f59e0b" }}>{"★".repeat(t.rating || 5)}</div>
-                      <p className="quote">&ldquo;{quoteNode}&rdquo;</p>
-                      <div className="meta">
-                        <div className="avatar">{t.av}</div>
-                        <div className="who">{t.name}<span>{t.role}</span></div>
-                      </div>
-                    </div>
-                  );
-                })
-              : [
-                  { av:"SK", who:"Sara Köhler",  role:"CEO · Nestaro",          q:<>&ldquo;Foxmen turned a vague pitch deck into a product our investors <span className="it">actually used</span> during the round. They ship like a product team, not an agency.&rdquo;</> },
-                  { av:"DA", who:"Devon Arias",  role:"Head of Product · Pulse", q:<>&ldquo;The AI copilot they built drove our <span className="it">activation rate</span> from 28% to 71%. Every meeting felt like we got our money back twice.&rdquo;</> },
-                  { av:"RM", who:"Rina Mehta",   role:"CTO · Marketo",           q:<>&ldquo;Care is in the name and it shows. Our launch had <span className="it">zero</span> P0s in week one — a first for us across three agencies.&rdquo;</> },
-                ].map((t, i) => (
-                  <div className={`testimonial fade${i ? ` d${i}` : ""}`} key={i}>
-                    <div className="stars">★★★★★</div>
-                    <p className="quote">{t.q}</p>
-                    <div className="meta">
-                      <div className="avatar">{t.av}</div>
-                      <div className="who">{t.who}<span>{t.role}</span></div>
-                    </div>
-                  </div>
-                ))
-            }
-          </div>
-        </div>
-      </section>
+      <TestimonialsSection testis={dbTestis} />
 
       {/* CTA */}
       <section id="contact" style={{ padding: "60px 0" }}>

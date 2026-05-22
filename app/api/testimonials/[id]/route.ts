@@ -15,7 +15,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       av      = COALESCE(${body.av    ?? null},   av),
       hi      = COALESCE(${body.hi    ?? null},   hi),
       visible = COALESCE(${body.visible ?? null}, visible),
-      rating  = COALESCE(${body.rating  ?? null}, rating)
+      rating  = COALESCE(${body.rating  ?? null}, rating),
+      img     = COALESCE(${body.img     ?? null}, img)
     WHERE id = ${id} RETURNING *
   ` as Record<string, unknown>[];
   if (!rows.length) return NextResponse.json({ error: "not found" }, { status: 404 });
