@@ -1,17 +1,18 @@
 "use client";
+import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, CircleMarker, Polyline } from "react-leaflet";
 
 const CITIES: [number, number][] = [
-  [34.05,  -118.24], // LA
-  [40.71,   -74.01], // NY
-  [-23.55,  -46.63], // São Paulo
-  [51.51,    -0.13], // London
-  [6.52,      3.37], // Lagos
-  [25.20,    55.27], // Dubai
-  [19.07,    72.88], // Mumbai
-  [1.35,    103.82], // Singapore
-  [35.68,   139.69], // Tokyo
-  [-33.87,  151.21], // Sydney
+  [34.05,  -118.24],
+  [40.71,   -74.01],
+  [-23.55,  -46.63],
+  [51.51,    -0.13],
+  [6.52,      3.37],
+  [25.20,    55.27],
+  [19.07,    72.88],
+  [1.35,    103.82],
+  [35.68,   139.69],
+  [-33.87,  151.21],
 ];
 
 const ARCS: [[number,number],[number,number]][] = [
@@ -31,17 +32,30 @@ function arcPoints(a: [number,number], b: [number,number]): [number,number][] {
   const midLon = (a[1] + b[1]) / 2;
   for (let i = 0; i <= 20; i++) {
     const t = i / 20;
-    const lat = (1-t)*(1-t)*a[0] + 2*(1-t)*t*midLat + t*t*b[0];
-    const lon = (1-t)*(1-t)*a[1] + 2*(1-t)*t*midLon + t*t*b[1];
-    pts.push([lat, lon]);
+    pts.push([
+      (1-t)*(1-t)*a[0] + 2*(1-t)*t*midLat + t*t*b[0],
+      (1-t)*(1-t)*a[1] + 2*(1-t)*t*midLon + t*t*b[1],
+    ]);
   }
   return pts;
 }
 
 export default function WorldMapLeaflet({ scrollOffset = 0 }: { scrollOffset?: number }) {
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= 761);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  if (!isDesktop) return null;
+
   return (
     <div className="wm-wrap" style={{ transform: `translateY(${scrollOffset * 0.25}px)` }}>
       <MapContainer
+        key="world-map"
         center={[20, 10]}
         zoom={2}
         zoomControl={false}

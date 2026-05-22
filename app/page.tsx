@@ -763,6 +763,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Testimonials */}
+      <TestimonialsSection testis={dbTestis} />
+
       {/* AI feature */}
       <section className="section" style={{ paddingTop: 140 }}>
         <div className="wrap">
@@ -850,9 +853,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Testimonials */}
-      <TestimonialsSection testis={dbTestis} />
 
       {/* CTA */}
       <section id="contact" style={{ padding: "60px 0" }}>

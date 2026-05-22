@@ -1,73 +1,48 @@
 import Link from "next/link";
-import Image from "next/image";
-import NewsletterForm from "./NewsletterForm";
+
+function ArrowIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 12h18M13 5l7 7-7 7" />
+    </svg>
+  );
+}
 
 export default function Footer() {
   return (
     <footer className="foot">
       <div className="wrap">
-        <div className="foot-top">
-          <div className="foot-brand">
-            <div className="logo-row">
-              <Image className="mark" src="/assets/logo-mark.svg" alt="" width={44} height={44} />
-              <span className="wm">Foxmen Studio</span>
-            </div>
-            <p>
-              International digital studio. We design, engineer, and grow products
-              for ambitious teams across 17 countries.
-            </p>
-            <NewsletterForm />
-          </div>
 
-          <div className="foot-col">
-            <h4>Studio</h4>
-            <ul>
-              <li><Link href="/work">Work</Link></li>
-              <li><Link href="/services">Services</Link></li>
-              <li><Link href="/about">About</Link></li>
-              <li><Link href="/#process">Process</Link></li>
-              <li><Link href="/journal">Journal</Link></li>
-              <li>
-                <Link href="/contact">
-                  Careers <span style={{ color: "var(--brand)" }}>· 3 open</span>
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div className="foot-col">
-            <h4>Services</h4>
-            <ul>
-              <li><Link href="/services#web">Web · Apps</Link></li>
-              <li><Link href="/services#ai">AI Integration</Link></li>
-              <li><Link href="/services#commerce">Ecommerce</Link></li>
-              <li><Link href="/services#real-estate">Real Estate</Link></li>
-              <li><Link href="/services#brand">Brand · Design</Link></li>
-            </ul>
-          </div>
-
-          <div className="foot-col">
-            <h4>Contact</h4>
-            <ul>
-              <li><a href="mailto:contact@foxmenstudio.com">contact@foxmenstudio.com</a></li>
-              <li><a href="mailto:team@foxmenstudio.com">team@foxmenstudio.com</a></li>
-              <li className="with-dot">Remote-first · Worldwide</li>
-              <li className="with-dot">Working hours: 9am–6pm GMT</li>
-            </ul>
+        <div className="foot-cta">
+          <p className="foot-cta-head">
+            Have a project<br />
+            <em>in mind?</em>
+          </p>
+          <div className="foot-cta-side">
+            <a className="foot-cta-email" href="mailto:contact@foxmenstudio.com">
+              contact@foxmenstudio.com
+            </a>
+            <Link href="/contact" className="btn btn--brand btn--lg">
+              <span className="label">Start a project</span>
+              <span className="chip"><ArrowIcon /></span>
+            </Link>
           </div>
         </div>
 
-        <div className="foot-giant" aria-hidden="true">
-          <Image src="/assets/logo_sn_fox.png" alt="" width={140} height={140} className="foot-giant-logo" />
-          <div className="foot-giant-text">
-            Foxmen <span className="it">Studio</span>
-          </div>
-        </div>
+        <div className="foot-rule" />
 
-        <div className="foot-bottom">
-          <div>© 2026 Foxmen Studio · All rights reserved</div>
-          <div className="socials">
-            <a href="#" aria-label="Twitter / X">
+        <div className="foot-mid">
+          <nav className="foot-links">
+            <Link href="/work">Work</Link>
+            <Link href="/services">Services</Link>
+            <Link href="/about">About</Link>
+            <Link href="/#process">Process</Link>
+            <Link href="/journal">Journal</Link>
+            <Link href="/contact">Contact</Link>
+            <Link href="/contact">Careers</Link>
+          </nav>
+          <div className="foot-social">
+            <a href="#" aria-label="X / Twitter">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M18.244 2H21.5l-7.5 8.57L23 22h-6.844l-5.36-7.005L4.7 22H1.44l8.04-9.183L1 2h7.014l4.844 6.405L18.244 2Zm-1.2 18h1.84L7.04 4H5.07l11.974 16Z" />
               </svg>
@@ -76,7 +51,7 @@ export default function Footer() {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="3" y="3" width="18" height="18" rx="5" />
                 <circle cx="12" cy="12" r="4" />
-                <circle cx="17.5" cy="6.5" r="1" fill="currentColor" />
+                <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
               </svg>
             </a>
             <a href="#" aria-label="LinkedIn">
@@ -91,8 +66,15 @@ export default function Footer() {
               </svg>
             </a>
           </div>
-          <div>Code · Craft · Care</div>
         </div>
+
+        <div className="foot-rule" />
+
+        <div className="foot-bar">
+          <span>© 2026 Foxmen Studio · All rights reserved</span>
+          <span>Code · Craft · Care</span>
+        </div>
+
       </div>
     </footer>
   );
