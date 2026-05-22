@@ -464,6 +464,7 @@ export default function FoxChat() {
       <button
         onClick={() => setOpen(o => !o)}
         aria-label="Chat with Fox"
+        className="fox-chat-btn"
         style={{ position: "fixed", bottom: 24, right: 24, width: 58, height: 58, borderRadius: "50%", background: open ? "#0f0f0f" : "linear-gradient(135deg,#1a0a2e,#0a0a0a)", border: "1.5px solid rgba(184,108,249,.3)", cursor: "pointer", boxShadow: open ? "0 8px 24px rgba(0,0,0,.4)" : "0 6px 28px rgba(0,0,0,.3), inset 0 1px 0 rgba(184,108,249,.15)", display: "grid", placeItems: "center", zIndex: 9999, transition: "all .25s cubic-bezier(.16,1,.3,1)", transform: open ? "scale(.9)" : "scale(1)" }}
       >
         {open

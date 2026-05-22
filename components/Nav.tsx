@@ -25,21 +25,10 @@ type Profile = { name?: string; avatar?: string };
 
 export default function Nav() {
   const pathname = usePathname();
-  const [scrolled, setScrolled] = useState(false);
-  const [clock, setClock] = useState("— : —");
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => { setMenuOpen(false); }, [pathname]);
-
-  useEffect(() => {
-    if (menuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => { document.body.style.overflow = ""; };
-  }, [menuOpen]);
+  const [scrolled,  setScrolled]  = useState(false);
+  const [clock,     setClock]     = useState("— : —");
+  const [profile,   setProfile]   = useState<Profile | null>(null);
+  const [menuOpen,  setMenuOpen]  = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -47,6 +36,19 @@ export default function Nav() {
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // Close menu on route change
+  useEffect(() => { setMenuOpen(false); }, [pathname]);
+
+  // Lock scroll + signal menu state to other components via body class
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    document.body.classList.toggle("nav-menu-open", menuOpen);
+    return () => {
+      document.body.style.overflow = "";
+      document.body.classList.remove("nav-menu-open");
+    };
+  }, [menuOpen]);
 
   useEffect(() => {
     const fmt = new Intl.DateTimeFormat("en-US", {
@@ -71,7 +73,10 @@ export default function Nav() {
 
   return (
     <>
-      <header className={`nav${scrolled ? " scrolled" : ""}`} id="nav">
+      <header
+        className={`nav${scrolled ? " scrolled" : ""}${menuOpen ? " menu-open" : ""}`}
+        id="nav"
+      >
         <div className="wrap nav-inner">
           <Link href="/" className="brand" aria-label="Foxmen Studio home">
             <Image className="mark" src="/assets/logo-mark.svg" alt="" width={34} height={34} />
@@ -98,7 +103,7 @@ export default function Nav() {
               <span className="dot" />
               <span>{clock}</span>
             </span>
-            <Link href="/portal" className="btn btn--ghost nav-portal-btn" style={{ marginRight: 4 }}>
+            <Link href="/portal" className="btn btn--ghost" style={{ marginRight: 4 }}>
               <span className="label">{isLoggedIn ? firstName : "Client Portal"}</span>
               <span className="chip" aria-hidden="true">
                 {isLoggedIn ? (
@@ -106,52 +111,61 @@ export default function Nav() {
                     ? <img src={profile.avatar} alt="" style={{ width: 22, height: 22, borderRadius: "50%", objectFit: "cover", display: "block" }} />
                     : <span style={{ width: 22, height: 22, borderRadius: "50%", background: "#b86cf9", color: "#fff", fontSize: 9, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1 }}>{initials}</span>
                 ) : (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ transform: "rotate(0deg)" }}>
                     <circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>
                   </svg>
                 )}
               </span>
             </Link>
-            <Link href="/contact" className="btn nav-start-btn">
+            <Link href="/contact" className="btn">
               <span className="label">Start a project</span>
               <span className="chip" aria-hidden="true">
                 <ArrowIcon />
               </span>
             </Link>
-            <button
-              className="nav-hamburger"
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={menuOpen}
-              onClick={() => setMenuOpen(o => !o)}
-            >
-              <span className={`hb${menuOpen ? " open" : ""}`} />
-              <span className={`hb${menuOpen ? " open" : ""}`} />
-              <span className={`hb${menuOpen ? " open" : ""}`} />
-            </button>
           </div>
+
+          {/* Mobile hamburger — only visible at ≤900px */}
+          <button
+            className={`nav-hamburger${menuOpen ? " open" : ""}`}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen(v => !v)}
+          >
+            <span />
+            <span />
+          </button>
         </div>
       </header>
 
-      {menuOpen && (
-        <div className="mob-menu-backdrop" onClick={() => setMenuOpen(false)}>
-          <div className="mob-menu" onClick={e => e.stopPropagation()}>
-            {links.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                className={`mob-link${pathname === href || (href !== "/" && pathname.startsWith(href)) ? " active" : ""}`}
-                onClick={() => setMenuOpen(false)}
-              >
-                {label}
-              </Link>
-            ))}
-            <Link href="/contact" className="btn btn--lg mob-cta" onClick={() => setMenuOpen(false)}>
-              <span className="label">Start a project</span>
-              <span className="chip"><ArrowIcon /></span>
+      {/* Mobile full-screen menu overlay */}
+      <div className={`mobile-menu${menuOpen ? " open" : ""}`} aria-hidden={!menuOpen}>
+        <nav className="mobile-menu-links" aria-label="Mobile navigation">
+          {links.map(({ href, label }, i) => (
+            <Link
+              key={href}
+              href={href}
+              className={pathname === href || (href !== "/" && pathname.startsWith(href)) ? "active" : ""}
+              onClick={() => setMenuOpen(false)}
+            >
+              <span className="link-num">0{i + 1}</span>
+              <span className="link-label">{label}</span>
+              <span className="link-arrow" aria-hidden="true"><ArrowIcon /></span>
             </Link>
+          ))}
+        </nav>
+
+        <div className="mobile-menu-footer">
+          <div className="mobile-menu-time">
+            <span className="dot" />
+            <span>{clock}</span>
           </div>
+          <Link href="/contact" className="btn btn--sm" onClick={() => setMenuOpen(false)}>
+            <span className="label">Start a project</span>
+            <span className="chip" aria-hidden="true"><ArrowIcon /></span>
+          </Link>
         </div>
-      )}
+      </div>
     </>
   );
 }

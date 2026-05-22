@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import ProjectEstimator from "@/app/components/ProjectEstimator";
 
@@ -16,6 +17,95 @@ function SmArrow() {
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
       <path d="M3 12h18M13 5l7 7-7 7" />
     </svg>
+  );
+}
+
+/*
+ * SlideButton — looks exactly like btn btn--lg.
+ * On mobile: drag the chip (circle) leftward across the label to navigate.
+ * On desktop: regular click also navigates.
+ */
+function SlideButton({ href, label, ghost = false }: {
+  href: string;
+  label: string;
+  ghost?: boolean;
+}) {
+  const router = useRouter();
+  const [offset,   setOffset]   = useState(0);
+  const [snapping, setSnapping] = useState(false);
+  const [done,     setDone]     = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const drag = useRef({ active: false, startX: 0, moved: false });
+  const CHIP = 54;
+
+  // chip starts at left pad (6px), must reach right edge (containerWidth - 6 - CHIP)
+  const getMax = () =>
+    Math.max(1, (containerRef.current?.clientWidth ?? 300) - CHIP - 12);
+
+  useEffect(() => {
+    const move = (x: number) => {
+      if (!drag.current.active) return;
+      const delta = x - drag.current.startX; // positive = dragged right
+      if (Math.abs(delta) > 4) drag.current.moved = true;
+      const max = getMax();
+      const v = Math.max(0, Math.min(delta, max));
+      setOffset(v);
+      if (v >= max * 0.93) {
+        drag.current.active = false;
+        setOffset(max); // snap chip flush to right edge
+        setDone(true);
+        setTimeout(() => router.push(href), 380);
+      }
+    };
+    const release = () => {
+      if (!drag.current.active) return;
+      drag.current.active = false;
+      setSnapping(true);
+      setOffset(0);
+      setTimeout(() => setSnapping(false), 540);
+    };
+    const mm = (e: MouseEvent) => move(e.clientX);
+    const tm = (e: TouchEvent) => move(e.touches[0].clientX);
+    window.addEventListener("mousemove", mm);
+    window.addEventListener("mouseup",   release);
+    window.addEventListener("touchmove", tm,     { passive: true });
+    window.addEventListener("touchend",  release);
+    return () => {
+      window.removeEventListener("mousemove", mm);
+      window.removeEventListener("mouseup",   release);
+      window.removeEventListener("touchmove", tm);
+      window.removeEventListener("touchend",  release);
+    };
+  }, [href, router]);
+
+  const progress = containerRef.current ? offset / getMax() : 0;
+
+  return (
+    <div
+      ref={containerRef}
+      className={`slide-btn${ghost ? " slide-btn--ghost" : ""}${done ? " slide-btn--done" : ""}`}
+      onMouseDown={(e)  => { drag.current = { active: true, startX: e.clientX, moved: false }; setSnapping(false); }}
+      onTouchStart={(e) => { drag.current = { active: true, startX: e.touches[0].clientX, moved: false }; setSnapping(false); }}
+      onClick={() => { if (!drag.current.moved) router.push(href); drag.current.moved = false; }}
+      role="link"
+      tabIndex={0}
+      style={{ userSelect: "none" } as React.CSSProperties}
+    >
+      {/* Chip on LEFT — slides right to activate */}
+      <div
+        className="slide-btn-chip"
+        style={{
+          transform:  `translateX(${offset}px)`,
+          transition: snapping ? "transform .55s cubic-bezier(.34,1.56,.64,1)" : "none",
+        }}
+      >
+        <ArrowIcon size={22} />
+      </div>
+      {/* Label centered — fades as chip slides over it */}
+      <span className="slide-btn-label" style={{ opacity: Math.max(0.08, 0.72 - progress * 1.8) }}>
+        Slide to {label.toLowerCase()}
+      </span>
+    </div>
   );
 }
 
@@ -68,17 +158,25 @@ function Hero() {
             <div className="stat-sub">Products shipped worldwide</div>
           </div>
           <div className="fade d4 hero-actions">
-            <Link href="/work" className="btn btn--lg">
-              <span className="label">See our work</span>
-              <span className="chip" aria-hidden="true"><ArrowIcon /></span>
-            </Link>
-            <button
-              className="tlink"
-              data-cal-link="yousuf-faysal/project-discussion-call"
-              data-cal-namespace="project-discussion-call"
-              data-cal-config='{"layout":"week_view","useSlotsViewOnSmallScreen":"true","theme":"auto"}'
-              style={{ background: "none", border: "none", padding: 0, cursor: "pointer", font: "inherit" }}
-            >Book a 20-min call →</button>
+            {/* Desktop: original btn--lg */}
+            <div className="hero-cta-desktop">
+              <Link href="/work" className="btn btn--lg">
+                <span className="label">See our work</span>
+                <span className="chip" aria-hidden="true"><ArrowIcon /></span>
+              </Link>
+              <button
+                className="tlink"
+                data-cal-link="yousuf-faysal/project-discussion-call"
+                data-cal-namespace="project-discussion-call"
+                data-cal-config='{"layout":"week_view","useSlotsViewOnSmallScreen":"true","theme":"auto"}'
+                style={{ background: "none", border: "none", padding: 0, cursor: "pointer", font: "inherit" }}
+              >Book a 20-min call →</button>
+            </div>
+            {/* Mobile: slide-to-activate */}
+            <div className="hero-cta-mobile">
+              <SlideButton href="/work"   label="See our work"  />
+              <SlideButton href="/portal" label="Client Portal" ghost />
+            </div>
           </div>
         </div>
       </div>
