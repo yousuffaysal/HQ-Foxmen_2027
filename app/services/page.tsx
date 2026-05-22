@@ -18,6 +18,17 @@ function CloseIcon() {
   );
 }
 
+function useIsMobile() {
+  const [m, setM] = useState(false);
+  useEffect(() => {
+    const check = () => setM(window.innerWidth < 761);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+  return m;
+}
+
 /* ─────────────── types ─────────────── */
 type DbService = { id: number; name: string; descr: string; count: string; badge: string | null; image: string | null };
 type ServiceDetail = {
@@ -251,6 +262,7 @@ function ServiceDetailModal({ service, image, onClose, onStartService }: {
 }) {
   const d = SERVICE_DETAILS[service] ?? SERVICE_DETAILS["Web Design & Development"];
   const [tab, setTab] = useState<"overview"|"features"|"stack">("overview");
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const fn = (e: KeyboardEvent) => { if (e.key==="Escape") onClose(); };
@@ -260,13 +272,13 @@ function ServiceDetailModal({ service, image, onClose, onStartService }: {
 
   return (
     <div
-      style={{ position:"fixed",inset:0,zIndex:300,display:"flex",alignItems:"center",justifyContent:"center",padding:"24px 16px",background:"rgba(6,6,10,.82)",backdropFilter:"blur(14px)" }}
+      style={{ position:"fixed",inset:0,zIndex:300,display:"flex",alignItems:isMobile?"flex-end":"center",justifyContent:"center",padding:isMobile?"0":"24px 16px",background:"rgba(6,6,10,.82)",backdropFilter:"blur(14px)" }}
       onClick={e => { if(e.target===e.currentTarget) onClose(); }}
     >
-      <div style={{ background:"#0a0a0f",width:"100%",maxWidth:820,maxHeight:"90vh",borderRadius:24,overflow:"hidden",display:"flex",flexDirection:"column",border:"1px solid rgba(255,255,255,.08)",boxShadow:"0 40px 100px -20px rgba(0,0,0,.8)",animation:"modalIn .45s cubic-bezier(.16,1,.3,1)" }}>
+      <div style={{ background:"#0a0a0f",width:"100%",maxWidth:820,maxHeight:isMobile?"92vh":"90vh",borderRadius:isMobile?"20px 20px 0 0":24,overflow:"hidden",display:"flex",flexDirection:"column",border:"1px solid rgba(255,255,255,.08)",boxShadow:"0 40px 100px -20px rgba(0,0,0,.8)",animation:"modalIn .45s cubic-bezier(.16,1,.3,1)" }}>
 
         {/* ── hero header ── */}
-        <div style={{ position:"relative",height:220,flexShrink:0,overflow:"hidden" }}>
+        <div style={{ position:"relative",height:isMobile?160:220,flexShrink:0,overflow:"hidden" }}>
           {image
             ? <img src={image} alt={service} style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }} />
             : <div style={{ width:"100%",height:"100%",background:CARD_GRADIENTS[service]??"linear-gradient(135deg,#0d0020,#7c3cce)" }} />
@@ -300,13 +312,13 @@ function ServiceDetailModal({ service, image, onClose, onStartService }: {
         <div style={{ overflowY:"auto",flex:1 }}>
 
           {tab==="overview" && (
-            <div style={{ padding:"28px 28px 100px" }}>
+            <div style={{ padding:isMobile?"20px 16px 80px":"28px 28px 100px" }}>
               {/* about */}
               {d.about.map((p,i) => (
                 <p key={i} style={{ fontSize:15,color:"rgba(255,255,255,.68)",lineHeight:1.75,margin:"0 0 16px",maxWidth:"68ch",animation:`fadeUp .5s ease ${i*0.1+0.1}s both` }}>{p}</p>
               ))}
               {/* stats */}
-              <div style={{ display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:1,background:"rgba(255,255,255,.05)",borderRadius:16,overflow:"hidden",marginTop:28 }}>
+              <div style={{ display:"grid",gridTemplateColumns:isMobile?"repeat(2,1fr)":"repeat(4,1fr)",gap:1,background:"rgba(255,255,255,.05)",borderRadius:16,overflow:"hidden",marginTop:28 }}>
                 {d.stats.map((s,i) => (
                   <div key={i} style={{ padding:"22px 16px",background:"rgba(255,255,255,.04)",textAlign:"center",animation:`fadeUp .5s ease ${i*0.08+0.3}s both` }}>
                     <div style={{ fontFamily:"var(--f-display)",fontSize:"clamp(20px,3vw,30px)",lineHeight:1,letterSpacing:"-.02em",color:"#fff",marginBottom:6 }}>{s.v}</div>
@@ -332,7 +344,7 @@ function ServiceDetailModal({ service, image, onClose, onStartService }: {
           )}
 
           {tab==="features" && (
-            <div style={{ padding:"28px 28px 100px",display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(250px,1fr))",gap:12 }}>
+            <div style={{ padding:isMobile?"20px 16px 80px":"28px 28px 100px",display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(250px,1fr))",gap:12 }}>
               {d.features.map((f,i) => (
                 <div key={i} style={{ background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.07)",borderRadius:12,padding:"18px 20px",animation:`fadeUp .4s ease ${i*0.05+0.1}s both`,transition:"border-color .2s" }}>
                   <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:10 }}>
@@ -348,7 +360,7 @@ function ServiceDetailModal({ service, image, onClose, onStartService }: {
           )}
 
           {tab==="stack" && (
-            <div style={{ padding:"28px 28px 100px" }}>
+            <div style={{ padding:isMobile?"20px 16px 80px":"28px 28px 100px" }}>
               <p style={{ fontSize:14,color:"rgba(255,255,255,.5)",marginBottom:24,lineHeight:1.6 }}>Technologies we use for {service} engagements. We recommend the right tool for each job — not the one that&apos;s most familiar.</p>
               <div style={{ display:"flex",flexWrap:"wrap",gap:10 }}>
                 {d.stack.map((t,i) => (
@@ -391,6 +403,7 @@ function ServiceInquiryModal({ service, onClose }: { service:string; onClose:()=
   const [submitting,setSubmitting] = useState(false);
   const [done,setDone] = useState(false);
   const [errors,setErrors] = useState<Partial<IForm>>({});
+  const isMobile = useIsMobile();
   const sf = (k:keyof IForm, v:string) => setForm(f=>({...f,[k]:v}));
 
   const validate = () => {
@@ -428,7 +441,7 @@ function ServiceInquiryModal({ service, onClose }: { service:string; onClose:()=
     <div style={{ position:"fixed",inset:0,zIndex:400,background:"rgba(10,10,10,.7)",backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",padding:"20px 16px",overflowY:"auto" }}
       onClick={e=>{ if(e.target===e.currentTarget) onClose(); }}>
       <div style={{ background:"#fff",borderRadius:20,width:"100%",maxWidth:600,boxShadow:"0 32px 80px -20px rgba(0,0,0,.35)",display:"flex",flexDirection:"column",maxHeight:"90vh",overflowY:"auto" }}>
-        <div style={{ padding:"28px 32px 0",display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:16 }}>
+        <div style={{ padding:isMobile?"20px 16px 0":"28px 32px 0",display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:16 }}>
           <div>
             <div style={{ fontFamily:"var(--f-mono)",fontSize:10,letterSpacing:".2em",color:"var(--muted)",textTransform:"uppercase",marginBottom:6 }}>Start a project</div>
             <h2 style={{ fontFamily:"var(--f-display)",fontSize:26,lineHeight:1.1,letterSpacing:"-.02em",margin:0 }}>{service}</h2>
@@ -445,8 +458,8 @@ function ServiceInquiryModal({ service, onClose }: { service:string; onClose:()=
             <button onClick={onClose} style={{ marginTop:28,padding:"12px 28px",borderRadius:999,background:"var(--ink)",color:"#fff",border:"none",cursor:"pointer",fontSize:14,fontWeight:600 }}>Close</button>
           </div>
         ) : (
-          <div style={{ padding:"24px 32px 32px",display:"flex",flexDirection:"column",gap:20 }}>
-            <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:14 }}>
+          <div style={{ padding:isMobile?"20px 16px 24px":"24px 32px 32px",display:"flex",flexDirection:"column",gap:20 }}>
+            <div style={{ display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:14 }}>
               <div>
                 <label style={LS}>Your name *</label>
                 <input value={form.name} onChange={e=>sf("name",e.target.value)} placeholder="Ahmed Rahman" style={IS(!!errors.name)} />
@@ -458,7 +471,7 @@ function ServiceInquiryModal({ service, onClose }: { service:string; onClose:()=
                 {errors.email&&<span style={ES}>{errors.email}</span>}
               </div>
             </div>
-            <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:14 }}>
+            <div style={{ display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:14 }}>
               <div>
                 <label style={LS}>Company <span style={{opacity:.5}}>(optional)</span></label>
                 <input value={form.company} onChange={e=>sf("company",e.target.value)} placeholder="Acme Inc." style={IS(false)} />
@@ -475,7 +488,7 @@ function ServiceInquiryModal({ service, onClose }: { service:string; onClose:()=
             </div>
             <div>
               <label style={LS}>Budget range *</label>
-              <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginTop:6 }}>
+              <div style={{ display:"grid",gridTemplateColumns:isMobile?"repeat(2,1fr)":"repeat(3,1fr)",gap:8,marginTop:6 }}>
                 {BUDGET_OPTIONS.map(opt=>(
                   <button key={opt.value} onClick={()=>sf("budget",opt.value)} style={{ padding:"10px 12px",borderRadius:10,border:`1.5px solid ${form.budget===opt.value?"var(--brand)":"var(--line)"}`,background:form.budget===opt.value?"var(--brand)":"#fff",color:form.budget===opt.value?"#fff":"var(--ink)",cursor:"pointer",textAlign:"left",transition:"all .2s" }}>
                     <div style={{ fontWeight:600,fontSize:13 }}>{opt.label}</div>
@@ -523,12 +536,14 @@ function ServiceSection({ service, index, total, onDetail, onStart, sectionRef: 
   const sectionRef = useRef<HTMLElement>(null);
   const bgRef      = useRef<HTMLDivElement>(null);
   const [entered, setEntered] = useState(false);
+  const isMobile = useIsMobile();
   const d = SERVICE_DETAILS[service.name];
   const accent = d?.accentColor ?? "#b86cf9";
   const gradient = CARD_GRADIENTS[service.name] ?? "linear-gradient(135deg,#0d0020,#7c3cce)";
 
   /* parallax — index-based for sticky-stacked sections */
   useEffect(() => {
+    if (isMobile) return;
     const onScroll = () => {
       if (!bgRef.current) return;
       const vh = window.innerHeight;
@@ -538,10 +553,11 @@ function ServiceSection({ service, index, total, onDetail, onStart, sectionRef: 
     window.addEventListener("scroll", onScroll, { passive:true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
-  }, [index]);
+  }, [index, isMobile]);
 
   /* entry animation — trigger when section slides halfway into view */
   useEffect(() => {
+    if (isMobile) { setEntered(true); return; }
     const onScroll = () => {
       const vh = window.innerHeight;
       if (window.scrollY >= Math.max(0, (index - 0.5) * vh)) setEntered(true);
@@ -549,12 +565,12 @@ function ServiceSection({ service, index, total, onDetail, onStart, sectionRef: 
     window.addEventListener("scroll", onScroll, { passive:true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
-  }, [index]);
+  }, [index, isMobile]);
 
   const tags = (service.count||"").split(",").filter(Boolean);
 
   return (
-    <section ref={(el)=>{ sectionRef.current=el; sectionRefCb?.(el); }} style={{ position:"sticky",top:76,zIndex:index+1,height:"calc(100vh - 76px - 120px)",overflow:"hidden",display:"flex",alignItems:"center",borderRadius:15,marginBottom:35 }}>
+    <section ref={(el)=>{ sectionRef.current=el; sectionRefCb?.(el); }} style={{ position:isMobile?"relative":"sticky",top:isMobile?undefined:76,zIndex:index+1,height:isMobile?"auto":"calc(100vh - 76px - 120px)",aspectRatio:isMobile?"1/1":undefined,overflow:"hidden",display:"flex",alignItems:isMobile?"flex-end":"center",borderRadius:15,marginBottom:isMobile?16:35 }}>
       {/* ── parallax background ── */}
       <div ref={bgRef} style={{ position:"absolute",inset:0,willChange:"transform",zIndex:0,background:gradient }}>
         {service.image
@@ -567,15 +583,15 @@ function ServiceSection({ service, index, total, onDetail, onStart, sectionRef: 
       <div style={{ position:"absolute",inset:0,zIndex:1,background:`radial-gradient(ellipse at 80% 50%, ${accent}18 0%, transparent 60%)` }} />
 
       {/* ── ghost index number ── */}
-      <div style={{ position:"absolute",right:"3vw",top:"50%",transform:"translateY(-50%)",fontFamily:"var(--f-display)",fontStyle:"italic",fontSize:"clamp(120px,18vw,240px)",lineHeight:1,letterSpacing:"-.05em",color:"rgba(255,255,255,.04)",userSelect:"none",zIndex:1,pointerEvents:"none" }}>
+      {!isMobile && <div style={{ position:"absolute",right:"3vw",top:"50%",transform:"translateY(-50%)",fontFamily:"var(--f-display)",fontStyle:"italic",fontSize:"clamp(120px,18vw,240px)",lineHeight:1,letterSpacing:"-.05em",color:"rgba(255,255,255,.04)",userSelect:"none",zIndex:1,pointerEvents:"none" }}>
         {String(index+1).padStart(2,"0")}
-      </div>
+      </div>}
 
       {/* ── animated accent line ── */}
       <div style={{ position:"absolute",left:0,top:0,bottom:0,width:3,background:`linear-gradient(to bottom, transparent 0%, ${accent} 50%, transparent 100%)`,zIndex:2,opacity:entered?.8:0,transition:"opacity .8s ease .3s" }} />
 
       {/* ── main content ── */}
-      <div style={{ position:"relative",zIndex:3,padding:"0 clamp(32px,7vw,100px)",maxWidth:700,width:"100%" }}>
+      <div style={{ position:"relative",zIndex:3,padding:isMobile?"0 20px 28px":"0 clamp(32px,7vw,100px)",maxWidth:isMobile?"100%":700,width:"100%" }}>
         {/* counter */}
         <div style={{ fontFamily:"var(--f-mono)",fontSize:11,letterSpacing:".22em",textTransform:"uppercase",color:"rgba(255,255,255,.38)",marginBottom:18,opacity:entered?1:0,transform:entered?"translateY(0)":"translateY(20px)",transition:"opacity .6s ease .1s, transform .6s ease .1s" }}>
           {String(index+1).padStart(2,"0")} <span style={{opacity:.4}}>/ {String(total).padStart(2,"0")}</span>
@@ -620,7 +636,7 @@ function ServiceSection({ service, index, total, onDetail, onStart, sectionRef: 
       </div>
 
       {/* ── scroll hint (first section only) ── */}
-      {index===0&&(
+      {index===0&&!isMobile&&(
         <div style={{ position:"absolute",bottom:28,right:"5vw",zIndex:3,display:"flex",flexDirection:"column",alignItems:"center",gap:8,color:"rgba(255,255,255,.3)",fontSize:10,fontFamily:"var(--f-mono)",letterSpacing:".18em",textTransform:"uppercase" }}>
           <span>scroll</span>
           <div style={{ width:1,height:44,background:"linear-gradient(to bottom,rgba(255,255,255,.3),transparent)",animation:"scrollPulse 1.6s ease-in-out infinite" }} />
@@ -636,6 +652,8 @@ function ServiceSection({ service, index, total, onDetail, onStart, sectionRef: 
 function NavDots({ count, active, onDotClick, accentColors }: {
   count:number; active:number; onDotClick:(i:number)=>void; accentColors:string[];
 }) {
+  const isMobile = useIsMobile();
+  if (isMobile) return null;
   return (
     <div style={{ position:"fixed",right:20,top:"50%",transform:"translateY(-50%)",zIndex:50,display:"flex",flexDirection:"column",gap:8 }}>
       {Array.from({length:count},(_,i)=>(
