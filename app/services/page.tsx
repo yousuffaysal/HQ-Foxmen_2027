@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 /* ─────────────── icons ─────────────── */
 function ArrowIcon({ size = 14 }: { size?: number }) {
@@ -861,6 +862,7 @@ const STATIC_SERVICES: DbService[] = [
 ];
 
 export default function ServicesPage() {
+  useScrollReveal(".fade, .reveal");
   const [dbServices, setDbServices]     = useState<DbService[]>([]);
   const [detailService, setDetailService] = useState<DbService|null>(null);
   const [inquiryService, setInquiryService] = useState<string|null>(null);
