@@ -14,6 +14,8 @@ function ArrowIcon() {
 const filters = ["All", "Web", "Mobile", "AI", "Ecommerce", "Real Estate", "Brand"];
 
 const TONE: Record<string, string> = { "(purple)": "violet", "": "violet", b: "dark", c: "brand", d: "bone" };
+const THUMB_BG: Record<string, string> = { dark: "#0a0a0a", brand: "#b86cf9", bone: "#efece6", violet: "#1a0c2c" };
+const THUMB_FG: Record<string, string> = { dark: "rgba(255,255,255,.4)", brand: "rgba(255,255,255,.8)", bone: "var(--muted)", violet: "rgba(255,255,255,.4)" };
 const STATUS_LABEL: Record<string, string> = { draft: "Draft", review: "In review", live: "Live", archived: "Archived" };
 
 function toSlug(name: string): string {
@@ -68,10 +70,23 @@ export default function WorkGrid({ projects }: { projects: DbProject[] }) {
 
               return (
                 <article key={p.id} className={`item ${tone} fade${i % 4 === 0 ? "" : ` d${i % 4}`}`}>
-                  <div className="thumb">
+                  <div className="thumb" style={{
+                    width: "100%",
+                    aspectRatio: "4 / 3",
+                    position: "relative",
+                    display: "grid",
+                    placeItems: "center",
+                    overflow: "hidden",
+                    background: THUMB_BG[tone] ?? "#1a0c2c",
+                    color: THUMB_FG[tone] ?? "rgba(255,255,255,.4)",
+                    fontFamily: "var(--f-mono)",
+                    fontSize: 10,
+                    letterSpacing: ".2em",
+                    textTransform: "uppercase",
+                  }}>
                     {img
-                      ? <img src={img} alt={p.name} loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }} />
-                      : <span style={{ fontFamily: "var(--f-mono)", fontSize: 11, letterSpacing: ".16em", textTransform: "uppercase", opacity: .4 }}>No image yet</span>
+                      ? <img src={img} alt={p.name} loading="lazy" decoding="async" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", display: "block" }} />
+                      : <span style={{ fontFamily: "var(--f-mono)", fontSize: 10, letterSpacing: ".2em", textTransform: "uppercase", opacity: .35 }}>No image yet</span>
                     }
                     {p.status !== "live" && (
                       <span className="proj-status-badge">{STATUS_LABEL[p.status] ?? p.status}</span>
