@@ -1046,52 +1046,142 @@ h1, h2, h3, h4 { margin: 0; font-weight: 400; letter-spacing: -0.02em; }
    ══════════════════════════════════════════════════════════ */
 
 /* Hide phone on desktop, show on mobile */
-.testi-phone-wrap { display: none; }
-.testi-dots       { display: none; }
-@media (min-width:761px) { .testi-desktop { display: grid; } }
+/* Desktop: iPhone mockup only, no card grid */
+.testi-desktop    { display: none !important; }
+.testi-phone-wrap { display: flex !important; flex-direction: column; align-items: center; gap: 24px; padding: 8px 0 4px; }
+.testi-dots       { display: flex !important; gap: 7px; }
+
 @media (max-width:760px) {
-  .testi-desktop    { display: none !important; }
-  .testi-phone-wrap { display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 8px 0 4px; }
-  .testi-dots       { display: flex; gap: 7px; }
+  .testi-deco { display: none !important; }
 }
+
+/* ─ Stage row + background ──────────────────────────────── */
+.testi-stage {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  position: relative;
+  padding: 48px 0;
+  min-height: 600px;
+  isolation: isolate;
+}
+.testi-deco {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 280px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.testi-phone { position: relative; z-index: 2; }
+.testi-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+.testi-bg-glow {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%,-50%);
+  width: 700px; height: 560px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(184,108,249,.08) 0%, rgba(184,108,249,.02) 45%, transparent 70%);
+}
+.testi-bg-dot {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--brand);
+  opacity: .28;
+  animation: tbdot 7s ease-in-out infinite;
+}
+.testi-bg-dot.fast { animation-duration: 4.5s; opacity: .45; }
+@keyframes tbdot {
+  0%,100% { transform: translateY(0) scale(1); opacity: .22; }
+  50%      { transform: translateY(-16px) scale(1.35); opacity: .55; }
+}
+.testi-bg-arcs { position: absolute; inset: 0; width: 100%; height: 100%; }
+.arc-1 { animation: arc-pulse 5s ease-in-out infinite; }
+.arc-2 { animation: arc-pulse 5s ease-in-out infinite; animation-delay: .6s; }
+.arc-3 { animation: arc-pulse 7s ease-in-out infinite; animation-delay: 1.8s; }
+@keyframes arc-pulse {
+  0%,100% { opacity: .35; }
+  50%      { opacity: 1; }
+}
+@media (max-width:760px) {
+  .testi-bg { display: none; }
+}
+
+/* ─ World Map Decoration (Leaflet) ─────────────────────── */
+.wm-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: .72;
+  border-radius: 15px;
+}
+.wm-leaflet {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 480px;
+  background: #0a0a0a;
+  pointer-events: none !important;
+}
+.wm-leaflet,
+.wm-leaflet * { pointer-events: none !important; }
+.leaflet-control-container { display: none !important; }
+.leaflet-attribution-flag  { display: none !important; }
+@media (max-width:760px) { .wm-wrap { display: none; } }
 
 /* ─ iPhone 16 frame ──────────────────────────────────────── */
 .testi-phone {
   width: 272px;
-  background: linear-gradient(160deg, #2e2e30 0%, #1c1c1e 55%, #0f0f11 100%);
-  border-radius: 54px;
-  padding: 13px;
+  background: linear-gradient(160deg, #333335 0%, #1e1e20 45%, #0e0e10 100%);
+  border-radius: 46px;
+  padding: 9px;
   position: relative;
   box-shadow:
-    0 0 0 1.5px rgba(255,255,255,.13),
-    inset 0 0 0 1px rgba(255,255,255,.06),
-    0 60px 120px -30px rgba(0,0,0,.75),
-    0 24px 48px -12px rgba(0,0,0,.5);
+    0 0 0 1px rgba(255,255,255,.18),
+    0 0 0 2.5px rgba(255,255,255,.06),
+    inset 0 0 0 1px rgba(255,255,255,.05),
+    0 80px 160px -30px rgba(0,0,0,.9),
+    0 32px 64px -16px rgba(0,0,0,.65),
+    0 0 60px -10px rgba(184,108,249,.12);
 }
 /* Volume + action buttons (left) */
 .testi-phone::before {
   content: "";
   position: absolute;
-  left: -4px; top: 90px;
-  width: 4px; height: 32px;
-  background: #3c3c3e;
+  left: -3.5px; top: 92px;
+  width: 3.5px; height: 30px;
+  background: linear-gradient(180deg,#444446,#3a3a3c);
   border-radius: 3px 0 0 3px;
-  box-shadow: 0 50px 0 #3c3c3e, 0 94px 0 #3c3c3e;
+  box-shadow: 0 48px 0 #3c3c3e, 0 92px 0 #3c3c3e;
 }
 /* Power button (right) */
 .testi-phone::after {
   content: "";
   position: absolute;
-  right: -4px; top: 160px;
-  width: 4px; height: 70px;
-  background: #3c3c3e;
+  right: -3.5px; top: 162px;
+  width: 3.5px; height: 68px;
+  background: linear-gradient(180deg,#444446,#3a3a3c);
   border-radius: 0 3px 3px 0;
 }
+
 
 /* ─ Screen ─────────────────────────────────────────────── */
 .testi-screen {
   background: #f2f2f7;
-  border-radius: 44px;
+  border-radius: 37px;
   overflow: hidden;
   height: 564px;
   display: flex;

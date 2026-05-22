@@ -4,6 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import ProjectEstimator from "@/app/components/ProjectEstimator";
+import dynamic from "next/dynamic";
+const WorldMapDecoration = dynamic(
+  () => import("@/app/components/WorldMapLeaflet"),
+  { ssr: false, loading: () => null }
+);
 
 function ArrowIcon({ size = 22 }: { size?: number }) {
   return (
@@ -364,11 +369,32 @@ function BatteryIcon() {
   );
 }
 
+
 function TestimonialsSection({ testis }: { testis: DbTesti[] }) {
   const items    = testis.length > 0 ? testis : STATIC_TESTIS;
   const [idx,    setIdx]    = useState(0);
   const [show,   setShow]   = useState(true);
   const [bKey,   setBKey]   = useState(0);
+  const [phoneZoom,      setPhoneZoom]      = useState(1);
+  const [scrollParallax, setScrollParallax] = useState(0);
+  const stageRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const check = () => setPhoneZoom(window.innerWidth >= 761 ? 1.43 : 1);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (!stageRef.current) return;
+      const rect = stageRef.current.getBoundingClientRect();
+      setScrollParallax((window.innerHeight / 2 - rect.top - rect.height / 2) * 0.07);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     if (items.length <= 1) return;
@@ -418,72 +444,95 @@ function TestimonialsSection({ testis }: { testis: DbTesti[] }) {
           })}
         </div>
 
-        {/* ── Mobile: iPhone 16 mockup ── */}
+        {/* ── iPhone mockup (desktop + mobile) ── */}
         <div className="testi-phone-wrap">
-          <div className="testi-phone">
-            {/* Screen */}
-            <div
-              className="testi-screen"
-              style={{ opacity: show ? 1 : 0, transform: show ? "scale(1)" : "scale(.95)", transition: "opacity .35s ease, transform .35s ease" }}
-            >
-              {/* Status bar with inline Dynamic Island */}
-              <div className="testi-status">
-                <span className="testi-time">9:41</span>
-                <div className="testi-island" />
-                <div className="testi-status-r">
-                  <SignalIcon /><BatteryIcon />
-                </div>
-              </div>
+          <div className="testi-stage" ref={stageRef}>
 
-              {/* iMessage header */}
-              <div className="testi-chat-hd">
-                <div className="testi-back">
-                  <svg width="9" height="15" viewBox="0 0 9 15" fill="none"><path d="M8 1 1.5 7.5 8 14" stroke="var(--brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  <div className="testi-chat-center">
-                    <div className="testi-chat-av">
-                      {t.img ? <img src={t.img} alt={t.name} style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:"50%",display:"block"}}/> : t.av}
-                    </div>
-                    <div className="testi-chat-info" key={bKey}>
-                      <div className="testi-chat-name">{t.name}</div>
-                      <div className="testi-chat-role">{t.role}</div>
-                    </div>
+            {/* Premium background layer — desktop only */}
+            <div className="testi-bg" aria-hidden="true">
+              <div className="testi-bg-glow" />
+              {[
+                {x:6,y:20,s:4,d:0,fast:false},{x:88,y:14,s:3,d:1.4,fast:false},
+                {x:14,y:72,s:3.5,d:2.6,fast:false},{x:84,y:68,s:4,d:0.9,fast:false},
+                {x:44,y:6,s:3,d:3.8,fast:true},{x:56,y:90,s:3.5,d:1.9,fast:false},
+                {x:24,y:46,s:2.5,d:4.4,fast:true},{x:76,y:40,s:2.5,d:3,fast:false},
+                {x:50,y:50,s:2,d:5.2,fast:false},{x:32,y:84,s:3,d:0.5,fast:true},
+                {x:68,y:22,s:2.5,d:2.1,fast:false},{x:18,y:34,s:2,d:3.3,fast:true},
+              ].map((p,i) => (
+                <div key={i} className={`testi-bg-dot${p.fast?" fast":""}`}
+                  style={{left:`${p.x}%`,top:`${p.y}%`,width:`${p.s}px`,height:`${p.s}px`,animationDelay:`${p.d}s`}}/>
+              ))}
+              <svg className="testi-bg-arcs" viewBox="0 0 900 500" preserveAspectRatio="xMidYMid meet">
+                <path d="M 80 250 Q 220 80 450 60" fill="none" stroke="rgba(184,108,249,.1)" strokeWidth="1" className="arc-1"/>
+                <path d="M 820 250 Q 680 80 450 60" fill="none" stroke="rgba(184,108,249,.1)" strokeWidth="1" className="arc-2"/>
+                <path d="M 100 300 Q 250 420 450 440" fill="none" stroke="rgba(150,150,150,.07)" strokeWidth="1" className="arc-3"/>
+                <path d="M 800 300 Q 650 420 450 440" fill="none" stroke="rgba(150,150,150,.07)" strokeWidth="1" className="arc-3"/>
+              </svg>
+            </div>
+
+            {/* World map */}
+            <WorldMapDecoration scrollOffset={scrollParallax} />
+
+            {/* iPhone */}
+            <div className="testi-phone" style={{zoom: phoneZoom}}>
+              {/* Screen */}
+              <div
+                className="testi-screen"
+                style={{ opacity: show ? 1 : 0, transform: show ? "scale(1)" : "scale(.95)", transition: "opacity .35s ease, transform .35s ease" }}
+              >
+                {/* Status bar with inline Dynamic Island */}
+                <div className="testi-status">
+                  <span className="testi-time">9:41</span>
+                  <div className="testi-island" />
+                  <div className="testi-status-r">
+                    <SignalIcon /><BatteryIcon />
                   </div>
                 </div>
-                <div className="testi-chat-actions">
-                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.62 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                  <svg width="19" height="14" viewBox="0 0 22 16" fill="none"><rect x=".5" y=".5" width="13" height="15" rx="2.5" stroke="var(--brand)" strokeWidth="1.5"/><path d="M14 5.5l7-3.5v12l-7-3.5V5.5Z" stroke="var(--brand)" strokeWidth="1.5" strokeLinejoin="round"/></svg>
-                </div>
-              </div>
 
-              {/* Bubbles */}
-              <div className="testi-bubbles" key={bKey}>
-                <div className="testi-chat-date">Today</div>
-                <div className="testi-stars-bubble">{stars}</div>
-                {bubbles.map((msg, i) => (
-                  <div
-                    key={i}
-                    className="testi-bubble testi-bubble--in"
-                    style={{ animationDelay: `${0.15 + i * 0.9}s` }}
-                  >{msg}</div>
-                ))}
-                <div
-                  className="testi-bubble testi-bubble--out"
-                  style={{ animationDelay: `${0.15 + bubbles.length * 0.9}s` }}
-                >{reply}</div>
-              </div>
-
-              {/* Input bar */}
-              <div className="testi-input-row">
-                <div className="testi-add-btn">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7.5" stroke="rgba(0,0,0,.2)"/><path d="M8 4v8M4 8h8" stroke="rgba(0,0,0,.4)" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                {/* iMessage header */}
+                <div className="testi-chat-hd">
+                  <div className="testi-back">
+                    <svg width="9" height="15" viewBox="0 0 9 15" fill="none"><path d="M8 1 1.5 7.5 8 14" stroke="var(--brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    <div className="testi-chat-center">
+                      <div className="testi-chat-av">
+                        {t.img ? <img src={t.img} alt={t.name} style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:"50%",display:"block"}}/> : t.av}
+                      </div>
+                      <div className="testi-chat-info" key={bKey}>
+                        <div className="testi-chat-name">{t.name}</div>
+                        <div className="testi-chat-role">{t.role}</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="testi-chat-actions">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.62 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    <svg width="19" height="14" viewBox="0 0 22 16" fill="none"><rect x=".5" y=".5" width="13" height="15" rx="2.5" stroke="var(--brand)" strokeWidth="1.5"/><path d="M14 5.5l7-3.5v12l-7-3.5V5.5Z" stroke="var(--brand)" strokeWidth="1.5" strokeLinejoin="round"/></svg>
+                  </div>
                 </div>
-                <div className="testi-input-bar">iMessage</div>
-                <div className="testi-send-btn">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+
+                {/* Bubbles */}
+                <div className="testi-bubbles" key={bKey}>
+                  <div className="testi-chat-date">Today</div>
+                  <div className="testi-stars-bubble">{stars}</div>
+                  {bubbles.map((msg, i) => (
+                    <div key={i} className="testi-bubble testi-bubble--in" style={{ animationDelay: `${0.15 + i * 0.9}s` }}>{msg}</div>
+                  ))}
+                  <div className="testi-bubble testi-bubble--out" style={{ animationDelay: `${0.15 + bubbles.length * 0.9}s` }}>{reply}</div>
+                </div>
+
+                {/* Input bar */}
+                <div className="testi-input-row">
+                  <div className="testi-add-btn">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7.5" stroke="rgba(0,0,0,.2)"/><path d="M8 4v8M4 8h8" stroke="rgba(0,0,0,.4)" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                  </div>
+                  <div className="testi-input-bar">iMessage</div>
+                  <div className="testi-send-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+
+          </div>{/* end testi-stage */}
 
           {/* Progress dots */}
           <div className="testi-dots">

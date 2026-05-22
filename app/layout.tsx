@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Instrument_Serif, Instrument_Sans } from "next/font/google";
 import "./globals.css";
+import "leaflet/dist/leaflet.css";
 import SiteShell from "@/components/SiteShell";
 import Script from "next/script";
 
