@@ -242,6 +242,182 @@ const CARD_GRADIENTS: Record<string, string> = {
   "Performance marketing":        "linear-gradient(135deg,#001810 0%,#025c37 50%,#059669 100%)",
 };
 
+/* ─────────────── service visual art ─────────────── */
+function VisualWeb({ a }: { a:string }) {
+  return (
+    <svg viewBox="0 0 500 380" fill="none" xmlns="http://www.w3.org/2000/svg" style={{width:"100%",height:"100%"}}>
+      <rect x="20" y="14" width="460" height="340" rx="16" stroke={a} strokeOpacity=".22" strokeWidth="1.5"/>
+      <rect x="20" y="14" width="460" height="52" rx="16" fill={a} fillOpacity=".05"/>
+      <rect x="20" y="52" width="460" height="14" fill={a} fillOpacity=".03"/>
+      <line x1="20" y1="66" x2="480" y2="66" stroke={a} strokeOpacity=".13" strokeWidth="1"/>
+      <circle cx="46" cy="40" r="8" fill={a} fillOpacity=".45"/>
+      <circle cx="70" cy="40" r="8" fill={a} fillOpacity=".25"/>
+      <circle cx="94" cy="40" r="8" fill={a} fillOpacity=".13"/>
+      <rect x="130" y="27" width="220" height="26" rx="13" stroke={a} strokeOpacity=".18" strokeWidth="1" fill={a} fillOpacity=".05"/>
+      {([
+        {x1:40,x2:170,y:96,op:.32,w:2},{x1:40,x2:250,y:118,op:.17,w:1.5},
+        {x1:60,x2:200,y:140,op:.24,w:1.5},{x1:60,x2:280,y:162,op:.13,w:1.5},
+        {x1:40,x2:150,y:184,op:.28,w:2},{x1:40,x2:230,y:206,op:.15,w:1.5},
+        {x1:60,x2:185,y:228,op:.2,w:1.5},{x1:60,x2:260,y:250,op:.12,w:1.5},
+        {x1:40,x2:160,y:272,op:.22,w:1.5},{x1:40,x2:215,y:294,op:.14,w:1.5},
+        {x1:60,x2:180,y:316,op:.18,w:1.5},
+      ] as {x1:number;x2:number;y:number;op:number;w:number}[]).map((l,i)=>(
+        <line key={i} x1={l.x1} y1={l.y} x2={l.x2} y2={l.y} stroke={a} strokeOpacity={l.op} strokeWidth={l.w} strokeLinecap="round"/>
+      ))}
+      {Array.from({length:8},(_,r)=>Array.from({length:5},(_,c)=>(
+        <circle key={`${r}-${c}`} cx={330+c*26} cy={90+r*30} r="2" fill={a} fillOpacity=".2"/>
+      )))}
+      <line x1="308" y1="80" x2="308" y2="350" stroke={a} strokeOpacity=".07" strokeWidth="1"/>
+    </svg>
+  );
+}
+
+function VisualMobile({ a }: { a:string }) {
+  const phone = (x:number,w:number,h:number,rx:number) => (
+    <>
+      <rect x={x} y="70" width={w} height={h} rx={rx} stroke={a} strokeOpacity=".28" strokeWidth="1.5"/>
+      <rect x={x+9} y="78" width={w-18} height={h-28} rx={rx-8} fill={a} fillOpacity=".05"/>
+      <rect x={x+w/2-22} y="75" width="44" height="7" rx="3.5" fill={a} fillOpacity=".28"/>
+      <circle cx={x+w/2} cy={70+h-14} r="7" stroke={a} strokeOpacity=".22" strokeWidth="1" fill="none"/>
+      {Array.from({length:4},(_,row)=>Array.from({length:3},(_,col)=>(
+        <rect key={`${row}-${col}`} x={x+12+col*((w-24)/3)} y={96+row*34} width={(w-24)/3-8} height="22" rx="5" fill={a} fillOpacity={row===0&&col===0?.22:.07}/>
+      )))}
+    </>
+  );
+  return (
+    <svg viewBox="0 0 500 380" fill="none" xmlns="http://www.w3.org/2000/svg" style={{width:"100%",height:"100%"}}>
+      {phone(55,115,215,22)}
+      {phone(215,130,230,24)}
+      <path d="M172 178 Q194 155 218 178" stroke={a} strokeOpacity=".25" strokeWidth="1.5" strokeDasharray="4 6" fill="none"/>
+      <path d="M172 200 Q194 223 218 200" stroke={a} strokeOpacity=".18" strokeWidth="1.5" strokeDasharray="4 6" fill="none"/>
+      <circle cx="195" cy="186" r="7" fill={a} fillOpacity=".5"/>
+      {[0,1,2].map(i=><circle key={i} cx={165+i*14} cy={324} r="4" fill={a} fillOpacity={i===1?.45:.2}/>)}
+    </svg>
+  );
+}
+
+function VisualAI({ a }: { a:string }) {
+  const nodes:[number,number,number,number][] = [
+    [250,190,14,.9],[155,112,9,.65],[348,112,9,.65],[118,224,8,.55],[382,224,8,.55],
+    [168,304,9,.6],[332,304,9,.6],[72,168,6,.38],[428,168,6,.38],[250,312,7,.42],[250,72,8,.5],
+  ];
+  const edges:[number,number][] = [
+    [0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,10],[1,2],[1,7],[2,8],[3,5],[4,6],[5,9],[6,9],[1,10],[2,10],
+  ];
+  return (
+    <svg viewBox="0 0 500 390" fill="none" xmlns="http://www.w3.org/2000/svg" style={{width:"100%",height:"100%"}}>
+      {Array.from({length:6},(_,r)=>Array.from({length:7},(_,c)=>(
+        <circle key={`h${r}-${c}`} cx={30+c*68+(r%2)*34} cy={28+r*58} r="1.8" fill={a} fillOpacity=".1"/>
+      )))}
+      {edges.map(([s,e],i)=>(
+        <line key={i} x1={nodes[s][0]} y1={nodes[s][1]} x2={nodes[e][0]} y2={nodes[e][1]} stroke={a} strokeOpacity=".2" strokeWidth="1.2"/>
+      ))}
+      {nodes.map(([cx,cy,r,op],i)=>(
+        <React.Fragment key={i}>
+          <circle cx={cx} cy={cy} r={r*2.4} fill={a} fillOpacity=".07"/>
+          <circle cx={cx} cy={cy} r={r} fill={a} fillOpacity={op}/>
+        </React.Fragment>
+      ))}
+    </svg>
+  );
+}
+
+function VisualEcom({ a }: { a:string }) {
+  const bars = [55,90,70,122,102,152,128,178,158,198];
+  const pts = bars.map((h,i)=>`${50+i*42},${315-h}`).join(" ");
+  return (
+    <svg viewBox="0 0 500 380" fill="none" xmlns="http://www.w3.org/2000/svg" style={{width:"100%",height:"100%"}}>
+      {[195,245,295,315].map(y=>(
+        <line key={y} x1="36" y1={y} x2="450" y2={y} stroke={a} strokeOpacity=".08" strokeWidth="1" strokeDasharray="4 8"/>
+      ))}
+      {bars.map((h,i)=>(
+        <rect key={i} x={36+i*42} y={315-h} width="30" height={h} rx="6" fill={a} fillOpacity={.07+i*.025}/>
+      ))}
+      <polyline points={pts} stroke={a} strokeOpacity=".52" strokeWidth="2.5" fill="none" strokeLinejoin="round" strokeLinecap="round"/>
+      {bars.map((h,i)=>(
+        <circle key={i} cx={50+i*42} cy={315-h} r="4.5" fill={a} fillOpacity=".78"/>
+      ))}
+      <path d="M362 54 h88 l-14 98 h-60 z" stroke={a} strokeOpacity=".22" strokeWidth="1.5" fill="none"/>
+      <path d="M376 54 q0-28 26-28 q26 0 26 28" stroke={a} strokeOpacity=".25" strokeWidth="1.5" fill="none"/>
+      <line x1="378" y1="96" x2="438" y2="96" stroke={a} strokeOpacity=".12" strokeWidth="1"/>
+    </svg>
+  );
+}
+
+function VisualRealEstate({ a }: { a:string }) {
+  const blds:{x:number;y:number;w:number;h:number}[] = [
+    {x:36,y:222,w:58,h:140},{x:104,y:172,w:54,h:190},{x:168,y:242,w:44,h:120},
+    {x:222,y:138,w:72,h:224},{x:304,y:192,w:56,h:170},{x:370,y:158,w:52,h:204},{x:432,y:212,w:50,h:150},
+  ];
+  return (
+    <svg viewBox="0 0 500 390" fill="none" xmlns="http://www.w3.org/2000/svg" style={{width:"100%",height:"100%"}}>
+      <line x1="18" y1="362" x2="482" y2="362" stroke={a} strokeOpacity=".18" strokeWidth="2"/>
+      {blds.map((b,i)=>(
+        <React.Fragment key={i}>
+          <rect x={b.x} y={b.y} width={b.w} height={b.h} stroke={a} strokeOpacity={.15+i*.015} strokeWidth="1.2" fill={a} fillOpacity=".04"/>
+          {Array.from({length:4},(_,row)=>Array.from({length:2},(_,col)=>(
+            <rect key={`${row}-${col}`} x={b.x+6+col*(b.w/2-3)} y={b.y+14+row*32} width={b.w/2-12} height="18" rx="3" fill={a} fillOpacity={(row+col)%2===0?.16:.05}/>
+          )))}
+        </React.Fragment>
+      ))}
+      <circle cx="250" cy="72" r="26" stroke={a} strokeOpacity=".38" strokeWidth="2"/>
+      <circle cx="250" cy="72" r="12" fill={a} fillOpacity=".55"/>
+      <line x1="250" y1="98" x2="250" y2="136" stroke={a} strokeOpacity=".32" strokeWidth="2.5" strokeLinecap="round"/>
+      {[0,1,2,3].map(i=><line key={i} x1="18" y1={18+i*28} x2="200" y2={18+i*28} stroke={a} strokeOpacity=".07" strokeWidth="1"/>)}
+      {[0,1,2].map(i=><line key={i} x1={42+i*44} y1="10" x2={42+i*44} y2="118" stroke={a} strokeOpacity=".07" strokeWidth="1"/>)}
+    </svg>
+  );
+}
+
+function VisualBrand({ a }: { a:string }) {
+  const swColors = ["rgba(255,255,255,.18)","#ec4899","#a855f7","#3b82f6","#10b981","#f59e0b","#ef4444"];
+  return (
+    <svg viewBox="0 0 500 390" fill="none" xmlns="http://www.w3.org/2000/svg" style={{width:"100%",height:"100%"}}>
+      <text x="90" y="310" fontFamily="Georgia, serif" fontSize="280" fill={a} fillOpacity=".07" fontStyle="italic">{'A'}</text>
+      {swColors.map((c,i)=>(
+        <circle key={i} cx={56+i*56} cy={48} r="22" fill={c} fillOpacity=".48" stroke={c} strokeOpacity=".65" strokeWidth="1"/>
+      ))}
+      <rect x="36" y="316" width="160" height="56" rx="12" stroke={a} strokeOpacity=".22" strokeWidth="1.5"/>
+      <rect x="50" y="332" width="68" height="13" rx="4" fill={a} fillOpacity=".22"/>
+      <rect x="50" y="350" width="48" height="10" rx="3" fill={a} fillOpacity=".12"/>
+      <rect x="214" y="316" width="234" height="56" rx="12" stroke={a} strokeOpacity=".18" strokeWidth="1.5"/>
+      {[0,1,2].map(i=><line key={i} x1="230" y1={330+i*14} x2={418-i*22} y2={330+i*14} stroke={a} strokeOpacity={.22-.06*i} strokeWidth={3-i} strokeLinecap="round"/>)}
+      {[0,1,2,3].map(i=><line key={i} x1="36" y1={114+i*46} x2={310-i*48} y2={114+i*46} stroke={a} strokeOpacity={.28-.05*i} strokeWidth={4-i} strokeLinecap="round"/>)}
+    </svg>
+  );
+}
+
+function VisualMarketing({ a }: { a:string }) {
+  const data = [38,56,46,70,60,86,76,102,93,118,108,142,130,158];
+  const pts = data.map((v,i)=>`${42+i*30},${320-v}`).join(" ");
+  return (
+    <svg viewBox="0 0 500 390" fill="none" xmlns="http://www.w3.org/2000/svg" style={{width:"100%",height:"100%"}}>
+      {[0,1,2,3,4].map(i=>(
+        <line key={i} x1="34" y1={120+i*50} x2="460" y2={120+i*50} stroke={a} strokeOpacity=".08" strokeWidth="1"/>
+      ))}
+      <polyline points={`42,320 ${pts} ${42+13*30},320`} fill={a} fillOpacity=".08" stroke="none"/>
+      <polyline points={pts} stroke={a} strokeOpacity=".55" strokeWidth="2.5" fill="none" strokeLinejoin="round" strokeLinecap="round"/>
+      {data.map((v,i)=>(
+        <circle key={i} cx={42+i*30} cy={320-v} r={i===data.length-1?6:4} fill={a} fillOpacity={i===data.length-1?.9:.65}/>
+      ))}
+      <line x1="400" y1="288" x2="444" y2="96" stroke={a} strokeOpacity=".38" strokeWidth="2.5" strokeLinecap="round"/>
+      <polyline points="436,106 444,96 452,114" stroke={a} strokeOpacity=".38" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+      <rect x="390" y="42" width="82" height="38" rx="8" fill={a} fillOpacity=".11" stroke={a} strokeOpacity=".2" strokeWidth="1"/>
+      <rect x="352" y="90" width="62" height="28" rx="7" fill={a} fillOpacity=".07" stroke={a} strokeOpacity=".15" strokeWidth="1"/>
+    </svg>
+  );
+}
+
+const SERVICE_VISUAL: Record<string, React.FC<{ a:string }>> = {
+  "Web Design & Development":      VisualWeb,
+  "iOS, Android & Cross-platform": VisualMobile,
+  "AI-Integrated Software":        VisualAI,
+  "Ecommerce & Multi-vendor":      VisualEcom,
+  "Real-estate platforms":         VisualRealEstate,
+  "UI · UX & Brand":               VisualBrand,
+  "Performance marketing":         VisualMarketing,
+};
+
 /* ─────────────── budget / timeline ─────────────── */
 const BUDGET_OPTIONS = [
   { value:"< $5k",      label:"< $5k",       sub:"Consultation / small scope" },
@@ -540,6 +716,7 @@ function ServiceSection({ service, index, total, onDetail, onStart, sectionRef: 
   const d = SERVICE_DETAILS[service.name];
   const accent = d?.accentColor ?? "#b86cf9";
   const gradient = CARD_GRADIENTS[service.name] ?? "linear-gradient(135deg,#0d0020,#7c3cce)";
+  const Visual = SERVICE_VISUAL[service.name];
 
   /* parallax — index-based for sticky-stacked sections */
   useEffect(() => {
@@ -570,7 +747,7 @@ function ServiceSection({ service, index, total, onDetail, onStart, sectionRef: 
   const tags = (service.count||"").split(",").filter(Boolean);
 
   return (
-    <section ref={(el)=>{ sectionRef.current=el; sectionRefCb?.(el); }} style={{ position:isMobile?"relative":"sticky",top:isMobile?undefined:76,zIndex:index+1,height:isMobile?"auto":"calc(100vh - 76px - 120px)",aspectRatio:isMobile?"1/1":undefined,overflow:"hidden",display:"flex",alignItems:isMobile?"flex-end":"center",borderRadius:15,marginBottom:isMobile?16:35 }}>
+    <section ref={(el)=>{ sectionRef.current=el; sectionRefCb?.(el); }} style={{ position:isMobile?"relative":"sticky",top:isMobile?undefined:76,zIndex:index+1,height:isMobile?"auto":"calc(100vh - 76px - 120px)",minHeight:isMobile?"clamp(320px,88vw,540px)":undefined,overflow:"hidden",display:"flex",alignItems:isMobile?"flex-end":"center",borderRadius:18,marginBottom:isMobile?14:28 }}>
       {/* ── parallax background ── */}
       <div ref={bgRef} style={{ position:"absolute",inset:0,willChange:"transform",zIndex:0,background:gradient }}>
         {service.image
@@ -579,8 +756,15 @@ function ServiceSection({ service, index, total, onDetail, onStart, sectionRef: 
         }
       </div>
       {/* ── overlay gradients ── */}
-      <div style={{ position:"absolute",inset:0,zIndex:1,background:"linear-gradient(90deg,rgba(0,0,0,.85) 0%,rgba(0,0,0,.55) 55%,rgba(0,0,0,.15) 100%)" }} />
-      <div style={{ position:"absolute",inset:0,zIndex:1,background:`radial-gradient(ellipse at 80% 50%, ${accent}18 0%, transparent 60%)` }} />
+      <div style={{ position:"absolute",inset:0,zIndex:1,background:isMobile?"linear-gradient(to top,rgba(0,0,0,.92) 0%,rgba(0,0,0,.6) 55%,rgba(0,0,0,.2) 100%)":"linear-gradient(90deg,rgba(0,0,0,.88) 0%,rgba(0,0,0,.6) 52%,rgba(0,0,0,.1) 100%)" }} />
+      <div style={{ position:"absolute",inset:0,zIndex:1,background:`radial-gradient(ellipse at 80% 50%, ${accent}1a 0%, transparent 60%)` }} />
+
+      {/* ── service visual art ── */}
+      {Visual && (
+        <div style={{ position:"absolute",right:isMobile?"-6%":"-1%",top:"50%",transform:"translateY(-50%)",width:isMobile?"78%":"50%",maxWidth:isMobile?360:520,pointerEvents:"none",zIndex:2,opacity:isMobile?.5:.88 }}>
+          <Visual a={accent} />
+        </div>
+      )}
 
       {/* ── ghost index number ── */}
       {!isMobile && <div style={{ position:"absolute",right:"3vw",top:"50%",transform:"translateY(-50%)",fontFamily:"var(--f-display)",fontStyle:"italic",fontSize:"clamp(120px,18vw,240px)",lineHeight:1,letterSpacing:"-.05em",color:"rgba(255,255,255,.04)",userSelect:"none",zIndex:1,pointerEvents:"none" }}>
@@ -591,7 +775,7 @@ function ServiceSection({ service, index, total, onDetail, onStart, sectionRef: 
       <div style={{ position:"absolute",left:0,top:0,bottom:0,width:3,background:`linear-gradient(to bottom, transparent 0%, ${accent} 50%, transparent 100%)`,zIndex:2,opacity:entered?.8:0,transition:"opacity .8s ease .3s" }} />
 
       {/* ── main content ── */}
-      <div style={{ position:"relative",zIndex:3,padding:isMobile?"0 20px 28px":"0 clamp(32px,7vw,100px)",maxWidth:isMobile?"100%":700,width:"100%" }}>
+      <div style={{ position:"relative",zIndex:3,padding:isMobile?"0 20px 32px":"0 clamp(32px,7vw,96px)",maxWidth:isMobile?"100%":580,width:"100%" }}>
         {/* counter */}
         <div style={{ fontFamily:"var(--f-mono)",fontSize:11,letterSpacing:".22em",textTransform:"uppercase",color:"rgba(255,255,255,.38)",marginBottom:18,opacity:entered?1:0,transform:entered?"translateY(0)":"translateY(20px)",transition:"opacity .6s ease .1s, transform .6s ease .1s" }}>
           {String(index+1).padStart(2,"0")} <span style={{opacity:.4}}>/ {String(total).padStart(2,"0")}</span>
@@ -762,7 +946,7 @@ export default function ServicesPage() {
       </section>
 
       {/* FULL-SCREEN SERVICE SECTIONS */}
-      <div ref={sectionsContainerRef} style={{ background:"var(--paper)", padding:"25px" }}>
+      <div ref={sectionsContainerRef} style={{ background:"var(--paper)", padding:"clamp(12px,2vw,28px)" }}>
         {services.map((s,i)=>(
           <ServiceSection
             key={s.id}
