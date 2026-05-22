@@ -66,6 +66,26 @@ export default function ToolsPage() {
 
   return (
     <>
+      <style>{`
+        .tools-bento { padding: 80px 0 120px; }
+        .tools-row1 { display: grid; grid-template-columns: 1.15fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .tools-row1-right { display: flex; flex-direction: column; gap: 12px; }
+        .tools-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .tools-why-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: rgba(255,255,255,.07); border-radius: 20px; overflow: hidden; }
+        .tools-card-featured { min-height: 400px; }
+        .tools-divider-row { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; font-family: var(--f-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+        @media (max-width: 760px) {
+          .tools-bento { padding: 40px 0 72px; }
+          .tools-row1 { grid-template-columns: 1fr; }
+          .tools-row2 { grid-template-columns: 1fr; }
+          .tools-why-grid { grid-template-columns: 1fr; border-radius: 14px; }
+          .tools-card-featured { min-height: 300px; padding: 28px 24px 24px !important; }
+          .tools-card-sm { padding: 22px 20px !important; }
+          .tools-card-md { padding: 26px 24px !important; min-height: 220px !important; }
+          .tools-divider-row { gap: 12px; }
+          .tools-divider-sep { display: none !important; }
+        }
+      `}</style>
       {/* ── HERO ── */}
       <section className="page-hero">
         <div className="wrap">
@@ -114,35 +134,31 @@ export default function ToolsPage() {
       {/* ── DIVIDER ── */}
       <div style={{ borderTop: "1px solid var(--line)", padding: "14px 0" }}>
         <div className="wrap">
-          <div className="fade in" style={{
-            display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap",
-            fontFamily: "var(--f-mono)", fontSize: 11, letterSpacing: ".12em",
-            textTransform: "uppercase", color: "var(--muted)",
-          }}>
+          <div className="fade in tools-divider-row">
             <span>05 Tools</span>
-            <span style={{ width: 1, height: 12, background: "var(--line)", display: "inline-block" }} />
+            <span className="tools-divider-sep" style={{ width: 1, height: 12, background: "var(--line)", display: "inline-block" }} />
             <span>Always free</span>
-            <span style={{ width: 1, height: 12, background: "var(--line)", display: "inline-block" }} />
+            <span className="tools-divider-sep" style={{ width: 1, height: 12, background: "var(--line)", display: "inline-block" }} />
             <span>No account needed</span>
-            <span style={{ width: 1, height: 12, background: "var(--line)", display: "inline-block" }} />
+            <span className="tools-divider-sep" style={{ width: 1, height: 12, background: "var(--line)", display: "inline-block" }} />
             <span>Built by Foxmen Studio</span>
           </div>
         </div>
       </div>
 
       {/* ── TOOLS BENTO ── */}
-      <section style={{ padding: "80px 0 120px" }}>
+      <section className="tools-bento">
         <div className="wrap">
 
           {/* Row 1: Featured (01) + Side column (02 + 03) */}
-          <div style={{ display: "grid", gridTemplateColumns: "1.15fr 1fr", gap: 12, marginBottom: 12 }}>
+          <div className="tools-row1">
 
             {/* CARD 01 — Featured dark */}
-            <Link href={TOOLS[0].href} className="fade in" style={{
+            <Link href={TOOLS[0].href} className="fade in tools-card-featured" style={{
               display: "flex", flexDirection: "column",
               background: TOOLS[0].bg, color: TOOLS[0].fg,
               borderRadius: 20, padding: "44px 44px 36px",
-              textDecoration: "none", minHeight: 400,
+              textDecoration: "none",
               transition: "transform .5s cubic-bezier(.16,1,.3,1), box-shadow .5s cubic-bezier(.16,1,.3,1)",
             }}
               onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 32px 80px -20px rgba(0,0,0,.4)"; }}
@@ -177,9 +193,9 @@ export default function ToolsPage() {
             </Link>
 
             {/* Right column */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div className="tools-row1-right">
               {[TOOLS[1], TOOLS[2]].map((tool, i) => (
-                <Link key={tool.href} href={tool.href} className={`fade in d${i + 1}`} style={{
+                <Link key={tool.href} href={tool.href} className={`fade in d${i + 1} tools-card-sm`} style={{
                   display: "flex", flexDirection: "column",
                   background: tool.bg, color: tool.fg,
                   borderRadius: 20, padding: "28px 32px",
@@ -222,9 +238,9 @@ export default function ToolsPage() {
           </div>
 
           {/* Row 2: Tools 04 + 05 */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div className="tools-row2">
             {[TOOLS[3], TOOLS[4]].map((tool, i) => (
-              <Link key={tool.href} href={tool.href} className={`fade in d${i + 2}`} style={{
+              <Link key={tool.href} href={tool.href} className={`fade in d${i + 2} tools-card-md`} style={{
                 display: "flex", flexDirection: "column",
                 background: tool.bg, color: tool.fg,
                 borderRadius: 20, padding: "36px 40px",
@@ -285,7 +301,7 @@ export default function ToolsPage() {
             </h2>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 1, background: "rgba(255,255,255,.07)", borderRadius: 20, overflow: "hidden" }}>
+          <div className="tools-why-grid">
             {[
               { icon: "↗", title: "Real data, live", body: "Every tool uses live data — real Core Web Vitals from Google, real market rates from agency research, real AI analysis. Not benchmarks we made up." },
               { icon: "⚡", title: "Results in seconds", body: "Speed checks return in under 30 seconds. AI audits in 10–20. Price estimates instantly. Built for founders who don't have time to wait." },
