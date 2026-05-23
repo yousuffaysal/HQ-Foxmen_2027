@@ -67,12 +67,20 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
   const inputRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const handledIds = useRef(new Set<number>());
+  const [isMobile, setIsMobile] = useState(false);
 
   const done  = project.milestones.filter(m => m.status === "completed").length;
   const total = project.milestones.length;
   const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
 
   useEffect(() => { inject(); }, []);
+
+  useEffect(() => {
+    function check() { setIsMobile(window.innerWidth <= 768); }
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   useEffect(() => {
     if (tab !== "chat") return;
@@ -182,9 +190,11 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
 
       {/* Panel */}
       <div className="pp-panel" style={{
-        position: "fixed", right: 0, top: 0, bottom: 0, width: 500,
+        position: "fixed", right: 0, top: 0, bottom: 0,
+        width: isMobile ? "100%" : 500,
+        left: isMobile ? 0 : undefined,
         zIndex: 201, background: "#fff", display: "flex", flexDirection: "column",
-        boxShadow: "-16px 0 60px rgba(0,0,0,.14)",
+        boxShadow: isMobile ? "none" : "-16px 0 60px rgba(0,0,0,.14)",
         fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       }}>
         {/* Header */}

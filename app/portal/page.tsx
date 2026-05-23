@@ -32,6 +32,8 @@ export default function PortalPage() {
   const [offers,   setOffers]   = useState<Offer[]>([]);
   const [notifs,   setNotifs]   = useState<Notification[]>([]);
   const [loading,  setLoading]  = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // side panel
   const [sidePanel,    setSidePanel]    = useState<Project | null>(null);
@@ -118,6 +120,19 @@ export default function PortalPage() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  useEffect(() => {
+    if (!document.getElementById("portal-mobile-css")) {
+      const s = document.createElement("style");
+      s.id = "portal-mobile-css";
+      s.textContent = `@keyframes ptSlideIn{from{transform:translateX(-100%)}to{transform:translateX(0)}} .pt-mob-drawer{animation:ptSlideIn .26s cubic-bezier(.22,1,.36,1) both}`;
+      document.head.appendChild(s);
+    }
+    function check() { setIsMobile(window.innerWidth <= 768); }
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   const unread        = notifs.filter(n => !n.read).length;
   const pendingOffers = offers.filter(o => o.status === "pending");
   const activeProjects= projects.filter(p => p.status === "in_progress" || p.status === "review");
@@ -176,7 +191,7 @@ export default function PortalPage() {
     <div style={{ display: "flex", minHeight: "100vh", background: "#f7f6f4", fontFamily: "var(--f-sans)" }}>
 
       {/* ── SIDEBAR ── */}
-      <aside style={{ width: 240, background: "#0a0a0a", color: "#fff", display: "flex", flexDirection: "column", position: "sticky", top: 0, height: "100vh", flexShrink: 0, zIndex: 50 }}>
+      <aside style={{ width: 240, background: "#0a0a0a", color: "#fff", display: isMobile ? "none" : "flex", flexDirection: "column", position: "sticky", top: 0, height: "100vh", flexShrink: 0, zIndex: 50 }}>
         {/* Brand */}
         <div style={{ padding: "22px 20px 18px", borderBottom: "1px solid rgba(255,255,255,.07)" }}>
           <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
@@ -254,9 +269,15 @@ export default function PortalPage() {
       <main style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
 
         {/* ── TOPBAR ── */}
-        <header style={{ background: "#fff", borderBottom: "1px solid #e7e5e2", padding: "0 24px", height: 60, display: "flex", alignItems: "center", gap: 10, position: "sticky", top: 0, zIndex: 30 }}>
+        <header style={{ background: "#fff", borderBottom: "1px solid #e7e5e2", padding: isMobile ? "0 14px" : "0 24px", height: 60, display: "flex", alignItems: "center", gap: 10, position: "sticky", top: 0, zIndex: 30 }}>
+          {isMobile && (
+            <button onClick={() => setMobileSidebarOpen(o => !o)}
+              style={{ width: 36, height: 36, borderRadius: 10, background: "#f7f6f4", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#6b6b6b", flexShrink: 0 }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+          )}
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 11, color: "#9a9a9a", letterSpacing: ".08em", textTransform: "uppercase" }}>
+            <div style={{ fontSize: isMobile ? 14 : 11, fontWeight: isMobile ? 600 : 400, color: isMobile ? "#0a0a0a" : "#9a9a9a", letterSpacing: ".08em", textTransform: isMobile ? "none" : "uppercase" }}>
               {navItems.find(n => n.key === tab)?.label}
             </div>
           </div>
@@ -346,7 +367,7 @@ export default function PortalPage() {
         </header>
 
         {/* ── CONTENT ── */}
-        <div style={{ flex: 1, padding: "28px", overflowY: "auto" }}>
+        <div style={{ flex: 1, padding: isMobile ? "16px 14px 86px" : "28px", overflowY: "auto" }}>
 
           {/* ══ DASHBOARD ══ */}
           {tab === "dashboard" && (
@@ -359,7 +380,7 @@ export default function PortalPage() {
               </div>
 
               {/* BENTO GRID */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gridTemplateRows: "auto", gap: 14 }}>
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, 1fr)", gridTemplateRows: "auto", gap: 12 }}>
 
                 {/* Stat cards */}
                 {[
@@ -380,7 +401,7 @@ export default function PortalPage() {
                 ))}
 
                 {/* Active projects — spans 3 cols */}
-                <div style={{ gridColumn: "1 / 4", background: "#fff", border: "1.5px solid #e7e5e2", borderRadius: 16, padding: "20px 22px" }}>
+                <div style={{ gridColumn: isMobile ? "1 / -1" : "1 / 4", background: "#fff", border: "1.5px solid #e7e5e2", borderRadius: 16, padding: "20px 22px" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
                     <h2 style={{ fontSize: 14, fontWeight: 600, color: "#0a0a0a", margin: 0 }}>Active Projects</h2>
                     <button onClick={() => setTab("projects")} style={{ fontSize: 12, color: "#b86cf9", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>View all →</button>
@@ -401,7 +422,7 @@ export default function PortalPage() {
                 </div>
 
                 {/* Offers — 1 col, tall */}
-                <div style={{ gridColumn: "4 / 5", gridRow: "2 / 4", background: "#fff", border: "1.5px solid #e7e5e2", borderRadius: 16, padding: "20px 22px", display: "flex", flexDirection: "column" }}>
+                <div style={{ gridColumn: isMobile ? "1 / -1" : "4 / 5", gridRow: isMobile ? undefined : "2 / 4", background: "#fff", border: "1.5px solid #e7e5e2", borderRadius: 16, padding: "20px 22px", display: "flex", flexDirection: "column" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
                     <h2 style={{ fontSize: 14, fontWeight: 600, color: "#0a0a0a", margin: 0 }}>Offers</h2>
                     {pendingOffers.length > 0 && <span style={{ background: "#b86cf9", color: "#fff", fontSize: 10, fontWeight: 700, padding: "1px 7px", borderRadius: 50 }}>{pendingOffers.length}</span>}
@@ -427,7 +448,7 @@ export default function PortalPage() {
                 </div>
 
                 {/* Recent activity — 3 cols */}
-                <div style={{ gridColumn: "1 / 4", background: "#fff", border: "1.5px solid #e7e5e2", borderRadius: 16, padding: "20px 22px" }}>
+                <div style={{ gridColumn: isMobile ? "1 / -1" : "1 / 4", background: "#fff", border: "1.5px solid #e7e5e2", borderRadius: 16, padding: "20px 22px" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
                     <h2 style={{ fontSize: 14, fontWeight: 600, color: "#0a0a0a", margin: 0 }}>Recent Activity</h2>
                     <button onClick={() => setTab("notifications")} style={{ fontSize: 12, color: "#b86cf9", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>View all →</button>
@@ -675,6 +696,71 @@ export default function PortalPage() {
           onClose={() => setSidePanel(null)}
           onUnread={handleUnread}
         />
+      )}
+
+      {/* ── MOBILE SIDEBAR DRAWER ── */}
+      {isMobile && mobileSidebarOpen && (
+        <>
+          <div onClick={() => setMobileSidebarOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.55)", zIndex: 60, backdropFilter: "blur(2px)" }} />
+          <div className="pt-mob-drawer" style={{ position: "fixed", left: 0, top: 0, bottom: 0, width: 270, background: "#0a0a0a", zIndex: 70, display: "flex", flexDirection: "column", overflowY: "auto" }}>
+            {/* Brand */}
+            <div style={{ padding: "20px 18px 16px", borderBottom: "1px solid rgba(255,255,255,.07)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
+                <img src="/assets/logo-mark.svg" alt="Foxmen" style={{ width: 26, height: 26 }} />
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: 14, color: "#fff", fontFamily: "var(--f-display)" }}>Foxmen <em style={{ fontStyle: "italic", color: "#b86cf9" }}>Studio</em></div>
+                  <div style={{ fontSize: 8, color: "rgba(255,255,255,.3)", letterSpacing: ".18em", textTransform: "uppercase" }}>Client Portal</div>
+                </div>
+              </a>
+              <button onClick={() => setMobileSidebarOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,.4)", padding: 4, borderRadius: 8, display: "flex" }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+            {/* Projects list */}
+            {projects.length > 0 && (
+              <div style={{ padding: "14px 10px 0" }}>
+                <div style={{ fontSize: 9, color: "rgba(255,255,255,.25)", letterSpacing: ".2em", textTransform: "uppercase", padding: "0 10px 8px" }}>Projects</div>
+                {projects.map(p => (
+                  <button key={p.id} onClick={() => { openProjectPanel(p); setMobileSidebarOpen(false); }}
+                    style={{ display: "flex", alignItems: "center", gap: 8, padding: "9px 12px", borderRadius: 8, border: "none", cursor: "pointer", width: "100%", textAlign: "left", background: "transparent" }}>
+                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: STATUS_COLOR[p.status] ?? "#888", flexShrink: 0 }} />
+                    <span style={{ fontSize: 13, color: "rgba(255,255,255,.6)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>{p.title}</span>
+                    {(projectUnreads[p.id] ?? 0) > 0 && <span style={{ background: "#b86cf9", color: "#fff", fontSize: 9, fontWeight: 700, padding: "1px 6px", borderRadius: 50 }}>{projectUnreads[p.id]}</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+            <div style={{ flex: 1 }} />
+            {/* User footer */}
+            <div style={{ padding: "14px 16px", borderTop: "1px solid rgba(255,255,255,.07)", display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 32, height: 32, borderRadius: "50%", flexShrink: 0, overflow: "hidden", background: "#b86cf9", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#fff" }}>
+                {settingAvatar ? <img src={settingAvatar} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initials}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 500, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.name}</div>
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,.3)", fontFamily: "monospace" }}>{foxId ?? (user?.role ?? "client")}</div>
+              </div>
+              <button onClick={() => signOut({ callbackUrl: "/login" })} title="Sign out"
+                style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,.4)", padding: 4, borderRadius: 6, display: "flex" }}>
+                <IconSignOut />
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── MOBILE BOTTOM NAV ── */}
+      {isMobile && (
+        <nav style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "#fff", borderTop: "1.5px solid #e7e5e2", display: "flex", zIndex: 50, paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+          {navItems.map(item => (
+            <button key={item.key} onClick={() => setTab(item.key as typeof tab)}
+              style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "8px 4px 10px", border: "none", background: "none", cursor: "pointer", color: tab === item.key ? "#b86cf9" : "#9a9a9a", position: "relative", minHeight: 56 }}>
+              <span style={{ opacity: tab === item.key ? 1 : 0.6, transition: "opacity .15s" }}>{item.icon}</span>
+              <span style={{ fontSize: 9, marginTop: 4, fontWeight: tab === item.key ? 700 : 400, letterSpacing: ".02em" }}>{item.label}</span>
+              {item.badge ? <span style={{ position: "absolute", top: 7, left: "50%", transform: "translateX(3px)", background: "#b86cf9", color: "#fff", fontSize: 8, padding: "1px 4px", borderRadius: 50, minWidth: 14, textAlign: "center", lineHeight: "1.5" }}>{item.badge}</span> : null}
+            </button>
+          ))}
+        </nav>
       )}
 
       {/* ── NEW PROJECT MODAL ── */}
