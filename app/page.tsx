@@ -589,13 +589,6 @@ const PF_CSS = `
     position:sticky; top:72px; z-index:10; order:-1;
     width:100%; margin-bottom:0;
   }
-  /* Gradient at bottom of sticky mockup — steps fade as they scroll under */
-  .pf-sticky-col::after {
-    content:''; position:absolute; bottom:-32px; left:0; right:0;
-    height:32px;
-    background:linear-gradient(to bottom, #0a0a0a 0%, transparent 100%);
-    pointer-events:none; z-index:11;
-  }
   .pf-left { position:relative; z-index:1; padding-top:48px; }
   .pf-app { height:380px; }
   .pf-profile-name { display:none; }
@@ -647,8 +640,10 @@ const PF_CSS = `
   .pf-step { padding:22px 0; gap:20px; }
   .pf-step-title { font-size:24px; margin-bottom:10px; }
   .pf-step-copy { font-size:15px; line-height:1.65; }
-  /* CTA full-width */
-  .pf-section a.btn { width:100%; justify-content:center; box-sizing:border-box; }
+  /* CTA — fit content width, compact chip */
+  .pf-section a.btn { padding:8px 8px 8px 24px; font-size:15px; }
+  .pf-section a.btn .chip { width:40px; height:40px; }
+  .pf-section a.btn .chip svg { width:18px; height:18px; }
 }
 `;
 
