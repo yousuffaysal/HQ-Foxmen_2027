@@ -33,10 +33,71 @@ const instrumentSans = Instrument_Sans({
 });
 
 export const metadata: Metadata = {
-  title: { default: "Foxmen Studio — Code. Craft. Care.", template: "%s — Foxmen Studio" },
+  metadataBase: new URL("https://foxmenstudio.com"),
+  title: {
+    default: "Foxmen Studio — Code. Craft. Care.",
+    template: "%s — Foxmen Studio",
+  },
   description:
-    "Foxmen Studio is an international agency building websites, mobile apps, AI-integrated software, ecommerce and real estate platforms, design systems and brands.",
-  icons: { icon: "/assets/logo-mark.svg" },
+    "Foxmen Studio is an international creative agency building websites, mobile apps, AI-integrated software, ecommerce and real estate platforms, design systems and brands. Est. 2025.",
+  keywords: [
+    "web design agency", "web development agency", "mobile app development",
+    "AI software development", "ecommerce development", "UI UX design agency",
+    "brand design", "Foxmen Studio", "Next.js development", "real estate platform",
+    "startup product agency", "digital agency", "design system",
+  ],
+  authors: [{ name: "Foxmen Studio", url: "https://foxmenstudio.com" }],
+  creator: "Foxmen Studio",
+  publisher: "Foxmen Studio",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://foxmenstudio.com",
+    siteName: "Foxmen Studio",
+    title: "Foxmen Studio — Code. Craft. Care.",
+    description:
+      "International creative agency building websites, mobile apps, AI-integrated software, ecommerce platforms, and design systems.",
+    images: [
+      {
+        url: "/assets/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Foxmen Studio — Code. Craft. Care.",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Foxmen Studio — Code. Craft. Care.",
+    description:
+      "International creative agency building websites, mobile apps, AI-integrated software, ecommerce platforms, and design systems.",
+    images: ["/assets/og-image.png"],
+    creator: "@foxmenstudio",
+    site: "@foxmenstudio",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-snippet": -1,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
+    },
+  },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: "/assets/logo-mark.svg",
+    shortcut: "/icon.svg",
+  },
+  alternates: {
+    canonical: "https://foxmenstudio.com",
+  },
+  category: "technology",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

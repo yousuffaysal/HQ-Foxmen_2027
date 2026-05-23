@@ -1,6 +1,31 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { sql } from "@/lib/db";
 import WorkGrid from "./WorkGrid";
+
+export const metadata: Metadata = {
+  title: "Work",
+  description:
+    "Case studies and selected work from Foxmen Studio — websites, mobile apps, AI products, ecommerce stores, and real estate platforms built for global clients.",
+  keywords: [
+    "web design portfolio", "agency case studies", "web development projects",
+    "mobile app portfolio", "AI product portfolio", "ecommerce portfolio",
+    "Foxmen Studio work", "digital product design",
+  ],
+  openGraph: {
+    title: "Work — Foxmen Studio",
+    description:
+      "Selected projects and case studies — websites, apps, AI products, ecommerce, and real estate platforms.",
+    url: "https://foxmenstudio.com/work",
+    images: [{ url: "/assets/og-image.png", width: 1200, height: 630, alt: "Foxmen Studio Work" }],
+  },
+  twitter: {
+    title: "Work — Foxmen Studio",
+    description: "Selected projects and case studies from Foxmen Studio.",
+    images: ["/assets/og-image.png"],
+  },
+  alternates: { canonical: "https://foxmenstudio.com/work" },
+};
 
 function ArrowIcon() {
   return (

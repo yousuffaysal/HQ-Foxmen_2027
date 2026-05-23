@@ -92,7 +92,7 @@ async function seed() {
   await sql`DELETE FROM team`;
   await sql`
     INSERT INTO team (av, name, role, bio) VALUES
-    ('AR','Arif Rahman',  'Owner · Studio Lead',   'Founded Foxmen in 2019. Leads strategy and client relationships.'),
+    ('AR','Arif Rahman',  'Owner · Studio Lead',   'Founded Foxmen in 2025. Leads strategy and client relationships.'),
     ('SK','Sara Köhler',  'Design Director',       'Leads design and motion. Previously at Linear, IDEO.'),
     ('DA','Devon Arias',  'Head of AI',            'Builds production-grade copilots. Ex-Anthropic applied team.'),
     ('MV','Marta Vidal',  'Principal Engineer',    'Engineering quality and platform. Owns the deploy pipeline.'),

@@ -225,7 +225,7 @@ th{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:#9a9a9a;f
             <div class="hd-tag">Code · Craft · Care</div>
           </div>
         </div>
-        <div class="hd-tag2">Est. 2019 · AI-Powered Studio</div>
+        <div class="hd-tag2">Est. 2025 · AI-Powered Studio</div>
         <div class="hd-para">We architect AI-integrated digital products that define the next era of business.<br/>Precision-engineered software and elevated design — built to give your brand an unfair advantage.</div>
       </div>
     </div>
@@ -289,7 +289,7 @@ ${p.notes?`<div class="notes-box"><span class="notes-lbl">Project Notes</span><d
 <div class="ft">
   <div>
     <div class="ft-logo-row"><img src="${logoUrl}" alt=""/><div class="ft-brand">Foxmen <em>Studio</em></div></div>
-    <div class="ft-sub">Code · Craft · Care · Est. 2019</div>
+    <div class="ft-sub">Code · Craft · Care · Est. 2025</div>
   </div>
   <div class="ft-mid"><strong>contact@foxmenstudio.com</strong><br/>foxmen.studio</div>
   <div class="ft-right">Payment due within 14 days of issue.<br/>Late payments subject to 2% monthly interest.</div>
@@ -2066,7 +2066,7 @@ export default function AdminPage() {
                                 <div className="inv-hd-tagline">Code · Craft · Care</div>
                               </div>
                             </div>
-                            <div className="inv-hd-tagline2">Est. 2019 · AI-Powered Studio</div>
+                            <div className="inv-hd-tagline2">Est. 2025 · AI-Powered Studio</div>
                             <div className="inv-hd-para">We architect AI-integrated digital products that define the next era of business.<br/>Precision-engineered software and elevated design — built to give your brand an unfair advantage.</div>
                           </div>
                         </div>
@@ -2174,7 +2174,7 @@ export default function AdminPage() {
                           <img src="/assets/logo-mark.svg" alt=""/>
                           <div className="ft-brand">Foxmen <em>Studio</em></div>
                         </div>
-                        <div className="ft-sub">Code · Craft · Care · Est. 2019</div>
+                        <div className="ft-sub">Code · Craft · Care · Est. 2025</div>
                       </div>
                       <div className="ft-mid"><strong>contact@foxmenstudio.com</strong><br/>foxmen.studio</div>
                       <div className="ft-right">Payment due within 14 days of issue.<br/>Late payments subject to 2% monthly interest.</div>

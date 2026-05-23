@@ -140,7 +140,7 @@ function Hero() {
       </div>
       <div className="wrap">
         <div className="hero-tag fade in">
-          <span className="eyebrow">International Digital Studio — EST. 2019</span>
+          <span className="eyebrow">International Digital Studio — EST. 2025</span>
         </div>
         <h1 className="display in">
           <span className="row">

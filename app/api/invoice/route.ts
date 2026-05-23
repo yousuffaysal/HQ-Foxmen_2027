@@ -82,7 +82,7 @@ function buildEmailHtml(data: {
           <td style="vertical-align:middle;">
             <div style="font-family:'Instrument Serif','Times New Roman',serif;font-size:2rem;font-weight:400;color:#fff;line-height:1;">Foxmen <em style="font-style:italic;color:#b86cf9;font-weight:400;">Studio</em></div>
             <div style="font-family:monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:#b86cf9;font-weight:700;margin-top:7px;">Code · Craft · Care</div>
-            <div style="font-family:monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.9);font-weight:400;padding-top:8px;border-top:1px solid rgba(255,255,255,.07);">Est. 2019 · AI-Powered Studio</div>
+            <div style="font-family:monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.9);font-weight:400;padding-top:8px;border-top:1px solid rgba(255,255,255,.07);">Est. 2025 · AI-Powered Studio</div>
             <div style="font-size:.73rem;color:rgba(255,255,255,.45);line-height:1.8;margin-top:7px;">We architect AI-integrated digital products that define the next era of business.<br/>Precision-engineered software and elevated design — built to give your brand an unfair advantage.</div>
           </td>
         </tr></table>
@@ -199,7 +199,7 @@ function buildEmailHtml(data: {
             <div style="font-family:'Instrument Serif','Times New Roman',serif;font-size:1rem;color:#fff;font-weight:400;">Foxmen <em style="font-style:italic;color:#b86cf9;">Studio</em></div>
           </td>
         </tr></table>
-        <div style="font-size:.6rem;color:rgba(255,255,255,.3);margin-top:5px;letter-spacing:.06em;">Code · Craft · Care · Est. 2019</div>
+        <div style="font-size:.6rem;color:rgba(255,255,255,.3);margin-top:5px;letter-spacing:.06em;">Code · Craft · Care · Est. 2025</div>
       </td>
       <td style="text-align:center;vertical-align:top;width:33%;">
         <div style="font-size:.7rem;color:rgba(255,255,255,.4);line-height:2;"><strong style="color:rgba(255,255,255,.75);font-weight:500;">contact@foxmenstudio.com</strong><br/>foxmen.studio</div>

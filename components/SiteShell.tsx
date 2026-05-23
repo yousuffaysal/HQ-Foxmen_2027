@@ -3,7 +3,6 @@ import { usePathname } from "next/navigation";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import Preloader from "@/components/Preloader";
-import FoxChat from "@/components/FoxChat";
 import SiteLiveChat from "@/components/SiteLiveChat";
 
 const NO_SHELL_PATHS  = ["/login", "/register"];
@@ -33,7 +32,6 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
       <Nav />
       <main>{children}</main>
       <Footer />
-      <FoxChat />
       {!noChat && <SiteLiveChat />}
     </>
   );

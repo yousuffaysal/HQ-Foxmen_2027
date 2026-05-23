@@ -40,6 +40,19 @@ function fmt(ts: string) {
   return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
 }
 
+function LogoMark({ size = 26 }: { size?: number }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 114.86 114.86" fill="none">
+      <g stroke="rgba(184,108,249,.35)" strokeWidth="1.6" strokeLinejoin="round">
+        <polygon fill="#b86cf9" points="86.85 27.97 86.89 43.89 71.15 43.84 56.73 27.97 27.95 27.97 27.76 1.03 58.44 1 86.89 27.97 86.85 27.97"/>
+        <polygon fill="#b86cf9" points="113.86 58.46 86.94 86.79 86.94 87.06 71.84 87.17 71.82 71.42 86.85 56.91 86.85 28.01 113.83 27.83 113.86 58.46"/>
+        <polygon fill="#b86cf9" points="86.76 86.88 57.23 86.88 43.09 71.99 27.75 72 27.86 86.88 27.86 86.93 27.9 86.97 56.27 113.86 86.95 113.83 86.76 86.88"/>
+        <polygon fill="#b86cf9" points="28.02 57.23 28.13 86.84 1.15 87.13 1 56.49 27.77 28.12 27.87 28.01 27.91 28.01 42.49 27.91 42.5 43.25 28.02 57.23"/>
+      </g>
+    </svg>
+  );
+}
+
 function renderMarkdown(text: string) {
   return text
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
@@ -290,7 +303,7 @@ export default function SiteLiveChat() {
       >
         {mode
           ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M18 6L6 18M6 6l12 12" /></svg>
-          : <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+          : <LogoMark size={26} />
         }
         {!mode && unread > 0 && (
           <span className="flc-badge" style={{
