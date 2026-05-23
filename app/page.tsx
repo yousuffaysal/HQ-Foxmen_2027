@@ -375,9 +375,12 @@ function BatteryIcon() {
    Left: scroll-driven 4-step list  |  Right: sticky animated portal mockup
 ───────────────────────────────────────────────────────────────────────── */
 const PF_CSS = `
-.pf-section { padding: 120px 0 100px; }
-.pf-section .display { font-size:clamp(44px,5.5vw,72px) !important; line-height:1.08 !important; }
-.pf-intro { max-width:560px; margin-top:24px; font-size:20px; line-height:1.65; opacity:.58; }
+.pf-section { padding: 120px 0 100px; background:#0a0a0a; color:#fff; }
+.pf-section .display { font-size:clamp(44px,5.5vw,72px) !important; line-height:1.08 !important; color:#fff !important; }
+.pf-intro { max-width:560px; margin-top:24px; font-size:20px; line-height:1.65; opacity:.58; color:#fff; }
+.pf-section a.btn { --bg:#b86cf9; --fg:#fff; --chip:#fff; --chipfg:#b86cf9; }
+.pf-section a.btn::before { background:#8c3bd9; }
+.pf-section a.btn:hover { color:#fff; }
 
 .pf-split {
   display:grid; grid-template-columns:1fr 1fr;
