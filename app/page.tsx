@@ -376,7 +376,7 @@ function BatteryIcon() {
 ───────────────────────────────────────────────────────────────────────── */
 const PF_CSS = `
 .pf-section { padding: 120px 0 80px; }
-.pf-intro { max-width:520px; margin-top:20px; font-size:17px; line-height:1.65; opacity:.58; }
+.pf-intro { max-width:560px; margin-top:24px; font-size:20px; line-height:1.65; opacity:.58; }
 
 .pf-split {
   display:grid; grid-template-columns:1fr 1fr;
@@ -385,25 +385,25 @@ const PF_CSS = `
 
 /* steps */
 .pf-step {
-  display:flex; gap:24px; padding:30px 0;
+  display:flex; gap:28px; padding:36px 0;
   border-top:1px solid rgba(10,10,10,.09);
-  opacity:.3; transition:opacity .5s cubic-bezier(.16,1,.3,1);
+  opacity:.25; transition:opacity .5s cubic-bezier(.16,1,.3,1);
   cursor:default;
 }
 .pf-step:first-child { border-top:none; }
 .pf-step--active { opacity:1; }
 
 .pf-step-num {
-  font-family:var(--font-geist-mono,monospace); font-size:11px;
-  color:var(--brand,#b86cf9); letter-spacing:.07em; padding-top:4px; min-width:26px;
+  font-family:var(--font-geist-mono,monospace); font-size:12px;
+  color:var(--brand,#b86cf9); letter-spacing:.07em; padding-top:6px; min-width:28px;
 }
 .pf-step-title {
-  font-size:21px; font-weight:600;
+  font-size:30px; font-weight:600;
   font-family:var(--font-instrument-serif,Georgia,serif);
-  margin-bottom:10px; transition:color .35s ease;
+  margin-bottom:12px; transition:color .35s ease; line-height:1.15;
 }
 .pf-step--active .pf-step-title { color:var(--brand,#b86cf9); }
-.pf-step-copy { font-size:15px; line-height:1.68; opacity:.62; max-width:340px; }
+.pf-step-copy { font-size:17px; line-height:1.7; opacity:.62; max-width:380px; }
 
 /* sticky col */
 .pf-sticky-col { position:sticky; top:100px; }
@@ -731,6 +731,324 @@ function PortalFeatureSection() {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Live Chat / Foxo AI Support Section
+───────────────────────────────────────────────────────────────────────── */
+const LC_CSS = `
+.lc-section {
+  padding:120px 0; background:#0a0a0a; overflow:hidden; position:relative;
+}
+.lc-bg-glow {
+  position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(ellipse 60% 55% at 75% 50%, rgba(184,108,249,.13) 0%, transparent 70%);
+}
+.lc-inner {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:80px; align-items:center; position:relative; z-index:1;
+}
+.lc-copy .eyebrow { color:rgba(184,108,249,.85); }
+.lc-copy h2 { color:#fff; margin-top:20px; }
+.lc-copy h2 .it { color:var(--brand,#b86cf9); }
+.lc-desc {
+  margin-top:20px; font-size:18px; line-height:1.68;
+  color:rgba(255,255,255,.5); max-width:460px;
+}
+.lc-opts { display:flex; flex-direction:column; gap:14px; margin-top:36px; }
+.lc-opt {
+  display:flex; align-items:flex-start; gap:16px;
+  background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
+  border-radius:14px; padding:20px; transition:border-color .3s ease, background .3s ease;
+}
+.lc-opt:hover { border-color:rgba(184,108,249,.35); background:rgba(184,108,249,.06); }
+.lc-opt-ico {
+  width:40px; height:40px; border-radius:10px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+.lc-opt-ico--ai   { background:rgba(184,108,249,.18); color:var(--brand,#b86cf9); }
+.lc-opt-ico--live { background:rgba(74,222,128,.12); color:#4ade80; }
+.lc-opt-title { font-size:15px; font-weight:600; color:#fff; margin-bottom:4px; }
+.lc-opt-desc  { font-size:13px; color:rgba(255,255,255,.45); line-height:1.55; }
+.lc-opt-badge {
+  margin-left:auto; align-self:flex-start; flex-shrink:0;
+  font-size:10px; font-weight:600; letter-spacing:.05em;
+  padding:3px 9px; border-radius:20px;
+}
+.lc-opt-badge--ai   { background:rgba(184,108,249,.15); color:var(--brand,#b86cf9); }
+.lc-opt-badge--live { background:rgba(74,222,128,.12);  color:#4ade80; }
+
+/* chat widget mockup */
+.lc-widget {
+  background:#1a1a1a; border-radius:20px; overflow:hidden;
+  border:1px solid rgba(255,255,255,.07);
+  box-shadow:0 0 0 1px rgba(255,255,255,.04), 0 40px 100px rgba(0,0,0,.5);
+  max-width:380px; margin:0 auto;
+}
+.lc-widget-hd {
+  padding:18px 20px 16px;
+  background:rgba(255,255,255,.035);
+  border-bottom:1px solid rgba(255,255,255,.06);
+  display:flex; align-items:center; gap:12px;
+}
+.lc-widget-av {
+  width:36px; height:36px; border-radius:50%; flex-shrink:0;
+  background:linear-gradient(135deg,#7c3aed,#b86cf9);
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; font-weight:700; color:#fff;
+}
+.lc-widget-hd-name  { font-size:14px; font-weight:600; color:#fff; }
+.lc-widget-hd-sub   { font-size:11px; color:rgba(255,255,255,.38); margin-top:1px; }
+.lc-widget-hd-badge {
+  margin-left:auto; display:flex; align-items:center; gap:5px;
+  font-size:11px; color:#4ade80; font-weight:500;
+}
+.lc-widget-hd-dot {
+  width:7px; height:7px; border-radius:50%; background:#4ade80;
+  animation:lcPulse 2s ease-in-out infinite;
+}
+@keyframes lcPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.6)} }
+
+/* chat body */
+.lc-chat-body {
+  padding:20px 16px; display:flex; flex-direction:column; gap:10px;
+  min-height:280px;
+}
+.lc-msg {
+  display:flex; flex-direction:column; gap:2px;
+  animation:lcMsgIn .5s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes lcMsgIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+.lc-msg--out { align-items:flex-end; }
+.lc-msg--in  { align-items:flex-start; }
+.lc-bubble {
+  max-width:82%; padding:10px 14px; border-radius:16px;
+  font-size:13px; line-height:1.55;
+}
+.lc-msg--in  .lc-bubble { background:rgba(255,255,255,.08); color:rgba(255,255,255,.85); border-bottom-left-radius:4px; }
+.lc-msg--out .lc-bubble { background:var(--brand,#b86cf9); color:#fff; border-bottom-right-radius:4px; }
+.lc-msg-time { font-size:10px; color:rgba(255,255,255,.22); padding:0 4px; }
+
+/* typing indicator */
+.lc-typing {
+  display:flex; gap:4px; padding:12px 14px;
+  background:rgba(255,255,255,.07); border-radius:16px; border-bottom-left-radius:4px;
+  width:fit-content; align-items:center;
+  animation:lcMsgIn .4s cubic-bezier(.16,1,.3,1) both;
+}
+.lc-typing-dot {
+  width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.4);
+  animation:lcTypeDot 1.2s ease-in-out infinite;
+}
+.lc-typing-dot:nth-child(2) { animation-delay:.15s; }
+.lc-typing-dot:nth-child(3) { animation-delay:.3s; }
+@keyframes lcTypeDot { 0%,60%,100%{transform:translateY(0);opacity:.4} 30%{transform:translateY(-5px);opacity:1} }
+
+/* input bar */
+.lc-input-row {
+  display:flex; align-items:center; gap:10px;
+  padding:14px 16px;
+  border-top:1px solid rgba(255,255,255,.06);
+  background:rgba(255,255,255,.02);
+}
+.lc-input-bar {
+  flex:1; background:rgba(255,255,255,.07); border-radius:20px;
+  padding:9px 14px; font-size:13px; color:rgba(255,255,255,.25);
+  border:1px solid rgba(255,255,255,.06);
+}
+.lc-send {
+  width:34px; height:34px; border-radius:50%; flex-shrink:0;
+  background:var(--brand,#b86cf9); display:flex; align-items:center; justify-content:center;
+  cursor:default;
+}
+
+/* tab switcher */
+.lc-tabs {
+  display:flex; gap:2px; padding:10px 16px 0;
+}
+.lc-tab {
+  flex:1; padding:8px; border-radius:10px; font-size:12px; font-weight:500;
+  text-align:center; cursor:default; transition:background .25s ease, color .25s ease;
+  color:rgba(255,255,255,.35);
+}
+.lc-tab--active { background:rgba(184,108,249,.2); color:var(--brand,#b86cf9); }
+
+/* responsive */
+@media(max-width:900px) {
+  .lc-inner { grid-template-columns:1fr; gap:52px; }
+  .lc-widget { max-width:100%; }
+  .lc-bg-glow { background:radial-gradient(ellipse 80% 40% at 50% 20%, rgba(184,108,249,.12) 0%, transparent 70%); }
+}
+`;
+
+const CONVERSATIONS: { from: "in" | "out"; text: string; delay: number }[][] = [
+  [
+    { from: "out", text: "Hey, what services do you offer?", delay: 0 },
+    { from: "in",  text: "We build websites, mobile apps, AI software, ecommerce and real estate platforms — and we handle brand & design too.", delay: 900 },
+    { from: "in",  text: "What kind of project are you thinking about?", delay: 1800 },
+    { from: "out", text: "A mobile app with AI features 👀", delay: 2700 },
+    { from: "in",  text: "Perfect fit. We've shipped 30+ of those. Want a quick estimate?", delay: 3600 },
+  ],
+  [
+    { from: "out", text: "How long does a website project take?", delay: 0 },
+    { from: "in",  text: "Typically 4–8 weeks from kickoff to launch, depending on scope.", delay: 900 },
+    { from: "in",  text: "Marketing sites are faster — 3–4 weeks. Full apps take 8–14 weeks.", delay: 1800 },
+    { from: "out", text: "And pricing?", delay: 2700 },
+    { from: "in",  text: "Web projects start around $3K. Apps from $8K. We can scope yours properly on a quick call.", delay: 3600 },
+  ],
+];
+
+function LiveChatSection() {
+  const [tab,      setTab]      = useState<0 | 1>(0);
+  const [visible,  setVisible]  = useState<number[]>([]);
+  const [typing,   setTyping]   = useState(false);
+  const [convKey,  setConvKey]  = useState(0);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const started    = useRef(false);
+
+  useEffect(() => {
+    const el = document.createElement("style");
+    el.id = "lc-css";
+    el.textContent = LC_CSS;
+    if (!document.getElementById("lc-css")) document.head.appendChild(el);
+    return () => { document.getElementById("lc-css")?.remove(); };
+  }, []);
+
+  const runConversation = () => {
+    const msgs = CONVERSATIONS[convKey % CONVERSATIONS.length];
+    setVisible([]);
+    setTyping(false);
+    msgs.forEach((m, i) => {
+      if (m.from === "in" && i > 0) {
+        setTimeout(() => setTyping(true),  m.delay - 600);
+        setTimeout(() => { setTyping(false); setVisible(v => [...v, i]); }, m.delay);
+      } else {
+        setTimeout(() => setVisible(v => [...v, i]), m.delay);
+      }
+    });
+    setTimeout(() => {
+      setConvKey(k => k + 1);
+    }, msgs[msgs.length - 1].delay + 4000);
+  };
+
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting && !started.current) { started.current = true; runConversation(); } },
+      { threshold: 0.3 }
+    );
+    if (sectionRef.current) obs.observe(sectionRef.current);
+    return () => obs.disconnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (convKey === 0) return;
+    runConversation();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [convKey]);
+
+  const msgs = CONVERSATIONS[convKey % CONVERSATIONS.length];
+
+  return (
+    <section className="lc-section" ref={sectionRef}>
+      <div className="lc-bg-glow" aria-hidden="true" />
+      <div className="wrap">
+        <div className="lc-inner">
+
+          {/* LEFT: copy */}
+          <div className="lc-copy">
+            <div className="fade"><span className="eyebrow">Always-on support</span></div>
+            <h2 className="display fade d1">
+              Help that&apos;s there<br />
+              <span className="it">when you need it.</span>
+            </h2>
+            <p className="lc-desc fade d2">
+              Whether it&apos;s a quick question at midnight or a project kickoff call at noon — we&apos;re covered. AI answers instantly, humans follow up when it matters.
+            </p>
+
+            <div className="lc-opts fade d3">
+              <div className="lc-opt">
+                <div className="lc-opt-ico lc-opt-ico--ai">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><circle cx="19" cy="5" r="3" fill="currentColor" stroke="none"/>
+                  </svg>
+                </div>
+                <div>
+                  <div className="lc-opt-title">Foxo AI</div>
+                  <div className="lc-opt-desc">Instant answers about services, pricing, timelines and case studies — 24 hours a day.</div>
+                </div>
+                <span className="lc-opt-badge lc-opt-badge--ai">24 / 7</span>
+              </div>
+
+              <div className="lc-opt">
+                <div className="lc-opt-ico lc-opt-ico--live">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  </svg>
+                </div>
+                <div>
+                  <div className="lc-opt-title">Live Chat</div>
+                  <div className="lc-opt-desc">Real people from the team. For scoping, briefs, or anything that deserves a proper conversation.</div>
+                </div>
+                <span className="lc-opt-badge lc-opt-badge--live">Mon – Fri</span>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT: animated chat widget */}
+          <div className="fade d2">
+            <div className="lc-widget">
+              {/* Header */}
+              <div className="lc-widget-hd">
+                <div className="lc-widget-av">F</div>
+                <div>
+                  <div className="lc-widget-hd-name">{tab === 0 ? "Foxo AI" : "Yousuf · Foxmen"}</div>
+                  <div className="lc-widget-hd-sub">{tab === 0 ? "Powered by Foxmen Studio" : "Founder & CEO"}</div>
+                </div>
+                <span className="lc-widget-hd-badge"><span className="lc-widget-hd-dot" />{tab === 0 ? "Active" : "Online"}</span>
+              </div>
+
+              {/* Tab switcher */}
+              <div className="lc-tabs">
+                <div className={`lc-tab${tab === 0 ? " lc-tab--active" : ""}`} onClick={() => setTab(0)}>Foxo AI</div>
+                <div className={`lc-tab${tab === 1 ? " lc-tab--active" : ""}`} onClick={() => setTab(1)}>Live Chat</div>
+              </div>
+
+              {/* Chat body */}
+              <div className="lc-chat-body" key={`${tab}-${convKey}`}>
+                {msgs.map((m, i) =>
+                  visible.includes(i) ? (
+                    <div key={i} className={`lc-msg lc-msg--${m.from}`} style={{ animationDelay: "0ms" }}>
+                      <div className="lc-bubble">{m.text}</div>
+                      {m.from === "out" && <span className="lc-msg-time">Just now</span>}
+                    </div>
+                  ) : null
+                )}
+                {typing && (
+                  <div className="lc-typing">
+                    <span className="lc-typing-dot" />
+                    <span className="lc-typing-dot" />
+                    <span className="lc-typing-dot" />
+                  </div>
+                )}
+              </div>
+
+              {/* Input bar */}
+              <div className="lc-input-row">
+                <div className="lc-input-bar">Ask anything…</div>
+                <div className="lc-send">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 19V5M5 12l7-7 7 7"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </section>
@@ -1223,6 +1541,9 @@ export default function Home() {
 
       {/* Portal Feature */}
       <PortalFeatureSection />
+
+      {/* Live Chat Support */}
+      <LiveChatSection />
 
       {/* CTA */}
       <section id="contact" style={{ padding: "60px 0" }}>
