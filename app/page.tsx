@@ -375,19 +375,20 @@ function BatteryIcon() {
    Left: scroll-driven 4-step list  |  Right: sticky animated portal mockup
 ───────────────────────────────────────────────────────────────────────── */
 const PF_CSS = `
-.pf-section { padding: 120px 0 80px; }
+.pf-section { padding: 120px 0 100px; }
+.pf-section .display { font-size:clamp(44px,5.5vw,72px) !important; line-height:1.08 !important; }
 .pf-intro { max-width:560px; margin-top:24px; font-size:20px; line-height:1.65; opacity:.58; }
 
 .pf-split {
   display:grid; grid-template-columns:1fr 1fr;
-  gap:88px; margin-top:72px; align-items:start;
+  gap:80px; margin-top:72px; align-items:start;
 }
 
 /* steps */
 .pf-step {
   display:flex; gap:28px; padding:36px 0;
   border-top:1px solid rgba(10,10,10,.09);
-  opacity:.25; transition:opacity .5s cubic-bezier(.16,1,.3,1);
+  opacity:.22; transition:opacity .5s cubic-bezier(.16,1,.3,1);
   cursor:default;
 }
 .pf-step:first-child { border-top:none; }
@@ -395,77 +396,83 @@ const PF_CSS = `
 
 .pf-step-num {
   font-family:var(--font-geist-mono,monospace); font-size:12px;
-  color:var(--brand,#b86cf9); letter-spacing:.07em; padding-top:6px; min-width:28px;
+  color:var(--brand,#b86cf9); letter-spacing:.07em; padding-top:7px; min-width:28px;
 }
 .pf-step-title {
-  font-size:30px; font-weight:600;
+  font-size:36px; font-weight:600;
   font-family:var(--font-instrument-serif,Georgia,serif);
-  margin-bottom:12px; transition:color .35s ease; line-height:1.15;
+  margin-bottom:14px; transition:color .35s ease; line-height:1.1;
 }
 .pf-step--active .pf-step-title { color:var(--brand,#b86cf9); }
-.pf-step-copy { font-size:17px; line-height:1.7; opacity:.62; max-width:380px; }
+.pf-step-copy { font-size:17px; line-height:1.72; opacity:.62; max-width:380px; }
 
 /* sticky col */
-.pf-sticky-col { position:sticky; top:100px; }
+.pf-sticky-col { position:sticky; top:80px; }
 
 /* mock window */
 .pf-mock {
-  background:#111; border-radius:14px; overflow:hidden;
-  box-shadow:0 0 0 1px rgba(255,255,255,.07),
-             0 40px 100px rgba(0,0,0,.35),
+  background:#111; border-radius:16px; overflow:hidden;
+  box-shadow:0 0 0 1px rgba(255,255,255,.08),
+             0 48px 120px rgba(0,0,0,.45),
              0 8px 24px rgba(0,0,0,.2);
 }
 
 /* title bar */
 .pf-titlebar {
   display:flex; align-items:center; gap:6px;
-  padding:11px 14px;
-  background:rgba(255,255,255,.035);
+  padding:12px 16px;
+  background:rgba(255,255,255,.04);
   border-bottom:1px solid rgba(255,255,255,.06);
 }
-.pf-tb-dot { display:inline-block; width:10px; height:10px; border-radius:50%; }
+.pf-tb-dot { display:inline-block; width:11px; height:11px; border-radius:50%; }
 .pf-tb-dot--r { background:#ff5f57; }
 .pf-tb-dot--y { background:#febc2e; }
 .pf-tb-dot--g { background:#28c840; }
 .pf-tb-url {
   margin-left:10px; font-family:var(--font-geist-mono,monospace);
-  font-size:11px; color:rgba(255,255,255,.25); letter-spacing:.02em;
+  font-size:11px; color:rgba(255,255,255,.22); letter-spacing:.02em;
 }
 
 /* app chrome */
-.pf-app { display:flex; height:380px; }
+.pf-app { display:flex; height:480px; }
 
 /* sidebar */
 .pf-sidebar {
-  width:48px; background:rgba(255,255,255,.025);
+  width:52px; background:rgba(255,255,255,.025);
   border-right:1px solid rgba(255,255,255,.06);
   display:flex; flex-direction:column; align-items:center;
-  padding:16px 0; gap:6px;
+  padding:18px 0 14px; gap:4px;
 }
-.pf-sb-logo { margin-bottom:14px; display:flex; }
+.pf-sb-logo { margin-bottom:18px; display:flex; }
 .pf-sb-nav {
-  width:34px; height:30px; border-radius:8px;
+  width:36px; height:32px; border-radius:9px;
   display:flex; align-items:center; justify-content:center;
   transition:background .3s ease;
 }
 .pf-sb-nav--active { background:rgba(184,108,249,.2); }
 .pf-sb-icon {
-  width:14px; height:14px; border-radius:3px;
-  background:rgba(255,255,255,.2); transition:background .3s ease;
+  width:15px; height:15px; border-radius:4px;
+  background:rgba(255,255,255,.18); transition:background .3s ease;
 }
 .pf-sb-nav--active .pf-sb-icon { background:var(--brand,#b86cf9); }
+.pf-sb-avatar {
+  margin-top:auto; width:30px; height:30px; border-radius:50%;
+  background:linear-gradient(135deg,#7c3aed,#b86cf9);
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:700; color:#fff;
+}
 
 /* main panel */
 .pf-main {
-  flex:1; padding:20px 20px 18px;
-  display:flex; flex-direction:column; gap:16px; overflow:hidden;
+  flex:1; padding:18px 18px 16px;
+  display:flex; flex-direction:column; gap:14px; overflow:hidden; min-width:0;
 }
 
 /* topbar */
-.pf-topbar { display:flex; align-items:center; justify-content:space-between; }
-.pf-proj-name { font-size:12px; font-weight:600; color:rgba(255,255,255,.8); }
+.pf-topbar { display:flex; align-items:center; gap:10px; }
+.pf-proj-name { font-size:13px; font-weight:600; color:rgba(255,255,255,.85); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .pf-live-pill {
-  display:flex; align-items:center; gap:5px;
+  display:flex; align-items:center; gap:5px; flex-shrink:0;
   background:rgba(255,255,255,.06); border-radius:20px;
   padding:3px 9px; font-size:10px; color:rgba(255,255,255,.45); font-weight:500;
 }
@@ -474,17 +481,24 @@ const PF_CSS = `
   animation:pfPulse 2s ease-in-out infinite;
 }
 @keyframes pfPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.45;transform:scale(.65)} }
+.pf-profile-row { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+.pf-profile-av {
+  width:26px; height:26px; border-radius:50%;
+  background:linear-gradient(135deg,#7c3aed,#b86cf9);
+  display:flex; align-items:center; justify-content:center;
+  font-size:10px; font-weight:700; color:#fff;
+}
+.pf-profile-name { font-size:11px; color:rgba(255,255,255,.4); }
 
 /* progress */
-.pf-progress { }
 .pf-progress-hd {
   display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;
 }
 .pf-progress-lbl {
-  font-size:10px; text-transform:uppercase; letter-spacing:.07em; color:rgba(255,255,255,.35);
+  font-size:10px; text-transform:uppercase; letter-spacing:.07em; color:rgba(255,255,255,.3);
 }
 .pf-progress-pct {
-  font-size:13px; font-weight:700; color:var(--brand,#b86cf9);
+  font-size:14px; font-weight:700; color:var(--brand,#b86cf9);
   font-family:var(--font-geist-mono,monospace);
   animation:pfNumIn .4s cubic-bezier(.16,1,.3,1) both;
 }
@@ -502,7 +516,7 @@ const PF_CSS = `
   display:flex; align-items:center; gap:9px;
   padding:7px 10px; border-radius:8px;
   background:rgba(255,255,255,.04);
-  font-size:12px; color:rgba(255,255,255,.35);
+  font-size:12px; color:rgba(255,255,255,.32);
   transition:background .4s ease, color .4s ease;
 }
 .pf-task--done { color:rgba(255,255,255,.78); background:rgba(184,108,249,.07); }
@@ -525,46 +539,52 @@ const PF_CSS = `
 }
 @keyframes pfTagIn { from{opacity:0;transform:scale(.8)} to{opacity:1;transform:scale(1)} }
 
-/* notification */
-.pf-notif {
-  display:flex; align-items:flex-start; gap:10px;
-  background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.07);
-  border-radius:10px; padding:11px 13px;
-  opacity:0; transform:translateY(-10px) scale(.97);
-  transition:opacity .55s cubic-bezier(.16,1,.3,1),
-             transform .55s cubic-bezier(.16,1,.3,1);
-  pointer-events:none;
+/* bento bottom */
+.pf-bento {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:8px; margin-top:auto;
 }
-.pf-notif--show { opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
-.pf-notif-ico {
-  width:28px; height:28px; flex-shrink:0; border-radius:8px;
-  background:rgba(184,108,249,.15); color:var(--brand,#b86cf9);
-  display:flex; align-items:center; justify-content:center;
+.pf-bcard {
+  background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
+  border-radius:10px; padding:11px; overflow:hidden;
+  opacity:0; transform:translateY(8px);
+  transition:opacity .5s cubic-bezier(.16,1,.3,1), transform .5s cubic-bezier(.16,1,.3,1);
 }
-.pf-notif-title { font-size:12px; font-weight:600; color:rgba(255,255,255,.82); margin-bottom:2px; }
-.pf-notif-sub   { font-size:11px; color:rgba(255,255,255,.32); }
+.pf-bcard--show { opacity:1; transform:translateY(0); }
+.pf-bcard-label {
+  font-size:9px; text-transform:uppercase; letter-spacing:.07em;
+  color:rgba(255,255,255,.28); margin-bottom:7px;
+}
+.pf-bcard-title { font-size:11px; font-weight:600; color:rgba(255,255,255,.78); margin-bottom:3px; line-height:1.35; }
+.pf-bcard-sub   { font-size:10px; color:rgba(255,255,255,.32); line-height:1.4; }
+.pf-bcard-dot   { display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--brand,#b86cf9); margin-right:5px; vertical-align:middle; }
+.pf-bcard-green { background:#4ade80; }
 
 /* approve row */
 .pf-approve {
-  display:flex; gap:8px; margin-top:auto;
+  display:grid; grid-template-columns:1fr 1fr; gap:8px;
   animation:pfApprove .55s cubic-bezier(.16,1,.3,1) both;
 }
 @keyframes pfApprove { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
 .pf-approve-btn {
-  flex:1; background:var(--brand,#b86cf9); color:#fff; border:none;
-  border-radius:8px; padding:9px; font-size:12px; font-weight:600; cursor:default;
+  background:var(--brand,#b86cf9); color:#fff; border:none;
+  border-radius:8px; padding:9px; font-size:11px; font-weight:600; cursor:default; text-align:center;
 }
 .pf-comment-btn {
-  flex:1; background:rgba(255,255,255,.07); color:rgba(255,255,255,.55);
-  border:none; border-radius:8px; padding:9px; font-size:12px; cursor:default;
+  background:rgba(255,255,255,.07); color:rgba(255,255,255,.55);
+  border:none; border-radius:8px; padding:9px; font-size:11px; cursor:default; text-align:center;
 }
 
 /* responsive */
+@media(max-width:1024px) {
+  .pf-split { gap:48px; }
+}
 @media(max-width:900px) {
   .pf-split { grid-template-columns:1fr; gap:48px; margin-top:48px; }
   .pf-sticky-col { position:static; order:-1; }
-  .pf-app { height:320px; }
+  .pf-app { height:400px; }
   .pf-step { opacity:1; }
+  .pf-section .display { font-size:clamp(38px,8vw,56px) !important; }
 }
 `;
 
@@ -655,28 +675,33 @@ function PortalFeatureSection() {
 
               {/* App layout */}
               <div className="pf-app">
-                {/* Sidebar */}
+                {/* Sidebar with profile at bottom */}
                 <div className="pf-sidebar">
                   <div className="pf-sb-logo">
-                    <img src="/assets/logo-mark.svg" width={20} height={20} alt="" style={{ filter: "invert(1)", opacity: .85 }} />
+                    <img src="/assets/logo-mark.svg" width={22} height={22} alt="" style={{ filter: "invert(1)", opacity: .85 }} />
                   </div>
                   {[0,1,2,3,4].map(i => (
                     <div key={i} className={`pf-sb-nav${NAV_ACTIVE[active] === i ? " pf-sb-nav--active" : ""}`}>
                       <span className="pf-sb-icon" />
                     </div>
                   ))}
+                  <div className="pf-sb-avatar">YF</div>
                 </div>
 
                 {/* Main panel */}
                 <div className="pf-main">
-                  {/* Topbar */}
+                  {/* Topbar: project + live pill + profile */}
                   <div className="pf-topbar">
                     <span className="pf-proj-name">Nestaro · Real Estate OS</span>
                     <span className="pf-live-pill"><span className="pf-live-dot" /> In progress</span>
+                    <div className="pf-profile-row">
+                      <div className="pf-profile-av">YF</div>
+                      <span className="pf-profile-name">Yousuf</span>
+                    </div>
                   </div>
 
-                  {/* Progress bar */}
-                  <div className="pf-progress">
+                  {/* Progress */}
+                  <div>
                     <div className="pf-progress-hd">
                       <span className="pf-progress-lbl">Sprint progress</span>
                       <span className="pf-progress-pct" key={active}>{PROGRESS[active]}%</span>
@@ -686,7 +711,7 @@ function PortalFeatureSection() {
                     </div>
                   </div>
 
-                  {/* Task list */}
+                  {/* Tasks */}
                   <div className="pf-tasks">
                     {TASKS.map((task, i) => {
                       const done = i <= active;
@@ -707,21 +732,32 @@ function PortalFeatureSection() {
                     })}
                   </div>
 
-                  {/* Notification — animates in on step 2 */}
-                  <div className={`pf-notif${active >= 2 ? " pf-notif--show" : ""}`}>
-                    <div className="pf-notif-ico">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                      </svg>
+                  {/* Bento bottom: notification + activity */}
+                  {active < 3 ? (
+                    <div className="pf-bento">
+                      <div className={`pf-bcard${active >= 1 ? " pf-bcard--show" : ""}`} style={{ transitionDelay: "0.05s" }}>
+                        <div className="pf-bcard-label">🔔 Notification</div>
+                        <div className="pf-bcard-title">
+                          <span className="pf-bcard-dot" />
+                          {active === 0 ? "Invite sent" : active === 1 ? "Design System merged" : "API Integration done"}
+                        </div>
+                        <div className="pf-bcard-sub">Yousuf · just now</div>
+                      </div>
+                      <div className={`pf-bcard${active >= 1 ? " pf-bcard--show" : ""}`} style={{ transitionDelay: "0.15s" }}>
+                        <div className="pf-bcard-label">💬 Latest update</div>
+                        <div className="pf-bcard-title">
+                          {active === 0 ? "Welcome to your portal!" : active === 1 ? "Sprint 2 kicked off" : "Ready for review"}
+                        </div>
+                        <div className="pf-bcard-sub">
+                          {active === 0
+                            ? "Your project starts tomorrow."
+                            : active === 1
+                            ? "Figma files shared in Files tab."
+                            : "Check the staging link below."}
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="pf-notif-title">API Integration complete</div>
-                      <div className="pf-notif-sub">Yousuf marked a milestone · just now</div>
-                    </div>
-                  </div>
-
-                  {/* Approve row — animates in on step 3 */}
-                  {active === 3 && (
+                  ) : (
                     <div className="pf-approve">
                       <button className="pf-approve-btn">✓ Approve milestone</button>
                       <button className="pf-comment-btn">Leave feedback</button>
@@ -753,27 +789,30 @@ const LC_CSS = `
   gap:80px; align-items:center; position:relative; z-index:1;
 }
 .lc-copy .eyebrow { color:rgba(184,108,249,.85); }
-.lc-copy h2 { color:#fff; margin-top:20px; }
+.lc-copy h2 {
+  color:#fff; margin-top:20px;
+  font-size:clamp(44px,5.5vw,72px) !important; line-height:1.08 !important;
+}
 .lc-copy h2 .it { color:var(--brand,#b86cf9); }
 .lc-desc {
-  margin-top:20px; font-size:18px; line-height:1.68;
-  color:rgba(255,255,255,.5); max-width:460px;
+  margin-top:22px; font-size:19px; line-height:1.68;
+  color:rgba(255,255,255,.5); max-width:480px;
 }
-.lc-opts { display:flex; flex-direction:column; gap:14px; margin-top:36px; }
+.lc-opts { display:flex; flex-direction:column; gap:14px; margin-top:40px; }
 .lc-opt {
   display:flex; align-items:flex-start; gap:16px;
   background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
-  border-radius:14px; padding:20px; transition:border-color .3s ease, background .3s ease;
+  border-radius:14px; padding:22px; transition:border-color .3s ease, background .3s ease;
 }
 .lc-opt:hover { border-color:rgba(184,108,249,.35); background:rgba(184,108,249,.06); }
 .lc-opt-ico {
-  width:40px; height:40px; border-radius:10px; flex-shrink:0;
+  width:44px; height:44px; border-radius:12px; flex-shrink:0;
   display:flex; align-items:center; justify-content:center;
 }
 .lc-opt-ico--ai   { background:rgba(184,108,249,.18); color:var(--brand,#b86cf9); }
 .lc-opt-ico--live { background:rgba(74,222,128,.12); color:#4ade80; }
-.lc-opt-title { font-size:15px; font-weight:600; color:#fff; margin-bottom:4px; }
-.lc-opt-desc  { font-size:13px; color:rgba(255,255,255,.45); line-height:1.55; }
+.lc-opt-title { font-size:16px; font-weight:600; color:#fff; margin-bottom:5px; }
+.lc-opt-desc  { font-size:14px; color:rgba(255,255,255,.45); line-height:1.58; }
 .lc-opt-badge {
   margin-left:auto; align-self:flex-start; flex-shrink:0;
   font-size:10px; font-weight:600; letter-spacing:.05em;
@@ -882,6 +921,7 @@ const LC_CSS = `
   .lc-inner { grid-template-columns:1fr; gap:52px; }
   .lc-widget { max-width:100%; }
   .lc-bg-glow { background:radial-gradient(ellipse 80% 40% at 50% 20%, rgba(184,108,249,.12) 0%, transparent 70%); }
+  .lc-copy h2 { font-size:clamp(38px,9vw,56px) !important; }
 }
 `;
 
