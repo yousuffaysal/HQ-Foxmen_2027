@@ -716,6 +716,18 @@ export default function PortalPage() {
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
               </button>
             </div>
+            {/* Nav items */}
+            <nav style={{ padding: "14px 10px 0" }}>
+              <div style={{ fontSize: 9, color: "rgba(255,255,255,.25)", letterSpacing: ".2em", textTransform: "uppercase", padding: "0 10px 6px" }}>Menu</div>
+              {navItems.map(item => (
+                <button key={item.key} onClick={() => { setTab(item.key as typeof tab); setMobileSidebarOpen(false); }}
+                  style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 500, width: "100%", textAlign: "left", background: tab === item.key ? "rgba(184,108,249,.15)" : "transparent", color: tab === item.key ? "#b86cf9" : "rgba(255,255,255,.6)", transition: "all .15s", marginBottom: 2 }}>
+                  <span style={{ opacity: tab === item.key ? 1 : 0.7, flexShrink: 0 }}>{item.icon}</span>
+                  <span style={{ flex: 1 }}>{item.label}</span>
+                  {item.badge ? <span style={{ background: "#b86cf9", color: "#fff", fontSize: 10, fontWeight: 700, padding: "1px 7px", borderRadius: 50, minWidth: 18, textAlign: "center" }}>{item.badge}</span> : null}
+                </button>
+              ))}
+            </nav>
             {/* Projects list */}
             {projects.length > 0 && (
               <div style={{ padding: "14px 10px 0" }}>
