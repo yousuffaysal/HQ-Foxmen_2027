@@ -601,13 +601,21 @@ function PortalFeatureSection() {
   }, []);
 
   useEffect(() => {
+    // track latest ratio per step so we always activate the most-visible one
+    const ratios: Record<number, number> = {};
     const obs = new IntersectionObserver(
       (entries) => {
         entries.forEach(e => {
-          if (e.isIntersecting) setActive(Number((e.target as HTMLElement).dataset.step ?? 0));
+          const step = Number((e.target as HTMLElement).dataset.step ?? -1);
+          ratios[step] = e.intersectionRatio;
         });
+        let best = -1, bestRatio = -1;
+        Object.entries(ratios).forEach(([s, r]) => {
+          if (r > bestRatio) { bestRatio = r; best = Number(s); }
+        });
+        if (best >= 0 && bestRatio > 0) setActive(best);
       },
-      { rootMargin: "-38% 0px -38% 0px", threshold: 0 }
+      { rootMargin: "-15% 0px -15% 0px", threshold: [0, 0.1, 0.25, 0.5, 0.75, 1] }
     );
     stepRefs.current.forEach(r => r && obs.observe(r));
     return () => obs.disconnect();
@@ -678,7 +686,7 @@ function PortalFeatureSection() {
                 {/* Sidebar with profile at bottom */}
                 <div className="pf-sidebar">
                   <div className="pf-sb-logo">
-                    <img src="/assets/logo-mark.svg" width={22} height={22} alt="" style={{ filter: "invert(1)", opacity: .85 }} />
+                    <img src="/assets/logo-mark.svg" width={22} height={22} alt="" style={{ filter: "brightness(0) invert(1)", opacity: .7 }} />
                   </div>
                   {[0,1,2,3,4].map(i => (
                     <div key={i} className={`pf-sb-nav${NAV_ACTIVE[active] === i ? " pf-sb-nav--active" : ""}`}>
