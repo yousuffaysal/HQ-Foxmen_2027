@@ -1537,6 +1537,12 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Portal Feature */}
+      <PortalFeatureSection />
+
+      {/* Live Chat Support */}
+      <LiveChatSection />
+
       {/* Process */}
       <section id="process" style={{ padding: "80px 0" }}>
         <div className="process">
@@ -1586,12 +1592,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Portal Feature */}
-      <PortalFeatureSection />
-
-      {/* Live Chat Support */}
-      <LiveChatSection />
 
       {/* CTA */}
       <section id="contact" style={{ padding: "60px 0" }}>
