@@ -58,6 +58,10 @@ function inject() {
     @keyframes flcDot   { 0%,80%,100%{transform:scale(0);opacity:.4} 40%{transform:scale(1);opacity:1} }
     .flc-panel { animation: flcOpen .26s cubic-bezier(.22,1,.36,1) both }
     .flc-panel.closing { animation: flcClose .2s cubic-bezier(.55,0,1,.45) both }
+    @media(max-width:480px){
+      .flc-panel { right:12px !important; left:12px !important; width:auto !important; bottom:88px !important; }
+      .flc-fab   { right:16px !important; bottom:16px !important; }
+    }
     .flc-msg   { animation: flcMsg .22s cubic-bezier(.22,1,.36,1) both }
     .flc-fab   { transition: transform .18s cubic-bezier(.22,1,.36,1), box-shadow .18s, right .3s cubic-bezier(.22,1,.36,1), opacity .2s }
     .flc-fab:hover { transform: scale(1.1) !important; }
@@ -259,7 +263,7 @@ export default function SiteLiveChat() {
 
   const panelBase: React.CSSProperties = {
     position: "fixed", bottom: 96, right: 28, zIndex: 99996,
-    width: 368, borderRadius: 20,
+    width: 368, borderRadius: 16,
     background: "#fff", overflow: "hidden",
     boxShadow: "0 24px 80px rgba(0,0,0,.18), 0 0 0 1px rgba(0,0,0,.07)",
     display: "flex", flexDirection: "column",
@@ -308,14 +312,14 @@ export default function SiteLiveChat() {
           {/* Header */}
           <div style={{ background: INK, padding: "20px 20px 18px", flexShrink: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-              <div style={{ width: 38, height: 38, borderRadius: "50%", background: "linear-gradient(135deg,#b86cf9,#7c3aed)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <img src="/assets/logo-mark.svg" alt="" style={{ width: 20, height: 20, filter: "brightness(0) invert(1)" }} />
+              <div style={{ width: 40, height: 40, borderRadius: 12, overflow: "hidden", flexShrink: 0, background: "rgba(255,255,255,.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <img src="/assets/logo-mark.svg" alt="Foxmen Studio" style={{ width: 28, height: 28 }} />
               </div>
               <div>
-                <div style={{ fontWeight: 700, fontSize: 15, color: "#fff", letterSpacing: "-.01em" }}>
+                <div style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontWeight: 400, fontSize: 18, color: "#fff", letterSpacing: "-.01em", lineHeight: 1.1 }}>
                   Foxmen <em style={{ fontStyle: "italic", color: BRAND }}>Studio</em>
                 </div>
-                <div style={{ fontSize: 11, color: "rgba(255,255,255,.4)", marginTop: 1 }}>How would you like to connect?</div>
+                <div style={{ fontSize: 11, color: "rgba(255,255,255,.4)", marginTop: 2 }}>How would you like to connect?</div>
               </div>
               <button onClick={closeAll} style={{ marginLeft: "auto", background: "rgba(255,255,255,.08)", border: "none", cursor: "pointer", width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,.5)", flexShrink: 0 }}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -327,16 +331,16 @@ export default function SiteLiveChat() {
           <div style={{ padding: "16px 16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
             {/* Foxo AI */}
             <button className="flc-pick-card" onClick={() => openPanel("ai")} style={{
-              display: "flex", alignItems: "flex-start", gap: 14, padding: "16px", borderRadius: 14,
+              display: "flex", alignItems: "flex-start", gap: 14, padding: "16px", borderRadius: 12,
               border: "1.5px solid #e7e5e2", background: "#fff", cursor: "pointer", textAlign: "left",
               transition: "border-color .15s, background .15s", width: "100%", fontFamily: "inherit",
             }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg,#b86cf9,#7c3aed)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.38-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 0 2h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1 0-2h1a7 7 0 0 1 7-7h1V5.73A2 2 0 0 1 10 4a2 2 0 0 1 2-2z"/><circle cx="9" cy="14" r="1"/><circle cx="15" cy="14" r="1"/></svg>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg,#b86cf9,#7c3aed)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, overflow: "hidden" }}>
+                <img src="/assets/logo-mark.svg" alt="" style={{ width: 28, height: 28, filter: "brightness(0) invert(1)" }} />
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 4 }}>
-                  <span style={{ fontWeight: 700, fontSize: 14.5, color: INK }}>Foxo AI</span>
+                  <span style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontWeight: 400, fontSize: 16, color: INK }}>Foxo <em style={{ fontStyle: "italic", color: BRAND }}>AI</em></span>
                   <span style={{ fontSize: 9.5, fontWeight: 700, padding: "2px 7px", borderRadius: 50, background: "rgba(184,108,249,.12)", color: BRAND, letterSpacing: ".06em", textTransform: "uppercase" }}>24/7</span>
                 </div>
                 <div style={{ fontSize: 12.5, color: "#6b6b6b", lineHeight: 1.55 }}>Instant answers about services, pricing, case studies, and the team. Powered by AI.</div>
@@ -345,7 +349,7 @@ export default function SiteLiveChat() {
 
             {/* Live Chat */}
             <button className="flc-pick-card" onClick={() => openPanel("live")} style={{
-              display: "flex", alignItems: "flex-start", gap: 14, padding: "16px", borderRadius: 14,
+              display: "flex", alignItems: "flex-start", gap: 14, padding: "16px", borderRadius: 12,
               border: "1.5px solid #e7e5e2", background: "#fff", cursor: "pointer", textAlign: "left",
               transition: "border-color .15s, background .15s", width: "100%", fontFamily: "inherit",
             }}>
@@ -354,7 +358,7 @@ export default function SiteLiveChat() {
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 4 }}>
-                  <span style={{ fontWeight: 700, fontSize: 14.5, color: INK }}>Live Chat</span>
+                  <span style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontWeight: 400, fontSize: 16, color: INK }}>Live Chat</span>
                   <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e", display: "inline-block", boxShadow: "0 0 5px #22c55e" }} />
                   {unread > 0 && <span style={{ fontSize: 9.5, fontWeight: 700, padding: "2px 7px", borderRadius: 50, background: "#ef4444", color: "#fff" }}>{unread}</span>}
                 </div>
