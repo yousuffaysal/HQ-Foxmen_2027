@@ -535,7 +535,7 @@ export async function POST(req: Request) {
     }
 
     /* ── Send to user ── */
-    const fromAddress = process.env.FROM_EMAIL ?? "contact@foxmenstudio.com";
+    const fromAddress = "team@foxmenstudio.com";
     await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },

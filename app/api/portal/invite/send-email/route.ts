@@ -249,7 +249,7 @@ export async function POST(req: Request) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from:    `Foxmen Studio <${process.env.FROM_EMAIL ?? "contact@foxmenstudio.com"}>`,
+        from:    `Foxmen Studio <team@foxmenstudio.com>`,
         to:      email,
         subject: `You're invited to your Foxmen Studio client portal`,
         html,

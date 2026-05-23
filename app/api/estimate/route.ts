@@ -250,7 +250,7 @@ export async function POST(req: Request) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: `Foxmen Studio <${process.env.FROM_EMAIL ?? "hello@foxmen.studio"}>`,
+            from: `Foxmen Studio <team@foxmenstudio.com>`,
             to: email,
             subject: `Your ${type} estimate — $${Number(estimate.price_min).toLocaleString()} to $${Number(estimate.price_max).toLocaleString()}`,
             html: emailHtml(type, complexity, timeline, estimate),

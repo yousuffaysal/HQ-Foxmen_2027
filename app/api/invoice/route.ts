@@ -236,7 +236,7 @@ export async function POST(req: Request) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: `Foxmen Studio <${process.env.FROM_EMAIL ?? "contact@foxmenstudio.com"}>`,
+      from: `Foxmen Studio <team@foxmenstudio.com>`,
       to: email,
       subject: `Invoice ${num} from Foxmen Studio — ${new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}`,
       html,

@@ -237,7 +237,7 @@ export async function sendWelcomeEmail(data: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from:    `Foxmen Studio <${process.env.FROM_EMAIL ?? "contact@foxmenstudio.com"}>`,
+      from:    `Foxmen Studio <team@foxmenstudio.com>`,
       to:      data.email,
       subject: `Welcome to Foxmen Studio, ${first} — let's build something extraordinary`,
       html,
