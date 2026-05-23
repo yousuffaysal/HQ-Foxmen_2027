@@ -375,12 +375,9 @@ function BatteryIcon() {
    Left: scroll-driven 4-step list  |  Right: sticky animated portal mockup
 ───────────────────────────────────────────────────────────────────────── */
 const PF_CSS = `
-.pf-section { padding: 120px 0 100px; background:#0a0a0a; color:#fff; }
-.pf-section .display { font-size:clamp(44px,5.5vw,72px) !important; line-height:1.08 !important; color:#fff !important; }
-.pf-intro { max-width:560px; margin-top:24px; font-size:20px; line-height:1.65; opacity:.58; color:#fff; }
-.pf-section a.btn { --bg:#b86cf9; --fg:#fff; --chip:#fff; --chipfg:#b86cf9; }
-.pf-section a.btn::before { background:#8c3bd9; }
-.pf-section a.btn:hover { color:#fff; }
+.pf-section { padding: 120px 0 100px; }
+.pf-section .display { font-size:clamp(44px,5.5vw,72px) !important; line-height:1.08 !important; }
+.pf-intro { max-width:560px; margin-top:24px; font-size:20px; line-height:1.65; opacity:.58; }
 
 .pf-split {
   display:grid; grid-template-columns:1fr 1fr;
@@ -586,23 +583,36 @@ const PF_CSS = `
   .pf-section { padding:80px 0 72px; }
   .pf-section .display { font-size:clamp(36px,8vw,56px) !important; }
   .pf-intro { font-size:18px; max-width:100%; }
-  .pf-split { grid-template-columns:1fr; gap:48px; margin-top:48px; }
-  .pf-sticky-col { position:static; order:-1; }
+  /* Switch to flex-column so sticky spans the full section height */
+  .pf-split { display:flex; flex-direction:column; gap:0; margin-top:48px; }
+  .pf-sticky-col {
+    position:sticky; top:72px; z-index:10; order:-1;
+    width:100%; margin-bottom:0;
+  }
+  /* Gradient at bottom of sticky mockup — steps fade as they scroll under */
+  .pf-sticky-col::after {
+    content:''; position:absolute; bottom:-32px; left:0; right:0;
+    height:32px;
+    background:linear-gradient(to bottom, #0a0a0a 0%, transparent 100%);
+    pointer-events:none; z-index:11;
+  }
+  .pf-left { position:relative; z-index:1; padding-top:48px; }
   .pf-app { height:380px; }
   .pf-profile-name { display:none; }
   .pf-step { opacity:1; }
-  /* premium glow on mockup when stacked */
+  /* premium glow on mockup */
   .pf-mock {
-    box-shadow:0 0 0 1px rgba(184,108,249,.15),
-               0 32px 80px rgba(184,108,249,.12),
-               0 8px 24px rgba(0,0,0,.35);
+    box-shadow:0 0 0 1px rgba(184,108,249,.2),
+               0 32px 80px rgba(184,108,249,.15),
+               0 8px 24px rgba(0,0,0,.4);
   }
 }
 @media(max-width:600px) {
   .pf-section { padding:64px 0 60px; }
   .pf-section .display { font-size:clamp(30px,9.5vw,44px) !important; line-height:1.1 !important; }
   .pf-intro { font-size:16px; line-height:1.65; }
-  .pf-split { gap:36px; margin-top:36px; }
+  .pf-split { gap:0; margin-top:36px; }
+  .pf-left { padding-top:36px; }
   /* mockup — premium framing with purple glow */
   .pf-mock {
     border-radius:18px;
