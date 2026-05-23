@@ -370,6 +370,373 @@ function BatteryIcon() {
 }
 
 
+/* ─────────────────────────────────────────────────────────────────────────
+   Portal Feature Section
+   Left: scroll-driven 4-step list  |  Right: sticky animated portal mockup
+───────────────────────────────────────────────────────────────────────── */
+const PF_CSS = `
+.pf-section { padding: 120px 0 80px; }
+.pf-intro { max-width:520px; margin-top:20px; font-size:17px; line-height:1.65; opacity:.58; }
+
+.pf-split {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:88px; margin-top:72px; align-items:start;
+}
+
+/* steps */
+.pf-step {
+  display:flex; gap:24px; padding:30px 0;
+  border-top:1px solid rgba(10,10,10,.09);
+  opacity:.3; transition:opacity .5s cubic-bezier(.16,1,.3,1);
+  cursor:default;
+}
+.pf-step:first-child { border-top:none; }
+.pf-step--active { opacity:1; }
+
+.pf-step-num {
+  font-family:var(--font-geist-mono,monospace); font-size:11px;
+  color:var(--brand,#b86cf9); letter-spacing:.07em; padding-top:4px; min-width:26px;
+}
+.pf-step-title {
+  font-size:21px; font-weight:600;
+  font-family:var(--font-instrument-serif,Georgia,serif);
+  margin-bottom:10px; transition:color .35s ease;
+}
+.pf-step--active .pf-step-title { color:var(--brand,#b86cf9); }
+.pf-step-copy { font-size:15px; line-height:1.68; opacity:.62; max-width:340px; }
+
+/* sticky col */
+.pf-sticky-col { position:sticky; top:100px; }
+
+/* mock window */
+.pf-mock {
+  background:#111; border-radius:14px; overflow:hidden;
+  box-shadow:0 0 0 1px rgba(255,255,255,.07),
+             0 40px 100px rgba(0,0,0,.35),
+             0 8px 24px rgba(0,0,0,.2);
+}
+
+/* title bar */
+.pf-titlebar {
+  display:flex; align-items:center; gap:6px;
+  padding:11px 14px;
+  background:rgba(255,255,255,.035);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.pf-tb-dot { display:inline-block; width:10px; height:10px; border-radius:50%; }
+.pf-tb-dot--r { background:#ff5f57; }
+.pf-tb-dot--y { background:#febc2e; }
+.pf-tb-dot--g { background:#28c840; }
+.pf-tb-url {
+  margin-left:10px; font-family:var(--font-geist-mono,monospace);
+  font-size:11px; color:rgba(255,255,255,.25); letter-spacing:.02em;
+}
+
+/* app chrome */
+.pf-app { display:flex; height:380px; }
+
+/* sidebar */
+.pf-sidebar {
+  width:48px; background:rgba(255,255,255,.025);
+  border-right:1px solid rgba(255,255,255,.06);
+  display:flex; flex-direction:column; align-items:center;
+  padding:16px 0; gap:6px;
+}
+.pf-sb-logo { margin-bottom:14px; display:flex; }
+.pf-sb-nav {
+  width:34px; height:30px; border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  transition:background .3s ease;
+}
+.pf-sb-nav--active { background:rgba(184,108,249,.2); }
+.pf-sb-icon {
+  width:14px; height:14px; border-radius:3px;
+  background:rgba(255,255,255,.2); transition:background .3s ease;
+}
+.pf-sb-nav--active .pf-sb-icon { background:var(--brand,#b86cf9); }
+
+/* main panel */
+.pf-main {
+  flex:1; padding:20px 20px 18px;
+  display:flex; flex-direction:column; gap:16px; overflow:hidden;
+}
+
+/* topbar */
+.pf-topbar { display:flex; align-items:center; justify-content:space-between; }
+.pf-proj-name { font-size:12px; font-weight:600; color:rgba(255,255,255,.8); }
+.pf-live-pill {
+  display:flex; align-items:center; gap:5px;
+  background:rgba(255,255,255,.06); border-radius:20px;
+  padding:3px 9px; font-size:10px; color:rgba(255,255,255,.45); font-weight:500;
+}
+.pf-live-dot {
+  width:6px; height:6px; border-radius:50%; background:#4ade80;
+  animation:pfPulse 2s ease-in-out infinite;
+}
+@keyframes pfPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.45;transform:scale(.65)} }
+
+/* progress */
+.pf-progress { }
+.pf-progress-hd {
+  display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;
+}
+.pf-progress-lbl {
+  font-size:10px; text-transform:uppercase; letter-spacing:.07em; color:rgba(255,255,255,.35);
+}
+.pf-progress-pct {
+  font-size:13px; font-weight:700; color:var(--brand,#b86cf9);
+  font-family:var(--font-geist-mono,monospace);
+  animation:pfNumIn .4s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes pfNumIn { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+.pf-bar-track { height:5px; background:rgba(255,255,255,.08); border-radius:99px; overflow:hidden; }
+.pf-bar-fill {
+  height:100%; border-radius:99px;
+  background:linear-gradient(90deg,#7c3aed,#b86cf9,#c4b5fd);
+  transition:width .9s cubic-bezier(.16,1,.3,1);
+}
+
+/* tasks */
+.pf-tasks { display:flex; flex-direction:column; gap:5px; }
+.pf-task {
+  display:flex; align-items:center; gap:9px;
+  padding:7px 10px; border-radius:8px;
+  background:rgba(255,255,255,.04);
+  font-size:12px; color:rgba(255,255,255,.35);
+  transition:background .4s ease, color .4s ease;
+}
+.pf-task--done { color:rgba(255,255,255,.78); background:rgba(184,108,249,.07); }
+.pf-task-chk {
+  width:16px; height:16px; border-radius:4px; flex-shrink:0;
+  border:1.5px solid rgba(255,255,255,.15);
+  display:flex; align-items:center; justify-content:center;
+  transition:background .35s ease, border-color .35s ease;
+}
+.pf-task--done .pf-task-chk {
+  background:var(--brand,#b86cf9); border-color:var(--brand,#b86cf9);
+  animation:pfCheckPop .4s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes pfCheckPop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+.pf-task-new {
+  margin-left:auto; font-size:10px;
+  background:rgba(74,222,128,.12); color:#4ade80;
+  padding:2px 7px; border-radius:4px;
+  animation:pfTagIn .4s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes pfTagIn { from{opacity:0;transform:scale(.8)} to{opacity:1;transform:scale(1)} }
+
+/* notification */
+.pf-notif {
+  display:flex; align-items:flex-start; gap:10px;
+  background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.07);
+  border-radius:10px; padding:11px 13px;
+  opacity:0; transform:translateY(-10px) scale(.97);
+  transition:opacity .55s cubic-bezier(.16,1,.3,1),
+             transform .55s cubic-bezier(.16,1,.3,1);
+  pointer-events:none;
+}
+.pf-notif--show { opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
+.pf-notif-ico {
+  width:28px; height:28px; flex-shrink:0; border-radius:8px;
+  background:rgba(184,108,249,.15); color:var(--brand,#b86cf9);
+  display:flex; align-items:center; justify-content:center;
+}
+.pf-notif-title { font-size:12px; font-weight:600; color:rgba(255,255,255,.82); margin-bottom:2px; }
+.pf-notif-sub   { font-size:11px; color:rgba(255,255,255,.32); }
+
+/* approve row */
+.pf-approve {
+  display:flex; gap:8px; margin-top:auto;
+  animation:pfApprove .55s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes pfApprove { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+.pf-approve-btn {
+  flex:1; background:var(--brand,#b86cf9); color:#fff; border:none;
+  border-radius:8px; padding:9px; font-size:12px; font-weight:600; cursor:default;
+}
+.pf-comment-btn {
+  flex:1; background:rgba(255,255,255,.07); color:rgba(255,255,255,.55);
+  border:none; border-radius:8px; padding:9px; font-size:12px; cursor:default;
+}
+
+/* responsive */
+@media(max-width:900px) {
+  .pf-split { grid-template-columns:1fr; gap:48px; margin-top:48px; }
+  .pf-sticky-col { position:static; order:-1; }
+  .pf-app { height:320px; }
+  .pf-step { opacity:1; }
+}
+`;
+
+function PortalFeatureSection() {
+  const [active, setActive] = useState(0);
+  const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    const el = document.createElement("style");
+    el.id = "pf-css";
+    el.textContent = PF_CSS;
+    if (!document.getElementById("pf-css")) document.head.appendChild(el);
+    return () => { document.getElementById("pf-css")?.remove(); };
+  }, []);
+
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) setActive(Number((e.target as HTMLElement).dataset.step ?? 0));
+        });
+      },
+      { rootMargin: "-38% 0px -38% 0px", threshold: 0 }
+    );
+    stepRefs.current.forEach(r => r && obs.observe(r));
+    return () => obs.disconnect();
+  }, []);
+
+  const STEPS = [
+    { num: "01", title: "Get invited", copy: "A secure invite lands in your inbox on day one. One click and you're inside your private portal — zero setup, zero friction." },
+    { num: "02", title: "See everything", copy: "Live status, file drops, sprint timelines and team progress — one clean view. No chasing emails, no wondering what's happening." },
+    { num: "03", title: "Stay notified", copy: "Push alerts the moment a milestone lands, a design is ready, or something needs your eyes. Always in the loop without asking." },
+    { num: "04", title: "Approve & ship", copy: "Review deliverables, drop comments, sign off on milestones right inside the portal. No email threads. Pure momentum." },
+  ];
+
+  const PROGRESS = [26, 52, 76, 100];
+  const TASKS    = ["Design System", "Frontend Build", "API Integration", "QA & Launch"];
+
+  const NAV_ACTIVE: Record<number, number> = { 0: 0, 1: 1, 2: 3, 3: 1 };
+
+  return (
+    <section className="section pf-section" id="portal-feature">
+      <div className="wrap">
+        <div className="fade"><span className="eyebrow">Client Portal</span></div>
+        <h2 className="display fade d1">
+          Your project, always <span className="it">in the light.</span>
+        </h2>
+        <p className="pf-intro fade d2">
+          Every Foxmen project ships with a private client portal — real-time progress, files, milestones and a direct line to the team.
+        </p>
+
+        <div className="pf-split">
+          {/* ── LEFT: steps ── */}
+          <div>
+            {STEPS.map((s, i) => (
+              <div
+                key={i}
+                ref={el => { stepRefs.current[i] = el; }}
+                data-step={i}
+                className={`pf-step${active === i ? " pf-step--active" : ""}`}
+                onClick={() => setActive(i)}
+              >
+                <div className="pf-step-num">{s.num}</div>
+                <div>
+                  <div className="pf-step-title">{s.title}</div>
+                  <div className="pf-step-copy">{s.copy}</div>
+                </div>
+              </div>
+            ))}
+            <div style={{ marginTop: 40 }}>
+              <Link href="/portal" className="btn btn--lg fade d3">
+                <span className="label">Access client portal</span>
+                <span className="chip"><ArrowIcon /></span>
+              </Link>
+            </div>
+          </div>
+
+          {/* ── RIGHT: sticky animated mockup ── */}
+          <div className="pf-sticky-col">
+            <div className="pf-mock">
+              {/* macOS title bar */}
+              <div className="pf-titlebar">
+                <span className="pf-tb-dot pf-tb-dot--r" />
+                <span className="pf-tb-dot pf-tb-dot--y" />
+                <span className="pf-tb-dot pf-tb-dot--g" />
+                <span className="pf-tb-url">foxmenstudio.com/portal</span>
+              </div>
+
+              {/* App layout */}
+              <div className="pf-app">
+                {/* Sidebar */}
+                <div className="pf-sidebar">
+                  <div className="pf-sb-logo">
+                    <img src="/assets/logo-mark.svg" width={20} height={20} alt="" style={{ filter: "invert(1)", opacity: .85 }} />
+                  </div>
+                  {[0,1,2,3,4].map(i => (
+                    <div key={i} className={`pf-sb-nav${NAV_ACTIVE[active] === i ? " pf-sb-nav--active" : ""}`}>
+                      <span className="pf-sb-icon" />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Main panel */}
+                <div className="pf-main">
+                  {/* Topbar */}
+                  <div className="pf-topbar">
+                    <span className="pf-proj-name">Nestaro · Real Estate OS</span>
+                    <span className="pf-live-pill"><span className="pf-live-dot" /> In progress</span>
+                  </div>
+
+                  {/* Progress bar */}
+                  <div className="pf-progress">
+                    <div className="pf-progress-hd">
+                      <span className="pf-progress-lbl">Sprint progress</span>
+                      <span className="pf-progress-pct" key={active}>{PROGRESS[active]}%</span>
+                    </div>
+                    <div className="pf-bar-track">
+                      <div className="pf-bar-fill" style={{ width: `${PROGRESS[active]}%` }} />
+                    </div>
+                  </div>
+
+                  {/* Task list */}
+                  <div className="pf-tasks">
+                    {TASKS.map((task, i) => {
+                      const done = i <= active;
+                      const isNew = i === active;
+                      return (
+                        <div key={i} className={`pf-task${done ? " pf-task--done" : ""}`}>
+                          <div className="pf-task-chk" key={`chk-${active}-${i}`}>
+                            {done && (
+                              <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
+                                <path d="M1 3.5L3.5 6L8 1" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            )}
+                          </div>
+                          <span>{task}</span>
+                          {isNew && done && <span className="pf-task-new">Just done</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Notification — animates in on step 2 */}
+                  <div className={`pf-notif${active >= 2 ? " pf-notif--show" : ""}`}>
+                    <div className="pf-notif-ico">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="pf-notif-title">API Integration complete</div>
+                      <div className="pf-notif-sub">Yousuf marked a milestone · just now</div>
+                    </div>
+                  </div>
+
+                  {/* Approve row — animates in on step 3 */}
+                  {active === 3 && (
+                    <div className="pf-approve">
+                      <button className="pf-approve-btn">✓ Approve milestone</button>
+                      <button className="pf-comment-btn">Leave feedback</button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function TestimonialsSection({ testis }: { testis: DbTesti[] }) {
   const items    = testis.length > 0 ? testis : STATIC_TESTIS;
   const [idx,    setIdx]    = useState(0);
@@ -853,6 +1220,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Portal Feature */}
+      <PortalFeatureSection />
 
       {/* CTA */}
       <section id="contact" style={{ padding: "60px 0" }}>
