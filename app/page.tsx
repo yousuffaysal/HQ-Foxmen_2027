@@ -575,16 +575,67 @@ const PF_CSS = `
   border:none; border-radius:8px; padding:9px; font-size:11px; cursor:default; text-align:center;
 }
 
-/* responsive */
+/* ── responsive ── */
 @media(max-width:1024px) {
   .pf-split { gap:48px; }
 }
 @media(max-width:900px) {
+  .pf-section { padding:80px 0 72px; }
+  .pf-section .display { font-size:clamp(36px,8vw,56px) !important; }
+  .pf-intro { font-size:18px; max-width:100%; }
   .pf-split { grid-template-columns:1fr; gap:48px; margin-top:48px; }
   .pf-sticky-col { position:static; order:-1; }
-  .pf-app { height:400px; }
+  .pf-app { height:380px; }
+  .pf-profile-name { display:none; }
   .pf-step { opacity:1; }
-  .pf-section .display { font-size:clamp(38px,8vw,56px) !important; }
+  /* premium glow on mockup when stacked */
+  .pf-mock {
+    box-shadow:0 0 0 1px rgba(184,108,249,.15),
+               0 32px 80px rgba(184,108,249,.12),
+               0 8px 24px rgba(0,0,0,.35);
+  }
+}
+@media(max-width:600px) {
+  .pf-section { padding:64px 0 60px; }
+  .pf-section .display { font-size:clamp(30px,9.5vw,44px) !important; line-height:1.1 !important; }
+  .pf-intro { font-size:16px; line-height:1.65; }
+  .pf-split { gap:36px; margin-top:36px; }
+  /* mockup — premium framing with purple glow */
+  .pf-mock {
+    border-radius:18px;
+    box-shadow:0 0 0 1px rgba(184,108,249,.2),
+               0 24px 64px rgba(184,108,249,.15),
+               0 6px 20px rgba(0,0,0,.4);
+  }
+  .pf-app { height:330px; }
+  .pf-titlebar { padding:10px 14px; }
+  /* hide profile row — topbar too cramped */
+  .pf-profile-row { display:none; }
+  /* sidebar compact */
+  .pf-sidebar { width:40px; padding:14px 0 10px; }
+  .pf-sb-nav { width:28px; height:28px; border-radius:7px; }
+  .pf-sb-icon { width:12px; height:12px; }
+  .pf-sb-avatar { width:24px; height:24px; font-size:9px; }
+  /* main panel compact */
+  .pf-main { padding:14px 13px 12px; gap:11px; }
+  .pf-proj-name { font-size:11px; }
+  .pf-live-pill { font-size:9px; padding:2px 7px; }
+  .pf-progress-lbl { font-size:9px; }
+  .pf-progress-pct { font-size:12px; }
+  .pf-bar-track { height:4px; }
+  .pf-task { padding:6px 8px; font-size:11px; }
+  .pf-task-chk { width:14px; height:14px; }
+  /* bento — single col, one card */
+  .pf-bento { grid-template-columns:1fr; gap:6px; }
+  .pf-bento .pf-bcard:last-child { display:none; }
+  .pf-bcard { padding:9px 10px; }
+  .pf-bcard-title { font-size:10px; }
+  /* steps */
+  .pf-step { padding:22px 0; gap:20px; }
+  .pf-step-title { font-size:24px; margin-bottom:10px; }
+  .pf-step-copy { font-size:15px; line-height:1.65; }
+  /* CTA full-width */
+  .pf-section a.btn { width:100%; justify-content:center; box-sizing:border-box; }
 }
 `;
 
@@ -924,12 +975,35 @@ const LC_CSS = `
 }
 .lc-tab--active { background:rgba(184,108,249,.2); color:var(--brand,#b86cf9); }
 
-/* responsive */
+/* ── responsive ── */
 @media(max-width:900px) {
-  .lc-inner { grid-template-columns:1fr; gap:52px; }
+  .lc-section { padding:72px 0; }
+  .lc-inner { grid-template-columns:1fr; gap:44px; }
+  .lc-copy h2 { font-size:clamp(36px,8vw,56px) !important; }
+  .lc-desc { font-size:17px; max-width:100%; }
+  .lc-opts { margin-top:28px; gap:12px; }
   .lc-widget { max-width:100%; }
-  .lc-bg-glow { background:radial-gradient(ellipse 80% 40% at 50% 20%, rgba(184,108,249,.12) 0%, transparent 70%); }
-  .lc-copy h2 { font-size:clamp(38px,9vw,56px) !important; }
+  .lc-chat-body { min-height:220px; }
+  .lc-bg-glow { background:radial-gradient(ellipse 80% 40% at 50% 20%, rgba(184,108,249,.11) 0%, transparent 70%); }
+}
+@media(max-width:600px) {
+  .lc-section { padding:56px 0; }
+  .lc-copy h2 { font-size:clamp(30px,9vw,44px) !important; }
+  .lc-desc { font-size:16px; }
+  /* option cards — tighter on phones */
+  .lc-opt { padding:16px; gap:12px; }
+  .lc-opt-ico { width:36px; height:36px; flex-shrink:0; }
+  .lc-opt-ico svg { width:16px; height:16px; }
+  .lc-opt-title { font-size:14px; }
+  .lc-opt-desc { font-size:13px; }
+  .lc-opt-badge { display:none; }
+  /* widget — chat body shorter on phones */
+  .lc-chat-body { min-height:180px; padding:14px 12px; gap:8px; }
+  .lc-bubble { font-size:12px; padding:9px 12px; }
+  .lc-widget-hd { padding:14px 16px 12px; }
+  .lc-widget-hd-name { font-size:13px; }
+  .lc-input-row { padding:10px 12px; }
+  .lc-input-bar { font-size:12px; padding:8px 12px; }
 }
 `;
 
