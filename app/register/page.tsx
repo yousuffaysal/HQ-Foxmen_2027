@@ -47,6 +47,13 @@ export default function RegisterPage() {
         </aside>
 
         <form onSubmit={handleSubmit}>
+          <div className="login-mobile-brand">
+            <img src="/assets/logo-mark.svg" alt="Foxmen Studio" />
+            <div>
+              <div className="lmb-name">Foxmen <em style={{ fontStyle: "italic", color: "var(--brand)" }}>Studio</em></div>
+              <span className="lmb-sub">Client Portal</span>
+            </div>
+          </div>
           <h2>Create <span className="it">account.</span></h2>
           <p>Get access to your client portal and track your projects in real-time.</p>
 
