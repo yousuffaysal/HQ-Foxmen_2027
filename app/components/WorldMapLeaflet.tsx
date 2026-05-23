@@ -1,6 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, CircleMarker, Polyline } from "react-leaflet";
+
+let _wm_key = 0;
 
 const CITIES: [number, number][] = [
   [34.05,  -118.24],
@@ -42,6 +44,8 @@ function arcPoints(a: [number,number], b: [number,number]): [number,number][] {
 
 export default function WorldMapLeaflet({ scrollOffset = 0 }: { scrollOffset?: number }) {
   const [isDesktop, setIsDesktop] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const mapKey = useRef(++_wm_key);
 
   useEffect(() => {
     const check = () => setIsDesktop(window.innerWidth >= 761);
@@ -50,12 +54,23 @@ export default function WorldMapLeaflet({ scrollOffset = 0 }: { scrollOffset?: n
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  if (!isDesktop) return null;
+  useEffect(() => {
+    setMounted(true);
+    return () => {
+      // destroy stale Leaflet instance so the container can be reused
+      document.querySelectorAll(".wm-leaflet").forEach((el) => {
+        const node = el as HTMLElement & { _leaflet_id?: number };
+        if (node._leaflet_id != null) delete node._leaflet_id;
+      });
+    };
+  }, []);
+
+  if (!isDesktop || !mounted) return null;
 
   return (
     <div className="wm-wrap" style={{ transform: `translateY(${scrollOffset * 0.25}px)` }}>
       <MapContainer
-        key="world-map"
+        key={mapKey.current}
         center={[20, 10]}
         zoom={2}
         zoomControl={false}
