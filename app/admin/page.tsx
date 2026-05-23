@@ -738,6 +738,7 @@ export default function AdminPage() {
   const [emailPdfLabel,      setEmailPdfLabel]      = useState("Download PDF");
   const [emailPdfUrl,        setEmailPdfUrl]        = useState("");
   const [emailPdfUploading,  setEmailPdfUploading]  = useState(false);
+  const [emailFrom,          setEmailFrom]          = useState("contact@foxmenstudio.com");
   const [invAiLoading,   setInvAiLoading]   = useState(false);
   const [projAiPrompt,   setProjAiPrompt]   = useState("");
   const [projAiLoading,  setProjAiLoading]  = useState(false);
@@ -2497,7 +2498,7 @@ ${emailPayNotes?`<div style="margin-top:24px;padding:16px 20px;background:#faf8f
             try{
               const body:Record<string,unknown>={
                 template:emailTemplate, to:emailTo, subject:emailSubject,
-                heroImage:emailHeroImg, btnColor:emailBtnColor,
+                from:emailFrom, heroImage:emailHeroImg, btnColor:emailBtnColor,
               };
               if(emailTemplate==="campaign"||emailTemplate==="custom"){
                 if(!emailRawContent.trim()){toast("Write some content first");setEmailSending(false);return;}
@@ -2557,6 +2558,16 @@ ${emailPayNotes?`<div style="margin-top:24px;padding:16px 20px;background:#faf8f
                 <div style={{fontSize:12,color:"var(--muted)",marginBottom:16,lineHeight:1.5}}>{TMPL_DESCS[emailTemplate]}</div>
 
                 {/* Shared fields */}
+                <div className="field" style={{marginBottom:12}}>
+                  <label style={{fontSize:12,fontWeight:500,color:"var(--muted)",display:"block",marginBottom:5}}>From</label>
+                  <select value={emailFrom} onChange={e=>setEmailFrom(e.target.value)} style={{width:"100%",padding:"8px 11px",background:"var(--canvas)",border:"1px solid var(--line)",borderRadius:"var(--r-sm)",color:"var(--ink)",fontSize:13,fontFamily:"var(--f-mono)",outline:"none",cursor:"pointer"}}>
+                    <option value="contact@foxmenstudio.com">contact@foxmenstudio.com</option>
+                    <option value="hello@foxmenstudio.com">hello@foxmenstudio.com</option>
+                    <option value="info@foxmenstudio.com">info@foxmenstudio.com</option>
+                    <option value="careers@foxmenstudio.com">careers@foxmenstudio.com</option>
+                    <option value="yousuf.h.faysal@foxmenstudio.com">yousuf.h.faysal@foxmenstudio.com</option>
+                  </select>
+                </div>
                 <Field label="To (recipient email)" value={emailTo} onChange={setEmailTo} placeholder="client@company.com" type="email"/>
                 <Field label="Subject line" value={emailSubject} onChange={setEmailSubject} placeholder="Here's what we've been building…"/>
 

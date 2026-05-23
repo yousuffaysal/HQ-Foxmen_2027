@@ -371,7 +371,7 @@ function buildPaymentHtml(data: PaymentEmailData): string {
 export async function POST(req: Request) {
   const deny = await requireAdmin();
   if (deny) return deny;
-  const { template, to, subject, rawContent, btnColor, heroImage, proposalData, paymentData } = await req.json();
+  const { template, to, from, subject, rawContent, btnColor, heroImage, proposalData, paymentData } = await req.json();
 
   if (!to)      return NextResponse.json({ error: "No recipient" },  { status: 400 });
   if (!subject) return NextResponse.json({ error: "No subject" },    { status: 400 });
@@ -397,7 +397,7 @@ export async function POST(req: Request) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: `Foxmen Studio <${process.env.FROM_EMAIL ?? "contact@foxmenstudio.com"}>`,
+      from: `Foxmen Studio <${from ?? process.env.FROM_EMAIL ?? "contact@foxmenstudio.com"}>`,
       to,
       subject,
       html,
