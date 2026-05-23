@@ -133,7 +133,7 @@ html,body{ margin:0; padding:0; }
 @media (max-width:900px){
   .login{ grid-template-columns:1fr; }
   .login .pane{ display:none; }
-  .login form{ padding:32px 24px; }
+  .login form{ padding:32px 24px; width:min(420px, 100% - 32px); }
   .login-mobile-brand{ display:flex !important; }
 }
 .login-mobile-brand{
