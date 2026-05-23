@@ -381,8 +381,6 @@ const PF_CSS = `
 .pf-section a.btn { --bg:#b86cf9; --fg:#fff; --chip:#fff; --chipfg:#b86cf9; }
 .pf-section a.btn::before { background:#8c3bd9; }
 .pf-section a.btn:hover { color:#fff; }
-.pf-cta-desktop { display:block; }
-.pf-cta-mobile  { display:none; }
 
 .pf-split {
   display:grid; grid-template-columns:1fr 1fr;
@@ -593,8 +591,6 @@ const PF_CSS = `
   .pf-app { height:380px; }
   .pf-profile-name { display:none; }
   .pf-step { opacity:1; }
-  .pf-cta-desktop { display:none; }
-  .pf-cta-mobile  { display:block; width:100%; }
   /* premium glow on mockup when stacked */
   .pf-mock {
     box-shadow:0 0 0 1px rgba(184,108,249,.15),
@@ -721,15 +717,10 @@ function PortalFeatureSection() {
               </div>
             ))}
             <div style={{ marginTop: 40 }}>
-              <div className="pf-cta-desktop">
-                <Link href="/portal" className="btn btn--lg fade d3">
-                  <span className="label">Access client portal</span>
-                  <span className="chip"><ArrowIcon /></span>
-                </Link>
-              </div>
-              <div className="pf-cta-mobile">
-                <SlideButton href="/portal" label="Access client portal" />
-              </div>
+              <Link href="/portal" className="btn btn--lg fade d3">
+                <span className="label">Access client portal</span>
+                <span className="chip"><ArrowIcon /></span>
+              </Link>
             </div>
           </div>
 
