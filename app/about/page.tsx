@@ -48,6 +48,7 @@ const FOUNDERS = [
     role: "Founder & CEO",
     tagline: "Strategy, design and client partnerships — from brief to launch.",
     gradient: "linear-gradient(160deg,#c4b5fd 0%,#a78bfa 40%,#7c3aed 100%)",
+    image: "https://ik.imagekit.io/2lax2ytm2/Gemini_Generated_Image_ug8ze2ug8ze2ug8z%20(1).jpeg",
     projects: 62,
     brands: 105,
     delay: "",
@@ -55,9 +56,10 @@ const FOUNDERS = [
   {
     initials: "RA",
     name: "Rayhan Ahmed",
-    role: "Co-founder · Head of Engineering",
+    role: "Co-founder",
     tagline: "Senior engineer writes the production code. Every time, every project.",
     gradient: "linear-gradient(160deg,#a5b4fc 0%,#818cf8 40%,#4f46e5 100%)",
+    image: "https://ik.imagekit.io/2lax2ytm2/Gemini_Generated_Image_pz9ph8pz9ph8pz9p.jpeg",
     projects: 50,
     brands: 80,
     delay: "d1",
@@ -388,7 +390,10 @@ export default function AboutPage() {
                 <article key={f.name} className={`pc fade${f.delay ? ` ${f.delay}` : ""}`}>
                   {/* image / gradient area */}
                   <div className="pc-img" style={{ background: f.gradient }}>
-                    <span className="pc-initials">{f.initials}</span>
+                    {f.image
+                      ? <img src={f.image} alt={f.name} style={{ width:"100%", height:"100%", objectFit:"cover", objectPosition:"center top", display:"block" }} />
+                      : <span className="pc-initials">{f.initials}</span>
+                    }
                   </div>
 
                   {/* text section — bottom third */}
