@@ -183,7 +183,7 @@ export default function ContactPage() {
   return (
     <>
       <style>{`
-        .cf-page { background: #f4f3f0; min-height: 100vh; padding: 120px 0 80px; }
+        .cf-page { background: #f4f3f0; min-height: 100vh; padding: 160px 0 80px; }
         .cf-grid { display: grid; grid-template-columns: 1fr 1.35fr; gap: 80px; align-items: start; }
         /* LEFT */
         .cf-left-title { font-family: var(--f-display); font-size: clamp(38px,5vw,62px); line-height: 1.05; letter-spacing: -.03em; color: var(--ink); font-weight: 400; margin-bottom: 24px; }
