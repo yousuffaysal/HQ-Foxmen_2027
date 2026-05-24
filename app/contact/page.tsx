@@ -257,7 +257,9 @@ export default function ContactPage() {
               </p>
 
               <div className="cf-founder">
-                <div className="cf-founder-photo">YF</div>
+                <div className="cf-founder-photo">
+                  <img src="https://ik.imagekit.io/2lax2ytm2/Gemini_Generated_Image_ug8ze2ug8ze2ug8z%20(1).jpeg" alt="Yousuf Faysal" />
+                </div>
                 <div>
                   <div className="cf-founder-name">Yousuf Faysal</div>
                   <div className="cf-founder-role">Founder &amp; CEO</div>

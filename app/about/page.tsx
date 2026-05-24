@@ -49,6 +49,12 @@ const FOUNDERS = [
     tagline: "Strategy, design and client partnerships — from brief to launch.",
     gradient: "linear-gradient(160deg,#c4b5fd 0%,#a78bfa 40%,#7c3aed 100%)",
     image: "https://ik.imagekit.io/2lax2ytm2/Gemini_Generated_Image_ug8ze2ug8ze2ug8z%20(1).jpeg",
+    socials: {
+      twitter: "https://x.com/FoxmenStudio",
+      linkedin: "https://www.linkedin.com/company/foxmen-studio/",
+      instagram: "https://www.instagram.com/foxmen_studio/",
+      dribbble: "https://dribbble.com/foxmen-studio",
+    },
     projects: 62,
     brands: 105,
     delay: "",
@@ -60,6 +66,12 @@ const FOUNDERS = [
     tagline: "Senior engineer writes the production code. Every time, every project.",
     gradient: "linear-gradient(160deg,#a5b4fc 0%,#818cf8 40%,#4f46e5 100%)",
     image: "https://ik.imagekit.io/2lax2ytm2/Gemini_Generated_Image_pz9ph8pz9ph8pz9p.jpeg",
+    socials: {
+      twitter: "https://x.com/FoxmenStudio",
+      linkedin: "https://www.linkedin.com/company/foxmen-studio/",
+      instagram: "https://www.instagram.com/foxmen_studio/",
+      dribbble: "https://dribbble.com/foxmen-studio",
+    },
     projects: 50,
     brands: 80,
     delay: "d1",
@@ -403,10 +415,10 @@ export default function AboutPage() {
                     <p className="pc-tagline">{f.tagline}</p>
                     <div className="pc-foot">
                       <div className="pc-socials">
-                        <a href="#" aria-label="Twitter / X" className="pc-soc-a"><XIcon /></a>
-                        <a href="#" aria-label="LinkedIn" className="pc-soc-a"><LiIcon /></a>
-                        <a href="#" aria-label="GitHub" className="pc-soc-a"><GhIcon /></a>
-                        <a href="#" aria-label="Instagram" className="pc-soc-a"><IgIcon /></a>
+                        <a href={f.socials.twitter} target="_blank" rel="noopener noreferrer" aria-label="Twitter / X" className="pc-soc-a"><XIcon /></a>
+                        <a href={f.socials.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="pc-soc-a"><LiIcon /></a>
+                        <a href={f.socials.dribbble} target="_blank" rel="noopener noreferrer" aria-label="Dribbble" className="pc-soc-a"><IgIcon /></a>
+                        <a href={f.socials.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="pc-soc-a"><GhIcon /></a>
                       </div>
                       <Link href="/contact" className="pc-btn">Contact</Link>
                     </div>
