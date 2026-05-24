@@ -677,6 +677,8 @@ export default function AdminPage() {
   const [priceCat,  setPriceCat]  = useState("Website");
   const [localPrices, setLocalPrices] = useState<Record<number,{min:number;max:number}>>({});
   const [localNotes, setLocalNotes]   = useState<Record<string,string>>({});
+  const [msgSearch, setMsgSearch] = useState("");
+  const [msgFilter, setMsgFilter] = useState<"all"|"unread"|"contact"|"estimator">("all");
 
   /* proposals */
   const [propClient,    setPropClient]    = useState("");
@@ -1638,32 +1640,71 @@ export default function AdminPage() {
         )}
 
         {/* ══════════ MESSAGES ══════════ */}
-        {page==="messages" && (
+        {page==="messages" && (()=>{
+          const filteredMsgs = msgs.filter(m=>{
+            if(msgFilter==="unread"    && !m.unread)              return false;
+            if(msgFilter==="contact"   && m.source!=="contact")   return false;
+            if(msgFilter==="estimator" && m.source!=="estimator") return false;
+            if(msgSearch){
+              const q=msgSearch.toLowerCase();
+              if(!m.sender.toLowerCase().includes(q)&&!(m.subject||"").toLowerCase().includes(q)&&!(m.preview||"").toLowerCase().includes(q)) return false;
+            }
+            return true;
+          });
+          const unreadCount = msgs.filter(m=>m.unread).length;
+          return (
           <section className="page active">
             <div className="page-head">
               <div><h2>Inbox <span className="it">— {msgs.length}</span></h2><p>Leads from the contact form, press, partnerships, careers.</p></div>
-              <div className="page-actions"><button className="btn-ghost" onClick={()=>{msgs.forEach(m=>{if(m.unread)markRead(m.id)});toast("All marked read");}}>Mark all read</button></div>
+              <div className="page-actions">
+                <button className="btn-ghost" onClick={()=>{msgs.forEach(m=>{if(m.unread)markRead(m.id)});toast("All marked read");}}>Mark all read</button>
+                <button className="btn-ghost" onClick={()=>loadData("messages")}>Refresh</button>
+              </div>
             </div>
             {msgs.length===0 ? (
               <div className="empty"><h3>Inbox <span style={{fontStyle:"italic",color:"var(--brand)"}}>zero.</span></h3><p>No messages yet. They&apos;ll appear here when someone sends from the contact form.</p></div>
             ) : (
               <div className="inbox">
                 <aside className="col-list">
-                  <div className="top"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg><input placeholder="Search messages"/></div>
-                  <div className="scroll">
-                    {msgs.map((m,i)=>(
-                      <div key={m.id} className={`thread${m.unread?" unread":""}${activeIdx===i?" on":""}`} onClick={()=>handleThread(i)}>
-                        <div className="av">{m.av||m.sender.slice(0,2).toUpperCase()}</div>
-                        <div className="body"><div className="row1"><div className="who">{m.sender}</div><div className="dt">{relTime(m.received_at)}</div></div><div className="sub">{m.subject}</div><div className="preview">{m.preview}</div></div>
-                      </div>
+                  {/* Search */}
+                  <div className="top">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+                    <input placeholder="Search messages…" value={msgSearch} onChange={e=>setMsgSearch(e.target.value)}/>
+                    {msgSearch&&<button onClick={()=>setMsgSearch("")} style={{border:"none",background:"none",cursor:"pointer",color:"var(--muted)",fontSize:16,lineHeight:1,padding:"0 2px"}}>×</button>}
+                  </div>
+                  {/* Filter pills */}
+                  <div style={{display:"flex",gap:6,padding:"8px 14px 10px",borderBottom:"1px solid var(--line)",flexWrap:"wrap"}}>
+                    {([["all","All",msgs.length],["unread","Unread",unreadCount],["contact","Contact",msgs.filter(m=>m.source==="contact").length],["estimator","Estimator",msgs.filter(m=>m.source==="estimator").length]] as [string,string,number][]).map(([val,label,cnt])=>(
+                      <button key={val} onClick={()=>setMsgFilter(val as typeof msgFilter)}
+                        style={{padding:"4px 10px",borderRadius:999,border:"1px solid",fontSize:11,fontWeight:500,cursor:"pointer",transition:"all .15s",
+                          background:msgFilter===val?"var(--ink)":"transparent",
+                          color:msgFilter===val?"#fff":"var(--muted)",
+                          borderColor:msgFilter===val?"var(--ink)":"var(--line)"}}>
+                        {label}{cnt>0&&<span style={{marginLeft:4,opacity:.7}}>{cnt}</span>}
+                      </button>
                     ))}
+                  </div>
+                  {/* Scrollable list */}
+                  <div className="scroll">
+                    {filteredMsgs.length===0
+                      ? <div style={{padding:24,textAlign:"center",color:"var(--muted)",fontSize:13}}>No messages match your filter.</div>
+                      : filteredMsgs.map((m)=>{
+                          const i=msgs.indexOf(m);
+                          return (
+                            <div key={m.id} className={`thread${m.unread?" unread":""}${activeIdx===i?" on":""}`} onClick={()=>handleThread(i)}>
+                              <div className="av">{m.av||m.sender.slice(0,2).toUpperCase()}</div>
+                              <div className="body"><div className="row1"><div className="who">{m.sender}</div><div className="dt">{relTime(m.received_at)}</div></div><div className="sub">{m.subject}</div><div className="preview">{m.preview}</div></div>
+                            </div>
+                          );
+                        })
+                    }
                   </div>
                 </aside>
                 {activeMsg && (
                   <section className="col-msg">
                     <div className="msg-head">
                       <div className="av">{activeMsg.av||activeMsg.sender.slice(0,2).toUpperCase()}</div>
-                      <div className="who"><h3>{activeMsg.sender}</h3><div className="em">{activeMsg.sender.toLowerCase().replace(/\s+/g,".")}@client.co</div></div>
+                      <div className="who"><h3>{activeMsg.sender}</h3><div className="em">{activeMsg.sender}</div></div>
                       <div className="spacer"/>
                       <button className="btn-icon" title="Delete" onClick={()=>deleteMsg(activeMsg.id)}><TrashSvg/></button>
                     </div>
@@ -1688,7 +1729,8 @@ export default function AdminPage() {
               </div>
             )}
           </section>
-        )}
+          );
+        })()}
 
         {/* ══════════ LEADS ══════════ */}
         {page==="leads" && (()=>{

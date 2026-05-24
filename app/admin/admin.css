@@ -579,10 +579,10 @@ td .acts{ display:flex; gap:6px; justify-content:flex-end; }
    ============================================================ */
 
 .inbox{
-  display:grid; grid-template-columns:340px 1fr;
+  display:grid; grid-template-columns:360px 1fr;
   background:#fff; border:1px solid var(--line); border-radius:var(--r); overflow:hidden;
-  height:calc(100vh - var(--topbar-h) - 120px);
-  min-height:560px;
+  height:calc(100vh - var(--topbar-h) - 210px);
+  min-height:520px;
 }
 .inbox .col-list{ border-right:1px solid var(--line); display:flex; flex-direction:column; }
 .inbox .col-list .top{
