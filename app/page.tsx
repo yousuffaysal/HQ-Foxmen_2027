@@ -312,7 +312,7 @@ const marqueeItems = ["Web Design","Mobile Apps","AI Integration","Ecommerce","R
 const techItems    = ["React","Next.js","Swift","Flutter","OpenAI","Anthropic","Stripe","Postgres","Figma","Webflow"];
 
 type DbService = { id:number; ord:number; name:string; descr:string; count:string; visible:boolean; badge:string|null; image:string|null };
-type DbProject = { id:number; name:string; tagline:string; industry:string; year:string; scope:string; status:string; thumbnail:string; slug:string; color_cls:string; live_url:string };
+type DbProject = { id:number; name:string; tagline:string; industry:string; year:string; scope:string; status:string; thumbnail:string; slug:string; color_cls:string; live_url:string; home_featured:boolean; home_order:number };
 type DbClient  = { id:number; name:string; industry:string; country:string };
 type DbTesti   = { id:number; quote:string; name:string; role:string; av:string; hi:string; rating:number; img:string };
 
@@ -1374,7 +1374,13 @@ export default function Home() {
       if (Array.isArray(rows) && rows.length > 0) setDbServices(rows);
     }).catch(() => {});
     fetch("/api/projects").then(r => r.json()).then(rows => {
-      if (Array.isArray(rows)) setDbProjects(rows.filter((p:DbProject) => p.status === "live").slice(0, 6));
+      if (!Array.isArray(rows)) return;
+      const featured = rows.filter((p:DbProject) => p.home_featured);
+      if (featured.length > 0) {
+        setDbProjects(featured.sort((a:DbProject, b:DbProject) => a.home_order - b.home_order));
+      } else {
+        setDbProjects(rows.filter((p:DbProject) => p.status === "live").slice(0, 6));
+      }
     }).catch(() => {});
     fetch("/api/clients").then(r => r.json()).then(rows => {
       if (Array.isArray(rows) && rows.length > 0) setDbClients(rows);

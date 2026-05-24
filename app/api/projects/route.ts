@@ -40,6 +40,8 @@ async function ensureMigrated() {
     sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS client_quote_author TEXT DEFAULT ''`,
     sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS client_quote_role TEXT DEFAULT ''`,
     sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS chapters TEXT DEFAULT '[]'`,
+    sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS home_featured BOOLEAN DEFAULT false`,
+    sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS home_order INT DEFAULT 0`,
   ]);
   migrated = true;
 }
@@ -49,7 +51,8 @@ export async function GET() {
   const rows = await sql`
     SELECT id, name, tagline, industry, year, scope, status,
            thumbnail, hero_image, color_cls, live_url, slug,
-           monogram, client_name, timeline_duration
+           monogram, client_name, timeline_duration,
+           home_featured, home_order
     FROM projects ORDER BY id DESC
   `;
   return NextResponse.json(rows);

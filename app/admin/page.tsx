@@ -10,7 +10,7 @@ import { getPusherClient } from "@/lib/pusher";
 /* ================================================================
    TYPES
    ================================================================ */
-type Project = { id:number; monogram:string; color_cls:string; name:string; industry:string; year:string; scope:string; status:string; updated_at:string; tagline:string; overview:string; challenge:string; solution:string; results:string; tech_stack:string; timeline_duration:string; client_name:string; live_url:string; hero_image:string; thumbnail:string; gallery:string; video_url:string; challenge_img1:string; challenge_img2:string; solution_img1:string; solution_img2:string; split1_label:string; split2_label:string; slug:string; challenge_img1_label:string; challenge_img2_label:string; solution_img1_label:string; solution_img2_label:string; challenge_img1_orient:string; challenge_img2_orient:string; solution_img1_orient:string; solution_img2_orient:string; client_quote:string; client_quote_author:string; client_quote_role:string; chapters:string };
+type Project = { id:number; monogram:string; color_cls:string; name:string; industry:string; year:string; scope:string; status:string; updated_at:string; tagline:string; overview:string; challenge:string; solution:string; results:string; tech_stack:string; timeline_duration:string; client_name:string; live_url:string; hero_image:string; thumbnail:string; gallery:string; video_url:string; challenge_img1:string; challenge_img2:string; solution_img1:string; solution_img2:string; split1_label:string; split2_label:string; slug:string; challenge_img1_label:string; challenge_img2_label:string; solution_img1_label:string; solution_img2_label:string; challenge_img1_orient:string; challenge_img2_orient:string; solution_img1_orient:string; solution_img2_orient:string; client_quote:string; client_quote_author:string; client_quote_role:string; chapters:string; home_featured:boolean; home_order:number };
 type ChapterImage = { url:string; orient:"portrait"|"landscape"; label:string };
 type ChapterStat  = { value:string; label:string; context:string };
 type Chapter = { id:string; title:string; body:string; images:ChapterImage[]; video:string; stats:ChapterStat[]; img_layout:"side-by-side"|"stacked" };
@@ -1142,6 +1142,7 @@ export default function AdminPage() {
           </a>
           <span className="label">Content</span>
           {[["projects","Projects",<svg key="p" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M8 5V3M16 5V3"/></svg>,`${projects.length||38}`],
+           ["featured","Featured",<svg key="ft" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,projects.filter(p=>p.home_featured).length>0?String(projects.filter(p=>p.home_featured).length):null],
            ["blog","Blog posts",<svg key="b" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M4 5h16M4 12h16M4 19h10"/></svg>,`${posts.length||24}`],
            ["services","Services",<svg key="s" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>,null],
            ["testimonials","Testimonials",<svg key="t" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg>,null],
@@ -1345,6 +1346,112 @@ export default function AdminPage() {
             </div>
           </section>
         )}
+
+        {page==="featured" && (()=>{
+          const [featList, setFeatList] = useState<{id:number;home_order:number}[]>(
+            () => projects.filter(p=>p.home_featured).sort((a,b)=>a.home_order-b.home_order).map(p=>({id:p.id,home_order:p.home_order}))
+          );
+          const [saving, setSaving] = useState(false);
+          const liveProjects = projects.filter(p=>p.status==="live");
+          const isFeatured = (id:number) => featList.some(f=>f.id===id);
+          const toggleFeat = (id:number) => {
+            setFeatList(prev => isFeatured(id)
+              ? prev.filter(f=>f.id!==id).map((f,i)=>({...f,home_order:i+1}))
+              : [...prev,{id,home_order:prev.length+1}]
+            );
+          };
+          const moveUp = (idx:number) => {
+            if(idx===0) return;
+            setFeatList(prev=>{
+              const next=[...prev];
+              [next[idx-1],next[idx]]=[next[idx],next[idx-1]];
+              return next.map((f,i)=>({...f,home_order:i+1}));
+            });
+          };
+          const moveDown = (idx:number) => {
+            setFeatList(prev=>{
+              if(idx>=prev.length-1) return prev;
+              const next=[...prev];
+              [next[idx],next[idx+1]]=[next[idx+1],next[idx]];
+              return next.map((f,i)=>({...f,home_order:i+1}));
+            });
+          };
+          const save = async()=>{
+            setSaving(true);
+            await fetch("/api/projects/featured",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({items:featList})});
+            await loadData("projects");
+            setSaving(false);
+            toast("Featured projects saved");
+          };
+          return (
+            <section className="page active">
+              <div className="page-head">
+                <div><h2>Featured Projects <span className="it">— home page</span></h2><p>Choose which projects appear on the home page and set their display order.</p></div>
+                <div className="page-actions"><button className="btn-primary" onClick={save} disabled={saving}>{saving?"Saving…":"Save order"}</button></div>
+              </div>
+
+              {/* Featured order list */}
+              {featList.length>0&&(
+                <div className="table-wrap" style={{marginBottom:24}}>
+                  <div style={{padding:"10px 16px 6px",fontSize:11,fontWeight:600,textTransform:"uppercase",letterSpacing:".06em",color:"var(--muted)"}}>Featured — displayed in this order</div>
+                  <table>
+                    <thead><tr><th style={{width:40}}>Order</th><th>Project</th><th>Industry</th><th>Year</th><th style={{width:90}}>Move</th><th style={{width:60}}>Remove</th></tr></thead>
+                    <tbody>
+                      {featList.map((f,idx)=>{
+                        const p=projects.find(x=>x.id===f.id);
+                        if(!p) return null;
+                        return (
+                          <tr key={p.id}>
+                            <td><span style={{fontFamily:"var(--f-mono)",fontSize:13,fontWeight:700,color:"var(--brand)"}}>{String(idx+1).padStart(2,"0")}</span></td>
+                            <td><div className="pair"><div className={`thumb-mini ${p.color_cls}`}>{p.monogram}</div><div><div className="ttl">{p.name}</div><div className="sub">{p.tagline||p.scope}</div></div></div></td>
+                            <td>{p.industry}</td>
+                            <td>{p.year}</td>
+                            <td>
+                              <div style={{display:"flex",gap:4}}>
+                                <button className="btn-icon" title="Move up" onClick={()=>moveUp(idx)} disabled={idx===0} style={{opacity:idx===0?.3:1}}>
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m18 15-6-6-6 6"/></svg>
+                                </button>
+                                <button className="btn-icon" title="Move down" onClick={()=>moveDown(idx)} disabled={idx===featList.length-1} style={{opacity:idx===featList.length-1?.3:1}}>
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
+                                </button>
+                              </div>
+                            </td>
+                            <td><button className="btn-icon danger" title="Remove from featured" onClick={()=>toggleFeat(p.id)}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* All live projects to pick from */}
+              <div className="table-wrap">
+                <div style={{padding:"10px 16px 6px",fontSize:11,fontWeight:600,textTransform:"uppercase",letterSpacing:".06em",color:"var(--muted)"}}>All live projects — click star to feature</div>
+                <table>
+                  <thead><tr><th style={{width:44}}>Feature</th><th>Project</th><th>Industry</th><th>Year</th><th>Status</th></tr></thead>
+                  <tbody>
+                    {liveProjects.map(p=>(
+                      <tr key={p.id} style={{opacity:isFeatured(p.id)?0.45:1,transition:"opacity .2s"}}>
+                        <td>
+                          <button className="btn-icon" title={isFeatured(p.id)?"Remove from featured":"Add to featured"} onClick={()=>toggleFeat(p.id)}
+                            style={{color:isFeatured(p.id)?"var(--brand)":"var(--muted)"}}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill={isFeatured(p.id)?"currentColor":"none"} stroke="currentColor" strokeWidth="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                          </button>
+                        </td>
+                        <td><div className="pair"><div className={`thumb-mini ${p.color_cls}`}>{p.monogram}</div><div><div className="ttl">{p.name}</div><div className="sub">{p.tagline||p.scope}</div></div></div></td>
+                        <td>{p.industry}</td>
+                        <td>{p.year}</td>
+                        <td><span className={`status ${p.status}`}>{p.status}</span></td>
+                      </tr>
+                    ))}
+                    {liveProjects.length===0&&<tr><td colSpan={5}><div style={{padding:32,textAlign:"center",color:"var(--muted)"}}>No live projects yet.</div></td></tr>}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          );
+        })()}
 
         {/* ══════════ BLOG ══════════ */}
         {page==="blog" && blogEditorPost && (
