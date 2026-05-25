@@ -3514,7 +3514,7 @@ ${emailPayNotes?`<div style="margin-top:24px;padding:16px 20px;background:#faf8f
                 <div className="form-section"><div className="lhs"><h3>Brand identity</h3><p>Name, tagline and description.</p></div><div className="rhs">
                   <div className="field"><label>Studio name</label><input type="text" data-setting="studio_name" defaultValue="Foxmen Studio"/></div>
                   <div className="field"><label>Tagline</label><input type="text" data-setting="tagline" defaultValue="Code · Craft · Care"/></div>
-                  <div className="field"><label>Brand description</label><textarea data-setting="brand_desc" defaultValue="International digital studio. We design, engineer, and grow products for ambitious teams across 17 countries."/></div>
+                  <div className="field"><label>Brand description</label><textarea data-setting="brand_desc" defaultValue="International digital studio. We design, engineer, and grow products for ambitious teams across 5 countries."/></div>
                 </div></div>
                 <div className="form-section"><div className="lhs"><h3>Site behaviour</h3><p>Toggles for the live site.</p></div><div className="rhs">
                   {[["Custom cursor","Brand-colored cursor dot."],["Mask-reveal showreel","Full-screen video on homepage."],["Preloader animation","2.5-second branded splash."],["Print noise overlay","Editorial texture."]].map(([h,p],i)=>(

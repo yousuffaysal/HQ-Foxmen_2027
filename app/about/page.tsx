@@ -55,8 +55,8 @@ const FOUNDERS = [
       instagram: "https://www.instagram.com/foxmen_studio/",
       dribbble: "https://dribbble.com/foxmen-studio",
     },
-    projects: 62,
-    brands: 105,
+    projects: 50,
+    brands: 50,
     delay: "",
   },
   {
@@ -335,8 +335,8 @@ export default function AboutPage() {
       {/* ── STATS ── */}
       <div className="ab-stats">
         {[
-          { n: "105+",  l: "Brands scaled" },
-          { n: "17+",   l: "Countries served" },
+          { n: "50+",   l: "Projects completed" },
+          { n: "5+",    l: "Countries served" },
           { n: "< 14w", l: "Avg. time to launch" },
           { n: "4.9★",  l: "Client satisfaction" },
         ].map((st, i) => (

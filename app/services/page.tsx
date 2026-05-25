@@ -939,7 +939,7 @@ export default function ServicesPage() {
               </div>
             </div>
             <div className="ph-stats fade in d2">
-              {([{v:"120+",k:"Products shipped"},{v:"07",k:"Capabilities"},{v:"17",k:"Countries"},{v:"98%",k:"Retention"}] as {v:string;k:string}[]).map(({v,k},i)=>(
+              {([{v:"50+",k:"Products shipped"},{v:"07",k:"Capabilities"},{v:"5",k:"Countries"},{v:"98%",k:"Retention"}] as {v:string;k:string}[]).map(({v,k},i)=>(
                 <div key={i} className="ph-stat" style={{"--di":i} as React.CSSProperties}><div className="v">{v}</div><div className="k">{k}</div></div>
               ))}
             </div>

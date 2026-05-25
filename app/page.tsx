@@ -159,7 +159,7 @@ function Hero() {
             deploy digital products that grow with you.
           </p>
           <div className="fade d3">
-            <div className="stat">120+</div>
+            <div className="stat">50+</div>
             <div className="stat-sub">Products shipped worldwide</div>
           </div>
           <div className="fade d4 hero-actions">
@@ -256,9 +256,9 @@ function Reel() {
             />
             <div className="reel-video-overlay" />
             <div className="ticker">
-              <span>120 products shipped</span><span>17 countries</span>
+              <span>50+ products shipped</span><span>5 countries</span>
               <span>42 active clients</span><span>98% retention</span>
-              <span>120 products shipped</span><span>17 countries</span>
+              <span>50+ products shipped</span><span>5 countries</span>
               <span>42 active clients</span><span>98% retention</span>
             </div>
           </div>
@@ -1564,7 +1564,7 @@ export default function Home() {
                 {dbClients.length > 0 ? dbClients.length : 42} active clients across{" "}
                 <span className="it">
                   {dbClients.length > 0
-                    ? new Set(dbClients.map(c => c.country).filter(Boolean)).size || 17
+                    ? new Set(dbClients.map(c => c.country).filter(Boolean)).size || 5
                     : 17}{" "}
                   countries
                 </span>{" "}
@@ -1667,9 +1667,9 @@ export default function Home() {
           </div>
           <div className="metrics">
             {[
-              { v:<>120<span className="it">+</span></>, k:"Products shipped" },
+              { v:<>50<span className="it">+</span></>, k:"Products shipped" },
               { v:"42",                                   k:"Active clients" },
-              { v:"17",                                   k:"Countries served" },
+              { v:"5",                                    k:"Countries served" },
               { v:<>98<span className="it">%</span></>,   k:"Retention rate" },
             ].map((m, i) => (
               <div className={`metric fade${i ? ` d${i}` : ""}`} key={i}>
