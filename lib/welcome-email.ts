@@ -199,50 +199,6 @@ export function buildWelcomeEmail(data: {
   <tr><td style="background:#0a0a0a;">
     <div style="height:2px;background:linear-gradient(90deg,${BRAND},${DARK});"></div>
     <div class="em-ft" style="padding:22px 60px;">
-      <!-- Social icons -->
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin-bottom:18px;">
-        <tr><td align="center">
-          <table cellpadding="0" cellspacing="0" border="0" role="presentation"><tr>
-            <td style="padding:0 5px;">
-              <a href="https://www.instagram.com/foxmen_studio/" target="_blank" style="text-decoration:none;" title="Instagram">
-                <table cellpadding="0" cellspacing="0" border="0" role="presentation"><tr>
-                  <td class="em-soc-ic" style="padding:10px;background:#B86CF9;border-radius:50%;text-align:center;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.5" fill="rgba(255,255,255,.9)" stroke="none"/></svg>
-                  </td>
-                </tr></table>
-              </a>
-            </td>
-            <td style="padding:0 5px;">
-              <a href="https://x.com/FoxmenStudio" target="_blank" style="text-decoration:none;" title="X (Twitter)">
-                <table cellpadding="0" cellspacing="0" border="0" role="presentation"><tr>
-                  <td class="em-soc-ic" style="padding:10px;background:#B86CF9;border-radius:50%;text-align:center;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="rgba(255,255,255,.9)"><path d="M18.244 2H21.5l-7.5 8.57L23 22h-6.844l-5.36-7.005L4.7 22H1.44l8.04-9.183L1 2h7.014l4.844 6.405L18.244 2Zm-1.2 18h1.84L7.04 4H5.07l11.974 16Z"/></svg>
-                  </td>
-                </tr></table>
-              </a>
-            </td>
-            <td style="padding:0 5px;">
-              <a href="https://www.linkedin.com/company/foxmen-studio/" target="_blank" style="text-decoration:none;" title="LinkedIn">
-                <table cellpadding="0" cellspacing="0" border="0" role="presentation"><tr>
-                  <td class="em-soc-ic" style="padding:10px;background:#B86CF9;border-radius:50%;text-align:center;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="rgba(255,255,255,.9)"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9h4v12H3V9Zm6 0h3.84v1.71h.05c.54-1 1.87-2.08 3.84-2.08C20.6 8.63 22 11 22 14.18V21h-4v-6.06c0-1.45-.03-3.31-2.02-3.31-2.02 0-2.33 1.58-2.33 3.21V21H9V9Z"/></svg>
-                  </td>
-                </tr></table>
-              </a>
-            </td>
-            <td style="padding:0 5px;">
-              <a href="https://www.facebook.com/people/Foxmen-Studio/61579940840061/" target="_blank" style="text-decoration:none;" title="Facebook">
-                <table cellpadding="0" cellspacing="0" border="0" role="presentation"><tr>
-                  <td class="em-soc-ic" style="padding:10px;background:#B86CF9;border-radius:50%;text-align:center;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="rgba(255,255,255,.9)"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3V2Z"/></svg>
-                  </td>
-                </tr></table>
-              </a>
-            </td>
-          </tr></table>
-        </td></tr>
-      </table>
-      <div style="height:1px;background:rgba(255,255,255,.08);margin-bottom:18px;"></div>
       <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation"><tr>
         <td style="vertical-align:middle;">
           <div style="font-family:${IS};font-size:15px;color:rgba(255,255,255,.7);font-style:italic;">Foxmen Studio</div>
@@ -252,8 +208,17 @@ export function buildWelcomeEmail(data: {
             &copy; ${year} Foxmen Studio. All rights reserved.
           </p>
         </td>
-        <td class="em-ft-logo" style="text-align:right;vertical-align:middle;">
-          <img src="${LOGO}" height="26" width="26" alt="" style="display:block;margin-left:auto;opacity:.15;"/>
+        <td style="text-align:right;vertical-align:middle;padding-left:20px;">
+          <table cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin-left:auto;">
+            <tr>
+              <td style="padding:0 3px 3px 0;"><a href="https://www.instagram.com/foxmen_studio/" target="_blank" style="text-decoration:none;" title="Instagram"><table cellpadding="0" cellspacing="0" border="0" role="presentation"><tr><td style="padding:7px;background:transparent;border-radius:50%;text-align:center;border:1px solid rgba(255,255,255,.28);"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.5" fill="#ffffff" stroke="none"/></svg></td></tr></table></a></td>
+              <td style="padding:0 0 3px 0;"><a href="https://x.com/FoxmenStudio" target="_blank" style="text-decoration:none;" title="X (Twitter)"><table cellpadding="0" cellspacing="0" border="0" role="presentation"><tr><td style="padding:7px;background:transparent;border-radius:50%;text-align:center;border:1px solid rgba(255,255,255,.28);"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="#ffffff"><path d="M18.244 2H21.5l-7.5 8.57L23 22h-6.844l-5.36-7.005L4.7 22H1.44l8.04-9.183L1 2h7.014l4.844 6.405L18.244 2Zm-1.2 18h1.84L7.04 4H5.07l11.974 16Z"/></svg></td></tr></table></a></td>
+            </tr>
+            <tr>
+              <td style="padding:0 3px 0 0;"><a href="https://www.linkedin.com/company/foxmen-studio/" target="_blank" style="text-decoration:none;" title="LinkedIn"><table cellpadding="0" cellspacing="0" border="0" role="presentation"><tr><td style="padding:7px;background:transparent;border-radius:50%;text-align:center;border:1px solid rgba(255,255,255,.28);"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="#ffffff"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9h4v12H3V9Zm6 0h3.84v1.71h.05c.54-1 1.87-2.08 3.84-2.08C20.6 8.63 22 11 22 14.18V21h-4v-6.06c0-1.45-.03-3.31-2.02-3.31-2.02 0-2.33 1.58-2.33 3.21V21H9V9Z"/></svg></td></tr></table></a></td>
+              <td><a href="https://www.facebook.com/people/Foxmen-Studio/61579940840061/" target="_blank" style="text-decoration:none;" title="Facebook"><table cellpadding="0" cellspacing="0" border="0" role="presentation"><tr><td style="padding:7px;background:transparent;border-radius:50%;text-align:center;border:1px solid rgba(255,255,255,.28);"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="#ffffff"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3V2Z"/></svg></td></tr></table></a></td>
+            </tr>
+          </table>
         </td>
       </tr></table>
     </div>
