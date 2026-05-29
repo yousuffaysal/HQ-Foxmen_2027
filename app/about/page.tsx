@@ -78,6 +78,18 @@ const FOUNDERS = [
   },
 ];
 
+function TypedText({ text, active, speed = 22 }: { text: string; active: boolean; speed?: number }) {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (!active) { setI(0); return; }
+    setI(0);
+    let c = 0;
+    const id = setInterval(() => { c++; setI(c); if (c >= text.length) clearInterval(id); }, speed);
+    return () => clearInterval(id);
+  }, [active, text, speed]);
+  return <>{text.slice(0, i)}{i < text.length && <span className="ai-cursor" />}</>;
+}
+
 export default function AboutPage() {
   useScrollReveal(".fade, .reveal");
   const isOpen = useIsOpen();
@@ -444,6 +456,25 @@ export default function AboutPage() {
         .ai-ename { font-family:var(--f-display); font-size:19px; letter-spacing:-.01em; color:#fff; }
         .ai-euse { font-size:12.5px; color:#4a4a52; line-height:1.5; }
 
+        /* ── Typing cursor ── */
+        .ai-cursor { display:inline-block; width:2px; height:.82em; background:currentColor; vertical-align:text-bottom; margin-left:1px; border-radius:1px; animation:aicur .65s step-start infinite; }
+        @keyframes aicur{0%,100%{opacity:1}50%{opacity:0}}
+
+        /* ── iMac mockup ── */
+        .imac-wrap { position:relative; }
+        .imac-screen { background:#0e0e10; border:8px solid #2c2c30; border-radius:22px; overflow:hidden; box-shadow:0 0 0 1px #1a1a1c,0 64px 112px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,255,255,.05); }
+        .imac-tbar { height:40px; background:#1c1c1e; border-bottom:1px solid rgba(255,255,255,.04); display:flex; align-items:center; padding:0 16px; gap:7px; position:relative; flex-shrink:0; }
+        .imac-cam { width:7px; height:7px; border-radius:50%; background:#2a2a2e; border:1px solid #3a3a3e; position:absolute; left:50%; transform:translateX(-50%); }
+        .imac-tbar-lbl { position:absolute; left:50%; transform:translateX(-50%); font-family:var(--f-mono); font-size:10px; letter-spacing:.1em; color:#444; text-transform:uppercase; margin-left:20px; }
+        .imac-chin { height:48px; background:#2c2c30; border-top:1px solid rgba(0,0,0,.5); border-radius:0 0 14px 14px; display:flex; align-items:center; justify-content:center; }
+        .imac-chin-line { width:52px; height:1px; background:rgba(255,255,255,.08); }
+        .imac-neck { width:42px; height:60px; background:linear-gradient(to bottom,#2c2c30,#1e1e22); margin:0 auto; clip-path:polygon(18% 0%,82% 0%,96% 100%,4% 100%); }
+        .imac-base { width:200px; height:11px; background:linear-gradient(to bottom,#2c2c30,#1e1e22); border-radius:999px; margin:0 auto; box-shadow:0 6px 24px rgba(0,0,0,.6); }
+
+        /* ── Logo avatar ── */
+        .ai-avatar-logo { width:30px; height:30px; border-radius:8px; background:linear-gradient(135deg,var(--brand),#6366f1); flex-shrink:0; display:grid; place-items:center; margin-top:2px; overflow:hidden; }
+        .ai-avatar-logo img { width:62%; height:62%; object-fit:contain; filter:brightness(0) invert(1); }
+
         /* ── AI responsive ── */
         @media(max-width:960px){
           .ai-chat-grid { grid-template-columns:1fr; }
@@ -560,59 +591,84 @@ export default function AboutPage() {
           </h2>
           <div className="ai-chat-grid">
 
-            {/* ── Chat window ── */}
-            <div className="ai-win">
-              <div className="ai-win-bar">
-                <span className="ai-wdot" style={{ background: "#ff5f57" }} />
-                <span className="ai-wdot" style={{ background: "#febc2e" }} />
-                <span className="ai-wdot" style={{ background: "#28c840" }} />
-                <span className="ai-win-lbl">Foxmen Studio · Client Brief</span>
-              </div>
-              <div className="ai-chat-body">
-                <div className={`ai-msg ai-msg-u${chatStep >= 1 ? " vis" : ""}`}>
-                  <div className="ai-bub ai-bub-u">
-                    We need a booking platform — online payments, automated reminders, and an admin dashboard for our team.
-                  </div>
-                  <span className="ai-msg-ts">Client · just now</span>
+            {/* ── iMac mockup ── */}
+            <div className="imac-wrap">
+              <div className="imac-screen">
+                {/* title bar with traffic lights + camera */}
+                <div className="imac-tbar">
+                  <span className="ai-wdot" style={{ background: "#ff5f57" }} />
+                  <span className="ai-wdot" style={{ background: "#febc2e" }} />
+                  <span className="ai-wdot" style={{ background: "#28c840" }} />
+                  <span className="imac-cam" />
+                  <span className="imac-tbar-lbl">Foxmen Studio · Client Brief</span>
                 </div>
 
-                {chatStep >= 1 && chatStep < 3 && (
-                  <div className="ai-msg ai-msg-a vis">
-                    <div className="ai-ai-row">
-                      <div className="ai-avatar">F</div>
-                      <div className="ai-dots"><span /><span /><span /></div>
+                {/* chat body */}
+                <div className="ai-chat-body">
+                  <div className={`ai-msg ai-msg-u${chatStep >= 1 ? " vis" : ""}`}>
+                    <div className="ai-bub ai-bub-u">
+                      <TypedText
+                        text="We need a booking platform — online payments, automated reminders, and an admin dashboard for our team."
+                        active={chatStep >= 1}
+                        speed={19}
+                      />
                     </div>
+                    <span className="ai-msg-ts">Client · just now</span>
                   </div>
-                )}
 
-                {chatStep >= 3 && (
-                  <div className="ai-msg ai-msg-a vis">
-                    <div className="ai-ai-row">
-                      <div className="ai-avatar">F</div>
-                      <div className="ai-bub ai-bub-a">
-                        Architecture mapped — Next.js frontend, Stripe payments, push notification layer, admin panel with role-based access. <strong style={{ color: "#fff" }}>Estimated: 8 weeks.</strong>
+                  {chatStep >= 1 && chatStep < 3 && (
+                    <div className="ai-msg ai-msg-a vis">
+                      <div className="ai-ai-row">
+                        <div className="ai-avatar-logo"><img src="/assets/logo-mark.svg" alt="" /></div>
+                        <div className="ai-dots"><span /><span /><span /></div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {chatStep >= 4 && (
-                  <div className="ai-msg ai-msg-u vis">
-                    <div className="ai-bub ai-bub-u">Perfect. Let&apos;s start Monday.</div>
-                  </div>
-                )}
-
-                {chatStep >= 5 && (
-                  <div className="ai-msg ai-msg-a vis">
-                    <div className="ai-ai-row">
-                      <div className="ai-avatar">F</div>
-                      <div className="ai-bub ai-bub-ok">
-                        ✓ Delivered in 7 weeks — 1 week ahead of schedule. 4.9★ rating. 100% on brief.
+                  {chatStep >= 3 && (
+                    <div className="ai-msg ai-msg-a vis">
+                      <div className="ai-ai-row">
+                        <div className="ai-avatar-logo"><img src="/assets/logo-mark.svg" alt="" /></div>
+                        <div className="ai-bub ai-bub-a">
+                          <TypedText
+                            text="Architecture mapped — Next.js frontend, Stripe payments, push notification layer, admin panel with role-based access. Estimated: 8 weeks."
+                            active={chatStep >= 3}
+                            speed={16}
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+
+                  {chatStep >= 4 && (
+                    <div className="ai-msg ai-msg-u vis">
+                      <div className="ai-bub ai-bub-u">
+                        <TypedText text="Perfect. Let's start Monday." active={chatStep >= 4} speed={22} />
+                      </div>
+                    </div>
+                  )}
+
+                  {chatStep >= 5 && (
+                    <div className="ai-msg ai-msg-a vis">
+                      <div className="ai-ai-row">
+                        <div className="ai-avatar-logo"><img src="/assets/logo-mark.svg" alt="" /></div>
+                        <div className="ai-bub ai-bub-ok">
+                          <TypedText
+                            text="✓ Delivered in 7 weeks — 1 week ahead of schedule. 4.9★ rating. 100% on brief."
+                            active={chatStep >= 5}
+                            speed={18}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
+
+              {/* iMac stand */}
+              <div className="imac-chin"><span className="imac-chin-line" /></div>
+              <div className="imac-neck" />
+              <div className="imac-base" />
             </div>
 
             {/* ── Outcome panel ── */}
