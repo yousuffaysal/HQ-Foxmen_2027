@@ -1285,3 +1285,126 @@ td .acts{ display:flex; gap:6px; justify-content:flex-end; }
   outline:none; transition:border-color .2s;
 }
 .field.input:focus{ border-color:var(--brand); }
+
+/* ============================================================
+   MOBILE RESPONSIVE — ≤900px  (tablet + phone)
+   Desktop / laptop view is untouched.
+   ============================================================ */
+
+/* Sidebar backdrop overlay */
+.sidebar-backdrop{
+  display:none;
+}
+
+@media (max-width:900px){
+
+  /* Backdrop */
+  .sidebar-backdrop{
+    display:block;
+    position:fixed; inset:0; z-index:49;
+    background:rgba(0,0,0,.42);
+    backdrop-filter:blur(2px);
+    -webkit-backdrop-filter:blur(2px);
+  }
+
+  /* Topbar */
+  .topbar .crumb{ display:none; }
+  .topbar h1{ font-size:22px; }
+
+  /* Page heading */
+  .page-head h2{ font-size:clamp(26px,6vw,36px); }
+  .page-head{ flex-direction:column; align-items:flex-start; gap:10px; }
+  .page-actions{ width:100%; }
+
+  /* Cards */
+  .card{ padding:16px; }
+
+  /* Tables — horizontal scroll on overflow */
+  .table-wrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  table{ min-width:540px; }
+
+  /* Invoice / proposal preview — scroll horizontally */
+  .gen-preview-body{ overflow-x:auto; -webkit-overflow-scrolling:touch; padding:12px; }
+
+  /* Modals — bottom sheet on mobile */
+  .modal-overlay{ padding:0; align-items:flex-end; padding-top:60px; }
+  .modal-card, .modal-card.wide{
+    border-radius:var(--r) var(--r) 0 0;
+    width:100%; max-height:90vh;
+  }
+  .modal-2col{ grid-template-columns:1fr; }
+
+  /* Save bar */
+  .savebar{ margin:16px -16px -20px; padding:12px 16px; flex-wrap:wrap; gap:8px; }
+
+  /* Form sections */
+  .form-section{ grid-template-columns:1fr; gap:14px; padding:20px 0; }
+
+  /* Inbox — already 1col at 1000px; tighten thread list */
+  .inbox{ height:auto; min-height:400px; }
+  .inbox .col-list{ max-height:300px; }
+  .msg-head{ padding:14px 16px; }
+  .msg-body{ padding:16px; }
+  .msg-foot{ padding:10px 16px; }
+
+  /* Stat numbers — tighten */
+  .stat .v{ font-size:40px; }
+
+  /* Page padding (overrides existing rule for consistency) */
+  .page{ padding:18px 14px; }
+}
+
+/* ============================================================
+   SMALL MOBILE — ≤600px
+   ============================================================ */
+@media (max-width:600px){
+
+  /* Topbar — compact */
+  .topbar{ padding:10px 12px; gap:8px; height:auto; min-height:52px; }
+  .topbar h1{ font-size:18px; }
+
+  /* Page */
+  .page{ padding:12px 10px; }
+
+  /* Page head */
+  .page-head h2{ font-size:24px; }
+  .page-actions{ gap:6px; }
+
+  /* Stat grid — 1 col on tiny phones */
+  .stat-grid{ grid-template-columns:1fr 1fr; }
+  .stat .v{ font-size:36px; }
+
+  /* Team + testimonial grids — 1 col */
+  .team-grid, .test-grid{ grid-template-columns:1fr; }
+
+  /* Invoice action row — stack */
+  .inv-action-row{ grid-template-columns:1fr; }
+
+  /* Table tools */
+  .table-tools{ flex-direction:column; align-items:stretch; gap:8px; }
+  .table-tools .search{ max-width:100%; }
+  .table-tools .spacer{ display:none; }
+  .table-tools .seg{ align-self:flex-start; }
+
+  /* Pagination */
+  .pagi{ flex-direction:column; align-items:center; gap:8px; }
+  .pagi .pages{ justify-content:center; }
+
+  /* Thread list tighter */
+  .inbox .col-list{ max-height:240px; }
+
+  /* Side search shortcut key hidden on small screens */
+  .side-search kbd{ display:none; }
+
+  /* Toast — bottom center */
+  .toast{ right:12px; left:12px; bottom:16px; justify-content:center; }
+
+  /* Modal body padding */
+  .modal-body{ padding:16px; }
+  .modal-head{ padding:16px 16px; }
+  .modal-foot{ padding:12px 16px; }
+
+  /* Empty state */
+  .empty{ padding:32px 20px; }
+  .empty h3{ font-size:24px; }
+}

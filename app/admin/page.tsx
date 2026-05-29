@@ -1126,6 +1126,9 @@ export default function AdminPage() {
   return (
     <div className="app">
 
+      {/* Mobile sidebar backdrop */}
+      {sidebarOpen&&<div className="sidebar-backdrop" onClick={()=>setSidebarOpen(false)}/>}
+
       {/* ══ SIDEBAR ══ */}
       <aside className={`sidebar${sidebarOpen?" open":""}`}>
         <div className="side-brand"><img src="/assets/logo-mark.svg" alt=""/><div><div className="name">Foxmen <em style={{fontStyle:"italic",color:"var(--brand)"}}>Admin</em></div><span className="sub">Workspace · Studio</span></div></div>
@@ -1192,7 +1195,7 @@ export default function AdminPage() {
 
         {/* TOPBAR */}
         <header className="topbar">
-          <button className="ic-btn" style={{display:"none"}} aria-label="Menu" onClick={()=>setSidebarOpen(o=>!o)}>
+          <button className="ic-btn menu-btn" style={{display:"none"}} aria-label="Menu" onClick={()=>setSidebarOpen(o=>!o)}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
           </button>
           <div><div className="crumb">{CRUMBS[page]}</div><h1>{TITLES[page]}</h1></div>
