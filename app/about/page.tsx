@@ -1043,16 +1043,16 @@ export default function AboutPage() {
 
           <div className="ai-eco-grid">
             {[
-              { name: "GPT-4o",     use: "Architecture planning, copy generation & client brief analysis",          bg: "rgba(16,163,127,.12)", bd: "rgba(16,163,127,.25)", logo: "https://cdn.simpleicons.org/openai/ffffff" },
-              { name: "Claude",     use: "Code review, logic analysis, QA automation & documentation",             bg: "rgba(184,108,249,.12)", bd: "rgba(184,108,249,.3)",  logo: "https://cdn.simpleicons.org/anthropic/ffffff" },
-              { name: "Figma AI",   use: "Design-to-code conversion, auto-layout & component generation",         bg: "rgba(255,100,50,.1)",   bd: "rgba(255,100,50,.22)", logo: "https://cdn.simpleicons.org/figma/ffffff" },
-              { name: "Vercel AI",  use: "Edge inference, streaming responses & zero-downtime deployment",         bg: "rgba(255,255,255,.06)", bd: "rgba(255,255,255,.1)", logo: "https://cdn.simpleicons.org/vercel/ffffff" },
-              { name: "Cursor",     use: "AI-pair programming that triples engineer output on every sprint",       bg: "rgba(99,102,241,.12)",  bd: "rgba(99,102,241,.25)", logo: "https://cdn.simpleicons.org/cursor/ffffff" },
-              { name: "Perplexity", use: "Real-time market research, competitor analysis & content fact-checking", bg: "rgba(20,184,166,.1)",   bd: "rgba(20,184,166,.22)", logo: "https://cdn.simpleicons.org/perplexity/ffffff" },
+              { name: "GPT-4o",     use: "Architecture planning, copy generation & client brief analysis",          bg: "rgba(16,163,127,.12)", bd: "rgba(16,163,127,.25)", logo: "/assets/logos/openai.svg" },
+              { name: "Claude",     use: "Code review, logic analysis, QA automation & documentation",             bg: "rgba(210,100,60,.12)",  bd: "rgba(210,100,60,.28)",  logo: "/assets/logos/claude.svg" },
+              { name: "Figma AI",   use: "Design-to-code conversion, auto-layout & component generation",         bg: "rgba(242,78,30,.1)",    bd: "rgba(242,78,30,.25)",  logo: "/assets/logos/figma.svg" },
+              { name: "Vercel AI",  use: "Edge inference, streaming responses & zero-downtime deployment",         bg: "rgba(255,255,255,.06)", bd: "rgba(255,255,255,.1)", logo: "/assets/logos/vercel.svg" },
+              { name: "Cursor",     use: "AI-pair programming that triples engineer output on every sprint",       bg: "rgba(99,102,241,.12)",  bd: "rgba(99,102,241,.25)", logo: "/assets/logos/cursor.svg" },
+              { name: "Perplexity", use: "Real-time market research, competitor analysis & content fact-checking", bg: "rgba(31,184,205,.1)",   bd: "rgba(31,184,205,.22)", logo: "/assets/logos/perplexity.svg" },
             ].map((node, i) => (
               <div key={i} className={`ai-enode${aiIn.eco ? " vis" : ""}`} style={{ transitionDelay: `${i * 0.08}s` }}>
                 <div className="ai-eicon" style={{ background: node.bg, border: `1px solid ${node.bd}` }}>
-                  <img src={node.logo} alt={node.name} style={{ width: 22, height: 22, objectFit: "contain" }} />
+                  <img src={node.logo} alt={node.name} style={{ width: 22, height: 22, objectFit: "contain", filter: "brightness(0) invert(1)" }} />
                 </div>
                 <div className="ai-ename">{node.name}</div>
                 <div className="ai-euse">{node.use}</div>
