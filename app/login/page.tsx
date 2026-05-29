@@ -35,22 +35,22 @@ function LoginForm() {
     <div className="adm-root" style={{ position: "fixed", inset: 0, overflowY: "auto" }}>
       <section className="login">
         <aside className="pane">
-          <div className="brand">
+          <Link href="/" className="brand" style={{ textDecoration: "none", color: "inherit" }}>
             <img src="/assets/logo-mark.svg" alt="" />
             <span>Foxmen <em style={{ fontStyle: "italic", color: "var(--brand)" }}>Studio</em></span>
-          </div>
+          </Link>
           <h1>Welcome <span className="it">back.</span><br />Your work<br />is waiting.</h1>
           <div className="meta"><span>Client Portal</span><span>Foxmen Studio</span></div>
         </aside>
 
         <form onSubmit={handleSubmit}>
-          <div className="login-mobile-brand">
+          <Link href="/" className="login-mobile-brand" style={{ textDecoration: "none", color: "inherit" }}>
             <img src="/assets/logo-mark.svg" alt="Foxmen Studio" />
             <div>
               <div className="lmb-name">Foxmen <em style={{ fontStyle: "italic", color: "var(--brand)" }}>Studio</em></div>
               <span className="lmb-sub">Client Portal</span>
             </div>
-          </div>
+          </Link>
           <h2>Sign in to <span className="it">portal.</span></h2>
           <p>Enter your email and password to access your client dashboard.</p>
 
