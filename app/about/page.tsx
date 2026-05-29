@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import s from "./about.module.css";
 
@@ -96,6 +96,7 @@ export default function AboutPage() {
   const [aiIn, setAiIn] = useState<Record<string, boolean>>({});
   const [chatStep, setChatStep] = useState(0);
   const [growthCounts, setGrowthCounts] = useState({ speed: 0, cost: 0, brief: 0 });
+  const chatBodyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const obs = new IntersectionObserver(
@@ -113,10 +114,18 @@ export default function AboutPage() {
 
   useEffect(() => {
     if (!aiIn.chat) return;
-    const delays = [300, 1600, 3000, 4300, 5600];
+    // 1=cursor appears  2=cursor moves  3=chat opens  4=ai greeting
+    // 5=user msg1  6=typing dots  7=ai reply  8=user msg2  9=ai confirm
+    const delays = [200, 1700, 3200, 4100, 5900, 8100, 9900, 11700, 13400];
     const ids = delays.map((d, i) => setTimeout(() => setChatStep(i + 1), d));
     return () => ids.forEach(clearTimeout);
   }, [aiIn.chat]);
+
+  useEffect(() => {
+    if (chatBodyRef.current) {
+      chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+    }
+  }, [chatStep]);
 
   useEffect(() => {
     if (!aiIn.growth) return;
@@ -460,56 +469,88 @@ export default function AboutPage() {
         .ai-cursor { display:inline-block; width:2px; height:.82em; background:currentColor; vertical-align:text-bottom; margin-left:1px; border-radius:1px; animation:aicur .65s step-start infinite; }
         @keyframes aicur{0%,100%{opacity:1}50%{opacity:0}}
 
-        /* ── Safari browser ── */
-        .safari { border-radius:14px; overflow:hidden; background:#111; box-shadow:0 0 0 1px rgba(255,255,255,.08),0 56px 100px rgba(0,0,0,.92); }
-        .sf-chrome { height:52px; background:#1e1e20; border-bottom:1px solid rgba(255,255,255,.05); display:flex; align-items:center; padding:0 16px; gap:10px; flex-shrink:0; position:relative; }
+        /* ── Safari browser chrome ── */
+        .safari { border-radius:14px; overflow:hidden; background:#e8e6e2; box-shadow:0 0 0 1px rgba(0,0,0,.15),0 60px 110px rgba(0,0,0,.55),0 20px 40px rgba(0,0,0,.2); }
+        .sf-chrome { height:50px; background:linear-gradient(to bottom,#e0deda,#d8d5d0); border-bottom:1px solid rgba(0,0,0,.15); display:flex; align-items:center; padding:0 14px; gap:10px; flex-shrink:0; position:relative; box-shadow:inset 0 1px 0 rgba(255,255,255,.5); }
         .sf-dots { display:flex; gap:6px; flex-shrink:0; }
-        .sf-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+        .sf-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; box-shadow:inset 0 1px 0 rgba(255,255,255,.25); }
         .sf-nav { display:flex; gap:2px; flex-shrink:0; }
-        .sf-nav-btn { width:28px; height:26px; background:none; border:none; border-radius:5px; display:grid; place-items:center; cursor:default; color:#555; padding:0; }
-        .sf-addr { height:30px; background:#2a2a2c; border-radius:8px; display:flex; align-items:center; gap:6px; padding:0 10px; border:1px solid rgba(255,255,255,.06); position:absolute; left:50%; transform:translateX(-50%); width:min(260px,44%); }
-        .sf-favicon { width:13px; height:13px; object-fit:contain; flex-shrink:0; filter:brightness(0) invert(.55); }
-        .sf-lock { color:#555; flex-shrink:0; }
-        .sf-url { font-family:var(--f-mono); font-size:11.5px; color:#888; flex:1; letter-spacing:.02em; text-align:center; white-space:nowrap; overflow:hidden; }
+        .sf-nav-btn { width:28px; height:26px; background:none; border:none; border-radius:5px; display:grid; place-items:center; cursor:default; color:#888; padding:0; }
+        .sf-addr { height:28px; background:rgba(255,255,255,.7); border-radius:7px; display:flex; align-items:center; gap:6px; padding:0 10px; border:1px solid rgba(0,0,0,.12); position:absolute; left:50%; transform:translateX(-50%); width:min(280px,44%); box-shadow:inset 0 1px 2px rgba(0,0,0,.06); }
+        .sf-favicon { width:13px; height:13px; object-fit:contain; flex-shrink:0; }
+        .sf-lock { color:#888; flex-shrink:0; }
+        .sf-url { font-family:var(--f-mono); font-size:11.5px; color:#555; flex:1; letter-spacing:.02em; text-align:center; white-space:nowrap; overflow:hidden; }
         .sf-tbr { margin-left:auto; display:flex; gap:3px; flex-shrink:0; }
-        .sf-tbr-btn { width:28px; height:26px; background:none; border:none; border-radius:5px; display:grid; place-items:center; cursor:default; color:#444; padding:0; }
+        .sf-tbr-btn { width:28px; height:26px; background:none; border:none; border-radius:5px; display:grid; place-items:center; cursor:default; color:#888; padding:0; }
 
-        .sf-body { display:grid; grid-template-columns:1fr 1fr; min-height:420px; }
-        .sf-chat-panel { background:#0c0c0e; border-right:1px solid rgba(255,255,255,.05); overflow-y:auto; display:flex; flex-direction:column; }
-        .sf-chat-inner { padding:14px; display:flex; flex-direction:column; gap:10px; flex:1; }
-        .sf-chat-inner .ai-bub { font-size:12px; padding:9px 12px; border-radius:10px; }
-        .sf-chat-inner .ai-msg { gap:3px; }
-        .sf-chat-inner .ai-avatar-logo { width:24px; height:24px; border-radius:6px; margin-top:1px; }
-        .sf-chat-inner .ai-ai-row { gap:7px; align-items:flex-start; }
-        .sf-chat-inner .ai-msg-ts { font-size:9px; }
-        .sf-chat-inner .ai-dots { padding:9px 12px; }
-        .sf-chat-inner .ai-dots span { width:5px; height:5px; }
-        .sf-chat-inner .ai-cursor { height:.72em; }
+        /* ── Full homepage inside browser ── */
+        .sf-page {
+          background-color:#f8f5f0;
+          background-image:linear-gradient(rgba(0,0,0,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.025) 1px,transparent 1px);
+          background-size:44px 44px;
+          position:relative; overflow:hidden; min-height:460px;
+        }
+        /* Page nav */
+        .sf-pnav { height:44px; display:flex; align-items:center; padding:0 18px; gap:14px; background:rgba(248,245,240,.85); backdrop-filter:blur(8px); border-bottom:1px solid rgba(0,0,0,.06); position:relative; z-index:5; }
+        .sf-plogo { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+        .sf-plogo-mark { width:20px; height:20px; flex-shrink:0; }
+        .sf-plogo-text { font-family:var(--f-display); font-size:13px; letter-spacing:-.01em; color:#0a0a0a; }
+        .sf-plogo-sub { font-family:var(--f-mono); font-size:7.5px; letter-spacing:.18em; text-transform:uppercase; color:#aaa; display:block; line-height:1; }
+        .sf-pnav-links { display:flex; gap:12px; margin-left:12px; }
+        .sf-pnav-lnk { font-size:11px; color:#444; font-family:var(--f-display); letter-spacing:-.01em; white-space:nowrap; }
+        .sf-pnav-r { margin-left:auto; display:flex; align-items:center; gap:8px; }
+        .sf-ptime { font-family:var(--f-mono); font-size:9px; color:#999; letter-spacing:.04em; display:flex; align-items:center; gap:5px; }
+        .sf-ppulse { width:6px; height:6px; border-radius:50%; background:var(--brand); animation:abpulse 2s infinite; flex-shrink:0; }
+        .sf-pnav-portal { padding:4px 10px; background:#f0ede8; border:1px solid rgba(0,0,0,.1); border-radius:999px; font-family:var(--f-display); font-size:10.5px; color:#0a0a0a; display:flex; align-items:center; gap:5px; white-space:nowrap; }
+        .sf-pnav-cta { padding:5px 11px; background:#0a0a0a; border-radius:999px; font-family:var(--f-display); font-size:10.5px; color:#fff; display:flex; align-items:center; gap:4px; white-space:nowrap; }
+        /* Hero eyebrow */
+        .sf-eyebrow { font-family:var(--f-mono); font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:#888; display:flex; align-items:center; gap:7px; padding:16px 18px 10px; position:relative; z-index:2; }
+        .sf-eyepulse { width:5px; height:5px; border-radius:50%; background:var(--brand); animation:abpulse 2s infinite; flex-shrink:0; }
+        /* Hero heading */
+        .sf-h1 { font-family:var(--f-display); font-size:58px; line-height:.92; letter-spacing:-.04em; color:#0a0a0a; margin:0; padding:0 18px; position:relative; z-index:2; }
+        .sf-h1 em { font-style:italic; color:var(--brand); }
+        /* Orbit */
+        .sf-orbit-el { position:absolute; top:50px; right:18px; width:120px; height:120px; pointer-events:none; z-index:2; animation:spin 22s linear infinite; }
+        .sf-orbit-center { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); animation:spin 22s linear infinite reverse; }
+        /* Bottom bar */
+        .sf-pfoot { position:absolute; bottom:0; left:0; right:0; padding:14px 18px; display:grid; grid-template-columns:1fr auto auto; align-items:end; gap:16px; z-index:3; }
+        .sf-pdesc { font-size:11px; color:#666; line-height:1.55; max-width:34ch; }
+        .sf-pstats-n { font-family:var(--f-display); font-style:italic; font-size:26px; letter-spacing:-.025em; color:#0a0a0a; line-height:1; }
+        .sf-pstats-l { font-family:var(--f-mono); font-size:8px; letter-spacing:.18em; text-transform:uppercase; color:#aaa; margin-top:2px; }
+        .sf-psee { padding:8px 16px; background:#0a0a0a; border-radius:999px; color:#fff; font-family:var(--f-display); font-size:11px; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
 
-        /* Mini hero panel */
-        .sf-hero-panel { background:#040407; position:relative; overflow:hidden; display:flex; flex-direction:column; padding:20px; }
-        .sf-h-bg { position:absolute; inset:0; background:radial-gradient(70% 65% at 75% 58%,rgba(184,108,249,.2),transparent 68%),radial-gradient(40% 40% at 10% 85%,rgba(99,102,241,.1),transparent 65%); pointer-events:none; }
-        .sf-h-nav { display:flex; align-items:center; gap:7px; position:relative; z-index:1; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,.05); }
-        .sf-h-navlinks { margin-left:auto; display:flex; gap:10px; }
-        .sf-h-navlink { font-family:var(--f-mono); font-size:8px; letter-spacing:.12em; text-transform:uppercase; color:#333; }
-        .sf-h-badge { display:inline-flex; align-items:center; gap:5px; font-family:var(--f-mono); font-size:8.5px; letter-spacing:.1em; text-transform:uppercase; color:#3a3a3a; margin-bottom:6px; }
-        .sf-h-pulse { width:5px; height:5px; border-radius:50%; background:#22c55e; animation:abpulse 2s infinite; flex-shrink:0; }
-        .sf-h-title { font-family:var(--f-display); line-height:.93; letter-spacing:-.03em; color:#fff; position:relative; z-index:1; flex:1; display:flex; align-items:center; padding:16px 0; }
-        .sf-h-orb { position:absolute; right:-6px; top:50%; transform:translateY(-50%); pointer-events:none; opacity:.4; }
-        .sf-h-ctas { display:flex; gap:6px; position:relative; z-index:1; flex-wrap:wrap; }
-        .sf-h-btn-p { background:var(--brand); color:#fff; padding:6px 11px; border-radius:7px; font-family:var(--f-mono); font-size:9px; letter-spacing:.07em; text-transform:uppercase; white-space:nowrap; line-height:1; }
-        .sf-h-btn-g { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); color:#666; padding:6px 11px; border-radius:7px; font-family:var(--f-mono); font-size:9px; letter-spacing:.07em; text-transform:uppercase; white-space:nowrap; line-height:1; }
+        /* ── Chat widget ── */
+        .sf-cw { position:absolute; bottom:16px; right:16px; z-index:20; }
+        .sf-cw-btn { width:46px; height:46px; border-radius:50%; background:var(--brand); display:grid; place-items:center; box-shadow:0 4px 22px rgba(184,108,249,.5); transition:opacity .25s,transform .25s; cursor:default; }
+        .sf-cwp { width:272px; border-radius:14px; overflow:hidden; box-shadow:0 18px 60px rgba(0,0,0,.22),0 0 0 1px rgba(0,0,0,.08); transition:opacity .4s cubic-bezier(.16,1,.3,1),transform .4s cubic-bezier(.16,1,.3,1); }
+        .sf-cwp-head { background:#0a0a0a; padding:12px 14px; display:flex; align-items:center; gap:9px; }
+        .sf-cwp-logo { width:28px; height:28px; border-radius:7px; background:var(--brand); display:grid; place-items:center; flex-shrink:0; }
+        .sf-cwp-title { font-family:var(--f-display); font-size:13px; color:#fff; letter-spacing:-.01em; line-height:1; }
+        .sf-cwp-status { font-family:var(--f-mono); font-size:9px; color:#666; letter-spacing:.07em; display:flex; align-items:center; gap:4px; margin-top:2px; }
+        .sf-cwp-sbtn { width:22px; height:22px; border-radius:5px; background:rgba(255,255,255,.08); border:none; display:grid; place-items:center; cursor:default; padding:0; flex-shrink:0; }
+        .sf-cwp-body { background:#fff; padding:12px; display:flex; flex-direction:column; gap:8px; max-height:196px; overflow-y:auto; scroll-behavior:smooth; }
+        .sf-cwp-body::-webkit-scrollbar { display:none; }
+        .sf-cwp-aibub { background:#f3f3f5; border-radius:10px 10px 10px 2px; padding:9px 11px; font-size:11.5px; color:#0a0a0a; line-height:1.5; max-width:92%; }
+        .sf-cwp-ubub { background:var(--brand); border-radius:10px 10px 2px 10px; padding:9px 11px; font-size:11.5px; color:#fff; line-height:1.5; max-width:86%; margin-left:auto; }
+        .sf-cwp-label { font-family:var(--f-mono); font-size:9px; color:#bbb; letter-spacing:.06em; margin-bottom:4px; }
+        .sf-cwp-ts { font-family:var(--f-mono); font-size:9px; color:#ccc; margin-top:3px; }
+        .sf-cwp-visitor { font-family:var(--f-mono); font-size:9px; color:#aaa; margin-top:4px; letter-spacing:.06em; }
+        .sf-cwp-input { display:flex; align-items:center; gap:8px; padding:9px 12px; background:#fff; border-top:1px solid #efefef; }
+        .sf-cwp-placeholder { flex:1; font-size:12px; color:#bbb; font-family:var(--f-display); }
+        .sf-cwp-send { width:28px; height:28px; border-radius:7px; background:var(--brand); display:grid; place-items:center; flex-shrink:0; }
+        .sf-cwp-foot { padding:8px 12px; background:#fafafa; border-top:1px solid #f0f0f0; }
+        .sf-cwp-powered { font-family:var(--f-mono); font-size:9px; color:#ccc; letter-spacing:.03em; }
+        .sf-cwp-book { font-family:var(--f-display); font-size:11px; color:#0a0a0a; margin-top:2px; display:block; }
+
+        /* ── Cursor ── */
+        .sf-cursor { position:absolute; z-index:40; pointer-events:none; filter:drop-shadow(0 2px 4px rgba(0,0,0,.3)); }
 
         /* ── Logo avatar ── */
         .ai-avatar-logo { width:30px; height:30px; border-radius:8px; background:linear-gradient(135deg,var(--brand),#6366f1); flex-shrink:0; display:grid; place-items:center; margin-top:2px; overflow:hidden; }
         .ai-avatar-logo img { width:62%; height:62%; object-fit:contain; filter:brightness(0) invert(1); }
 
-        @media(max-width:960px){
-          .sf-body { grid-template-columns:1fr; min-height:auto; }
-          .sf-chat-panel { min-height:260px; border-right:none; border-bottom:1px solid rgba(255,255,255,.05); }
-          .sf-hero-panel { min-height:180px; }
-          .sf-addr { width:min(200px,50%); }
-        }
+        @media(max-width:860px){ .sf-h1{font-size:44px} .sf-pnav-links{display:none} .sf-pnav-cta{display:none} }
+        @media(max-width:600px){ .sf-h1{font-size:34px} .sf-pnav-portal{display:none} }
 
         /* ── AI responsive ── */
         @media(max-width:960px){
@@ -663,112 +704,174 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              {/* Split body */}
-              <div className="sf-body">
-                {/* Left: Chat panel */}
-                <div className="sf-chat-panel">
-                  <div className="sf-chat-inner">
-                    <div className={`ai-msg ai-msg-u${chatStep >= 1 ? " vis" : ""}`}>
-                      <div className="ai-bub ai-bub-u">
-                        <TypedText text="We need a booking platform — online payments, automated reminders, and an admin dashboard for our team." active={chatStep >= 1} speed={19} />
-                      </div>
-                      <span className="ai-msg-ts">Client · just now</span>
-                    </div>
+              {/* Full homepage recreation */}
+              <div className="sf-page">
 
-                    {chatStep >= 1 && chatStep < 3 && (
-                      <div className="ai-msg ai-msg-a vis">
-                        <div className="ai-ai-row">
-                          <div className="ai-avatar-logo"><img src="/assets/logo-mark.svg" alt="" /></div>
-                          <div className="ai-dots"><span /><span /><span /></div>
-                        </div>
-                      </div>
-                    )}
-
-                    {chatStep >= 3 && (
-                      <div className="ai-msg ai-msg-a vis">
-                        <div className="ai-ai-row">
-                          <div className="ai-avatar-logo"><img src="/assets/logo-mark.svg" alt="" /></div>
-                          <div className="ai-bub ai-bub-a">
-                            <TypedText text="Architecture mapped — Next.js frontend, Stripe payments, push notification layer, admin panel with role-based access. Estimated: 8 weeks." active={chatStep >= 3} speed={16} />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {chatStep >= 4 && (
-                      <div className="ai-msg ai-msg-u vis">
-                        <div className="ai-bub ai-bub-u">
-                          <TypedText text="Perfect. Let's start Monday." active={chatStep >= 4} speed={22} />
-                        </div>
-                      </div>
-                    )}
-
-                    {chatStep >= 5 && (
-                      <div className="ai-msg ai-msg-a vis">
-                        <div className="ai-ai-row">
-                          <div className="ai-avatar-logo"><img src="/assets/logo-mark.svg" alt="" /></div>
-                          <div className="ai-bub ai-bub-ok">
-                            <TypedText text="✓ Delivered in 7 weeks — 1 week ahead of schedule. 4.9★ rating. 100% on brief." active={chatStep >= 5} speed={18} />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Right: Mini hero preview of foxmen.studio */}
-                <div className="sf-hero-panel">
-                  <div className="sf-h-bg" />
-
-                  {/* Top nav */}
-                  <div className="sf-h-nav">
-                    <img src="/assets/logo-mark.svg" alt="" style={{ width: 15, height: 15, filter: "brightness(0) invert(.9)", flexShrink: 0 }} />
-                    <span style={{ fontFamily: "var(--f-display)", fontSize: 12, color: "#fff", letterSpacing: "-.01em", lineHeight: 1, whiteSpace: "nowrap" }}>
-                      Foxmen <em style={{ fontStyle: "italic", color: "var(--brand)" }}>Studio</em>
-                    </span>
-                    <div className="sf-h-navlinks">
-                      {["Work", "About", "Contact"].map(l => <span key={l} className="sf-h-navlink">{l}</span>)}
-                    </div>
-                  </div>
-
-                  {/* Hero heading */}
-                  <div className="sf-h-title">
+                {/* Page nav */}
+                <div className="sf-pnav">
+                  <div className="sf-plogo">
+                    <img src="/assets/logo-mark.svg" className="sf-plogo-mark" alt="" />
                     <div>
-                      <div className="sf-h-badge">
-                        <span className="sf-h-pulse" />
-                        Now accepting projects
-                      </div>
-                      <div style={{ fontSize: "clamp(17px,2vw,24px)" }}>
-                        We design,<br />build &amp; ship<br />digital<br />
-                        <em style={{ fontStyle: "italic", color: "var(--brand)" }}>products</em>
-                        <br />that last.
-                      </div>
+                      <div className="sf-plogo-text">Foxmen <em style={{ fontStyle: "italic", color: "var(--brand)" }}>Studio</em></div>
+                      <span className="sf-plogo-sub">CODE · CRAFT · CARE</span>
                     </div>
                   </div>
-
-                  {/* Decorative orbit */}
-                  <div className="sf-h-orb">
-                    <svg width="92" height="92" viewBox="0 0 92 92" fill="none">
-                      <circle cx="46" cy="46" r="40" stroke="rgba(184,108,249,.5)" strokeWidth=".8" strokeDasharray="3 5" />
-                      <circle cx="46" cy="6" r="5" fill="var(--brand)" opacity=".85" />
-                      <circle cx="86" cy="46" r="3.5" fill="rgba(184,108,249,.55)" />
-                      <circle cx="46" cy="86" r="2.5" fill="rgba(99,102,241,.45)" />
-                      <line x1="46" y1="46" x2="46" y2="6" stroke="rgba(184,108,249,.15)" strokeWidth=".8"/>
-                      <line x1="46" y1="46" x2="86" y2="46" stroke="rgba(184,108,249,.1)" strokeWidth=".8"/>
-                    </svg>
+                  <div className="sf-pnav-links">
+                    {["Work", "Services", "About", "Journal", "Contact"].map(l => (
+                      <span key={l} className="sf-pnav-lnk">{l}</span>
+                    ))}
                   </div>
-
-                  {/* CTAs */}
-                  <div className="sf-h-ctas">
-                    <div className="sf-h-btn-p">Start a project →</div>
-                    <div className="sf-h-btn-g">See our work</div>
+                  <div className="sf-pnav-r">
+                    <div className="sf-ptime"><span className="sf-ppulse" />Live</div>
+                    <div className="sf-pnav-portal">Client Portal</div>
+                    <div className="sf-pnav-cta">Start a project</div>
                   </div>
                 </div>
+
+                {/* Eyebrow */}
+                <div className="sf-eyebrow">
+                  <span className="sf-eyepulse" />
+                  INTERNATIONAL DIGITAL STUDIO — EST. 2025
+                </div>
+
+                {/* Hero heading */}
+                <h1 className="sf-h1">
+                  We build <em>digital</em><br />
+                  products<br />
+                  that <em>ship.</em>
+                </h1>
+
+                {/* Spinning orbit */}
+                <div className="sf-orbit-el">
+                  <svg viewBox="0 0 120 120" fill="none" width="120" height="120">
+                    <circle cx="60" cy="60" r="52" stroke="rgba(0,0,0,.1)" strokeWidth="1" strokeDasharray="2 5" />
+                    <defs>
+                      <path id="sf-orb-path" d="M60,8 a52,52 0 1,1 -.001,0" />
+                    </defs>
+                    <text fontFamily="monospace" fontSize="8.5" letterSpacing="4.5" fill="#999">
+                      <textPath href="#sf-orb-path" startOffset="0%">CODE · CRAFT · CARE ·</textPath>
+                    </text>
+                    <g className="sf-orbit-center">
+                      <image href="/assets/logo-mark.svg" x="44" y="44" width="32" height="32" style={{ opacity: .35 }} />
+                    </g>
+                  </svg>
+                </div>
+
+                {/* Bottom stats bar */}
+                <div className="sf-pfoot">
+                  <p className="sf-pdesc">From custom AI to full-stack development — built with precision for founders and growth-stage companies.</p>
+                  <div>
+                    <div className="sf-pstats-n">50+</div>
+                    <div className="sf-pstats-l">Products shipped</div>
+                  </div>
+                  <div className="sf-psee">See our work →</div>
+                </div>
+
+                {/* Chat widget */}
+                <div className="sf-cw">
+                  <div className="sf-cw-btn" style={{ opacity: chatStep >= 3 ? 0 : 1, transform: chatStep >= 3 ? "scale(.8)" : "scale(1)", transition: "opacity .3s, transform .3s", position: "absolute", bottom: 0, right: 0 }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  </div>
+                  <div className="sf-cwp" style={{ opacity: chatStep >= 3 ? 1 : 0, transform: chatStep >= 3 ? "translateY(0) scale(1)" : "translateY(14px) scale(.96)", pointerEvents: "none" }}>
+                    <div className="sf-cwp-head">
+                      <div className="sf-cwp-logo">
+                        <img src="/assets/logo-mark.svg" alt="" style={{ width: "62%", height: "62%", objectFit: "contain", filter: "brightness(0) invert(1)" }} />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div className="sf-cwp-title">Foxmen Studio</div>
+                        <div className="sf-cwp-status">
+                          <svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="#22c55e"/></svg>
+                          Live Support
+                        </div>
+                      </div>
+                      <button type="button" className="sf-cwp-sbtn">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                      </button>
+                    </div>
+                    <div className="sf-cwp-body" ref={chatBodyRef}>
+                      {chatStep >= 4 && (
+                        <div>
+                          <div className="sf-cwp-label">Foxmen Studio</div>
+                          <div className="sf-cwp-aibub">
+                            <TypedText text="Hi there! 👋 How can we help you today?" active={chatStep >= 4} speed={18} />
+                          </div>
+                          <div className="sf-cwp-ts">just now</div>
+                        </div>
+                      )}
+                      {chatStep >= 5 && (
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+                          <div className="sf-cwp-visitor">You</div>
+                          <div className="sf-cwp-ubub">
+                            <TypedText text="I need a booking platform for my business." active={chatStep >= 5} speed={20} />
+                          </div>
+                        </div>
+                      )}
+                      {chatStep >= 6 && chatStep < 7 && (
+                        <div>
+                          <div className="sf-cwp-label">Foxmen Studio</div>
+                          <div className="ai-dots" style={{ background: "#f3f3f5", border: "none" }}><span /><span /><span /></div>
+                        </div>
+                      )}
+                      {chatStep >= 7 && (
+                        <div>
+                          <div className="sf-cwp-label">Foxmen Studio</div>
+                          <div className="sf-cwp-aibub">
+                            <TypedText text="Great! We can build that — Stripe payments, calendar sync, and an admin dashboard. Estimated 7 weeks." active={chatStep >= 7} speed={15} />
+                          </div>
+                        </div>
+                      )}
+                      {chatStep >= 8 && (
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+                          <div className="sf-cwp-visitor">You</div>
+                          <div className="sf-cwp-ubub">
+                            <TypedText text="Sounds perfect. Let's start Monday!" active={chatStep >= 8} speed={22} />
+                          </div>
+                        </div>
+                      )}
+                      {chatStep >= 9 && (
+                        <div>
+                          <div className="sf-cwp-label">Foxmen Studio</div>
+                          <div className="sf-cwp-aibub" style={{ background: "rgba(34,197,94,.1)", border: "1px solid rgba(34,197,94,.22)", color: "#16a34a" }}>
+                            <TypedText text="✓ Confirmed! Monday kickoff is locked. Can't wait to build this with you." active={chatStep >= 9} speed={18} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="sf-cwp-input">
+                      <span className="sf-cwp-placeholder">Type a message…</span>
+                      <div className="sf-cwp-send">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z"/></svg>
+                      </div>
+                    </div>
+                    <div className="sf-cwp-foot">
+                      <div className="sf-cwp-powered">Powered by Foxmen Studio</div>
+                      <span className="sf-cwp-book">Book a free call →</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Animated cursor */}
+                <div
+                  className="sf-cursor"
+                  style={{
+                    position: "absolute",
+                    bottom: 26,
+                    right: 26,
+                    opacity: chatStep >= 1 && chatStep < 4 ? 1 : 0,
+                    transform: chatStep >= 3 ? "translate(0,0) scale(.7)" : chatStep >= 2 ? "translate(0,0)" : "translate(-220px,-160px)",
+                    transition: chatStep >= 2 ? "transform 1.3s cubic-bezier(.16,1,.3,1), opacity .3s" : "opacity .4s",
+                  }}
+                >
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="white" stroke="#111" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 3l13.5 9-7.5 1.5L7 20z" fill="white" />
+                  </svg>
+                </div>
+
               </div>
             </div>
 
             {/* ── Outcome panel ── */}
-            <div className={`ai-outcome${chatStep >= 5 ? " vis" : ""}`}>
+            <div className={`ai-outcome${chatStep >= 8 ? " vis" : ""}`}>
               <span className="ai-ey-dark">The result</span>
               <div className="ai-out-h">
                 Live in<br /><em style={{ color: "var(--brand)", fontStyle: "italic" }}>7 weeks.</em>
