@@ -1565,7 +1565,7 @@ export default function Home() {
                 <span className="it">
                   {dbClients.length > 0
                     ? new Set(dbClients.map(c => c.country).filter(Boolean)).size || 5
-                    : 17}{" "}
+                    : 5}{" "}
                   countries
                 </span>{" "}
                 — from seed-stage to listed.
