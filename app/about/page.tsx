@@ -460,20 +460,56 @@ export default function AboutPage() {
         .ai-cursor { display:inline-block; width:2px; height:.82em; background:currentColor; vertical-align:text-bottom; margin-left:1px; border-radius:1px; animation:aicur .65s step-start infinite; }
         @keyframes aicur{0%,100%{opacity:1}50%{opacity:0}}
 
-        /* ── iMac mockup ── */
-        .imac-wrap { position:relative; }
-        .imac-screen { background:#0e0e10; border:8px solid #2c2c30; border-radius:22px; overflow:hidden; box-shadow:0 0 0 1px #1a1a1c,0 64px 112px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,255,255,.05); }
-        .imac-tbar { height:40px; background:#1c1c1e; border-bottom:1px solid rgba(255,255,255,.04); display:flex; align-items:center; padding:0 16px; gap:7px; position:relative; flex-shrink:0; }
-        .imac-cam { width:7px; height:7px; border-radius:50%; background:#2a2a2e; border:1px solid #3a3a3e; position:absolute; left:50%; transform:translateX(-50%); }
-        .imac-tbar-lbl { position:absolute; left:50%; transform:translateX(-50%); font-family:var(--f-mono); font-size:10px; letter-spacing:.1em; color:#444; text-transform:uppercase; margin-left:20px; }
-        .imac-chin { height:48px; background:#2c2c30; border-top:1px solid rgba(0,0,0,.5); border-radius:0 0 14px 14px; display:flex; align-items:center; justify-content:center; }
-        .imac-chin-line { width:52px; height:1px; background:rgba(255,255,255,.08); }
-        .imac-neck { width:42px; height:60px; background:linear-gradient(to bottom,#2c2c30,#1e1e22); margin:0 auto; clip-path:polygon(18% 0%,82% 0%,96% 100%,4% 100%); }
-        .imac-base { width:200px; height:11px; background:linear-gradient(to bottom,#2c2c30,#1e1e22); border-radius:999px; margin:0 auto; box-shadow:0 6px 24px rgba(0,0,0,.6); }
+        /* ── Safari browser ── */
+        .safari { border-radius:14px; overflow:hidden; background:#111; box-shadow:0 0 0 1px rgba(255,255,255,.08),0 56px 100px rgba(0,0,0,.92); }
+        .sf-chrome { height:52px; background:#1e1e20; border-bottom:1px solid rgba(255,255,255,.05); display:flex; align-items:center; padding:0 16px; gap:10px; flex-shrink:0; position:relative; }
+        .sf-dots { display:flex; gap:6px; flex-shrink:0; }
+        .sf-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+        .sf-nav { display:flex; gap:2px; flex-shrink:0; }
+        .sf-nav-btn { width:28px; height:26px; background:none; border:none; border-radius:5px; display:grid; place-items:center; cursor:default; color:#555; padding:0; }
+        .sf-addr { height:30px; background:#2a2a2c; border-radius:8px; display:flex; align-items:center; gap:6px; padding:0 10px; border:1px solid rgba(255,255,255,.06); position:absolute; left:50%; transform:translateX(-50%); width:min(260px,44%); }
+        .sf-favicon { width:13px; height:13px; object-fit:contain; flex-shrink:0; filter:brightness(0) invert(.55); }
+        .sf-lock { color:#555; flex-shrink:0; }
+        .sf-url { font-family:var(--f-mono); font-size:11.5px; color:#888; flex:1; letter-spacing:.02em; text-align:center; white-space:nowrap; overflow:hidden; }
+        .sf-tbr { margin-left:auto; display:flex; gap:3px; flex-shrink:0; }
+        .sf-tbr-btn { width:28px; height:26px; background:none; border:none; border-radius:5px; display:grid; place-items:center; cursor:default; color:#444; padding:0; }
+
+        .sf-body { display:grid; grid-template-columns:1fr 1fr; min-height:420px; }
+        .sf-chat-panel { background:#0c0c0e; border-right:1px solid rgba(255,255,255,.05); overflow-y:auto; display:flex; flex-direction:column; }
+        .sf-chat-inner { padding:14px; display:flex; flex-direction:column; gap:10px; flex:1; }
+        .sf-chat-inner .ai-bub { font-size:12px; padding:9px 12px; border-radius:10px; }
+        .sf-chat-inner .ai-msg { gap:3px; }
+        .sf-chat-inner .ai-avatar-logo { width:24px; height:24px; border-radius:6px; margin-top:1px; }
+        .sf-chat-inner .ai-ai-row { gap:7px; align-items:flex-start; }
+        .sf-chat-inner .ai-msg-ts { font-size:9px; }
+        .sf-chat-inner .ai-dots { padding:9px 12px; }
+        .sf-chat-inner .ai-dots span { width:5px; height:5px; }
+        .sf-chat-inner .ai-cursor { height:.72em; }
+
+        /* Mini hero panel */
+        .sf-hero-panel { background:#040407; position:relative; overflow:hidden; display:flex; flex-direction:column; padding:20px; }
+        .sf-h-bg { position:absolute; inset:0; background:radial-gradient(70% 65% at 75% 58%,rgba(184,108,249,.2),transparent 68%),radial-gradient(40% 40% at 10% 85%,rgba(99,102,241,.1),transparent 65%); pointer-events:none; }
+        .sf-h-nav { display:flex; align-items:center; gap:7px; position:relative; z-index:1; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,.05); }
+        .sf-h-navlinks { margin-left:auto; display:flex; gap:10px; }
+        .sf-h-navlink { font-family:var(--f-mono); font-size:8px; letter-spacing:.12em; text-transform:uppercase; color:#333; }
+        .sf-h-badge { display:inline-flex; align-items:center; gap:5px; font-family:var(--f-mono); font-size:8.5px; letter-spacing:.1em; text-transform:uppercase; color:#3a3a3a; margin-bottom:6px; }
+        .sf-h-pulse { width:5px; height:5px; border-radius:50%; background:#22c55e; animation:abpulse 2s infinite; flex-shrink:0; }
+        .sf-h-title { font-family:var(--f-display); line-height:.93; letter-spacing:-.03em; color:#fff; position:relative; z-index:1; flex:1; display:flex; align-items:center; padding:16px 0; }
+        .sf-h-orb { position:absolute; right:-6px; top:50%; transform:translateY(-50%); pointer-events:none; opacity:.4; }
+        .sf-h-ctas { display:flex; gap:6px; position:relative; z-index:1; flex-wrap:wrap; }
+        .sf-h-btn-p { background:var(--brand); color:#fff; padding:6px 11px; border-radius:7px; font-family:var(--f-mono); font-size:9px; letter-spacing:.07em; text-transform:uppercase; white-space:nowrap; line-height:1; }
+        .sf-h-btn-g { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); color:#666; padding:6px 11px; border-radius:7px; font-family:var(--f-mono); font-size:9px; letter-spacing:.07em; text-transform:uppercase; white-space:nowrap; line-height:1; }
 
         /* ── Logo avatar ── */
         .ai-avatar-logo { width:30px; height:30px; border-radius:8px; background:linear-gradient(135deg,var(--brand),#6366f1); flex-shrink:0; display:grid; place-items:center; margin-top:2px; overflow:hidden; }
         .ai-avatar-logo img { width:62%; height:62%; object-fit:contain; filter:brightness(0) invert(1); }
+
+        @media(max-width:960px){
+          .sf-body { grid-template-columns:1fr; min-height:auto; }
+          .sf-chat-panel { min-height:260px; border-right:none; border-bottom:1px solid rgba(255,255,255,.05); }
+          .sf-hero-panel { min-height:180px; }
+          .sf-addr { width:min(200px,50%); }
+        }
 
         /* ── AI responsive ── */
         @media(max-width:960px){
@@ -591,84 +627,144 @@ export default function AboutPage() {
           </h2>
           <div className="ai-chat-grid">
 
-            {/* ── iMac mockup ── */}
-            <div className="imac-wrap">
-              <div className="imac-screen">
-                {/* title bar with traffic lights + camera */}
-                <div className="imac-tbar">
-                  <span className="ai-wdot" style={{ background: "#ff5f57" }} />
-                  <span className="ai-wdot" style={{ background: "#febc2e" }} />
-                  <span className="ai-wdot" style={{ background: "#28c840" }} />
-                  <span className="imac-cam" />
-                  <span className="imac-tbar-lbl">Foxmen Studio · Client Brief</span>
+            {/* ── Safari browser mockup ── */}
+            <div className="safari">
+              {/* Browser chrome */}
+              <div className="sf-chrome">
+                <div className="sf-dots">
+                  <span className="sf-dot" style={{ background: "#ff5f57" }} />
+                  <span className="sf-dot" style={{ background: "#febc2e" }} />
+                  <span className="sf-dot" style={{ background: "#28c840" }} />
                 </div>
-
-                {/* chat body */}
-                <div className="ai-chat-body">
-                  <div className={`ai-msg ai-msg-u${chatStep >= 1 ? " vis" : ""}`}>
-                    <div className="ai-bub ai-bub-u">
-                      <TypedText
-                        text="We need a booking platform — online payments, automated reminders, and an admin dashboard for our team."
-                        active={chatStep >= 1}
-                        speed={19}
-                      />
-                    </div>
-                    <span className="ai-msg-ts">Client · just now</span>
-                  </div>
-
-                  {chatStep >= 1 && chatStep < 3 && (
-                    <div className="ai-msg ai-msg-a vis">
-                      <div className="ai-ai-row">
-                        <div className="ai-avatar-logo"><img src="/assets/logo-mark.svg" alt="" /></div>
-                        <div className="ai-dots"><span /><span /><span /></div>
-                      </div>
-                    </div>
-                  )}
-
-                  {chatStep >= 3 && (
-                    <div className="ai-msg ai-msg-a vis">
-                      <div className="ai-ai-row">
-                        <div className="ai-avatar-logo"><img src="/assets/logo-mark.svg" alt="" /></div>
-                        <div className="ai-bub ai-bub-a">
-                          <TypedText
-                            text="Architecture mapped — Next.js frontend, Stripe payments, push notification layer, admin panel with role-based access. Estimated: 8 weeks."
-                            active={chatStep >= 3}
-                            speed={16}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {chatStep >= 4 && (
-                    <div className="ai-msg ai-msg-u vis">
-                      <div className="ai-bub ai-bub-u">
-                        <TypedText text="Perfect. Let's start Monday." active={chatStep >= 4} speed={22} />
-                      </div>
-                    </div>
-                  )}
-
-                  {chatStep >= 5 && (
-                    <div className="ai-msg ai-msg-a vis">
-                      <div className="ai-ai-row">
-                        <div className="ai-avatar-logo"><img src="/assets/logo-mark.svg" alt="" /></div>
-                        <div className="ai-bub ai-bub-ok">
-                          <TypedText
-                            text="✓ Delivered in 7 weeks — 1 week ahead of schedule. 4.9★ rating. 100% on brief."
-                            active={chatStep >= 5}
-                            speed={18}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                <div className="sf-nav">
+                  <button type="button" className="sf-nav-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                  </button>
+                  <button type="button" className="sf-nav-btn" style={{ opacity: .3 }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                  </button>
+                </div>
+                {/* Address bar — centred */}
+                <div className="sf-addr">
+                  <svg className="sf-lock" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                  <img src="/assets/logo-mark.svg" className="sf-favicon" alt="" />
+                  <span className="sf-url">foxmen.studio</span>
+                </div>
+                {/* Right toolbar */}
+                <div className="sf-tbr">
+                  <button type="button" className="sf-tbr-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                  </button>
+                  <button type="button" className="sf-tbr-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+                  </button>
                 </div>
               </div>
 
-              {/* iMac stand */}
-              <div className="imac-chin"><span className="imac-chin-line" /></div>
-              <div className="imac-neck" />
-              <div className="imac-base" />
+              {/* Split body */}
+              <div className="sf-body">
+                {/* Left: Chat panel */}
+                <div className="sf-chat-panel">
+                  <div className="sf-chat-inner">
+                    <div className={`ai-msg ai-msg-u${chatStep >= 1 ? " vis" : ""}`}>
+                      <div className="ai-bub ai-bub-u">
+                        <TypedText text="We need a booking platform — online payments, automated reminders, and an admin dashboard for our team." active={chatStep >= 1} speed={19} />
+                      </div>
+                      <span className="ai-msg-ts">Client · just now</span>
+                    </div>
+
+                    {chatStep >= 1 && chatStep < 3 && (
+                      <div className="ai-msg ai-msg-a vis">
+                        <div className="ai-ai-row">
+                          <div className="ai-avatar-logo"><img src="/assets/logo-mark.svg" alt="" /></div>
+                          <div className="ai-dots"><span /><span /><span /></div>
+                        </div>
+                      </div>
+                    )}
+
+                    {chatStep >= 3 && (
+                      <div className="ai-msg ai-msg-a vis">
+                        <div className="ai-ai-row">
+                          <div className="ai-avatar-logo"><img src="/assets/logo-mark.svg" alt="" /></div>
+                          <div className="ai-bub ai-bub-a">
+                            <TypedText text="Architecture mapped — Next.js frontend, Stripe payments, push notification layer, admin panel with role-based access. Estimated: 8 weeks." active={chatStep >= 3} speed={16} />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {chatStep >= 4 && (
+                      <div className="ai-msg ai-msg-u vis">
+                        <div className="ai-bub ai-bub-u">
+                          <TypedText text="Perfect. Let's start Monday." active={chatStep >= 4} speed={22} />
+                        </div>
+                      </div>
+                    )}
+
+                    {chatStep >= 5 && (
+                      <div className="ai-msg ai-msg-a vis">
+                        <div className="ai-ai-row">
+                          <div className="ai-avatar-logo"><img src="/assets/logo-mark.svg" alt="" /></div>
+                          <div className="ai-bub ai-bub-ok">
+                            <TypedText text="✓ Delivered in 7 weeks — 1 week ahead of schedule. 4.9★ rating. 100% on brief." active={chatStep >= 5} speed={18} />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Right: Mini hero preview of foxmen.studio */}
+                <div className="sf-hero-panel">
+                  <div className="sf-h-bg" />
+
+                  {/* Top nav */}
+                  <div className="sf-h-nav">
+                    <img src="/assets/logo-mark.svg" alt="" style={{ width: 15, height: 15, filter: "brightness(0) invert(.9)", flexShrink: 0 }} />
+                    <span style={{ fontFamily: "var(--f-display)", fontSize: 12, color: "#fff", letterSpacing: "-.01em", lineHeight: 1, whiteSpace: "nowrap" }}>
+                      Foxmen <em style={{ fontStyle: "italic", color: "var(--brand)" }}>Studio</em>
+                    </span>
+                    <div className="sf-h-navlinks">
+                      {["Work", "About", "Contact"].map(l => <span key={l} className="sf-h-navlink">{l}</span>)}
+                    </div>
+                  </div>
+
+                  {/* Hero heading */}
+                  <div className="sf-h-title">
+                    <div>
+                      <div className="sf-h-badge">
+                        <span className="sf-h-pulse" />
+                        Now accepting projects
+                      </div>
+                      <div style={{ fontSize: "clamp(17px,2vw,24px)" }}>
+                        We design,<br />build &amp; ship<br />digital<br />
+                        <em style={{ fontStyle: "italic", color: "var(--brand)" }}>products</em>
+                        <br />that last.
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Decorative orbit */}
+                  <div className="sf-h-orb">
+                    <svg width="92" height="92" viewBox="0 0 92 92" fill="none">
+                      <circle cx="46" cy="46" r="40" stroke="rgba(184,108,249,.5)" strokeWidth=".8" strokeDasharray="3 5" />
+                      <circle cx="46" cy="6" r="5" fill="var(--brand)" opacity=".85" />
+                      <circle cx="86" cy="46" r="3.5" fill="rgba(184,108,249,.55)" />
+                      <circle cx="46" cy="86" r="2.5" fill="rgba(99,102,241,.45)" />
+                      <line x1="46" y1="46" x2="46" y2="6" stroke="rgba(184,108,249,.15)" strokeWidth=".8"/>
+                      <line x1="46" y1="46" x2="86" y2="46" stroke="rgba(184,108,249,.1)" strokeWidth=".8"/>
+                    </svg>
+                  </div>
+
+                  {/* CTAs */}
+                  <div className="sf-h-ctas">
+                    <div className="sf-h-btn-p">Start a project →</div>
+                    <div className="sf-h-btn-g">See our work</div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* ── Outcome panel ── */}
