@@ -774,8 +774,8 @@ export default function AboutPage() {
                   </div>
                   <div className="sf-cwp" style={{ opacity: chatStep >= 3 ? 1 : 0, transform: chatStep >= 3 ? "translateY(0) scale(1)" : "translateY(14px) scale(.96)", pointerEvents: "none" }}>
                     <div className="sf-cwp-head">
-                      <div className="sf-cwp-logo">
-                        <img src="/assets/logo-mark.svg" alt="" style={{ width: "62%", height: "62%", objectFit: "contain", filter: "brightness(0) invert(1)" }} />
+                      <div className="sf-cwp-logo" style={{ background: "none", overflow: "hidden", padding: 0 }}>
+                        <img src="/assets/logo_sn_fox.png" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 7 }} />
                       </div>
                       <div style={{ flex: 1 }}>
                         <div className="sf-cwp-title">Foxmen Studio</div>
