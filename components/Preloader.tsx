@@ -44,8 +44,12 @@ export default function Preloader() {
     const lw   = rect.width  + pad * 2;
     const lh   = rect.height + pad * 2;
 
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    canvas.width  = W;
+    canvas.height = H;
+    canvas.style.width  = W + "px";
+    canvas.style.height = H + "px";
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -258,7 +262,7 @@ export default function Preloader() {
         ref={canvasRef}
         style={{
           position: "fixed", inset: 0,
-          width: "100vw", height: "100vh",
+          width: "100%", height: "100%",
           zIndex: 2, pointerEvents: "none",
         }}
       />
