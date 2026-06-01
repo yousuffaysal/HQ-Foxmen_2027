@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     title: "Journal — Foxmen Studio",
     description:
       "Design craft, engineering deep-dives, AI in production, and case studies from the Foxmen Studio team.",
-    url: "https://foxmenstudio.com/journal",
+    url: "https://foxmen.studio/journal",
     images: [{ url: "/assets/og-image.png", width: 1200, height: 630, alt: "Foxmen Studio Journal" }],
   },
   twitter: {
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     description: "Design, engineering, AI, and studio notes from Foxmen Studio.",
     images: ["/assets/og-image.png"],
   },
-  alternates: { canonical: "https://foxmenstudio.com/journal" },
+  alternates: { canonical: "https://foxmen.studio/journal" },
 };
 
 export default function JournalLayout({ children }: { children: React.ReactNode }) {

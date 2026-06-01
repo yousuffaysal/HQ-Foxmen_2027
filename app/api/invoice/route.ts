@@ -12,8 +12,8 @@ function fmtMoney(n: number) {
 }
 
 const PAYMENT_LABELS: Record<string, string> = {
-  wise:   "Wise — contact@foxmenstudio.com",
-  paypal: "PayPal — payments@foxmenstudio.com",
+  wise:   "Wise — contact@foxmen.studio",
+  paypal: "PayPal — payments@foxmen.studio",
   bank:   "Bank Transfer — IBAN on request",
   crypto: "USDT / USDC — Wallet on request",
 };
@@ -103,7 +103,7 @@ function buildEmailHtml(data: {
     <!-- Bottom row: contact + status -->
     <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
       <td style="font-size:.68rem;color:rgba(255,255,255,.38);line-height:1.9;vertical-align:middle;">
-        <strong style="color:rgba(255,255,255,.7);font-weight:500;">contact@foxmenstudio.com</strong> · foxmen.studio
+        <strong style="color:rgba(255,255,255,.7);font-weight:500;">contact@foxmen.studio</strong> · foxmen.studio
       </td>
       <td style="text-align:right;vertical-align:middle;">
         <span style="display:inline-flex;align-items:center;gap:7px;padding:5px 14px;border-radius:999px;font-size:.7rem;font-weight:700;background:${st.bg};color:${st.color};">
@@ -202,7 +202,7 @@ function buildEmailHtml(data: {
         <div style="font-size:.6rem;color:rgba(255,255,255,.3);margin-top:5px;letter-spacing:.06em;">Code · Craft · Care · Est. 2025</div>
       </td>
       <td style="text-align:center;vertical-align:top;width:33%;">
-        <div style="font-size:.7rem;color:rgba(255,255,255,.4);line-height:2;"><strong style="color:rgba(255,255,255,.75);font-weight:500;">contact@foxmenstudio.com</strong><br/>foxmen.studio</div>
+        <div style="font-size:.7rem;color:rgba(255,255,255,.4);line-height:2;"><strong style="color:rgba(255,255,255,.75);font-weight:500;">contact@foxmen.studio</strong><br/>foxmen.studio</div>
       </td>
       <td style="text-align:right;vertical-align:top;width:33%;">
         <div style="font-size:.65rem;color:rgba(255,255,255,.3);line-height:1.9;">Payment due within 14 days of issue.<br/>Late payments subject to 2% monthly interest.</div>
@@ -236,7 +236,7 @@ export async function POST(req: Request) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: `Foxmen Studio <team@foxmenstudio.com>`,
+      from: `Foxmen Studio <team@foxmen.studio>`,
       to: email,
       subject: `Invoice ${num} from Foxmen Studio — ${new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}`,
       html,

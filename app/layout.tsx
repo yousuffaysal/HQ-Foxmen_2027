@@ -33,7 +33,7 @@ const instrumentSans = Instrument_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://foxmenstudio.com"),
+  metadataBase: new URL("https://foxmen.studio"),
   title: {
     default: "Foxmen Studio — Code. Craft. Care.",
     template: "%s — Foxmen Studio",
@@ -46,13 +46,13 @@ export const metadata: Metadata = {
     "brand design", "Foxmen Studio", "Next.js development", "real estate platform",
     "startup product agency", "digital agency", "design system",
   ],
-  authors: [{ name: "Foxmen Studio", url: "https://foxmenstudio.com" }],
+  authors: [{ name: "Foxmen Studio", url: "https://foxmen.studio" }],
   creator: "Foxmen Studio",
   publisher: "Foxmen Studio",
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://foxmenstudio.com",
+    url: "https://foxmen.studio",
     siteName: "Foxmen Studio",
     title: "Foxmen Studio — Code. Craft. Care.",
     description:
@@ -92,7 +92,7 @@ export const metadata: Metadata = {
     shortcut: "/icon.svg",
   },
   alternates: {
-    canonical: "https://foxmenstudio.com",
+    canonical: "https://foxmen.studio",
   },
   category: "technology",
 };

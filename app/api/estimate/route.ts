@@ -148,7 +148,7 @@ function emailHtml(type: string, complexity: string, timeline: string, r: Record
       <tr><td style="padding:32px 28px;text-align:center;">
         <div style="font-size:20px;font-weight:700;color:#fff;margin-bottom:8px;">Ready to move forward?</div>
         <div style="font-size:14px;color:#aaa;margin-bottom:24px;line-height:1.5;">Book a free 20-min discovery call. We'll scope your project<br/>and confirm exact pricing within 24 hours.</div>
-        <a href="https://foxmenstudio.com/contact" class="cta-btn" style="display:inline-block;background:#b86cf9;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:15px 36px;border-radius:999px;letter-spacing:.02em;">Book a Free Call &rarr;</a>
+        <a href="https://foxmen.studio/contact" class="cta-btn" style="display:inline-block;background:#b86cf9;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:15px 36px;border-radius:999px;letter-spacing:.02em;">Book a Free Call &rarr;</a>
         <div style="margin-top:16px;font-size:12px;color:#666;">Or reply to this email &mdash; we respond within 24 hours</div>
       </td></tr>
     </table>
@@ -179,7 +179,7 @@ function emailHtml(type: string, complexity: string, timeline: string, r: Record
     <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" style="padding-bottom:16px;">${logoDark}</td></tr></table>
     <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation"><tr>
       <td style="vertical-align:middle;text-align:left;">
-        <div style="font-size:12px;color:#555;margin-bottom:8px;">foxmenstudio.com &nbsp;·&nbsp; yousuf.h.faysal@foxmenstudio.com</div>
+        <div style="font-size:12px;color:#555;margin-bottom:8px;">foxmen.studio &nbsp;·&nbsp; yousuf.h.faysal@foxmen.studio</div>
         <div style="font-size:11px;color:#3d3d3d;line-height:1.6;">This is a preliminary estimate. Final scope &amp; pricing confirmed after discovery call.<br/>You received this because you used the Project Estimator on our website.</div>
       </td>
       <td style="text-align:right;vertical-align:middle;padding-left:20px;">
@@ -265,7 +265,7 @@ export async function POST(req: Request) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: `Foxmen Studio <team@foxmenstudio.com>`,
+            from: `Foxmen Studio <team@foxmen.studio>`,
             to: email,
             subject: `Your ${type} estimate — $${Number(estimate.price_min).toLocaleString()} to $${Number(estimate.price_max).toLocaleString()}`,
             html: emailHtml(type, complexity, timeline, estimate),

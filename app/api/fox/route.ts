@@ -130,14 +130,14 @@ function emailHtml(
       <tr><td style="padding:28px;text-align:center;">
         <div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:6px;">Ready to move forward?</div>
         <div style="font-size:13px;color:#aaa;margin-bottom:20px;">Book a free 20-min discovery call — we'll confirm exact pricing within 24 hours.</div>
-        <a href="https://foxmenstudio.com/contact" style="display:inline-block;background:#b86cf9;color:#fff;font-size:14px;font-weight:700;text-decoration:none;padding:13px 32px;border-radius:999px;">Book a Free Call</a>
+        <a href="https://foxmen.studio/contact" style="display:inline-block;background:#b86cf9;color:#fff;font-size:14px;font-weight:700;text-decoration:none;padding:13px 32px;border-radius:999px;">Book a Free Call</a>
         <div style="margin-top:12px;font-size:12px;color:#555;">Or reply to this email — we respond within 24 hours</div>
       </td></tr>
     </table>
   </td></tr>
 
   <tr><td style="background:#0a0a0a;padding:20px 36px;text-align:center;">
-    <div style="font-size:11px;color:#555;">foxmenstudio.com · yousuf.h.faysal@foxmenstudio.com</div>
+    <div style="font-size:11px;color:#555;">foxmen.studio · yousuf.h.faysal@foxmen.studio</div>
     <div style="font-size:10px;color:#3d3d3d;margin-top:4px;">Preliminary estimate. Final pricing confirmed after discovery call.</div>
   </td></tr>
 </table>
@@ -174,7 +174,7 @@ export async function POST(req: Request) {
           method: "POST",
           headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
           body: JSON.stringify({
-            from: `Foxmen Studio <team@foxmenstudio.com>`,
+            from: `Foxmen Studio <team@foxmen.studio>`,
             to: email,
             subject: `Your ${projectType} estimate — $${Number(totalMin).toLocaleString()} to $${Number(totalMax).toLocaleString()}`,
             html,

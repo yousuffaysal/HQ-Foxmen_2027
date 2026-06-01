@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     title: "Work — Foxmen Studio",
     description:
       "Selected projects and case studies — websites, apps, AI products, ecommerce, and real estate platforms.",
-    url: "https://foxmenstudio.com/work",
+    url: "https://foxmen.studio/work",
     images: [{ url: "/assets/og-image.png", width: 1200, height: 630, alt: "Foxmen Studio Work" }],
   },
   twitter: {
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     description: "Selected projects and case studies from Foxmen Studio.",
     images: ["/assets/og-image.png"],
   },
-  alternates: { canonical: "https://foxmenstudio.com/work" },
+  alternates: { canonical: "https://foxmen.studio/work" },
 };
 
 function ArrowIcon() {

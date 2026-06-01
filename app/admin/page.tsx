@@ -126,7 +126,7 @@ function invoicePdfHtml(p:{
   const subtotal=p.items.reduce((s,it)=>s+(it.quantity*it.rate),0);
   const taxAmt=subtotal*(p.taxRate/100);
   const total=subtotal+taxAmt-p.discount;
-  const PAY:Record<string,string>={wise:"Wise — contact@foxmenstudio.com",paypal:"PayPal — payments@foxmenstudio.com",bank:"Bank Transfer — IBAN on request",crypto:"USDT / USDC — Wallet on request"};
+  const PAY:Record<string,string>={wise:"Wise — contact@foxmen.studio",paypal:"PayPal — payments@foxmen.studio",bank:"Bank Transfer — IBAN on request",crypto:"USDT / USDC — Wallet on request"};
   const [pName,pDetail]=(PAY[p.payment]??p.payment).split("—").map(s=>s.trim());
   const STATUS_STYLE:Record<string,{color:string;bg:string;label:string}>={
     draft:{color:"#6b7280",bg:"#f9fafb",label:"Draft"},
@@ -240,7 +240,7 @@ th{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:#9a9a9a;f
   </div>
   <div class="hd-rule"></div>
   <div class="hd-bottom">
-    <div class="hd-ct"><strong>contact@foxmenstudio.com</strong> · foxmen.studio</div>
+    <div class="hd-ct"><strong>contact@foxmen.studio</strong> · foxmen.studio</div>
     <div class="badge" style="background:${st.bg};color:${st.color};">
       <span class="dot" style="background:${st.color};"></span>${st.label}
     </div>
@@ -291,7 +291,7 @@ ${p.notes?`<div class="notes-box"><span class="notes-lbl">Project Notes</span><d
     <div class="ft-logo-row"><img src="${logoUrl}" alt=""/><div class="ft-brand">Foxmen <em>Studio</em></div></div>
     <div class="ft-sub">Code · Craft · Care · Est. 2025</div>
   </div>
-  <div class="ft-mid"><strong>contact@foxmenstudio.com</strong><br/>foxmen.studio</div>
+  <div class="ft-mid"><strong>contact@foxmen.studio</strong><br/>foxmen.studio</div>
   <div class="ft-right">Payment due within 14 days of issue.<br/>Late payments subject to 2% monthly interest.</div>
 </div>
 </div>
@@ -740,7 +740,7 @@ export default function AdminPage() {
   const [emailPdfLabel,      setEmailPdfLabel]      = useState("Download PDF");
   const [emailPdfUrl,        setEmailPdfUrl]        = useState("");
   const [emailPdfUploading,  setEmailPdfUploading]  = useState(false);
-  const [emailFrom,          setEmailFrom]          = useState("contact@foxmenstudio.com");
+  const [emailFrom,          setEmailFrom]          = useState("contact@foxmen.studio");
   const [invAiLoading,   setInvAiLoading]   = useState(false);
   const [projAiPrompt,   setProjAiPrompt]   = useState("");
   const [projAiLoading,  setProjAiLoading]  = useState(false);
@@ -2031,7 +2031,7 @@ export default function AdminPage() {
           const removeItem=(i:number)=>setInvItems(p=>p.filter((_,idx)=>idx!==i));
           const updateItem=(i:number,f:keyof InvoiceItem,v:string)=>setInvItems(p=>p.map((it,idx)=>idx===i?{...it,[f]:f==="service"||f==="description"||f==="unit"?v:(parseFloat(v)||0)}:it));
 
-          const PAY_LABELS:Record<string,string>={wise:"Wise — contact@foxmenstudio.com",paypal:"PayPal — payments@foxmenstudio.com",bank:"Bank Transfer — IBAN on request",crypto:"USDT / USDC — Wallet on request"};
+          const PAY_LABELS:Record<string,string>={wise:"Wise — contact@foxmen.studio",paypal:"PayPal — payments@foxmen.studio",bank:"Bank Transfer — IBAN on request",crypto:"USDT / USDC — Wallet on request"};
 
           const subtotal=invItems.reduce((s,it)=>s+(it.quantity*it.rate),0);
           const taxAmt=subtotal*(invTaxRate/100);
@@ -2174,8 +2174,8 @@ export default function AdminPage() {
                 <div className="field">
                   <label>Payment method</label>
                   <select value={invPayment} onChange={e=>setInvPayment(e.target.value)} style={{background:"var(--canvas)",border:"1px solid var(--line)",borderRadius:"var(--r-sm)",padding:"10px 12px",fontSize:14,width:"100%",fontFamily:"var(--f-sans)",color:"var(--ink)"}}>
-                    <option value="wise">Wise — contact@foxmenstudio.com</option>
-                    <option value="paypal">PayPal — payments@foxmenstudio.com</option>
+                    <option value="wise">Wise — contact@foxmen.studio</option>
+                    <option value="paypal">PayPal — payments@foxmen.studio</option>
                     <option value="bank">Bank Transfer — IBAN on request</option>
                     <option value="crypto">USDT / USDC — Wallet on request</option>
                   </select>
@@ -2236,7 +2236,7 @@ export default function AdminPage() {
                       {/* Bottom row: contact + status */}
                       <div className="inv-hd-bottom">
                         <div className="inv-hd-contact">
-                          <strong>contact@foxmenstudio.com</strong> · foxmen.studio
+                          <strong>contact@foxmen.studio</strong> · foxmen.studio
                         </div>
                         <div className="inv-status" style={{background:stBadge.bg,color:stBadge.color}}>
                           <span className="sdot" style={{background:stBadge.color}}/>
@@ -2328,7 +2328,7 @@ export default function AdminPage() {
                         </div>
                         <div className="ft-sub">Code · Craft · Care · Est. 2025</div>
                       </div>
-                      <div className="ft-mid"><strong>contact@foxmenstudio.com</strong><br/>foxmen.studio</div>
+                      <div className="ft-mid"><strong>contact@foxmen.studio</strong><br/>foxmen.studio</div>
                       <div className="ft-right">Payment due within 14 days of issue.<br/>Late payments subject to 2% monthly interest.</div>
                     </div>
                   </div>
@@ -2426,14 +2426,14 @@ export default function AdminPage() {
     <td class="em-hd-meta" style="text-align:right;vertical-align:middle;">
       <a href="https://foxmen.studio" style="display:block;font-size:11px;color:${BRAND};text-decoration:none;letter-spacing:.01em;margin-bottom:5px;">https://foxmen.studio</a>
       <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:5px;">US &middot; UK &middot; International</div>
-      <div style="font-size:10px;color:rgba(255,255,255,.38);">contact@foxmenstudio.com</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.38);">contact@foxmen.studio</div>
     </td>
   </tr></table>
   <div style="height:1px;background:rgba(255,255,255,.15);margin:20px 0 15px;"></div>
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
     <tr>
       <td class="em-hd-info" style="font-size:11px;color:rgba(255,255,255,.5);line-height:1.6;">Web apps &nbsp;·&nbsp; AI-integrated products &nbsp;·&nbsp; Mobile &amp; software</td>
-      <td style="text-align:right;white-space:nowrap;font-size:11px;"><strong style="color:rgba(255,255,255,.75);font-weight:500;">contact@foxmenstudio.com</strong></td>
+      <td style="text-align:right;white-space:nowrap;font-size:11px;"><strong style="color:rgba(255,255,255,.75);font-weight:500;">contact@foxmen.studio</strong></td>
     </tr>
   </table>
 </td></tr>
@@ -2446,7 +2446,7 @@ ${heroRow}<!-- BODY -->
     <td style="vertical-align:bottom;">
       <p style="margin:0 0 3px;font-size:12px;color:#b8b5b0;">Warm regards,</p>
       <p class="em-sig-name" style="margin:0 0 4px;font-family:${IS};font-size:20px;color:#0a0a0a;font-style:italic;">The Foxmen Team</p>
-      <p style="margin:0;font-size:11px;color:#c8c5c0;">foxmen.studio · contact@foxmenstudio.com</p>
+      <p style="margin:0;font-size:11px;color:#c8c5c0;">foxmen.studio · contact@foxmen.studio</p>
     </td>
     <td class="em-sig-logo" style="text-align:right;vertical-align:bottom;width:44px;"><img src="${LOGO_C}" height="28" width="28" style="display:block;margin-left:auto;opacity:.15;"/></td>
   </tr></table>
@@ -2457,7 +2457,7 @@ ${heroRow}<!-- BODY -->
   <div class="em-ft" style="padding:20px 58px;">
     <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
       <td style="vertical-align:middle;"><div class="em-ft-name" style="font-family:${IS};font-size:14px;color:rgba(255,255,255,.7);font-style:italic;">Foxmen Studio</div>
-        <p style="margin:4px 0 0;font-size:10px;color:rgba(255,255,255,.45);line-height:1.8;"><a href="https://foxmen.studio" style="color:rgba(255,255,255,.65);text-decoration:none;">foxmen.studio</a> · contact@foxmenstudio.com<br/>© ${yr} Foxmen Studio. All rights reserved.</p>
+        <p style="margin:4px 0 0;font-size:10px;color:rgba(255,255,255,.45);line-height:1.8;"><a href="https://foxmen.studio" style="color:rgba(255,255,255,.65);text-decoration:none;">foxmen.studio</a> · contact@foxmen.studio<br/>© ${yr} Foxmen Studio. All rights reserved.</p>
       </td>
       <td style="text-align:right;vertical-align:middle;padding-left:20px;">
         <table cellpadding="0" cellspacing="0" border="0" style="margin-left:auto;">
@@ -2723,11 +2723,11 @@ ${emailPayNotes?`<div style="margin-top:24px;padding:16px 20px;background:#faf8f
                 <div className="field" style={{marginBottom:12}}>
                   <label style={{fontSize:12,fontWeight:500,color:"var(--muted)",display:"block",marginBottom:5}}>From</label>
                   <select value={emailFrom} onChange={e=>setEmailFrom(e.target.value)} style={{width:"100%",padding:"8px 11px",background:"var(--canvas)",border:"1px solid var(--line)",borderRadius:"var(--r-sm)",color:"var(--ink)",fontSize:13,fontFamily:"var(--f-mono)",outline:"none",cursor:"pointer"}}>
-                    <option value="contact@foxmenstudio.com">contact@foxmenstudio.com</option>
-                    <option value="hello@foxmenstudio.com">hello@foxmenstudio.com</option>
-                    <option value="info@foxmenstudio.com">info@foxmenstudio.com</option>
-                    <option value="careers@foxmenstudio.com">careers@foxmenstudio.com</option>
-                    <option value="yousuf.h.faysal@foxmenstudio.com">yousuf.h.faysal@foxmenstudio.com</option>
+                    <option value="contact@foxmen.studio">contact@foxmen.studio</option>
+                    <option value="hello@foxmen.studio">hello@foxmen.studio</option>
+                    <option value="info@foxmen.studio">info@foxmen.studio</option>
+                    <option value="careers@foxmen.studio">careers@foxmen.studio</option>
+                    <option value="yousuf.h.faysal@foxmen.studio">yousuf.h.faysal@foxmen.studio</option>
                   </select>
                 </div>
                 <Field label="To (recipient email)" value={emailTo} onChange={setEmailTo} placeholder="client@company.com" type="email"/>

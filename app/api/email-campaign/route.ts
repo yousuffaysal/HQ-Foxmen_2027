@@ -154,14 +154,14 @@ function emailShell(subject: string, bodyHtml: string, heroImage = ""): string {
       <td class="em-hd-meta" style="text-align:right;vertical-align:middle;">
         <a href="https://foxmen.studio" style="display:block;font-size:11px;color:${BRAND_COLOR};text-decoration:none;letter-spacing:.01em;margin-bottom:5px;">https://foxmen.studio</a>
         <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:5px;">US &middot; UK &middot; International</div>
-        <div style="font-size:10px;color:rgba(255,255,255,.38);">contact@foxmenstudio.com</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.38);">contact@foxmen.studio</div>
       </td>
     </tr></table>
     <div style="height:1px;background:rgba(255,255,255,.15);margin:20px 0 16px;"></div>
     <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
       <tr>
         <td class="em-hd-info" style="font-size:11px;color:rgba(255,255,255,.5);line-height:1.6;">Web apps &nbsp;·&nbsp; AI-integrated products &nbsp;·&nbsp; Mobile &amp; software</td>
-        <td style="text-align:right;white-space:nowrap;font-size:11px;"><strong style="color:rgba(255,255,255,.75);font-weight:500;">contact@foxmenstudio.com</strong></td>
+        <td style="text-align:right;white-space:nowrap;font-size:11px;"><strong style="color:rgba(255,255,255,.75);font-weight:500;">contact@foxmen.studio</strong></td>
       </tr>
     </table>
   </td></tr>
@@ -179,7 +179,7 @@ ${heroRow}
         <td style="vertical-align:bottom;">
           <p style="margin:0 0 3px;font-size:12px;color:#b8b5b0;letter-spacing:.01em;">Warm regards,</p>
           <p class="em-sig-name" style="margin:0 0 4px;font-family:${IS};font-size:22px;font-weight:400;color:#0a0a0a;font-style:italic;">The Foxmen Team</p>
-          <p style="margin:0;font-size:11px;color:#c8c5c0;">foxmen.studio · contact@foxmenstudio.com</p>
+          <p style="margin:0;font-size:11px;color:#c8c5c0;">foxmen.studio · contact@foxmen.studio</p>
         </td>
         <td class="em-sig-logo" style="text-align:right;vertical-align:bottom;width:44px;">
           <img src="${LOGO}" height="30" width="30" alt="" style="display:block;margin-left:auto;opacity:.15;"/>
@@ -197,7 +197,7 @@ ${heroRow}
           <div class="em-ft-name" style="font-family:${IS};font-size:15px;color:rgba(255,255,255,.7);font-style:italic;">Foxmen Studio</div>
           <p style="margin:4px 0 0;font-size:10px;color:rgba(255,255,255,.45);line-height:1.8;">
             <a href="https://foxmen.studio" style="color:rgba(255,255,255,.65);text-decoration:none;">foxmen.studio</a>
-            &nbsp;·&nbsp;contact@foxmenstudio.com<br/>
+            &nbsp;·&nbsp;contact@foxmen.studio<br/>
             &copy; ${year} Foxmen Studio. All rights reserved.
           </p>
         </td>
@@ -405,7 +405,7 @@ export async function POST(req: Request) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: `Foxmen Studio <${from ?? process.env.FROM_EMAIL ?? "contact@foxmenstudio.com"}>`,
+      from: `Foxmen Studio <${from ?? process.env.FROM_EMAIL ?? "contact@foxmen.studio"}>`,
       to,
       subject,
       html,

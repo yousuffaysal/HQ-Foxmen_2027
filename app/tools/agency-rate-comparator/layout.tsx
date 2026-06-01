@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Agency Rate Comparator — Foxmen Studio",
     description: "Compare agency hourly rates across London, NYC, UAE, and Foxmen Studio. See real savings on your project budget.",
-    url: "https://foxmenstudio.com/tools/agency-rate-comparator",
+    url: "https://foxmen.studio/tools/agency-rate-comparator",
     images: [{ url: "/assets/og-image.png", width: 1200, height: 630, alt: "Agency Rate Comparator" }],
   },
   twitter: {
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     description: "Compare agency rates across London, NYC, UAE, and Foxmen Studio — free tool.",
     images: ["/assets/og-image.png"],
   },
-  alternates: { canonical: "https://foxmenstudio.com/tools/agency-rate-comparator" },
+  alternates: { canonical: "https://foxmen.studio/tools/agency-rate-comparator" },
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     title: "Services — Foxmen Studio",
     description:
       "Web, mobile, AI, ecommerce, real estate, brand, and marketing services — from a focused international creative agency.",
-    url: "https://foxmenstudio.com/services",
+    url: "https://foxmen.studio/services",
     images: [{ url: "/assets/og-image.png", width: 1200, height: 630, alt: "Foxmen Studio Services" }],
   },
   twitter: {
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
       "Web, mobile, AI, ecommerce, real estate, brand, and marketing — Foxmen Studio services.",
     images: ["/assets/og-image.png"],
   },
-  alternates: { canonical: "https://foxmenstudio.com/services" },
+  alternates: { canonical: "https://foxmen.studio/services" },
 };
 
 export default function ServicesLayout({ children }: { children: React.ReactNode }) {

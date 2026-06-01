@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Roast My Website — Foxmen Studio",
     description: "Brutally honest AI feedback on your website's design, UX, conversions, and SEO — free.",
-    url: "https://foxmenstudio.com/tools/roast-my-website",
+    url: "https://foxmen.studio/tools/roast-my-website",
     images: [{ url: "/assets/og-image.png", width: 1200, height: 630, alt: "Roast My Website" }],
   },
   twitter: {
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     description: "Brutally honest AI feedback on your website — free from Foxmen Studio.",
     images: ["/assets/og-image.png"],
   },
-  alternates: { canonical: "https://foxmenstudio.com/tools/roast-my-website" },
+  alternates: { canonical: "https://foxmen.studio/tools/roast-my-website" },
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

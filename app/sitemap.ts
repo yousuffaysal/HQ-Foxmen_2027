@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const BASE = "https://foxmenstudio.com";
+const BASE = "https://foxmen.studio";
 
 const JOURNAL_SLUGS = [
   "designing-in-the-browser-not-in-figma",

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     title: "Free Tools — Foxmen Studio",
     description:
       "Speed checker, AI roast, price calculator, tech stack recommender, and agency rate comparator — all free, no sign-up.",
-    url: "https://foxmenstudio.com/tools",
+    url: "https://foxmen.studio/tools",
     images: [{ url: "/assets/og-image.png", width: 1200, height: 630, alt: "Foxmen Studio Free Tools" }],
   },
   twitter: {
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     description: "Speed checker, AI roast, price calculator, and more — all free from Foxmen Studio.",
     images: ["/assets/og-image.png"],
   },
-  alternates: { canonical: "https://foxmenstudio.com/tools" },
+  alternates: { canonical: "https://foxmen.studio/tools" },
 };
 
 export default function ToolsLayout({ children }: { children: React.ReactNode }) {
