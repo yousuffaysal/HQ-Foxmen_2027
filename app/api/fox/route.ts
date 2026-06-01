@@ -174,7 +174,7 @@ export async function POST(req: Request) {
           method: "POST",
           headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
           body: JSON.stringify({
-            from: `Foxmen Studio <team@foxmen.studio>`,
+            from: `Foxmen Studio <team@foxmenstudio.com>`,
             to: email,
             subject: `Your ${projectType} estimate — $${Number(totalMin).toLocaleString()} to $${Number(totalMax).toLocaleString()}`,
             html,
