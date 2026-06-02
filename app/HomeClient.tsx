@@ -1382,6 +1382,20 @@ export default function HomeClient({
       {/* Reel */}
       <Reel />
 
+      {/* Video reel 2 */}
+      <section style={{ background: "#0a0a0a", padding: "0 0 80px" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px" }}>
+          <video
+            src="https://ik.imagekit.io/2lax2ytm2/Foxmen.mov"
+            autoPlay
+            muted
+            loop
+            playsInline
+            style={{ width: "100%", borderRadius: 20, display: "block", objectFit: "cover" }}
+          />
+        </div>
+      </section>
+
       {/* Marquee */}
       <section className="strip" aria-label="Capabilities">
         <div className="marquee">
