@@ -244,11 +244,13 @@ function Reel() {
         </div>
         <div className="frame" ref={frameRef}>
           <div className="reel-video">
-            <iframe
+            <video
               className="reel-iframe"
-              src="https://www.youtube.com/embed/V_x0ellgYwI?autoplay=1&mute=1&loop=1&controls=0&playlist=V_x0ellgYwI&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3"
-              allow="autoplay; encrypted-media"
-              allowFullScreen
+              src="https://ik.imagekit.io/2lax2ytm2/Foxmen.mov"
+              autoPlay
+              muted
+              loop
+              playsInline
             />
             <div className="reel-video-overlay" />
             <div className="ticker">
@@ -1381,20 +1383,6 @@ export default function HomeClient({
 
       {/* Reel */}
       <Reel />
-
-      {/* Video reel 2 */}
-      <section style={{ background: "#0a0a0a", padding: "0 0 80px" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px" }}>
-          <video
-            src="https://ik.imagekit.io/2lax2ytm2/Foxmen.mov"
-            autoPlay
-            muted
-            loop
-            playsInline
-            style={{ width: "100%", borderRadius: 20, display: "block", objectFit: "cover" }}
-          />
-        </div>
-      </section>
 
       {/* Marquee */}
       <section className="strip" aria-label="Capabilities">
