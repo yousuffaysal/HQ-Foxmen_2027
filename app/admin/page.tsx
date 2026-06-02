@@ -2671,7 +2671,7 @@ ${emailPayNotes?`<div style="margin-top:24px;padding:16px 20px;background:#faf8f
                 body.paymentData={clientName:emailPayClient,invoiceNum:emailPayInvoice,dueDate:emailPayDueDate,items:emailPayItems.split(/\r?\n/).filter(Boolean).map((l:string)=>{const p=l.split(/[|·]/).map((s:string)=>s.trim());return{service:p[0]||"",amount:p[1]||""};}),total:emailPayTotal,payLink:emailPayLink,notes:emailPayNotes};
               }
               const r=await fetch("/api/email-campaign",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
-              if(r.ok){toast("Email sent to "+emailTo);}else{const d=await r.json();toast(d.error||"Send failed");}
+              if(r.ok){toast("Email sent to "+emailTo);}else{const d=await r.json();toast((d.details?.message||d.error||"Send failed"));}
             }catch{toast("Send failed. Try again.");}
             setEmailSending(false);
           };
