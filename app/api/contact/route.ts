@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 
-const NOTIFY_TO = "hello@foxmen.studio";
+const NOTIFY_TO = "yousuf.h.faysal@foxmenstudio.com";
 const FROM      = "Foxmen Studio <team@foxmenstudio.com>";
 
 export async function POST(req: Request) {
