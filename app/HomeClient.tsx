@@ -193,6 +193,18 @@ function Reel() {
   const reelRef   = useRef<HTMLElement>(null);
   const frameRef  = useRef<HTMLDivElement>(null);
   const labelRef  = useRef<HTMLDivElement>(null);
+  const videoRef  = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      const obs = new IntersectionObserver(
+        ([e]) => { if (e.isIntersecting) { video.play(); obs.disconnect(); } },
+        { threshold: 0.25 }
+      );
+      obs.observe(video);
+      return () => obs.disconnect();
+    }
+  }, []);
   useEffect(() => {
     const reel  = reelRef.current;
     const frame = frameRef.current;
@@ -245,9 +257,9 @@ function Reel() {
         <div className="frame" ref={frameRef}>
           <div className="reel-video">
             <video
+              ref={videoRef}
               className="reel-iframe"
               src="https://ik.imagekit.io/2lax2ytm2/Foxmen.mov"
-              autoPlay
               muted
               loop
               playsInline
