@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { getPusherClient } from "@/lib/pusher";
 
 type Milestone = { id: number; title: string; description: string; status: string; due_date: string; completed_at: string | null; ord: number };
-type Message = { id: number; project_id: number; sender_id: number; sender_name: string; sender_role: string; message: string; created_at: string };
+type Message = { id: number; project_id: number; sender_id: number; sender_name: string; sender_role: string; message: string; image_url: string; created_at: string };
 type Project = {
   id: number; title: string; service_type: string; status: string;
   description: string; budget: string; timeline: string; website: string;
@@ -35,6 +35,8 @@ export default function ProjectDetailPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"timeline" | "chat" | "details">("timeline");
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -106,6 +108,25 @@ export default function ProjectDetailPage() {
       setText("");
     }
     setSending(false);
+  }
+
+  async function sendImage(file: File) {
+    setUploading(true);
+    const form = new FormData();
+    form.append("file", file);
+    const up = await fetch("/api/portal/upload", { method: "POST", body: form });
+    if (!up.ok) { setUploading(false); return; }
+    const { url } = await up.json();
+    const res = await fetch("/api/portal/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ project_id: projectId, message: "", image_url: url }),
+    });
+    if (res.ok) {
+      const msg = await res.json();
+      setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg]);
+    }
+    setUploading(false);
   }
 
   if (status === "loading" || loading) return <LoadingScreen />;
@@ -215,8 +236,9 @@ export default function ProjectDetailPage() {
                         {isAdmin ? "Foxmen Studio" : m.sender_name}
                         {" · "}{new Date(m.created_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
                       </div>
-                      <div style={{ background: isMe ? "var(--ink)" : "#f3f4f6", color: isMe ? "#fff" : "var(--ink)", borderRadius: isMe ? "14px 14px 4px 14px" : "14px 14px 14px 4px", padding: "10px 14px", fontSize: 14, lineHeight: 1.5, wordBreak: "break-word" }}>
-                        {m.message}
+                      <div style={{ background: isMe ? "var(--ink)" : "#f3f4f6", color: isMe ? "#fff" : "var(--ink)", borderRadius: isMe ? "14px 14px 4px 14px" : "14px 14px 14px 4px", padding: m.image_url && !m.message ? "4px" : "10px 14px", fontSize: 14, lineHeight: 1.5, wordBreak: "break-word", overflow: "hidden" }}>
+                        {m.image_url && <img src={m.image_url} alt="attachment" style={{ display: "block", maxWidth: "100%", borderRadius: 10, maxHeight: 300, objectFit: "contain" }} />}
+                        {m.message && <span style={{ display: m.image_url ? "block" : undefined, marginTop: m.image_url ? 6 : 0, padding: m.image_url ? "0 10px 6px" : undefined }}>{m.message}</span>}
                       </div>
                     </div>
                   </div>
@@ -224,7 +246,15 @@ export default function ProjectDetailPage() {
               })}
               <div ref={chatEndRef} />
             </div>
-            <form onSubmit={sendMessage} style={{ display: "flex", gap: 10, marginTop: 12 }}>
+            <form onSubmit={sendMessage} style={{ display: "flex", gap: 8, marginTop: 12, alignItems: "center" }}>
+              <input ref={fileInputRef} type="file" accept="image/*" style={{ display: "none" }}
+                onChange={e => { const f = e.target.files?.[0]; if (f) sendImage(f); e.target.value = ""; }} />
+              <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading}
+                style={{ background: "#fff", border: "1.5px solid var(--line)", borderRadius: 50, width: 46, height: 46, cursor: uploading ? "not-allowed" : "pointer", opacity: uploading ? 0.5 : 1, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "var(--muted)" }}>
+                {uploading
+                  ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: "spin 1s linear infinite" }}><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".25"/><path d="M21 12a9 9 0 0 1-9 9"/></svg>
+                  : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>}
+              </button>
               <input
                 value={text}
                 onChange={e => setText(e.target.value)}
@@ -237,6 +267,7 @@ export default function ProjectDetailPage() {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
               </button>
             </form>
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </div>
         )}
 

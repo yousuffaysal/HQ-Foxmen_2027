@@ -28,7 +28,7 @@ type PortalMilestone = { id:number; title:string; description:string; status:str
 type PortalProject = { id:number; user_id:number; title:string; service_type:string; status:string; description:string; budget:string; timeline:string; website:string; admin_note:string; created_at:string; updated_at:string; milestones:PortalMilestone[]; user_name:string; user_email:string };
 type PortalUser = { id:number; name:string; email:string; role:string; fox_id:string|null; created_at:string };
 type PortalOffer = { id:number; user_id:number; project_id:number|null; title:string; description:string; price:string; status:string; created_at:string; user_name?:string };
-type PortalMessage = { id:number; project_id:number; sender_id:number; sender_name:string; sender_role:string; message:string; created_at:string };
+type PortalMessage = { id:number; project_id:number; sender_id:number; sender_name:string; sender_role:string; message:string; image_url:string; created_at:string };
 
 /* ── PDF template helpers (open in new window → print as PDF) ── */
 function proposalPdfHtml(client:string,company:string,service:string,timeline:string,budget:string,data:ProposalData):string{
@@ -1028,7 +1028,8 @@ export default function AdminPage() {
   };
   const deletePortalProject=async(id:number)=>{
     if(!confirm("Delete this project? This cannot be undone.")) return;
-    await fetch(`/api/portal/projects/${id}`,{method:"DELETE"});
+    const res=await fetch(`/api/portal/projects/${id}`,{method:"DELETE"});
+    if(!res.ok){ toast("Delete failed — please try again"); return; }
     setPortalProjects(prev=>prev.filter(p=>p.id!==id));
     if(selectedPortalProject?.id===id){ setSelectedPortalProject(null); setProjEditMode(false); }
     toast("Project deleted");
@@ -3246,7 +3247,10 @@ ${emailPayNotes?`<div style="margin-top:24px;padding:16px 20px;background:#faf8f
                       {portalMessages.map(m=>(
                         <div key={m.id} style={{display:"flex",gap:8,flexDirection:m.sender_role==="admin"?"row-reverse":"row",alignItems:"flex-end"}}>
                           <div style={{width:26,height:26,borderRadius:"50%",background:m.sender_role==="admin"?"var(--brand)":"var(--line)",color:m.sender_role==="admin"?"#fff":"var(--muted)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:600,flexShrink:0}}>{m.sender_name.charAt(0).toUpperCase()}</div>
-                          <div style={{maxWidth:"72%",background:m.sender_role==="admin"?"var(--ink)":"#f3f4f6",color:m.sender_role==="admin"?"#fff":"var(--ink)",borderRadius:m.sender_role==="admin"?"12px 12px 4px 12px":"12px 12px 12px 4px",padding:"8px 12px",fontSize:13,lineHeight:1.5,wordBreak:"break-word"}}>{m.message}</div>
+                          <div style={{maxWidth:"72%",background:m.sender_role==="admin"?"var(--ink)":"#f3f4f6",color:m.sender_role==="admin"?"#fff":"var(--ink)",borderRadius:m.sender_role==="admin"?"12px 12px 4px 12px":"12px 12px 12px 4px",padding:m.image_url&&!m.message?"4px":"8px 12px",fontSize:13,lineHeight:1.5,wordBreak:"break-word",overflow:"hidden"}}>
+                            {m.image_url&&<img src={m.image_url} alt="attachment" style={{display:"block",maxWidth:"100%",borderRadius:8,maxHeight:220,objectFit:"contain",cursor:"pointer"}} onClick={()=>window.open(m.image_url,"_blank")}/>}
+                            {m.message&&<span style={{display:m.image_url?"block":undefined,marginTop:m.image_url?4:0,padding:m.image_url?"0 8px 4px":undefined}}>{m.message}</span>}
+                          </div>
                         </div>
                       ))}
                       <div ref={portalChatEndRef}/>
