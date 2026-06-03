@@ -1,6 +1,8 @@
 import { sql } from "@/lib/db";
 import ServicesPage from "./ServicesClient";
 
+export const dynamic = "force-dynamic";
+
 type DbService = { id: number; name: string; descr: string; count: string; badge: string | null; image: string | null };
 
 export default async function Page() {

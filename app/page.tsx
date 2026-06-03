@@ -1,6 +1,8 @@
 import { sql } from "@/lib/db";
 import HomeClient from "./HomeClient";
 
+export const dynamic = "force-dynamic";
+
 type DbService = { id:number; ord:number; name:string; descr:string; count:string; visible:boolean; badge:string|null; image:string|null };
 type DbProject = { id:number; name:string; tagline:string; industry:string; year:string; scope:string; status:string; thumbnail:string; slug:string; color_cls:string; live_url:string; home_featured:boolean; home_order:number };
 type DbClient  = { id:number; name:string; industry:string; country:string };

@@ -3,6 +3,8 @@ import Link from "next/link";
 import { sql } from "@/lib/db";
 import WorkGrid from "./WorkGrid";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Work",
   description:
