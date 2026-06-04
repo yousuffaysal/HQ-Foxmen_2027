@@ -1553,35 +1553,6 @@ export default function HomeClient({
         </div>
       </section>
 
-      {/* Social proof */}
-      <section className="proof" aria-label="Trusted by">
-        <div className="wrap">
-          <div className="proof-head">
-            <div>
-              <div className="fade"><span className="eyebrow">Trusted worldwide</span></div>
-              <h3 className="fade d1" style={{ marginTop: 14 }}>
-                {dbClients.length > 0 ? dbClients.length : 42} active clients across{" "}
-                <span className="it">
-                  {dbClients.length > 0
-                    ? new Set(dbClients.map(c => c.country).filter(Boolean)).size || 5
-                    : 5}{" "}
-                  countries
-                </span>{" "}
-                — from seed-stage to listed.
-              </h3>
-            </div>
-            <Link href="/work" className="tlink fade d2">See the work →</Link>
-          </div>
-        </div>
-        <div className="proof-grid fade">
-          {(dbClients.length > 0 ? dbClients : proofCells.map(c => ({ name: c.name, industry: c.badge, country: "" }))).map((c, i) => (
-            <div className="cell" key={i}>
-              <span className="mk">{PROOF_SYMBOLS[i % PROOF_SYMBOLS.length]}</span> {c.name}
-              <span className="badge">{c.industry}</span>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* Testimonials */}
       <TestimonialsSection testis={dbTestis} />
