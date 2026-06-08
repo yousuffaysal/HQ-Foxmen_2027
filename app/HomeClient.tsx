@@ -267,9 +267,9 @@ function Reel() {
             <div className="reel-video-overlay" />
             <div className="ticker">
               <span>50+ products shipped</span><span>5 countries</span>
-              <span>42 active clients</span><span>98% retention</span>
+              <span>98% retention</span><span>Code · Craft · Care</span>
               <span>50+ products shipped</span><span>5 countries</span>
-              <span>42 active clients</span><span>98% retention</span>
+              <span>98% retention</span><span>Code · Craft · Care</span>
             </div>
           </div>
         </div>
@@ -1661,8 +1661,8 @@ export default function HomeClient({
               a half-formed idea?
             </h2>
             <div className="row fade d2">
-              <a href="mailto:hello@foxmen.studio" className="btn btn--lg">
-                <span className="label">hello@foxmen.studio</span>
+              <a href="mailto:hello@foxmenstudio.com" className="btn btn--lg">
+                <span className="label">hello@foxmenstudio.com</span>
                 <span className="chip"><ArrowIcon /></span>
               </a>
               <button
