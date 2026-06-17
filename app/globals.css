@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Effyra";
+  src: url("/assets/Effyra.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ============================================================
    TAILWIND v4 DESIGN TOKENS
    ============================================================ */
@@ -268,12 +276,12 @@ h1, h2, h3, h4 { margin: 0; font-weight: 400; letter-spacing: -0.02em; }
 }
 .brand {
   display: flex; align-items: center; gap: 12px;
-  font-family: var(--f-display); font-size: 24px; letter-spacing: -.02em;
+  font-size: 24px; letter-spacing: -.02em;
 }
-.brand .mark { width: 34px; height: 34px; }
-.brand .wm { line-height: 1; font-weight: 400; }
+.brand .mark { width: 40px; height: 40px; }
+.brand .wm { line-height: 1; font-weight: 400; font-family: "Effyra", var(--f-display); }
 .brand .wm .small {
-  display: block; font-family: var(--f-mono); font-size: 9px;
+  display: block; font-family: var(--font-urbanist), "Urbanist", var(--f-sans); font-size: 9px;
   letter-spacing: .22em; color: var(--muted); text-transform: uppercase; margin-top: 2px;
 }
 .nav-links {

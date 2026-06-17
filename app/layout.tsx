@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Instrument_Serif, Instrument_Sans } from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Serif, Instrument_Sans, Urbanist } from "next/font/google";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import SiteShell from "@/components/SiteShell";
@@ -32,8 +32,15 @@ const instrumentSans = Instrument_Sans({
   display: "swap",
 });
 
+const urbanist = Urbanist({
+  variable: "--font-urbanist",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://foxmen.studio"),
+  metadataBase: new URL("https://www.foxmen.studio"),
   title: {
     default: "Foxmen Studio — Code. Craft. Care.",
     template: "%s — Foxmen Studio",
@@ -92,7 +99,7 @@ export const metadata: Metadata = {
     shortcut: "/icon.svg",
   },
   alternates: {
-    canonical: "https://foxmen.studio",
+    canonical: "https://www.foxmen.studio/",
   },
   category: "technology",
 };
@@ -101,7 +108,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} ${instrumentSans.variable}`}
+      className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} ${instrumentSans.variable} ${urbanist.variable}`}
     >
       <body
         data-mood="violet"

@@ -79,7 +79,7 @@ export default function Nav() {
       >
         <div className="wrap nav-inner">
           <Link href="/" className="brand" aria-label="Foxmen Studio home">
-            <Image className="mark" src="/assets/logo-mark.svg" alt="" width={34} height={34} />
+            <Image className="mark" src="/assets/logo-mark.svg" alt="" width={40} height={40} />
             <span className="wm">
               Foxmen Studio
               <span className="small">Code · Craft · Care</span>

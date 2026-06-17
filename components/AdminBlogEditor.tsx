@@ -343,6 +343,9 @@ export default function AdminBlogEditor({ post, onSave, onClose }: Props) {
               <div style={{ position: "relative", marginBottom: 6 }}>
                 <img src={data.cover_image} style={{ width: "100%", height: 100, objectFit: "cover", borderRadius: 8, border: "1.5px solid #e5e2de" }} alt="" />
                 <button onClick={() => set("cover_image", "")} style={{ position: "absolute", top: 6, right: 6, width: 22, height: 22, borderRadius: "50%", background: "rgba(0,0,0,.6)", border: "none", cursor: "pointer", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12 }}>×</button>
+                <div onClick={() => coverImgRef.current?.click()} style={{ marginTop: 6, fontSize: 10, color: "#aaa", textAlign: "center", cursor: "pointer", letterSpacing: ".02em" }}>
+                  Click image area to replace · <span style={{ color: "var(--brand)" }}>1200 × 480 px</span>
+                </div>
               </div>
             ) : (
               <div onClick={() => coverImgRef.current?.click()} style={{ border: "2px dashed #e5e2de", borderRadius: 8, padding: "16px 10px", textAlign: "center", cursor: "pointer", background: "#faf9f8", transition: "border-color .15s" }}
@@ -350,6 +353,7 @@ export default function AdminBlogEditor({ post, onSave, onClose }: Props) {
                 {uploadingCover ? <span style={{ fontSize: 12, color: "#888" }}>Uploading…</span> : <>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="1.8" style={{ display: "block", margin: "0 auto 6px" }}><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
                   <span style={{ fontSize: 11, color: "#888" }}>Click to upload cover</span>
+                  <span style={{ display: "block", fontSize: 10, color: "#bbb", marginTop: 4, letterSpacing: ".02em" }}>1200 × 480 px recommended (2.5:1)</span>
                 </>}
               </div>
             )}
