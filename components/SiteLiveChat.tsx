@@ -329,7 +329,7 @@ export default function SiteLiveChat() {
                 <img src="/assets/logo-mark.svg" alt="Foxmen Studio" style={{ width: 28, height: 28 }} />
               </div>
               <div>
-                <div style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontWeight: 400, fontSize: 18, color: "#fff", letterSpacing: "-.01em", lineHeight: 1.1 }}>
+                <div style={{ fontFamily: "'Effyra', 'Instrument Serif', Georgia, serif", fontWeight: 400, fontSize: 18, color: "#fff", letterSpacing: "-.01em", lineHeight: 1.1 }}>
                   Foxmen <em style={{ fontStyle: "italic", color: BRAND }}>Studio</em>
                 </div>
                 <div style={{ fontSize: 11, color: "rgba(255,255,255,.4)", marginTop: 2 }}>How would you like to connect?</div>
@@ -463,7 +463,7 @@ export default function SiteLiveChat() {
               <img src="/assets/logo-mark.svg" alt="" style={{ width: 22, height: 22, filter: "brightness(0) invert(1)" }} />
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 700, fontSize: 15, color: "#fff", letterSpacing: "-.01em" }}>
+              <div style={{ fontFamily: "'Effyra', 'Instrument Serif', Georgia, serif", fontWeight: 400, fontSize: 15, color: "#fff", letterSpacing: "-.01em" }}>
                 Foxmen <em style={{ fontStyle: "italic", color: BRAND }}>Studio</em>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 3 }}>
