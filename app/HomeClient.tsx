@@ -198,11 +198,11 @@ function Reel() {
     const video = videoRef.current;
     if (video) {
       const obs = new IntersectionObserver(
-        ([e]) => { if (e.isIntersecting) { video.play(); obs.disconnect(); } },
+        ([e]) => { if (e.isIntersecting) { video.play().catch(() => {}); obs.disconnect(); } },
         { threshold: 0.25 }
       );
       obs.observe(video);
-      return () => obs.disconnect();
+      return () => { obs.disconnect(); video.pause(); };
     }
   }, []);
   useEffect(() => {

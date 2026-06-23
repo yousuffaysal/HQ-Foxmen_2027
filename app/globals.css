@@ -279,9 +279,9 @@ h1, h2, h3, h4 { margin: 0; font-weight: 400; letter-spacing: -0.02em; }
   font-size: 24px; letter-spacing: -.02em;
 }
 .brand .mark { width: 40px; height: 40px; }
-.brand .wm { line-height: 1; font-weight: 400; font-family: "Effyra", var(--f-display); }
+.brand .wm { line-height: 1; font-weight: 400; font-family: var(--font-instrument-serif), "Instrument Serif", serif; }
 .brand .wm .small {
-  display: block; font-family: var(--font-urbanist), "Urbanist", var(--f-sans); font-size: 9px;
+  display: block; font-family: var(--font-geist-sans), "Geist", var(--f-sans); font-size: 9px;
   letter-spacing: .22em; color: var(--muted); text-transform: uppercase; margin-top: 2px;
 }
 .nav-links {
@@ -1975,7 +1975,7 @@ h1, h2, h3, h4 { margin: 0; font-weight: 400; letter-spacing: -0.02em; }
   background: radial-gradient(60% 60% at 50% 50%, rgba(184,108,249,.15), transparent 60%);
   pointer-events: none;
 }
-.proj-grid .item .body { padding: 28px; display: grid; gap: 14px; flex: 1; }
+.proj-grid .item .body { padding: 28px; display: grid; gap: 14px; flex: 1; text-align: left; }
 .proj-grid .item .body h3 { font-family: var(--f-display); font-size: 36px; line-height: 1; letter-spacing: -.02em; }
 .proj-grid .item .body h3 .it { font-style: italic; color: var(--brand); }
 .proj-grid .item .meta {

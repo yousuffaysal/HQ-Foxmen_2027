@@ -66,7 +66,7 @@ export const metadata: Metadata = {
       "International creative agency building websites, mobile apps, AI-integrated software, ecommerce platforms, and design systems.",
     images: [
       {
-        url: "/assets/og-image.png",
+        url: "https://ik.imagekit.io/hkhhsyhak/foxmen-og-01.png",
         width: 1200,
         height: 630,
         alt: "Foxmen Studio — Code. Craft. Care.",
@@ -78,7 +78,7 @@ export const metadata: Metadata = {
     title: "Foxmen Studio — Code. Craft. Care.",
     description:
       "International creative agency building websites, mobile apps, AI-integrated software, ecommerce platforms, and design systems.",
-    images: ["/assets/og-image.png"],
+    images: ["https://ik.imagekit.io/hkhhsyhak/foxmen-og-01.png"],
     creator: "@foxmenstudio",
     site: "@foxmenstudio",
   },
