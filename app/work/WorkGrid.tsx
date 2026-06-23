@@ -85,7 +85,7 @@ export default function WorkGrid({ projects }: { projects: DbProject[] }) {
                     textTransform: "uppercase",
                   }}>
                     {img
-                      ? <img src={img} alt={p.name} loading="lazy" decoding="async" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", display: "block" }} />
+                      ? <img src={img} alt={p.name} loading="lazy" decoding="async" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                       : <span style={{ fontFamily: "var(--f-mono)", fontSize: 10, letterSpacing: ".2em", textTransform: "uppercase", opacity: .35 }}>No image yet</span>
                     }
                     {p.status !== "live" && (
@@ -99,9 +99,9 @@ export default function WorkGrid({ projects }: { projects: DbProject[] }) {
                       <span>{p.year}</span>
                     </div>
                     <h3>{p.name}</h3>
-                    {p.tagline && <p style={{ color: "#3a3a3a", margin: 0, fontSize: 15, lineHeight: 1.55 }}>{p.tagline}</p>}
+                    {p.tagline && <p style={{ color: "#3a3a3a", margin: 0, fontSize: 15, lineHeight: 1.55, textAlign: "left" }}>{p.tagline}</p>}
                     {p.scope && (
-                      <div style={{ fontFamily: "var(--f-mono)", fontSize: 10, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--muted)" }}>
+                      <div style={{ fontFamily: "var(--f-mono)", fontSize: 10, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--muted)", textAlign: "left" }}>
                         {p.scope}
                       </div>
                     )}
