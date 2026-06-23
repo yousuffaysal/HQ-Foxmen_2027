@@ -93,12 +93,12 @@ export default function WorkGrid({ projects }: { projects: DbProject[] }) {
                     )}
                   </div>
 
-                  <div className="body">
-                    <div className="meta">
+                  <div className="body" style={{ textAlign: "left" }}>
+                    <div className="meta" style={{ textAlign: "left" }}>
                       <span>Case {num}</span>
                       <span>{p.year}</span>
                     </div>
-                    <h3>{p.name}</h3>
+                    <h3 style={{ textAlign: "left" }}>{p.name}</h3>
                     {p.tagline && <p style={{ color: "#3a3a3a", margin: 0, fontSize: 15, lineHeight: 1.55, textAlign: "left" }}>{p.tagline}</p>}
                     {p.scope && (
                       <div style={{ fontFamily: "var(--f-mono)", fontSize: 10, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--muted)", textAlign: "left" }}>
