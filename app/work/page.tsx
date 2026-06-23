@@ -19,12 +19,12 @@ export const metadata: Metadata = {
     description:
       "Selected projects and case studies — websites, apps, AI products, ecommerce, and real estate platforms.",
     url: "https://foxmen.studio/work",
-    images: [{ url: "/assets/og-image.png", width: 1200, height: 630, alt: "Foxmen Studio Work" }],
+    images: [{ url: "https://ik.imagekit.io/hkhhsyhak/foxmen-og-01.png", width: 1200, height: 630, alt: "Foxmen Studio Work" }],
   },
   twitter: {
     title: "Work — Foxmen Studio",
     description: "Selected projects and case studies from Foxmen Studio.",
-    images: ["/assets/og-image.png"],
+    images: ["https://ik.imagekit.io/hkhhsyhak/foxmen-og-01.png"],
   },
   alternates: { canonical: "https://foxmen.studio/work" },
 };
