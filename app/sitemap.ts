@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { sql } from "@/lib/db";
 
-const BASE = "https://foxmen.studio";
+const BASE = "https://www.foxmen.studio";
 
 /* Hardcoded static journal slugs — always included */
 const STATIC_JOURNAL_SLUGS = [

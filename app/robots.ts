@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/admin", "/portal", "/api/", "/login", "/register"],
       },
     ],
-    sitemap: "https://foxmen.studio/sitemap.xml",
+    sitemap: "https://www.foxmen.studio/sitemap.xml",
   };
 }
