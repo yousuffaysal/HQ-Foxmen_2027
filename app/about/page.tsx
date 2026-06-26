@@ -260,7 +260,9 @@ export default function AboutPage() {
           justify-content:center;
           transition:aspect-ratio 0.35s cubic-bezier(.4,0,.2,1);
           overflow:hidden;
+          position:relative;
         }
+        .pc-img img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center top; display:block; }
         .pc:hover .pc-img { aspect-ratio:1/1; }
 
         .pc-initials {
@@ -1109,7 +1111,7 @@ export default function AboutPage() {
                   {/* image / gradient area */}
                   <div className="pc-img" style={{ background: f.gradient }}>
                     {f.image
-                      ? <img src={f.image} alt={f.name} style={{ width:"100%", height:"100%", objectFit:"cover", objectPosition:"center top", display:"block" }} />
+                      ? <img src={f.image} alt={f.name} />
                       : <span className="pc-initials">{f.initials}</span>
                     }
                   </div>
