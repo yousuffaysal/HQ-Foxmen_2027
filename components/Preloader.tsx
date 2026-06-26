@@ -150,7 +150,7 @@ export default function Preloader() {
         x: px, y: py,
         vx: Math.cos(angle) * speed + 0.7,
         vy: Math.sin(angle) * speed - 0.3,
-        size: Math.random() * 6 + 2,    // 2–8 px — large, visible shards
+        size: Math.random() * 6 + 2,
         color: `rgb(${clamp(r)},${clamp(g)},${clamp(b)})`,
         delay: (1 - xRatio) * SWEEP_MS, // right side first
       });
