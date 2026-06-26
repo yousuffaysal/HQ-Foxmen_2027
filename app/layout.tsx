@@ -53,13 +53,13 @@ export const metadata: Metadata = {
     "brand design", "Foxmen Studio", "Next.js development", "real estate platform",
     "startup product agency", "digital agency", "design system",
   ],
-  authors: [{ name: "Foxmen Studio", url: "https://foxmen.studio" }],
+  authors: [{ name: "Foxmen Studio", url: "https://www.foxmen.studio" }],
   creator: "Foxmen Studio",
   publisher: "Foxmen Studio",
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://foxmen.studio",
+    url: "https://www.foxmen.studio",
     siteName: "Foxmen Studio",
     title: "Foxmen Studio — Code. Craft. Care.",
     description:

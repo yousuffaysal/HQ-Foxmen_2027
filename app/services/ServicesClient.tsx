@@ -774,15 +774,15 @@ function ServiceSection({ service, index, onDetail, onStart }: {
       </div>
 
       {/* ── central card mockup ── */}
-      <div style={{ flex:1, display:"flex", justifyContent:"center", alignItems:"flex-start", padding: isMobile ? "0 16px 16px" : "0 40px 20px", overflow:"hidden", minHeight:0 }}>
+      <div style={{ flex:1, display:"flex", justifyContent:"center", alignItems:"center", padding: isMobile ? "0 16px 16px" : "0 40px 16px", overflow:"hidden", minHeight:0 }}>
         <div style={{
           background:"#fff",
           borderRadius:20,
-          width: isMobile ? "100%" : "min(660px,74%)",
+          width: isMobile ? "100%" : "min(720px,80%)",
           maxHeight:"100%",
           overflow:"hidden",
           boxShadow:"0 28px 70px rgba(0,0,0,.38)",
-          aspectRatio:"16/9",
+          aspectRatio:"4/3",
           position:"relative",
         }}>
           {Visual && <Visual a={bg} />}
@@ -844,7 +844,7 @@ export default function ServicesPage({ initialServices = [] }: { initialServices
           <div className="svc-hero-chip fade in">
             <span className="svc-chip-dot" />07 capabilities
           </div>
-          <h1 className="display" style={{ margin: "20px 0 24px", fontSize: "clamp(52px,8.5vw,116px)", lineHeight: 0.88, letterSpacing: "-.03em" }}>
+          <h1 className="display" style={{ margin: "20px 0 24px", fontSize: "clamp(52px,8.5vw,116px)", lineHeight: 0.92, letterSpacing: "-.03em" }}>
             <span className="reveal in"><span className="reveal-inner">Seven ways we</span></span>
             <span className="reveal in reveal-delay-1"><span className="reveal-inner">can help</span></span>
             <span className="reveal in reveal-delay-2"><span className="reveal-inner it">you ship.</span></span>

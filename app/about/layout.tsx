@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     title: "About — Foxmen Studio",
     description:
       "Meet the Foxmen Studio team — founders, engineers, and designers building world-class digital products.",
-    url: "https://foxmen.studio/about",
+    url: "https://www.foxmen.studio/about",
     images: [{ url: "/assets/og-image.png", width: 1200, height: 630, alt: "Foxmen Studio Team" }],
   },
   twitter: {
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     description: "Meet the founders and team behind Foxmen Studio.",
     images: ["/assets/og-image.png"],
   },
-  alternates: { canonical: "https://foxmen.studio/about" },
+  alternates: { canonical: "https://www.foxmen.studio/about" },
 };
 
 export default function AboutLayout({ children }: { children: React.ReactNode }) {

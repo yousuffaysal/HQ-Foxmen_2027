@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { cache } from "react";
 import { sql } from "@/lib/db";
 
-const BASE = "https://foxmen.studio";
+const BASE = "https://www.foxmen.studio";
 
 /* Metadata for the hardcoded static posts so they also get per-post SEO */
 const STATIC_META: Record<string, {

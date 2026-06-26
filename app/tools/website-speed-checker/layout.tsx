@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Website Speed Checker — Foxmen Studio",
     description: "Check your Core Web Vitals — LCP, FCP, CLS, TBT — free using Google PageSpeed insights.",
-    url: "https://foxmen.studio/tools/website-speed-checker",
+    url: "https://www.foxmen.studio/tools/website-speed-checker",
     images: [{ url: "/assets/og-image.png", width: 1200, height: 630, alt: "Website Speed Checker" }],
   },
   twitter: {
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     description: "Check your Core Web Vitals for free — powered by Google PageSpeed.",
     images: ["/assets/og-image.png"],
   },
-  alternates: { canonical: "https://foxmen.studio/tools/website-speed-checker" },
+  alternates: { canonical: "https://www.foxmen.studio/tools/website-speed-checker" },
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
