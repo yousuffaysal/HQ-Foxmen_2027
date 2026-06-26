@@ -508,13 +508,21 @@ body.page-revealed .pc-3 { animation: curtain-rise 0.78s cubic-bezier(0.76, 0, 0
 /* ── hero grid lines ── */
 .hero::after {
   content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
-  background-image: repeating-linear-gradient(
-    90deg,
-    transparent 0,
-    transparent calc(20% - 1px),
-    rgba(0,0,0,0.12) calc(20% - 1px),
-    rgba(0,0,0,0.12) 20%
-  );
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0,
+      transparent calc(20% - 1px),
+      rgba(0,0,0,0.12) calc(20% - 1px),
+      rgba(0,0,0,0.12) 20%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 79px,
+      rgba(0,0,0,0.12) 79px,
+      rgba(0,0,0,0.12) 80px
+    );
 }
 .hero > .wrap {
   flex: 1; display: flex; flex-direction: column;
