@@ -503,6 +503,7 @@ h1, h2, h3, h4 { margin: 0; font-weight: 400; letter-spacing: -0.02em; }
 .hero h1 .row { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
 .hero h1 .row.right { justify-content: flex-end; }
 .hero h1 .it { font-style: italic; color: var(--brand); }
+.hero h1 .reveal { padding-bottom: 0.14em; }
 .hero-tag { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
 .hero-bottom {
   display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 48px;
