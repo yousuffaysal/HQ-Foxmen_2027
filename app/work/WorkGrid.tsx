@@ -72,7 +72,7 @@ export default function WorkGrid({ projects }: { projects: DbProject[] }) {
                 <article key={p.id} className={`item ${tone} fade${i % 4 === 0 ? "" : ` d${i % 4}`}`}>
                   <div className="thumb" style={{
                     width: "100%",
-                    aspectRatio: "4 / 3",
+                    aspectRatio: "16 / 9",
                     position: "relative",
                     display: "grid",
                     placeItems: "center",
@@ -85,7 +85,7 @@ export default function WorkGrid({ projects }: { projects: DbProject[] }) {
                     textTransform: "uppercase",
                   }}>
                     {img
-                      ? <img src={img} alt={p.name} loading="lazy" decoding="async" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                      ? <img src={img} alt={p.name} loading="lazy" decoding="async" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center", display: "block" }} />
                       : <span style={{ fontFamily: "var(--f-mono)", fontSize: 10, letterSpacing: ".2em", textTransform: "uppercase", opacity: .35 }}>No image yet</span>
                     }
                     {p.status !== "live" && (

@@ -216,6 +216,7 @@ export default function Preloader() {
         rafRef.current = requestAnimationFrame(tick);
       } else {
         document.body.classList.remove("loading");
+        document.body.classList.add("page-revealed");
         _wrap.style.transition = "opacity 0.55s cubic-bezier(.22,.61,.36,1)";
         _wrap.style.opacity    = "0";
         setTimeout(() => setUnmounted(true), 600);

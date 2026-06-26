@@ -1391,6 +1391,11 @@ export default function HomeClient({
 
   return (
     <>
+      <div className="page-curtain" aria-hidden="true">
+        <div className="pc-layer pc-1" />
+        <div className="pc-layer pc-2" />
+        <div className="pc-layer pc-3" />
+      </div>
       <Hero />
 
       {/* Reel */}

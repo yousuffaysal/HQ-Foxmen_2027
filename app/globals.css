@@ -489,6 +489,33 @@ h1, h2, h3, h4 { margin: 0; font-weight: 400; letter-spacing: -0.02em; }
   position: relative;
   overflow: hidden;
 }
+/* ── page curtain: slides up like a window being raised ── */
+@keyframes curtain-rise {
+  from { transform: translateX(0); }
+  to   { transform: translateX(100%); }
+}
+.page-curtain {
+  position: fixed; inset: 0; z-index: 9990; pointer-events: none;
+}
+.pc-layer { position: absolute; inset: 0; }
+.pc-1 { background: #111111; z-index: 3; }
+.pc-2 { background: #2a1640; z-index: 2; }
+.pc-3 { background: #ede8e1; z-index: 1; }
+body.page-revealed .pc-1 { animation: curtain-rise 0.65s cubic-bezier(0.76, 0, 0.24, 1) 0s    both; }
+body.page-revealed .pc-2 { animation: curtain-rise 0.70s cubic-bezier(0.76, 0, 0.24, 1) 0.08s  both; }
+body.page-revealed .pc-3 { animation: curtain-rise 0.78s cubic-bezier(0.76, 0, 0.24, 1) 0.16s  both; }
+
+/* ── hero grid lines ── */
+.hero::after {
+  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent 0,
+    transparent calc(20% - 1px),
+    rgba(0,0,0,0.12) calc(20% - 1px),
+    rgba(0,0,0,0.12) 20%
+  );
+}
 .hero > .wrap {
   flex: 1; display: flex; flex-direction: column;
   width: 100%; max-width: none; margin-inline: 0; padding-inline: 24px;
