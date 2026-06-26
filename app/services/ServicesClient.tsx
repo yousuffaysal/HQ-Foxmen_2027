@@ -243,6 +243,28 @@ const CARD_GRADIENTS: Record<string, string> = {
   "Performance marketing":        "linear-gradient(135deg,#001810 0%,#025c37 50%,#059669 100%)",
 };
 
+/* ─────────────── solid bg colours (one per section) ─────────────── */
+const SVC_BG: Record<string, string> = {
+  "Web Design & Development":     "#3D6DB5",
+  "iOS, Android & Cross-platform":"#111111",
+  "AI-Integrated Software":       "#2A0A6B",
+  "Ecommerce & Multi-vendor":     "#04422D",
+  "Real-estate platforms":        "#6B2E09",
+  "UI · UX & Brand":              "#7A1048",
+  "Performance marketing":        "#0A3324",
+};
+
+/* ─────────────── heading splits: [bold sans, italic serif] ─────────────── */
+const SVC_SPLIT: Record<string, [string, string]> = {
+  "Web Design & Development":     ["Web Design &", "Development"],
+  "iOS, Android & Cross-platform":["iOS, Android &", "Cross-platform"],
+  "AI-Integrated Software":       ["AI-Integrated", "Software"],
+  "Ecommerce & Multi-vendor":     ["Ecommerce &", "Multi-vendor"],
+  "Real-estate platforms":        ["Real-estate", "platforms"],
+  "UI · UX & Brand":              ["UI · UX &", "Brand"],
+  "Performance marketing":        ["Performance", "marketing"],
+};
+
 /* ─────────────── service visual art ─────────────── */
 function VisualWeb({ a }: { a:string }) {
   return (
@@ -704,147 +726,81 @@ function IS(err:boolean): React.CSSProperties { return { width:"100%",padding:"1
 const ES: React.CSSProperties = { fontSize:11,color:"#e74c3c",marginTop:4,display:"block" };
 
 /* ════════════════════════════════════════════════════
-   FULL-SCREEN PARALLAX SERVICE SECTION
+   FULL-SCREEN STICKY SERVICE SECTION
    ════════════════════════════════════════════════════ */
-function ServiceSection({ service, index, total, onDetail, onStart, sectionRef: sectionRefCb }: {
-  service:DbService; index:number; total:number; onDetail:()=>void; onStart:()=>void;
-  sectionRef?: (el: HTMLElement | null) => void;
+function ServiceSection({ service, index, onDetail, onStart }: {
+  service: DbService; index: number; onDetail: () => void; onStart: () => void;
 }) {
-  const sectionRef = useRef<HTMLElement>(null);
-  const bgRef      = useRef<HTMLDivElement>(null);
-  const [entered, setEntered] = useState(false);
-  const isMobile = useIsMobile();
-  const d = SERVICE_DETAILS[service.name];
+  const d      = SERVICE_DETAILS[service.name];
   const accent = d?.accentColor ?? "#b86cf9";
-  const gradient = CARD_GRADIENTS[service.name] ?? "linear-gradient(135deg,#0d0020,#7c3cce)";
+  const bg     = SVC_BG[service.name] ?? "#111";
+  const split  = SVC_SPLIT[service.name] ?? [service.name, ""];
   const Visual = SERVICE_VISUAL[service.name];
-
-  /* parallax — index-based for sticky-stacked sections */
-  useEffect(() => {
-    if (isMobile) return;
-    const onScroll = () => {
-      if (!bgRef.current) return;
-      const vh = window.innerHeight;
-      const progress = (window.scrollY - index * vh) / vh;
-      bgRef.current.style.transform = `scale(${1 + Math.max(0, .5 - Math.abs(progress - .5)) * .04})`;
-    };
-    window.addEventListener("scroll", onScroll, { passive:true });
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [index, isMobile]);
-
-  /* entry animation — trigger when section slides halfway into view */
-  useEffect(() => {
-    if (isMobile) { setEntered(true); return; }
-    const onScroll = () => {
-      const vh = window.innerHeight;
-      if (window.scrollY >= Math.max(0, (index - 0.5) * vh)) setEntered(true);
-    };
-    window.addEventListener("scroll", onScroll, { passive:true });
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [index, isMobile]);
-
-  const tags = (service.count||"").split(",").filter(Boolean);
-
-  return (
-    <section ref={(el)=>{ sectionRef.current=el; sectionRefCb?.(el); }} style={{ position:isMobile?"relative":"sticky",top:isMobile?undefined:76,zIndex:index+1,height:isMobile?"auto":"calc(100vh - 76px - 120px)",minHeight:isMobile?"clamp(320px,88vw,540px)":undefined,overflow:"hidden",display:"flex",alignItems:isMobile?"flex-end":"center",borderRadius:18,marginBottom:isMobile?14:28 }}>
-      {/* ── parallax background ── */}
-      <div ref={bgRef} style={{ position:"absolute",inset:0,willChange:"transform",zIndex:0,background:gradient }}>
-        {service.image
-          ? <img src={service.image} alt={service.name} style={{ width:"100%",height:"100%",objectFit:"contain",display:"block" }} />
-          : null
-        }
-      </div>
-      {/* ── overlay gradients ── */}
-      <div style={{ position:"absolute",inset:0,zIndex:1,background:isMobile?"linear-gradient(to top,rgba(0,0,0,.92) 0%,rgba(0,0,0,.6) 55%,rgba(0,0,0,.2) 100%)":"linear-gradient(90deg,rgba(0,0,0,.88) 0%,rgba(0,0,0,.6) 52%,rgba(0,0,0,.1) 100%)" }} />
-      <div style={{ position:"absolute",inset:0,zIndex:1,background:`radial-gradient(ellipse at 80% 50%, ${accent}1a 0%, transparent 60%)` }} />
-
-      {/* ── service visual art ── */}
-      {Visual && (
-        <div style={{ position:"absolute",right:isMobile?"-6%":"-1%",top:"50%",transform:"translateY(-50%)",width:isMobile?"78%":"50%",maxWidth:isMobile?360:520,pointerEvents:"none",zIndex:2,opacity:isMobile?.5:.88 }}>
-          <Visual a={accent} />
-        </div>
-      )}
-
-      {/* ── ghost index number ── */}
-      {!isMobile && <div style={{ position:"absolute",right:"3vw",top:"50%",transform:"translateY(-50%)",fontFamily:"var(--f-display)",fontStyle:"italic",fontSize:"clamp(120px,18vw,240px)",lineHeight:1,letterSpacing:"-.05em",color:"rgba(255,255,255,.04)",userSelect:"none",zIndex:1,pointerEvents:"none" }}>
-        {String(index+1).padStart(2,"0")}
-      </div>}
-
-      {/* ── animated accent line ── */}
-      <div style={{ position:"absolute",left:0,top:0,bottom:0,width:3,background:`linear-gradient(to bottom, transparent 0%, ${accent} 50%, transparent 100%)`,zIndex:2,opacity:entered?.8:0,transition:"opacity .8s ease .3s" }} />
-
-      {/* ── main content ── */}
-      <div style={{ position:"relative",zIndex:3,padding:isMobile?"0 20px 32px":"0 clamp(32px,7vw,96px)",maxWidth:isMobile?"100%":580,width:"100%" }}>
-        {/* counter */}
-        <div style={{ fontFamily:"var(--f-mono)",fontSize:11,letterSpacing:".22em",textTransform:"uppercase",color:"rgba(255,255,255,.38)",marginBottom:18,opacity:entered?1:0,transform:entered?"translateY(0)":"translateY(20px)",transition:"opacity .6s ease .1s, transform .6s ease .1s" }}>
-          {String(index+1).padStart(2,"0")} <span style={{opacity:.4}}>/ {String(total).padStart(2,"0")}</span>
-          {service.badge&&<span style={{ marginLeft:16,padding:"3px 10px",borderRadius:999,background:accent,fontSize:9,fontWeight:700,letterSpacing:".1em",color:"#fff" }}>{service.badge}</span>}
-        </div>
-
-        {/* title */}
-        <h2 style={{ fontFamily:"var(--f-display)",fontSize:"clamp(36px,6vw,76px)",lineHeight:1.05,letterSpacing:"-.03em",color:"#fff",margin:"0 0 20px",opacity:entered?1:0,transform:entered?"translateY(0)":"translateY(30px)",transition:"opacity .7s ease .2s, transform .7s ease .2s" }}>
-          {service.name}
-        </h2>
-
-        {/* description */}
-        <p style={{ fontSize:"clamp(15px,1.6vw,17px)",color:"rgba(255,255,255,.7)",lineHeight:1.7,maxWidth:"52ch",marginBottom:24,opacity:entered?1:0,transform:entered?"translateY(0)":"translateY(24px)",transition:"opacity .7s ease .3s, transform .7s ease .3s" }}>
-          {service.descr}
-        </p>
-
-        {/* tags */}
-        {tags.length>0&&(
-          <div style={{ display:"flex",flexWrap:"wrap",gap:8,marginBottom:32,opacity:entered?1:0,transform:entered?"translateY(0)":"translateY(20px)",transition:"opacity .6s ease .4s, transform .6s ease .4s" }}>
-            {tags.map((t,i)=>(
-              <span key={i} style={{ padding:"5px 14px",borderRadius:999,background:"rgba(255,255,255,.08)",border:"1px solid rgba(255,255,255,.14)",fontSize:11,fontFamily:"var(--f-mono)",letterSpacing:".12em",color:"rgba(255,255,255,.65)",backdropFilter:"blur(6px)" }}>{t.trim()}</span>
-            ))}
-          </div>
-        )}
-
-        {/* CTAs */}
-        <div style={{ display:"flex",gap:12,flexWrap:"wrap",opacity:entered?1:0,transform:entered?"translateY(0)":"translateY(16px)",transition:"opacity .6s ease .5s, transform .6s ease .5s" }}>
-          <button onClick={onDetail} className="btn" style={{"--bg":"#fff","--fg":"#0a0a0a","--chip":"#0a0a0a","--chipfg":"#fff"} as React.CSSProperties}>
-            <span className="label">View details</span>
-            <span className="chip"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h18M13 5l7 7-7 7"/></svg></span>
-          </button>
-          <button onClick={onStart} className="btn btn--brand" style={{"--chip":"rgba(255,255,255,.15)","--chipfg":"#fff"} as React.CSSProperties}>
-            <span className="label">Start this project</span>
-            <span className="chip"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h18M13 5l7 7-7 7"/></svg></span>
-          </button>
-        </div>
-      </div>
-
-      {/* ── progress bar ── */}
-      <div style={{ position:"absolute",bottom:0,left:0,right:0,height:2,background:"rgba(255,255,255,.06)",zIndex:3 }}>
-        <div style={{ height:"100%",background:accent,width:`${((index+1)/total)*100}%`,transition:"width .3s ease" }} />
-      </div>
-
-      {/* ── scroll hint (first section only) ── */}
-      {index===0&&!isMobile&&(
-        <div style={{ position:"absolute",bottom:28,right:"5vw",zIndex:3,display:"flex",flexDirection:"column",alignItems:"center",gap:8,color:"rgba(255,255,255,.3)",fontSize:10,fontFamily:"var(--f-mono)",letterSpacing:".18em",textTransform:"uppercase" }}>
-          <span>scroll</span>
-          <div style={{ width:1,height:44,background:"linear-gradient(to bottom,rgba(255,255,255,.3),transparent)",animation:"scrollPulse 1.6s ease-in-out infinite" }} />
-        </div>
-      )}
-    </section>
-  );
-}
-
-/* ════════════════════════════════════════════════════
-   SIDEBAR DOTS
-   ════════════════════════════════════════════════════ */
-function NavDots({ count, active, onDotClick, accentColors }: {
-  count:number; active:number; onDotClick:(i:number)=>void; accentColors:string[];
-}) {
   const isMobile = useIsMobile();
-  if (isMobile) return null;
+
   return (
-    <div style={{ position:"fixed",right:20,top:"50%",transform:"translateY(-50%)",zIndex:50,display:"flex",flexDirection:"column",gap:8 }}>
-      {Array.from({length:count},(_,i)=>(
-        <button key={i} onClick={()=>onDotClick(i)} title={`Service ${i+1}`} style={{ width:i===active?20:6,height:6,borderRadius:3,background:i===active?accentColors[i]:"rgba(255,255,255,.25)",border:"none",cursor:"pointer",transition:"width .3s ease, background .3s ease",padding:0 }} />
-      ))}
-    </div>
+    <section style={{
+      position: isMobile ? "relative" : "sticky",
+      top: isMobile ? undefined : 76,
+      zIndex: index + 1,
+      height: isMobile ? "auto" : "calc(100vh - 76px)",
+      minHeight: isMobile ? "min(92vw,520px)" : undefined,
+      background: bg,
+      display: "flex",
+      flexDirection: "column",
+      overflow: "hidden",
+    }}>
+      {/* ── top bar ── */}
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"20px 28px", flexShrink:0 }}>
+        <span style={{ fontFamily:"var(--f-mono)", fontSize:12, letterSpacing:".12em", color:"rgba(255,255,255,.32)" }}>
+          ({String(index + 1).padStart(2, "0")})
+        </span>
+        <button onClick={onDetail} style={{ background:"transparent", border:"none", cursor:"pointer", fontFamily:"var(--f-display)", fontSize:15, color:"rgba(255,255,255,.7)", letterSpacing:"-.01em", padding:0 }}>
+          Explore services
+        </button>
+      </div>
+
+      {/* ── big heading ── */}
+      <div style={{ textAlign:"center", padding: isMobile ? "4px 20px 14px" : "2px 40px 14px", flexShrink:0 }}>
+        <h2 style={{ margin:0, lineHeight:1.0, letterSpacing:"-.025em", fontSize:"clamp(36px,6.5vw,96px)" }}>
+          <strong style={{ fontFamily:"var(--f-sans)", fontWeight:800, color:"#fff", fontStyle:"normal" }}>{split[0]}</strong>
+          {split[1] && <>{" "}<em style={{ fontFamily:"var(--f-display)", fontStyle:"italic", fontWeight:400, color:"rgba(255,255,255,.88)" }}>{split[1]}</em></>}
+        </h2>
+        {service.badge && (
+          <span style={{ display:"inline-block", marginTop:10, padding:"3px 12px", borderRadius:999, background:accent, fontFamily:"var(--f-mono)", fontSize:9, letterSpacing:".12em", textTransform:"uppercase", color:"#fff" }}>
+            {service.badge}
+          </span>
+        )}
+      </div>
+
+      {/* ── central card mockup ── */}
+      <div style={{ flex:1, display:"flex", justifyContent:"center", alignItems:"flex-start", padding: isMobile ? "0 16px 16px" : "0 40px 20px", overflow:"hidden", minHeight:0 }}>
+        <div style={{
+          background:"#fff",
+          borderRadius:20,
+          width: isMobile ? "100%" : "min(660px,74%)",
+          maxHeight:"100%",
+          overflow:"hidden",
+          boxShadow:"0 28px 70px rgba(0,0,0,.38)",
+          aspectRatio:"16/9",
+          position:"relative",
+        }}>
+          {Visual && <Visual a={bg} />}
+        </div>
+      </div>
+
+      {/* ── bottom CTAs ── */}
+      <div style={{ display:"flex", gap:10, padding: isMobile ? "0 16px 24px" : "0 40px 24px", justifyContent:"center", flexShrink:0 }}>
+        <button onClick={onDetail} className="btn" style={{ "--bg":"rgba(255,255,255,.12)", "--fg":"#fff", "--chip":"rgba(255,255,255,.18)", "--chipfg":"#fff" } as React.CSSProperties}>
+          <span className="label">View details</span>
+          <span className="chip"><ArrowIcon /></span>
+        </button>
+        <button onClick={onStart} className="btn btn--brand">
+          <span className="label">Start this project</span>
+          <span className="chip"><ArrowIcon /></span>
+        </button>
+      </div>
+    </section>
   );
 }
 
@@ -864,117 +820,83 @@ const STATIC_SERVICES: DbService[] = [
 export default function ServicesPage({ initialServices = [] }: { initialServices?: DbService[] }) {
   useScrollReveal(".fade, .reveal");
   const [dbServices] = useState<DbService[]>(initialServices);
-  const [detailService, setDetailService] = useState<DbService|null>(null);
-  const [inquiryService, setInquiryService] = useState<string|null>(null);
-  const [activeSection, setActiveSection]  = useState(0);
-  const sectionRefs = useRef<(HTMLElement|null)[]>([]);
-  const sectionsContainerRef = useRef<HTMLDivElement>(null);
+  const [detailService, setDetailService] = useState<DbService | null>(null);
+  const [inquiryService, setInquiryService] = useState<string | null>(null);
 
-  const services = dbServices.length>0 ? dbServices : STATIC_SERVICES;
+  const services = dbServices.length > 0 ? dbServices : STATIC_SERVICES;
 
-  /* active section tracker — index-based for sticky-stacked sections */
-  useEffect(() => {
-    const onScroll = () => {
-      if (!sectionsContainerRef.current) return;
-      const containerTop = sectionsContainerRef.current.offsetTop;
-      const vh = window.innerHeight;
-      const i = Math.max(0, Math.min(Math.floor((window.scrollY - containerTop) / vh), services.length - 1));
-      setActiveSection(i);
-    };
-    window.addEventListener("scroll",onScroll,{passive:true});
-    onScroll();
-    return ()=>window.removeEventListener("scroll",onScroll);
-  },[services]);
-
-  const scrollToSection = (i:number) => {
-    sectionRefs.current[i]?.scrollIntoView({ behavior:"smooth" });
-  };
-
-  const openDetail  = useCallback((s:DbService)=>{ setDetailService(s); document.body.style.overflow="hidden"; },[]);
-  const closeDetail = useCallback(()=>{ setDetailService(null); document.body.style.overflow=""; },[]);
-  const openInquiry = useCallback((name:string)=>{ setDetailService(null); setInquiryService(name); document.body.style.overflow="hidden"; },[]);
-  const closeInquiry= useCallback(()=>{ setInquiryService(null); document.body.style.overflow=""; },[]);
-
-  const accentColors = services.map(s=>SERVICE_DETAILS[s.name]?.accentColor??"#b86cf9");
+  const openDetail   = useCallback((s: DbService) => { setDetailService(s); document.body.style.overflow = "hidden"; }, []);
+  const closeDetail  = useCallback(() => { setDetailService(null); document.body.style.overflow = ""; }, []);
+  const openInquiry  = useCallback((name: string) => { setDetailService(null); setInquiryService(name); document.body.style.overflow = "hidden"; }, []);
+  const closeInquiry = useCallback(() => { setInquiryService(null); document.body.style.overflow = ""; }, []);
 
   return (
     <>
-      {detailService&&<ServiceDetailModal service={detailService.name} image={detailService.image} onClose={closeDetail} onStartService={()=>openInquiry(detailService.name)} />}
-      {inquiryService&&<ServiceInquiryModal service={inquiryService} onClose={closeInquiry} />}
+      {detailService && <ServiceDetailModal service={detailService.name} image={detailService.image} onClose={closeDetail} onStartService={() => openInquiry(detailService.name)} />}
+      {inquiryService && <ServiceInquiryModal service={inquiryService} onClose={closeInquiry} />}
 
-      {/* sidebar nav dots */}
-      <NavDots count={services.length} active={activeSection} onDotClick={scrollToSection} accentColors={accentColors} />
-
-      {/* PAGE HERO */}
-      <section style={{ minHeight:"60vh",display:"flex",alignItems:"center",paddingTop:"140px",paddingBottom:"60px",background:"var(--paper)" }}>
+      {/* ── HERO ── */}
+      <section className="page-hero">
         <div className="wrap">
-          <div style={{ display:"flex",alignItems:"flex-start",justifyContent:"space-between",flexWrap:"wrap",gap:40 }}>
-            <div style={{ maxWidth:620 }}>
-              <div className="crumbs fade in" style={{ marginBottom:20 }}>
-                <Link href="/">Home</Link><span className="sep">/</span><span>Services</span>
-              </div>
-              <h1 className="display" style={{ margin:"0 0 20px", fontSize:"clamp(52px,8vw,110px)", lineHeight:.9, letterSpacing:"-.03em" }}>
-                <span className="reveal in"><span className="reveal-inner">One studio,</span></span>{" "}
-                <span className="reveal in reveal-delay-1"><span className="reveal-inner">every</span></span>{" "}
-                <span className="reveal in reveal-delay-2"><span className="reveal-inner it">layer.</span></span>
-              </h1>
-              <p className="lede fade in d2" style={{ marginBottom:32 }}>
-                You bring the concept. We bring the design, engineering, and the launch. Scroll down to explore every service — click to see what&apos;s inside, start a project when you&apos;re ready.
-              </p>
-              <div className="fade in d3" style={{ display:"flex",gap:10,flexWrap:"wrap" }}>
-                <button onClick={()=>scrollToSection(0)} className="btn">
-                  <span className="label">Explore services</span>
-                  <span className="chip"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h18M13 5l7 7-7 7"/></svg></span>
-                </button>
-                <Link href="/work" className="btn btn--ghost" style={{textDecoration:"none"}}>
-                  <span className="label">See our work</span>
-                  <span className="chip"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h18M13 5l7 7-7 7"/></svg></span>
-                </Link>
-              </div>
-            </div>
-            <div className="ph-stats fade in d2">
-              {([{v:"50+",k:"Products shipped"},{v:"07",k:"Capabilities"},{v:"5",k:"Countries"},{v:"98%",k:"Retention"}] as {v:string;k:string}[]).map(({v,k},i)=>(
-                <div key={i} className="ph-stat" style={{"--di":i} as React.CSSProperties}><div className="v">{v}</div><div className="k">{k}</div></div>
-              ))}
-            </div>
+          <div className="crumbs fade in">
+            <Link href="/">Home</Link><span className="sep">/</span><span>Services</span>
+          </div>
+          <div className="svc-hero-chip fade in">
+            <span className="svc-chip-dot" />07 capabilities
+          </div>
+          <h1 className="display" style={{ margin: "20px 0 24px", fontSize: "clamp(52px,8.5vw,116px)", lineHeight: 0.88, letterSpacing: "-.03em" }}>
+            <span className="reveal in"><span className="reveal-inner">Seven ways we</span></span>
+            <span className="reveal in reveal-delay-1"><span className="reveal-inner">can help</span></span>
+            <span className="reveal in reveal-delay-2"><span className="reveal-inner it">you ship.</span></span>
+          </h1>
+          <p className="lede fade in d2" style={{ maxWidth: "52ch", marginBottom: 36 }}>
+            From concept to code to launch — design, engineering, AI, ecommerce, brand and growth. All under one roof. No handoffs. No gaps.
+          </p>
+          <div className="fade in d3" style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <button onClick={() => openInquiry("General Inquiry")} className="btn btn--lg">
+              <span className="label">Start a project</span>
+              <span className="chip"><ArrowIcon size={16} /></span>
+            </button>
+            <Link href="/work" className="btn btn--ghost btn--lg" style={{ textDecoration: "none" }}>
+              <span className="label">See our work</span>
+              <span className="chip"><ArrowIcon size={16} /></span>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* FULL-SCREEN SERVICE SECTIONS */}
-      <div ref={sectionsContainerRef} style={{ background:"var(--paper)", padding:"clamp(12px,2vw,28px)" }}>
-        {services.map((s,i)=>(
+      {/* ── STICKY SERVICE SECTIONS ── */}
+      <div>
+        {services.map((s, i) => (
           <ServiceSection
             key={s.id}
             service={s}
             index={i}
-            total={services.length}
-            sectionRef={(el:HTMLElement|null)=>{ sectionRefs.current[i]=el; }}
-            onDetail={()=>openDetail(s)}
-            onStart={()=>openInquiry(s.name)}
+            onDetail={() => openDetail(s)}
+            onStart={() => openInquiry(s.name)}
           />
         ))}
       </div>
 
-      {/* PROCESS */}
-      <section id="process" style={{ padding:"100px 0",background:"#0a0a0a" }}>
+      {/* ── PROCESS ── */}
+      <section id="process" style={{ padding: "100px 0", background: "#0a0a0a" }}>
         <div className="process">
           <div className="wrap">
             <div className="process-head">
-              <div><div className="fade"><span className="eyebrow" style={{color:"#666"}}>How we work</span></div></div>
-              <h2 className="fade d1" style={{color:"#fff"}}>A <span style={{fontStyle:"italic",color:"var(--brand)"}}>deliberate</span> process — four chapters from brief to launch.</h2>
+              <div><div className="fade"><span className="eyebrow" style={{ color: "#666" }}>How we work</span></div></div>
+              <h2 className="fade d1" style={{ color: "#fff" }}>A <span style={{ fontStyle: "italic", color: "var(--brand)" }}>deliberate</span> process — four chapters from brief to launch.</h2>
             </div>
             <div className="steps">
               {[
-                {num:"01",title:"Discover",copy:"We unpack the problem — user research, stakeholder workshops, technical audits. We challenge the brief before we execute it.",items:["Audit","Stakeholder map","JTBD"]},
-                {num:"02",title:"Design",  copy:"IA, flows, components, prototypes — designed in the browser. What you see is what ships.",items:["IA","Design system","Hi-fi prototypes"]},
-                {num:"03",title:"Build",   copy:"Production engineering with weekly demos. CI/CD, observability, and analytics from day one — never retrofitted.",items:["Next.js · Swift","Postgres","CI / CD"]},
-                {num:"04",title:"Care",    copy:"Launch is a milestone, not the end. We retain a senior pod after launch to ship the next 90 days of your roadmap.",items:["SLA","Experiments","Roadmap"]},
-              ].map((s,i)=>(
-                <div className={`step fade${i>0?` d${i}`:""}`} key={s.num}>
+                { num: "01", title: "Discover", copy: "We unpack the problem — user research, stakeholder workshops, technical audits. We challenge the brief before we execute it.", items: ["Audit", "Stakeholder map", "JTBD"] },
+                { num: "02", title: "Design",   copy: "IA, flows, components, prototypes — designed in the browser. What you see is what ships.", items: ["IA", "Design system", "Hi-fi prototypes"] },
+                { num: "03", title: "Build",    copy: "Production engineering with weekly demos. CI/CD, observability, and analytics from day one — never retrofitted.", items: ["Next.js · Swift", "Postgres", "CI / CD"] },
+                { num: "04", title: "Care",     copy: "Launch is a milestone, not the end. We retain a senior pod after launch to ship the next 90 days of your roadmap.", items: ["SLA", "Experiments", "Roadmap"] },
+              ].map((s, i) => (
+                <div className={`step fade${i > 0 ? ` d${i}` : ""}`} key={s.num}>
                   <div className="num">{s.num}</div>
                   <div><div className="title">{s.title}</div></div>
-                  <div className="copy">{s.copy}<ul>{s.items.map(it=><li key={it}>{it}</li>)}</ul></div>
+                  <div className="copy">{s.copy}<ul>{s.items.map(it => <li key={it}>{it}</li>)}</ul></div>
                 </div>
               ))}
             </div>
@@ -982,20 +904,20 @@ export default function ServicesPage({ initialServices = [] }: { initialServices
         </div>
       </section>
 
-      {/* CTA */}
-      <section id="contact" style={{padding:"60px 0"}}>
+      {/* ── CTA ── */}
+      <section id="contact" style={{ padding: "60px 0" }}>
         <div className="cta">
           <div className="wrap-tight">
             <div className="fade in"><span className="eyebrow">Let&apos;s build</span></div>
             <h2 className="fade in d1">Pick a craft. <span className="it">Or all of them.</span></h2>
             <div className="row fade in d2">
-              <button onClick={()=>openInquiry("General Inquiry")} className="btn btn--lg">
+              <button onClick={() => openInquiry("General Inquiry")} className="btn btn--lg">
                 <span className="label">Start a project</span>
-                <span className="chip"><ArrowIcon size={16}/></span>
+                <span className="chip"><ArrowIcon size={16} /></span>
               </button>
               <Link href="/work" className="btn btn--ghost btn--lg">
                 <span className="label">See the work</span>
-                <span className="chip"><ArrowIcon size={16}/></span>
+                <span className="chip"><ArrowIcon size={16} /></span>
               </Link>
             </div>
           </div>
@@ -1003,7 +925,22 @@ export default function ServicesPage({ initialServices = [] }: { initialServices
       </section>
 
       <style>{`
-        @keyframes scrollPulse { 0%,100%{opacity:.3;transform:scaleY(1)} 50%{opacity:.7;transform:scaleY(1.3)} }
+        .svc-hero-chip {
+          display: inline-flex; align-items: center; gap: 9px;
+          padding: 6px 14px 6px 10px; border-radius: 999px;
+          border: 1px solid var(--line); margin-bottom: 0;
+          font-family: var(--f-mono); font-size: 11px;
+          letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+        }
+        .svc-chip-dot {
+          width: 7px; height: 7px; border-radius: 50%;
+          background: var(--brand); flex-shrink: 0;
+          animation: svcpulse 2s infinite;
+        }
+        @keyframes svcpulse {
+          0%,100% { box-shadow: 0 0 0 0 rgba(184,108,249,.4); }
+          70%      { box-shadow: 0 0 0 7px rgba(184,108,249,0); }
+        }
       `}</style>
     </>
   );
