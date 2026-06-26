@@ -24,6 +24,9 @@ function XIcon() {
 function LiIcon() {
   return <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9h4v12H3V9Zm6 0h3.84v1.71h.05c.54-1 1.87-2.08 3.84-2.08C20.6 8.63 22 11 22 14.18V21h-4v-6.06c0-1.45-.03-3.31-2.02-3.31-2.02 0-2.33 1.58-2.33 3.21V21H9V9Z"/></svg>;
 }
+function BeIcon() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9.01 13.57H5.03V16h4.3c.8 0 1.22-.45 1.22-1.22 0-.8-.46-1.21-1.54-1.21ZM9.3 10.06c0-.7-.45-1.06-1.3-1.06H5.03v2.2h2.82c.93 0 1.45-.44 1.45-1.14ZM14.5 10.64c-.97 0-1.6.6-1.66 1.56h3.28c-.08-.97-.65-1.56-1.62-1.56ZM22 3H2C.9 3 0 3.9 0 5v14c0 1.1.9 2 2 2h20c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2ZM11.7 16.3c-.56.56-1.32.84-2.28.84H3.5V7.87h5.6c1.03 0 1.83.25 2.38.76.55.5.82 1.12.82 1.84 0 1-.5 1.7-1.5 2.12 1.28.38 1.9 1.2 1.9 2.36 0 .96-.33 1.8-1 2.35Zm8.28-4.26h-5c0 1.2.65 1.87 1.82 1.87.66 0 1.2-.32 1.46-.9h1.62c-.47 1.56-1.6 2.4-3.12 2.4-2.04 0-3.38-1.38-3.38-3.38 0-2 1.34-3.4 3.34-3.4 2.1 0 3.3 1.4 3.3 3.55 0 .1 0 .2-.04.3Zm-2.64-4.74h-3.7v-.97h3.7v.97Z"/></svg>;
+}
 
 function useIsOpen() {
   const [open, setOpen] = useState(false);
@@ -54,6 +57,7 @@ const FOUNDERS = [
       linkedin: "https://www.linkedin.com/company/foxmen-studio/",
       instagram: "https://www.instagram.com/foxmen_studio/",
       dribbble: "https://dribbble.com/foxmen-studio",
+      behance: "",
     },
     projects: 50,
     brands: 50,
@@ -71,10 +75,29 @@ const FOUNDERS = [
       linkedin: "https://www.linkedin.com/company/foxmen-studio/",
       instagram: "https://www.instagram.com/foxmen_studio/",
       dribbble: "https://dribbble.com/foxmen-studio",
+      behance: "",
     },
     projects: 50,
     brands: 80,
     delay: "d1",
+  },
+  {
+    initials: "SS",
+    name: "Shohanur Sourav",
+    role: "Head of Marketing Wing",
+    tagline: "Brand growth, campaigns and digital presence — making the world notice every product we ship.",
+    gradient: "linear-gradient(160deg,#fdba74 0%,#fb923c 40%,#ea580c 100%)",
+    image: "https://ik.imagekit.io/2lax2ytm2/shohanursourav-foxmenstudio.png",
+    socials: {
+      twitter: "",
+      linkedin: "https://www.linkedin.com/in/shohanursourav/",
+      instagram: "",
+      dribbble: "",
+      behance: "https://www.behance.net/shohanursourav",
+    },
+    projects: 0,
+    brands: 0,
+    delay: "d2",
   },
 ];
 
@@ -194,7 +217,7 @@ export default function AboutPage() {
 
         /* ── team ── */
         .ab-team { padding:100px 0; border-bottom:1px solid var(--line); text-align:center; }
-        .ab-cards { display:grid; grid-template-columns:1fr 1fr; gap:32px; margin-top:56px; max-width:760px; margin-left:auto; margin-right:auto; }
+        .ab-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:32px; margin-top:56px; max-width:1100px; margin-left:auto; margin-right:auto; }
 
         /* ── profile card (Codepen pattern) ── */
         .pc {
@@ -340,7 +363,8 @@ export default function AboutPage() {
         .pc-btn::after { rotate:90deg; transition:rotate 0.15s; }
         .pc-btn:hover { background:var(--line); }
 
-        @media(max-width:700px){ .ab-cards{grid-template-columns:1fr;max-width:360px;} }
+        @media(max-width:900px){ .ab-cards{grid-template-columns:1fr 1fr;max-width:760px;} }
+        @media(max-width:600px){ .ab-cards{grid-template-columns:1fr;max-width:360px;} }
 
         /* ── cta ── */
         .ab-cta { padding:100px 0; text-align:center; }
@@ -1097,10 +1121,11 @@ export default function AboutPage() {
                     <p className="pc-tagline">{f.tagline}</p>
                     <div className="pc-foot">
                       <div className="pc-socials">
-                        <a href={f.socials.twitter} target="_blank" rel="noopener noreferrer" aria-label="Twitter / X" className="pc-soc-a"><XIcon /></a>
-                        <a href={f.socials.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="pc-soc-a"><LiIcon /></a>
-                        <a href={f.socials.dribbble} target="_blank" rel="noopener noreferrer" aria-label="Dribbble" className="pc-soc-a"><IgIcon /></a>
-                        <a href={f.socials.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="pc-soc-a"><GhIcon /></a>
+                        {f.socials.twitter && <a href={f.socials.twitter} target="_blank" rel="noopener noreferrer" aria-label="Twitter / X" className="pc-soc-a"><XIcon /></a>}
+                        {f.socials.linkedin && <a href={f.socials.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="pc-soc-a"><LiIcon /></a>}
+                        {f.socials.behance && <a href={f.socials.behance} target="_blank" rel="noopener noreferrer" aria-label="Behance" className="pc-soc-a"><BeIcon /></a>}
+                        {f.socials.dribbble && <a href={f.socials.dribbble} target="_blank" rel="noopener noreferrer" aria-label="Dribbble" className="pc-soc-a"><IgIcon /></a>}
+                        {f.socials.instagram && <a href={f.socials.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="pc-soc-a"><GhIcon /></a>}
                       </div>
                       <Link href="/contact" className="pc-btn">Contact</Link>
                     </div>
