@@ -1628,28 +1628,6 @@ export default function HomeClient({
         </div>
       </section>
 
-      {/* Metrics */}
-      <section className="section" id="about" style={{ paddingTop: 60 }}>
-        <div className="wrap">
-          <div className="svc-head">
-            <div className="fade"><span className="eyebrow">The studio</span></div>
-            <h2 className="display fade d1">Small, senior team. <span className="it">Outsized</span> output.</h2>
-          </div>
-          <div className="metrics">
-            {[
-              { v:<>50<span className="it">+</span></>, k:"Products shipped" },
-              { v:"42",                                   k:"Active clients" },
-              { v:"5",                                    k:"Countries served" },
-              { v:<>98<span className="it">%</span></>,   k:"Retention rate" },
-            ].map((m, i) => (
-              <div className={`metric fade${i ? ` d${i}` : ""}`} key={i}>
-                <div className="v">{m.v}</div>
-                <div className="k">{m.k}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* CTA */}
       <section id="contact" style={{ padding: "60px 0" }}>
