@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import ProjectEstimator from "@/app/components/ProjectEstimator";
@@ -14,6 +14,13 @@ function ArrowIcon({ size = 22 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 12h18M13 5l7 7-7 7" />
+    </svg>
+  );
+}
+function XIcon({ light = false }: { light?: boolean }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill={light ? "rgba(255,255,255,.55)" : "rgba(0,0,0,.3)"}>
+      <path d="M18.244 2H21.5l-7.5 8.57L23 22h-6.844l-5.36-7.005L4.7 22H1.44l8.04-9.183L1 2h7.014l4.844 6.405L18.244 2Zm-1.2 18h1.84L7.04 4H5.07l11.974 16Z"/>
     </svg>
   );
 }
@@ -352,16 +359,16 @@ const techItems    = ["React","Next.js","Swift","Flutter","OpenAI","Anthropic","
 type DbService = { id:number; ord:number; name:string; descr:string; count:string; visible:boolean; badge:string|null; image:string|null };
 type DbProject = { id:number; name:string; tagline:string; industry:string; year:string; scope:string; status:string; thumbnail:string; slug:string; color_cls:string; live_url:string; home_featured:boolean; home_order:number };
 type DbClient  = { id:number; name:string; industry:string; country:string };
-type DbTesti   = { id:number; quote:string; name:string; role:string; av:string; hi:string; rating:number; img:string };
+type DbTesti   = { id:number; quote:string; name:string; role:string; av:string; hi:string; rating:number; img:string; date?:string };
 
 const PROOF_SYMBOLS = ["◆","●","▲","✦","◇","★","◐","⬡","⌬","⟁","⌖","◈","◉","▼","◫","⌑","⌀","⊕","⟐","⌘"];
 
 function toSlug(n: string) { return n.toLowerCase().replace(/[—–]/g,"-").replace(/[^a-z0-9\s-]/g,"").replace(/\s+/g,"-").replace(/-+/g,"-").trim(); }
 
 const STATIC_TESTIS = [
-  { id:-1, av:"SK", img:"", name:"Sara Köhler",  role:"CEO · Nestaro",          hi:"actually used", rating:5, quote:"Foxmen turned a vague pitch deck into a product our investors actually used during the round. They ship like a product team, not an agency." },
-  { id:-2, av:"DA", img:"", name:"Devon Arias",  role:"Head of Product · Pulse", hi:"activation rate", rating:5, quote:"The AI copilot they built drove our activation rate from 28% to 71%. Every meeting felt like we got our money back twice." },
-  { id:-3, av:"RM", img:"", name:"Rina Mehta",   role:"CTO · Marketo",           hi:"zero", rating:5, quote:"Care is in the name and it shows. Our launch had zero P0s in week one — a first for us across three agencies." },
+  { id:-1, av:"SK", img:"", name:"Sara Köhler",  role:"CEO · Nestaro",          hi:"actually used", rating:5, date:"09/30/2024", quote:"Foxmen turned a vague pitch deck into a product our investors actually used during the round. They ship like a product team, not an agency." },
+  { id:-2, av:"DA", img:"", name:"Devon Arias",  role:"Head of Product · Pulse", hi:"activation rate", rating:5, date:"08/14/2024", quote:"The AI copilot they built drove our activation rate from 28% to 71%. Every meeting felt like we got our money back twice." },
+  { id:-3, av:"RM", img:"", name:"Rina Mehta",   role:"CTO · Marketo",           hi:"zero", rating:5, date:"07/02/2024", quote:"Care is in the name and it shows. Our launch had zero P0s in week one — a first for us across three agencies." },
 ];
 
 const BRAND_REPLIES = [
@@ -1223,176 +1230,167 @@ function LiveChatSection() {
   );
 }
 
+function TwitterBird({ light = false }: { light?: boolean }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill={light ? "#fff" : "#1d9bf0"} aria-hidden="true">
+      <path d="M23.643 4.937c-.835.37-1.732.62-2.675.733a4.67 4.67 0 0 0 2.048-2.578 9.3 9.3 0 0 1-2.958 1.13 4.66 4.66 0 0 0-7.938 4.25 13.229 13.229 0 0 1-9.602-4.868c-.4.69-.63 1.49-.63 2.342A4.66 4.66 0 0 0 3.96 9.824a4.647 4.647 0 0 1-2.11-.583v.06a4.66 4.66 0 0 0 3.737 4.568 4.692 4.692 0 0 1-2.104.08 4.661 4.661 0 0 0 4.352 3.234 9.348 9.348 0 0 1-5.786 1.995 9.5 9.5 0 0 1-1.112-.065 13.175 13.175 0 0 0 7.14 2.093c8.57 0 13.255-7.098 13.255-13.254 0-.2-.005-.402-.014-.602a9.47 9.47 0 0 0 2.323-2.41z"/>
+    </svg>
+  );
+}
+
+function leadSplit(q: string): [string, string] {
+  const clean = q.replace(/^[“”"'\s]+/, "").replace(/[“”"'\s]+$/, "");
+  const words = clean.split(/\s+/);
+  const lead = words.slice(0, 3).join(" ");
+  const rest = words.slice(3).join(" ");
+  return [lead, rest];
+}
+
+function TestiCard({ t, active, onClick }: { t: DbTesti; active: boolean; onClick?: () => void }) {
+  const [lead, rest] = leadSplit(t.quote);
+  return (
+    <div className={`tv-card${active ? " is-active" : ""}`} onClick={onClick}>
+      <div className="tv-card-top">
+        <div className="tv-id">
+          <span className="tv-av">{t.img ? <img src={t.img} alt={t.name} /> : t.av}</span>
+          <span className="tv-id-text">
+            <span className="tv-id-name">{t.name}</span>
+            <span className="tv-id-role">{t.role}</span>
+          </span>
+        </div>
+        <span className="tv-tw"><TwitterBird /></span>
+      </div>
+      <p className="tv-quote">
+        <strong>&ldquo;{lead}{rest ? "" : "”"}</strong>
+        {rest && <span className="tv-quote-rest">{rest}&rdquo;</span>}
+      </p>
+      <div className="tv-foot">
+        <span className="tv-stars" aria-label={`${t.rating || 5} out of 5 stars`}>{"★".repeat(t.rating || 5)}</span>
+        <span className="tv-date">{t.date || "09/30/2024"}</span>
+      </div>
+    </div>
+  );
+}
+
 function TestimonialsSection({ testis }: { testis: DbTesti[] }) {
-  const items    = testis.length > 0 ? testis : STATIC_TESTIS;
-  const [idx,    setIdx]    = useState(0);
-  const [show,   setShow]   = useState(true);
-  const [bKey,   setBKey]   = useState(0);
-  const [phoneZoom,      setPhoneZoom]      = useState(1);
-  const [scrollParallax, setScrollParallax] = useState(0);
-  const stageRef = useRef<HTMLDivElement>(null);
+  const items = testis.length > 0 ? testis : STATIC_TESTIS;
+  const N = items.length;
+  // Triple the list so the carousel can loop infinitely without a visible jump.
+  const slides = useMemo(() => [...items, ...items, ...items], [items]);
 
-  useEffect(() => {
-    const check = () => setPhoneZoom(window.innerWidth >= 761 ? 1.43 : 1);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
+  const [pos, setPos] = useState(N);          // index into `slides`; start in the middle copy
+  const [noAnim, setNoAnim] = useState(false); // disable transition for the seamless wrap snap
+  const lock = useRef(false);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const [m, setM] = useState({ cardW: 360, gap: 24, vpW: 0 });
 
+  // Measure viewport so we can centre the active card.
   useEffect(() => {
-    const onScroll = () => {
-      if (!stageRef.current) return;
-      const rect = stageRef.current.getBoundingClientRect();
-      setScrollParallax((window.innerHeight / 2 - rect.top - rect.height / 2) * 0.07);
+    const vp = viewportRef.current;
+    if (!vp) return;
+    const measure = () => {
+      const vpW = vp.clientWidth;
+      const cardW = Math.max(252, Math.min(380, vpW - 96));
+      setM({ cardW, gap: 24, vpW });
     };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(vp);
+    return () => ro.disconnect();
   }, []);
 
-  useEffect(() => {
-    if (items.length <= 1) return;
-    const id = setInterval(() => {
-      setShow(false);
-      setTimeout(() => {
-        setIdx(p => (p + 1) % items.length);
-        setBKey(k => k + 1);
-        setShow(true);
-      }, 380);
-    }, 5500);
-    return () => clearInterval(id);
-  }, [items.length]);
+  const move = useCallback((delta: number) => {
+    if (lock.current || delta === 0) return;
+    lock.current = true;
+    setPos((p) => p + delta);
+  }, []);
 
-  const t       = items[idx];
-  const bubbles = splitQuote(t.quote);
-  const reply   = BRAND_REPLIES[idx % BRAND_REPLIES.length];
-  const stars   = "★".repeat(t.rating || 5);
+  const next = useCallback(() => move(1), [move]);
+  const prev = useCallback(() => move(-1), [move]);
+  const goTo = useCallback((real: number) => {
+    const current = ((pos % N) + N) % N;
+    let delta = real - current;
+    if (delta > N / 2) delta -= N;
+    if (delta < -N / 2) delta += N;
+    move(delta);
+  }, [pos, N, move]);
+
+  // Autoplay.
+  useEffect(() => {
+    const id = setInterval(() => move(1), 5000);
+    return () => clearInterval(id);
+  }, [move]);
+
+  // After the slide finishes, silently snap back into the middle copy.
+  const onTrackEnd = (e: React.TransitionEvent) => {
+    if (e.target !== e.currentTarget || e.propertyName !== "transform") return;
+    lock.current = false;
+    if (pos >= 2 * N || pos < N) {
+      setNoAnim(true);
+      setPos((p) => (((p % N) + N) % N) + N);
+    }
+  };
+
+  // Re-enable the transition the frame after a snap.
+  useEffect(() => {
+    if (!noAnim) return;
+    const id = requestAnimationFrame(() => requestAnimationFrame(() => setNoAnim(false)));
+    return () => cancelAnimationFrame(id);
+  }, [noAnim]);
+
+  const activeReal = ((pos % N) + N) % N;
+  const offset = m.vpW / 2 - m.cardW / 2 - pos * (m.cardW + m.gap);
 
   return (
-    <section className="section" style={{ paddingTop: 0 }}>
-      <div className="wrap">
-        <div className="svc-head">
-          <div className="fade"><span className="eyebrow">Words from clients</span></div>
-          <h2 className="display fade d1">What it feels like to <span className="it">work</span> with us.</h2>
-        </div>
-
-        {/* ── Desktop: grid cards ── */}
-        <div className="testimonials testi-desktop">
-          {items.map((t, i) => {
-            const hi = t.hi?.trim();
-            const qn = hi && t.quote.includes(hi)
-              ? <>{t.quote.slice(0,t.quote.indexOf(hi))}<span className="it">{hi}</span>{t.quote.slice(t.quote.indexOf(hi)+hi.length)}</>
-              : <>{t.quote}</>;
-            return (
-              <div className={`testimonial fade${i ? ` d${i}` : ""}`} key={t.id}>
-                <div className="stars" style={{color:"#f59e0b"}}>{"★".repeat(t.rating||5)}</div>
-                <p className="quote">&ldquo;{qn}&rdquo;</p>
-                <div className="meta">
-                  <div className="avatar">
-                    {t.img ? <img src={t.img} alt={t.name} style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:"50%",display:"block"}}/> : t.av}
-                  </div>
-                  <div className="who">{t.name}<span>{t.role}</span></div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* ── iPhone mockup (desktop + mobile) ── */}
-        <div className="testi-phone-wrap">
-          <div className="testi-stage" ref={stageRef}>
-
-            {/* Premium background layer — desktop only */}
-            <div className="testi-bg" aria-hidden="true">
-              <div className="testi-bg-glow" />
-              {[
-                {x:6,y:20,s:4,d:0,fast:false},{x:88,y:14,s:3,d:1.4,fast:false},
-                {x:14,y:72,s:3.5,d:2.6,fast:false},{x:84,y:68,s:4,d:0.9,fast:false},
-                {x:44,y:6,s:3,d:3.8,fast:true},{x:56,y:90,s:3.5,d:1.9,fast:false},
-                {x:24,y:46,s:2.5,d:4.4,fast:true},{x:76,y:40,s:2.5,d:3,fast:false},
-                {x:50,y:50,s:2,d:5.2,fast:false},{x:32,y:84,s:3,d:0.5,fast:true},
-                {x:68,y:22,s:2.5,d:2.1,fast:false},{x:18,y:34,s:2,d:3.3,fast:true},
-              ].map((p,i) => (
-                <div key={i} className={`testi-bg-dot${p.fast?" fast":""}`}
-                  style={{left:`${p.x}%`,top:`${p.y}%`,width:`${p.s}px`,height:`${p.s}px`,animationDelay:`${p.d}s`}}/>
-              ))}
-              <svg className="testi-bg-arcs" viewBox="0 0 900 500" preserveAspectRatio="xMidYMid meet">
-                <path d="M 80 250 Q 220 80 450 60" fill="none" stroke="rgba(184,108,249,.1)" strokeWidth="1" className="arc-1"/>
-                <path d="M 820 250 Q 680 80 450 60" fill="none" stroke="rgba(184,108,249,.1)" strokeWidth="1" className="arc-2"/>
-                <path d="M 100 300 Q 250 420 450 440" fill="none" stroke="rgba(150,150,150,.07)" strokeWidth="1" className="arc-3"/>
-                <path d="M 800 300 Q 650 420 450 440" fill="none" stroke="rgba(150,150,150,.07)" strokeWidth="1" className="arc-3"/>
-              </svg>
-            </div>
-
-            {/* World map */}
-            <WorldMapDecoration scrollOffset={scrollParallax} />
-
-            {/* iPhone */}
-            <div className="testi-phone" style={{zoom: phoneZoom}}>
-              {/* Screen */}
-              <div
-                className="testi-screen"
-                style={{ opacity: show ? 1 : 0, transform: show ? "scale(1)" : "scale(.95)", transition: "opacity .35s ease, transform .35s ease" }}
-              >
-                {/* Status bar with inline Dynamic Island */}
-                <div className="testi-status">
-                  <span className="testi-time">9:41</span>
-                  <div className="testi-island" />
-                  <div className="testi-status-r">
-                    <SignalIcon /><BatteryIcon />
-                  </div>
-                </div>
-
-                {/* iMessage header */}
-                <div className="testi-chat-hd">
-                  <div className="testi-back">
-                    <svg width="9" height="15" viewBox="0 0 9 15" fill="none"><path d="M8 1 1.5 7.5 8 14" stroke="var(--brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                    <div className="testi-chat-center">
-                      <div className="testi-chat-av">
-                        {t.img ? <img src={t.img} alt={t.name} style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:"50%",display:"block"}}/> : t.av}
-                      </div>
-                      <div className="testi-chat-info" key={bKey}>
-                        <div className="testi-chat-name">{t.name}</div>
-                        <div className="testi-chat-role">{t.role}</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="testi-chat-actions">
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.62 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                    <svg width="19" height="14" viewBox="0 0 22 16" fill="none"><rect x=".5" y=".5" width="13" height="15" rx="2.5" stroke="var(--brand)" strokeWidth="1.5"/><path d="M14 5.5l7-3.5v12l-7-3.5V5.5Z" stroke="var(--brand)" strokeWidth="1.5" strokeLinejoin="round"/></svg>
-                  </div>
-                </div>
-
-                {/* Bubbles */}
-                <div className="testi-bubbles" key={bKey}>
-                  <div className="testi-chat-date">Today</div>
-                  <div className="testi-stars-bubble">{stars}</div>
-                  {bubbles.map((msg, i) => (
-                    <div key={i} className="testi-bubble testi-bubble--in" style={{ animationDelay: `${0.15 + i * 0.9}s` }}>{msg}</div>
-                  ))}
-                  <div className="testi-bubble testi-bubble--out" style={{ animationDelay: `${0.15 + bubbles.length * 0.9}s` }}>{reply}</div>
-                </div>
-
-                {/* Input bar */}
-                <div className="testi-input-row">
-                  <div className="testi-add-btn">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7.5" stroke="rgba(0,0,0,.2)"/><path d="M8 4v8M4 8h8" stroke="rgba(0,0,0,.4)" strokeWidth="1.5" strokeLinecap="round"/></svg>
-                  </div>
-                  <div className="testi-input-bar">iMessage</div>
-                  <div className="testi-send-btn">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>{/* end testi-stage */}
-
-          {/* Progress dots */}
-          <div className="testi-dots">
-            {items.map((_, i) => (
-              <span key={i} className={`testi-dot${i === idx ? " active" : ""}`} />
-            ))}
+    <section className="tv-section">
+      <div className="wrap-tight">
+        <header className="tv-head fade">
+          <div>
+            <span className="tv-badge">Testimonial</span>
+            <h2 className="tv-title">Chosen by 50+ growing<br /><span className="tv-title-dim">businesses worldwide!</span></h2>
           </div>
+          <Link href="/contact" className="tv-contact">Contact Now</Link>
+        </header>
+
+        <div className="tv-stage" ref={viewportRef}>
+          <div
+            className={`tv-row${noAnim ? " no-anim" : ""}`}
+            style={{ transform: `translate3d(${offset}px,0,0)` }}
+            onTransitionEnd={onTrackEnd}
+          >
+            {slides.map((t, i) => {
+              const d = i - pos;
+              const isActive = d === 0;
+              const near = Math.abs(d) <= 1;
+              return (
+                <div
+                  key={i}
+                  className="tv-slide"
+                  style={{
+                    width: m.cardW,
+                    transform: `scale(${isActive ? 1 : 0.86})`,
+                    opacity: near ? (isActive ? 1 : 0.5) : 0,
+                    pointerEvents: near ? "auto" : "none",
+                  }}
+                >
+                  <TestiCard t={t} active={isActive} onClick={() => move(d)} />
+                </div>
+              );
+            })}
+          </div>
+
+          <button className="tv-arrow tv-arrow--prev" onClick={prev} aria-label="Previous testimonial">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <button className="tv-arrow tv-arrow--next" onClick={next} aria-label="Next testimonial">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+
+        <div className="tv-dots">
+          {items.map((_, i) => (
+            <button key={i} onClick={() => goTo(i)} className={`tv-dot${i === activeReal ? ' active' : ''}`} aria-label={`Review ${i + 1}`} />
+          ))}
         </div>
       </div>
     </section>
@@ -1587,9 +1585,6 @@ export default function HomeClient({
       </section>
 
 
-      {/* Testimonials */}
-      <TestimonialsSection testis={dbTestis} />
-
       {/* AI feature */}
       <section className="section" style={{ paddingTop: 140 }}>
         <div className="wrap">
@@ -1661,6 +1656,9 @@ export default function HomeClient({
         </div>
       </section>
 
+
+      {/* Testimonials */}
+      <TestimonialsSection testis={dbTestis} />
 
       {/* CTA */}
       <section id="contact" style={{ padding: "60px 0" }}>

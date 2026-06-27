@@ -1,8 +1,14 @@
 "use client";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import s from "./about.module.css";
+
+const WorldMapDecoration = dynamic(
+  () => import("@/app/components/WorldMapLeaflet"),
+  { ssr: false, loading: () => <div style={{ width: "100%", height: "100%" }} /> }
+);
 
 function ArrowIcon() {
   return (
@@ -100,6 +106,229 @@ const FOUNDERS = [
     delay: "d2",
   },
 ];
+
+/* ── Testimonials iPhone mockup ── */
+const AB_TESTIS = [
+  { id:-1, av:"SK", img:"", name:"Sara Köhler",  role:"CEO · Nestaro",           hi:"actually used", rating:5, quote:"Foxmen turned a vague pitch deck into a product our investors actually used during the round. They ship like a product team, not an agency." },
+  { id:-2, av:"DA", img:"", name:"Devon Arias",  role:"Head of Product · Pulse",  hi:"activation rate", rating:5, quote:"The AI copilot they built drove our activation rate from 28% to 71%. Every meeting felt like we got our money back twice." },
+  { id:-3, av:"RM", img:"", name:"Rina Mehta",   role:"CTO · Marketo",            hi:"zero", rating:5, quote:"Care is in the name and it shows. Our launch had zero P0s in week one — a first for us across three agencies." },
+];
+const AB_REPLIES = ["Means the world to us 🙏", "So grateful for this ✨", "This made our day 💜"];
+
+function abSplitQuote(q: string): string[] {
+  const words = q.split(/\s+/);
+  if (words.length <= 13) return [q];
+  const mid = Math.floor(words.length * 0.46);
+  let cut = mid;
+  for (let i = mid; i < Math.min(mid + 7, words.length - 4); i++) {
+    if (/[,;.!?—]$/.test(words[i])) { cut = i + 1; break; }
+  }
+  return [words.slice(0, cut).join(" "), words.slice(cut).join(" ")].filter(s => s.trim().length > 1);
+}
+function AbSignalIcon() {
+  return <svg width="17" height="12" viewBox="0 0 17 12" fill="none"><rect x="0" y="8" width="3" height="4" rx="0.8" fill="black" fillOpacity=".4"/><rect x="4.5" y="5.5" width="3" height="6.5" rx="0.8" fill="black" fillOpacity=".65"/><rect x="9" y="3" width="3" height="9" rx="0.8" fill="black" fillOpacity=".85"/><rect x="13.5" y="0" width="3" height="12" rx="0.8" fill="black"/></svg>;
+}
+function AbBatteryIcon() {
+  return <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="20" height="11" rx="3.5" stroke="#30d158" strokeOpacity=".6"/><rect x="1.5" y="1.5" width="16.5" height="8.5" rx="2.5" fill="#30d158"/><path d="M22 4.5v3a1.5 1.5 0 0 0 0-3Z" fill="black" fillOpacity=".4"/></svg>;
+}
+
+function ReelMap({ mode }: { mode: "locate" | "route" }) {
+  return (
+    <div className="reel-map">
+      <svg className="reel-map-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        {mode === "route" && (
+          <>
+            <path className="reel-route reel-route--ghost" d={REEL_ROUTE} />
+            <path className="reel-route" d={REEL_ROUTE} />
+            <circle r="2.2" className="reel-route-dot">
+              <animateMotion dur="1.8s" begin="0.4s" repeatCount="indefinite" path={REEL_ROUTE} />
+            </circle>
+          </>
+        )}
+      </svg>
+      {REEL_CITIES.map((c, i) => (
+        <span key={i} className="reel-city" style={{ left: `${c.x}%`, top: `${c.y}%`, animationDelay: `${i * 0.4}s` }} />
+      ))}
+      {mode === "locate" && (
+        <>
+          <span className="reel-radar" style={{ left: `${REEL_CITIES[1].x}%`, top: `${REEL_CITIES[1].y}%` }} />
+          <span className="reel-pin" style={{ left: `${REEL_CITIES[1].x}%`, top: `${REEL_CITIES[1].y}%` }}>
+            <svg width="22" height="28" viewBox="0 0 22 28" fill="none"><path d="M11 27C11 27 20 17.5 20 10.5C20 5.25 15.97 1 11 1C6.03 1 2 5.25 2 10.5C2 17.5 11 27 11 27Z" fill="var(--brand)" stroke="#fff" strokeWidth="1.4"/><circle cx="11" cy="10.5" r="3.4" fill="#fff"/></svg>
+          </span>
+        </>
+      )}
+    </div>
+  );
+}
+
+function TestiPhone() {
+  const [scene, setScene]                   = useState(0);
+  const [proofIdx, setProofIdx]             = useState(0);
+  const [phoneZoom, setPhoneZoom]           = useState(1);
+  const [scrollParallax, setScrollParallax] = useState(0);
+  const stageRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const check = () => setPhoneZoom(window.innerWidth >= 761 ? 1.43 : 1);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (!stageRef.current) return;
+      const rect = stageRef.current.getBoundingClientRect();
+      setScrollParallax((window.innerHeight / 2 - rect.top - rect.height / 2) * 0.07);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      setScene(prev => {
+        const nx = (prev + 1) % REEL_STEPS.length;
+        if (nx === PROOF_SCENE) setProofIdx(p => (p + 1) % AB_TESTIS.length);
+        return nx;
+      });
+    }, REEL_DUR[scene]);
+    return () => clearTimeout(id);
+  }, [scene]);
+
+  const step  = REEL_STEPS[scene];
+  const proof = AB_TESTIS[proofIdx];
+
+  return (
+    <section className="section" style={{ paddingTop: 0 }}>
+      <div className="wrap">
+        <div className="svc-head">
+          <div className="fade"><span className="eyebrow">How we work</span></div>
+          <h2 className="display fade d1">Your growth, on <span className="it">autoplay</span>.</h2>
+        </div>
+        <div className="testi-phone-wrap">
+          <div className="testi-stage" ref={stageRef}>
+            <div className="testi-bg" aria-hidden="true">
+              <div className="testi-bg-glow" />
+              {[
+                {x:6,y:20,s:4,d:0,fast:false},{x:88,y:14,s:3,d:1.4,fast:false},
+                {x:14,y:72,s:3.5,d:2.6,fast:false},{x:84,y:68,s:4,d:0.9,fast:false},
+                {x:44,y:6,s:3,d:3.8,fast:true},{x:56,y:90,s:3.5,d:1.9,fast:false},
+                {x:24,y:46,s:2.5,d:4.4,fast:true},{x:76,y:40,s:2.5,d:3,fast:false},
+              ].map((p,i) => (
+                <div key={i} className={`testi-bg-dot${p.fast ? " fast" : ""}`}
+                  style={{ left:`${p.x}%`, top:`${p.y}%`, width:`${p.s}px`, height:`${p.s}px`, animationDelay:`${p.d}s` }} />
+              ))}
+            </div>
+            <WorldMapDecoration scrollOffset={scrollParallax} />
+            <div className="testi-phone" style={{ zoom: phoneZoom }}>
+              <div className="testi-screen reel-screen">
+                {/* status bar */}
+                <div className="reel-status">
+                  <span className="reel-time">9:41</span>
+                  <div className="testi-island" />
+                  <div className="reel-status-r reel-status-white"><AbSignalIcon /><AbBatteryIcon /></div>
+                </div>
+
+                {/* progress segments */}
+                <div className="reel-bars">
+                  {REEL_DUR.map((d, i) => (
+                    <div key={i} className="reel-bar">
+                      <span
+                        key={`${i}-${scene}`}
+                        className={`reel-bar-fill${i === scene ? " run" : ""}`}
+                        style={i < scene ? { transform: "scaleX(1)" } : i === scene ? { animationDuration: `${d}ms` } : { transform: "scaleX(0)" }}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                {/* account header */}
+                <div className="reel-head">
+                  <div className="reel-ava">F</div>
+                  <div className="reel-acct"><b>foxmen.studio</b><span>Growth reel</span></div>
+                  <div className="reel-follow">Follow</div>
+                </div>
+
+                {/* scenes */}
+                <div className="reel-stage">
+                  <div className={`reel-scene${scene === 0 ? " is-active" : ""}`}><ReelMap mode="locate" /></div>
+                  <div className={`reel-scene${scene === 1 ? " is-active" : ""}`}><ReelMap mode="route" /></div>
+
+                  <div className={`reel-scene reel-scene--panel${scene === 2 ? " is-active" : ""}`}>
+                    <div className="reel-steps">
+                      {["Discover", "Design", "Build", "Launch"].map((label, i) => (
+                        <div key={label} className="reel-step" style={{ animationDelay: `${0.15 + i * 0.4}s` }}>
+                          <span className="reel-step-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+                          {label}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className={`reel-scene reel-scene--panel${scene === 3 ? " is-active" : ""}`}>
+                    <div className="reel-proof">
+                      <div className="reel-proof-stars">{"★".repeat(proof.rating || 5)}</div>
+                      <p className="reel-proof-q">&ldquo;{proof.quote}&rdquo;</p>
+                      <div className="reel-proof-by">
+                        <span className="reel-proof-av">{proof.av}</span>
+                        <span>
+                          <span className="reel-proof-name">{proof.name}</span>
+                          <span className="reel-proof-role">{proof.role}</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={`reel-scene reel-scene--grow${scene === 4 ? " is-active" : ""}`}>
+                    <div className="reel-grow-bars">
+                      {REEL_GROW_BARS.map((h, i) => (
+                        <span key={i} className="reel-grow-bar" style={{ height: h, animationDelay: `${0.1 + i * 0.12}s` }} />
+                      ))}
+                      <svg className="reel-grow-arrow" width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 17 9 11l4 4 8-8"/><path d="M15 4h6v6"/></svg>
+                    </div>
+                    <div className="reel-grow-title">Grow your business <em>digitally</em></div>
+                  </div>
+                </div>
+
+                {/* right action rail */}
+                <div className="reel-rail" aria-hidden="true">
+                  <div className="reel-rail-btn reel-rail-heart">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M12 21s-7.5-4.6-10-9.3C.7 8.9 2 5.5 5.2 5.1 7 4.9 8.6 5.9 9.5 7.3 10.4 5.9 12 4.9 13.8 5.1 17 5.5 18.3 8.9 17 11.7 14.5 16.4 12 21 12 21z"/></svg>
+                    <span>2.4k</span>
+                  </div>
+                  <div className="reel-rail-btn">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7a8.5 8.5 0 0 1-.9-3.8A8.38 8.38 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5z"/></svg>
+                    <span>318</span>
+                  </div>
+                  <div className="reel-rail-btn">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                    <span>Share</span>
+                  </div>
+                </div>
+
+                {/* caption + CTA */}
+                <div className="reel-foot">
+                  <span className="reel-kicker">{step.kicker}</span>
+                  <div className="reel-caption" key={scene}>
+                    <b>{step.title}</b>
+                    <span>{step.sub}</span>
+                  </div>
+                  <Link href="/contact" className="reel-cta">Grow with Foxmen <ArrowIcon /></Link>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="testi-dots">
+            {REEL_STEPS.map((_, i) => (
+              <span key={i} className={`testi-dot${i === scene ? " active" : ""}`} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 function TypedText({ text, active, speed = 22 }: { text: string; active: boolean; speed?: number }) {
   const [i, setI] = useState(0);
@@ -1138,6 +1367,9 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
+      {/* ── Client testimonials ── */}
+      <TestiPhone />
 
       {/* ── CTA ── */}
       <section style={{ borderTop: "1px solid var(--line)" }}>

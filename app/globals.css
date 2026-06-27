@@ -1077,6 +1077,171 @@ body.page-revealed .hero::after {
 .testimonial .stars { display: flex; gap: 2px; color: var(--brand); }
 @media (max-width:900px) { .testimonials { grid-template-columns: 1fr; } }
 
+/* ── testimonials — 3-card carousel ── */
+/* ── testimonial showcase ── */
+.tv-section {
+  padding: 96px 0;
+  background: #f4f4f3;
+  border-top: 1px solid var(--line);
+  overflow: hidden;
+}
+.tv-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 32px; margin-bottom: 52px;
+}
+.tv-badge {
+  display: inline-block; padding: 9px 18px; border-radius: 999px;
+  background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,.07);
+  font-size: 13px; font-weight: 600; color: var(--ink);
+  margin-bottom: 24px;
+}
+.tv-title {
+  font-family: var(--f-sans);
+  font-size: clamp(34px, 4.6vw, 58px);
+  line-height: 1.02; letter-spacing: -.03em; font-weight: 800;
+  color: var(--ink); margin: 0;
+}
+.tv-title-dim { color: #b6b6b3; }
+.tv-contact {
+  flex-shrink: 0; margin-top: 58px;
+  display: inline-flex; align-items: center;
+  padding: 15px 27px; border-radius: 999px;
+  background: var(--ink); color: #fff;
+  font-size: 14px; font-weight: 600; text-decoration: none;
+  box-shadow: 0 10px 26px rgba(0,0,0,.2);
+  transition: transform .2s, box-shadow .2s;
+}
+.tv-contact:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(0,0,0,.26); }
+
+.tv-stage {
+  position: relative;
+  overflow: hidden;
+  padding: 26px 0;
+  margin: 0 -24px;          /* let slides bleed to the section edges */
+}
+.tv-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  transition: transform .6s cubic-bezier(.4, 0, .15, 1);
+  will-change: transform;
+}
+.tv-row.no-anim { transition: none; }
+.tv-slide {
+  flex: 0 0 auto;
+  transition: transform .6s cubic-bezier(.4, 0, .15, 1), opacity .5s ease;
+  will-change: transform, opacity;
+}
+
+.tv-card {
+  background: #fff; border-radius: 22px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  padding: 28px 28px 26px;
+  min-height: 432px;
+  display: flex; flex-direction: column;
+  cursor: pointer;
+  transition: box-shadow .4s ease;
+}
+.tv-card.is-active {
+  box-shadow: 0 24px 60px -18px rgba(0,0,0,.22);
+}
+
+.tv-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
+.tv-id { display: flex; align-items: center; gap: 12px; }
+.tv-av {
+  width: 46px; height: 46px; border-radius: 50%; overflow: hidden; flex-shrink: 0;
+  background: var(--brand-soft); color: var(--brand-deep);
+  display: grid; place-items: center; font-size: 13px; font-weight: 700; font-family: var(--f-mono);
+}
+.tv-av img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tv-id-text { display: flex; flex-direction: column; }
+.tv-id-name { font-size: 15px; font-weight: 700; color: var(--ink); }
+.tv-id-role { font-size: 13px; color: var(--muted); margin-top: 1px; }
+.tv-tw {
+  width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+  background: #f1f1ef; display: grid; place-items: center;
+}
+
+.tv-quote { margin: 0; }
+.tv-quote strong {
+  display: block; font-size: clamp(17px, 1.4vw, 20px); font-weight: 700;
+  color: var(--ink); letter-spacing: -.015em; line-height: 1.25; margin-bottom: 9px;
+}
+.tv-quote-rest { font-size: 14.5px; line-height: 1.55; color: var(--muted); }
+.tv-foot {
+  margin-top: auto; padding-top: 28px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.tv-stars { color: #f5a623; font-size: 15px; letter-spacing: 2px; }
+.tv-date { font-size: 13.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* floating navigation arrows */
+.tv-arrow {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 52px; height: 52px; border-radius: 50%; border: none; cursor: pointer;
+  background: rgba(255,255,255,.7); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  color: var(--ink); display: grid; place-items: center; z-index: 4;
+  box-shadow: 0 8px 24px rgba(0,0,0,.14);
+  transition: background .2s, transform .2s, box-shadow .2s;
+}
+.tv-arrow:hover { background: #fff; box-shadow: 0 12px 30px rgba(0,0,0,.2); }
+.tv-arrow--prev { left: 28px; }
+.tv-arrow--next { right: 28px; }
+.tv-arrow--prev:hover { transform: translateY(-50%) scale(1.08); }
+.tv-arrow--next:hover { transform: translateY(-50%) scale(1.08); }
+
+.tv-dots { display: flex; justify-content: center; gap: 8px; margin-top: 32px; }
+.tv-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(0,0,0,.18); border: none; cursor: pointer; padding: 0;
+  transition: background .3s, width .3s;
+}
+.tv-dot.active { background: var(--ink); width: 22px; border-radius: 99px; }
+
+@media (max-width: 900px) {
+  .tv-head { flex-direction: column; gap: 22px; }
+  .tv-contact { margin-top: 0; }
+  .tv-arrow--prev { left: 10px; }
+  .tv-arrow--next { right: 10px; }
+}
+@media (max-width: 760px) {
+  .tv-section { padding: 64px 0; }
+  .tv-card { min-height: 392px; }
+}
+
+/* ── testimonials rolling strip (home page) ── */
+.testi-roll-wrap {
+  position: relative; overflow: hidden; padding: 40px 0 48px;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+}
+.testi-roll-track {
+  display: flex; gap: 20px; width: max-content;
+  animation: testi-scroll 40s linear infinite;
+}
+.testi-roll-track:hover { animation-play-state: paused; }
+@keyframes testi-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.testi-roll-card {
+  width: 340px; flex-shrink: 0;
+  border: 1px solid var(--line); border-radius: 14px; padding: 24px 26px;
+  background: #fff; display: flex; flex-direction: column; gap: 14px;
+}
+.testi-roll-stars { color: #f59e0b; font-size: 13px; letter-spacing: 3px; }
+.testi-roll-quote { font-size: 15px; line-height: 1.65; color: var(--ink); margin: 0; flex: 1; }
+.testi-roll-quote .it { font-style: italic; color: var(--brand); }
+.testi-roll-meta { display: flex; align-items: center; gap: 12px; margin-top: auto; }
+.testi-roll-av {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--brand-soft); color: var(--brand-deep);
+  display: grid; place-items: center; flex-shrink: 0;
+  font-size: 11px; font-family: var(--f-mono); font-weight: 600;
+}
+.testi-roll-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+.testi-roll-role { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
 /* ══════════════════════════════════════════════════════════
    TESTIMONIALS — iPhone 16 mockup
    All structural styles live OUTSIDE media queries so
