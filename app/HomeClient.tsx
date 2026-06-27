@@ -116,12 +116,44 @@ function SlideButton({ href, label, ghost = false }: {
 
 function Hero() {
   const orbitRef = useRef<HTMLDivElement>(null);
+  const [count, setCount] = useState(0);
+
   useEffect(() => {
     const onScroll = () => {
       if (orbitRef.current) orbitRef.current.style.translate = `0 ${window.scrollY * 0.15}px`;
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const TARGET = 50;
+    const DURATION = 1800; // ms
+
+    function startCount() {
+      const start = performance.now();
+      function frame(now: number) {
+        const progress = Math.min((now - start) / DURATION, 1);
+        // ease-out
+        const eased = 1 - Math.pow(1 - progress, 3);
+        setCount(Math.floor(eased * TARGET));
+        if (progress < 1) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    if (document.body.classList.contains("page-revealed")) {
+      startCount();
+      return;
+    }
+    const obs = new MutationObserver(() => {
+      if (document.body.classList.contains("page-revealed")) {
+        obs.disconnect();
+        startCount();
+      }
+    });
+    obs.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+    return () => obs.disconnect();
   }, []);
 
   return (
