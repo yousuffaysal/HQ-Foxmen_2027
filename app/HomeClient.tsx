@@ -251,9 +251,6 @@ function Reel() {
   return (
     <section className="reel" id="reel" ref={reelRef} aria-label="Studio showreel">
       <div className="sticky">
-        <div className="label fade" ref={labelRef}>
-          <span className="it">Showreel</span> · 2026 · selected work
-        </div>
         <div className="frame" ref={frameRef}>
           <div className="reel-video">
             <video
@@ -273,7 +270,6 @@ function Reel() {
             </div>
           </div>
         </div>
-        <div className="play-cue" aria-hidden="true"><span className="live" /> Live preview</div>
       </div>
     </section>
   );
