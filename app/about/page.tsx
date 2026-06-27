@@ -121,7 +121,7 @@ const REEL_STEPS = [
   { kicker:"Step 02", title:"We map the strategy",      sub:"Channels and a route that actually connect." },
   { kicker:"Step 03", title:"Design \u00b7 Build \u00b7 Launch", sub:"We ship a product engineered to convert." },
   { kicker:"Proof",   title:"Loved by founders",        sub:"Real teams, real outcomes." },
-  { kicker:"Result",  title:"Grow your business digitally", sub:"From the first pin to compounding growth." },
+  { kicker:"Result",  title:"Ready to grow?",            sub:"Let us build your digital growth engine." },
 ];
 // City coordinates (% / SVG-user units) shared by the map pins and the route path.
 const REEL_CITIES = [{ x:22, y:38 }, { x:54, y:24 }, { x:74, y:58 }, { x:40, y:70 }];
@@ -248,7 +248,14 @@ function TestiPhone() {
 
                 {/* account header */}
                 <div className="reel-head">
-                  <div className="reel-ava">F</div>
+                  <div className="reel-ava">
+                    <svg viewBox="0 0 114.86 114.86" fill="#b86cf9" aria-label="Foxmen">
+                      <polygon points="86.85 27.97 86.89 43.89 71.15 43.84 56.73 27.97 27.95 27.97 27.76 1.03 58.44 1 86.89 27.97 86.85 27.97"/>
+                      <polygon points="113.86 58.46 86.94 86.79 86.94 87.06 71.84 87.17 71.82 71.42 86.85 56.91 86.85 28.01 113.83 27.83 113.86 58.46"/>
+                      <polygon points="86.76 86.88 57.23 86.88 43.09 71.99 27.75 72 27.86 86.88 27.86 86.93 27.9 86.97 56.27 113.86 86.95 113.83 86.76 86.88"/>
+                      <polygon points="28.02 57.23 28.13 86.84 1.15 87.13 1 56.49 27.77 28.12 27.87 28.01 27.91 28.01 42.49 27.91 42.5 43.25 28.02 57.23"/>
+                    </svg>
+                  </div>
                   <div className="reel-acct"><b>foxmen.studio</b><span>Growth reel</span></div>
                   <div className="reel-follow">Follow</div>
                 </div>
@@ -297,7 +304,7 @@ function TestiPhone() {
                 {/* right action rail */}
                 <div className="reel-rail" aria-hidden="true">
                   <div className="reel-rail-btn reel-rail-heart">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M12 21s-7.5-4.6-10-9.3C.7 8.9 2 5.5 5.2 5.1 7 4.9 8.6 5.9 9.5 7.3 10.4 5.9 12 4.9 13.8 5.1 17 5.5 18.3 8.9 17 11.7 14.5 16.4 12 21 12 21z"/></svg>
+                    <svg width="23" height="23" viewBox="0 0 24 24" fill="#ff3040"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                     <span>2.4k</span>
                   </div>
                   <div className="reel-rail-btn">
