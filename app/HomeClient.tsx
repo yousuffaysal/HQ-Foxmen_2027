@@ -191,7 +191,7 @@ function Hero() {
             deploy digital products that grow with you.
           </p>
           <div className="fade d3">
-            <div className="stat">50+</div>
+            <div className="stat">{count}+</div>
             <div className="stat-sub">Products shipped worldwide</div>
           </div>
           <div className="fade d4 hero-actions">
