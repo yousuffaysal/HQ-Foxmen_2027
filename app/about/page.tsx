@@ -107,24 +107,27 @@ const FOUNDERS = [
   },
 ];
 
-/* ── Testimonials iPhone mockup ── */
+/* ── "How we work" Reels-style phone mockup ── */
 const AB_TESTIS = [
   { id:-1, av:"SK", img:"", name:"Sara Köhler",  role:"CEO · Nestaro",           hi:"actually used", rating:5, quote:"Foxmen turned a vague pitch deck into a product our investors actually used during the round. They ship like a product team, not an agency." },
   { id:-2, av:"DA", img:"", name:"Devon Arias",  role:"Head of Product · Pulse",  hi:"activation rate", rating:5, quote:"The AI copilot they built drove our activation rate from 28% to 71%. Every meeting felt like we got our money back twice." },
   { id:-3, av:"RM", img:"", name:"Rina Mehta",   role:"CTO · Marketo",            hi:"zero", rating:5, quote:"Care is in the name and it shows. Our launch had zero P0s in week one — a first for us across three agencies." },
 ];
-const AB_REPLIES = ["Means the world to us 🙏", "So grateful for this ✨", "This made our day 💜"];
+// Reel scenes: the story the phone plays on loop.
+const REEL_DUR  = [3400, 3600, 3800, 3600, 4400];
+const PROOF_SCENE = 3;
+const REEL_STEPS = [
+  { kicker:"Step 01", title:"We find your market",      sub:"Pinpoint exactly where your customers already are." },
+  { kicker:"Step 02", title:"We map the strategy",      sub:"Channels and a route that actually connect." },
+  { kicker:"Step 03", title:"Design \u00b7 Build \u00b7 Launch", sub:"We ship a product engineered to convert." },
+  { kicker:"Proof",   title:"Loved by founders",        sub:"Real teams, real outcomes." },
+  { kicker:"Result",  title:"Grow your business digitally", sub:"From the first pin to compounding growth." },
+];
+// City coordinates (% / SVG-user units) shared by the map pins and the route path.
+const REEL_CITIES = [{ x:22, y:38 }, { x:54, y:24 }, { x:74, y:58 }, { x:40, y:70 }];
+const REEL_ROUTE  = `M ${REEL_CITIES[0].x} ${REEL_CITIES[0].y} Q ${REEL_CITIES[1].x} ${REEL_CITIES[1].y - 16} ${REEL_CITIES[2].x} ${REEL_CITIES[2].y} T ${REEL_CITIES[3].x} ${REEL_CITIES[3].y}`;
+const REEL_GROW_BARS = [34, 52, 70, 92, 120];
 
-function abSplitQuote(q: string): string[] {
-  const words = q.split(/\s+/);
-  if (words.length <= 13) return [q];
-  const mid = Math.floor(words.length * 0.46);
-  let cut = mid;
-  for (let i = mid; i < Math.min(mid + 7, words.length - 4); i++) {
-    if (/[,;.!?—]$/.test(words[i])) { cut = i + 1; break; }
-  }
-  return [words.slice(0, cut).join(" "), words.slice(cut).join(" ")].filter(s => s.trim().length > 1);
-}
 function AbSignalIcon() {
   return <svg width="17" height="12" viewBox="0 0 17 12" fill="none"><rect x="0" y="8" width="3" height="4" rx="0.8" fill="black" fillOpacity=".4"/><rect x="4.5" y="5.5" width="3" height="6.5" rx="0.8" fill="black" fillOpacity=".65"/><rect x="9" y="3" width="3" height="9" rx="0.8" fill="black" fillOpacity=".85"/><rect x="13.5" y="0" width="3" height="12" rx="0.8" fill="black"/></svg>;
 }
