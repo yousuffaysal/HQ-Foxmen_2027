@@ -234,7 +234,7 @@ const SERVICE_DETAILS: Record<string, ServiceDetail> = {
 
 /* ─────────────── card visuals ─────────────── */
 const CARD_GRADIENTS: Record<string, string> = {
-  "Web Design & Development":     "linear-gradient(135deg,#0d0020 0%,#2d0f6b 45%,#7c3cce 100%)",
+  "Web Design & Development":     "linear-gradient(135deg,#d2c3f6 0%,#a88bf5 50%,#7c3cce 100%)",
   "iOS, Android & Cross-platform":"linear-gradient(135deg,#060618 0%,#160f48 50%,#3730a3 100%)",
   "AI-Integrated Software":       "linear-gradient(135deg,#0d0020 0%,#380d7f 40%,#7c22ce 100%)",
   "Ecommerce & Multi-vendor":     "linear-gradient(135deg,#011a12 0%,#034d31 50%,#059669 100%)",
@@ -245,7 +245,7 @@ const CARD_GRADIENTS: Record<string, string> = {
 
 /* ─────────────── solid bg colours (one per section) ─────────────── */
 const SVC_BG: Record<string, string> = {
-  "Web Design & Development":     "#3D6DB5",
+  "Web Design & Development":     "#d2c3f6",
   "iOS, Android & Cross-platform":"#111111",
   "AI-Integrated Software":       "#2A0A6B",
   "Ecommerce & Multi-vendor":     "#04422D",
@@ -319,29 +319,137 @@ function VisualMobile({ a }: { a:string }) {
   );
 }
 
-function VisualAI({ a }: { a:string }) {
-  const nodes:[number,number,number,number][] = [
-    [250,190,14,.9],[155,112,9,.65],[348,112,9,.65],[118,224,8,.55],[382,224,8,.55],
-    [168,304,9,.6],[332,304,9,.6],[72,168,6,.38],[428,168,6,.38],[250,312,7,.42],[250,72,8,.5],
-  ];
-  const edges:[number,number][] = [
-    [0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,10],[1,2],[1,7],[2,8],[3,5],[4,6],[5,9],[6,9],[1,10],[2,10],
-  ];
+function VisualAI({ a }: { a?:string }) {
   return (
-    <svg viewBox="0 0 500 390" fill="none" xmlns="http://www.w3.org/2000/svg" style={{width:"100%",height:"100%"}}>
-      {Array.from({length:6},(_,r)=>Array.from({length:7},(_,c)=>(
-        <circle key={`h${r}-${c}`} cx={30+c*68+(r%2)*34} cy={28+r*58} r="1.8" fill={a} fillOpacity=".1"/>
-      )))}
-      {edges.map(([s,e],i)=>(
-        <line key={i} x1={nodes[s][0]} y1={nodes[s][1]} x2={nodes[e][0]} y2={nodes[e][1]} stroke={a} strokeOpacity=".2" strokeWidth="1.2"/>
-      ))}
-      {nodes.map(([cx,cy,r,op],i)=>(
-        <React.Fragment key={i}>
-          <circle cx={cx} cy={cy} r={r*2.4} fill={a} fillOpacity=".07"/>
-          <circle cx={cx} cy={cy} r={r} fill={a} fillOpacity={op}/>
-        </React.Fragment>
-      ))}
-    </svg>
+    <div style={{
+      width: "100%", height: "100%", background: "#06060c",
+      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-between",
+      padding: "24px 20px 18px", position: "relative", overflow: "hidden",
+      fontFamily: "var(--f-sans)", color: "#fff",
+      boxSizing: "border-box",
+    }}>
+      {/* Ambient aurora aura */}
+      <div style={{
+        position: "absolute", top: "15%", left: "50%", width: 260, height: 260,
+        background: "radial-gradient(circle, rgba(138,35,135,0.28) 0%, rgba(0,242,254,0.15) 50%, transparent 70%)",
+        transform: "translate(-50%, -50%)", filter: "blur(35px)", pointerEvents: "none",
+        animation: "aiPulse 4s ease-in-out infinite alternate",
+      }} />
+
+      {/* ── Top: 60 FPS Glowing Orb Ring ── */}
+      <div style={{ position: "relative", width: 120, height: 120, display: "grid", placeItems: "center", marginTop: 6, flexShrink: 0 }}>
+        {/* Outer glowing aura */}
+        <div style={{
+          position: "absolute", inset: 0, borderRadius: "50%",
+          background: "conic-gradient(from 0deg, #ff2a85, #7928ca, #00f2fe, #ff2a85)",
+          filter: "blur(16px)", opacity: 0.75,
+          animation: "aiSpin 6s linear infinite",
+        }} />
+
+        {/* Ring 1 - Base glowing Ribbon */}
+        <div style={{
+          position: "absolute", inset: 4, borderRadius: "50%",
+          padding: 3.5, background: "conic-gradient(from 0deg, #ff2a85, #9333ea, #38bdf8, #f43f5e, #ff2a85)",
+          WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+          WebkitMaskComposite: "xor", maskComposite: "exclude",
+          animation: "aiSpin 4.5s linear infinite",
+        }} />
+
+        {/* Ring 2 - Reverse morphing Ribbon for 3D Torus effect */}
+        <div style={{
+          position: "absolute", inset: 8, borderRadius: "46%",
+          padding: 2.5, background: "conic-gradient(from 180deg, #38bdf8, #818cf8, #c084fc, #f43f5e, #38bdf8)",
+          WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+          WebkitMaskComposite: "xor", maskComposite: "exclude",
+          animation: "aiSpinReverse 7s linear infinite, aiMorph 3s ease-in-out infinite alternate",
+        }} />
+
+        {/* Ring 3 - Inner core highlight */}
+        <div style={{
+          position: "absolute", inset: 16, borderRadius: "52%",
+          padding: 2, background: "conic-gradient(from 90deg, #fff, rgba(255,255,255,0), #38bdf8, rgba(255,255,255,0), #fff)",
+          WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+          WebkitMaskComposite: "xor", maskComposite: "exclude",
+          animation: "aiSpin 3s linear infinite",
+          opacity: 0.85,
+        }} />
+      </div>
+
+      {/* ── Middle: Greeting & Question ── */}
+      <div style={{ textAlign: "center", zIndex: 2, margin: "8px 0", flexShrink: 0 }}>
+        <div style={{ fontSize: 15, fontWeight: 500, color: "rgba(255,255,255,0.65)", letterSpacing: "-0.01em", marginBottom: 2 }}>
+          Hey Jason
+        </div>
+        <div style={{ fontSize: "clamp(18px, 2.5vw, 22px)", fontWeight: 700, letterSpacing: "-0.02em", color: "#fff", lineHeight: 1.2 }}>
+          How can I <span style={{ background: "linear-gradient(135deg, #60a5fa 0%, #c084fc 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>assist you?</span>
+        </div>
+      </div>
+
+      {/* ── Bottom Cards / Chips ── */}
+      <div style={{ width: "100%", maxWidth: 480, zIndex: 2, display: "flex", flexDirection: "column", gap: 10, flexShrink: 0 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+          {[
+            { icon: "⚽", text: "Show market value of João Pedro" },
+            { icon: "🎾", text: "List recent wins by Carlos Alcaraz" },
+            { icon: "⚡", text: "Run RAG query on live database" },
+          ].map((c, idx) => (
+            <div key={idx} style={{
+              background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)",
+              borderRadius: 12, padding: "10px 10px", display: "flex", flexDirection: "column", gap: 6,
+              transition: "all 0.2s ease", cursor: "pointer",
+            }}>
+              <div style={{ width: 22, height: 22, borderRadius: 6, background: "rgba(255,255,255,0.06)", display: "grid", placeItems: "center", fontSize: 12 }}>
+                {c.icon}
+              </div>
+              <div style={{ fontSize: 11, lineHeight: 1.3, color: "rgba(255,255,255,0.6)", fontWeight: 400 }}>
+                {c.text}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Search / Input Bar */}
+        <div style={{
+          background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
+          borderRadius: 999, padding: "5px 5px 5px 14px", display: "flex", alignItems: "center", justifyContent: "space-between",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, color: "rgba(255,255,255,0.5)", fontSize: 12.5 }}>
+            <span>📎</span>
+            <span>Show market value of Marc Cucurella...</span>
+          </div>
+          <div style={{
+            width: 28, height: 28, borderRadius: "50%",
+            background: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
+            display: "grid", placeItems: "center", color: "#fff", fontSize: 13, fontWeight: "bold",
+            boxShadow: "0 0 12px rgba(168,85,247,0.5)", cursor: "pointer",
+          }}>
+            ↑
+          </div>
+        </div>
+      </div>
+
+      {/* Embedded 60 FPS hardware accelerated keyframes */}
+      <style>{`
+        @keyframes aiSpin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        @keyframes aiSpinReverse {
+          0% { transform: rotate(360deg); }
+          100% { transform: rotate(0deg); }
+        }
+        @keyframes aiMorph {
+          0% { transform: rotate(0deg) scale(1) skew(0deg); }
+          50% { transform: rotate(180deg) scaleX(1.08) scaleY(0.94) skew(3deg); }
+          100% { transform: rotate(360deg) scale(1) skew(0deg); }
+        }
+        @keyframes aiPulse {
+          0% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.6; }
+          100% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.95; }
+        }
+      `}</style>
+    </div>
   );
 }
 
@@ -453,6 +561,13 @@ const BUDGET_OPTIONS = [
 const TIMELINE_OPTIONS = ["ASAP","1–2 months","3–6 months","6+ months","Flexible"];
 type IForm = { service:string;name:string;email:string;company:string;description:string;budget:string;budget_custom:string;timeline:string;website:string };
 
+function getShowcaseImage(name: string, idx?: number): string | null {
+  const n = name.toLowerCase();
+  if (idx === 0 || n.includes("web") || n.includes("design")) return "/assets/hero-showcase.png";
+  if (idx === 1 || n.includes("ios") || n.includes("android") || n.includes("cross")) return "/assets/ios-showcase.png";
+  return null;
+}
+
 /* ════════════════════════════════════════════════════
    DETAIL MODAL — redesigned with animations
    ════════════════════════════════════════════════════ */
@@ -462,6 +577,8 @@ function ServiceDetailModal({ service, image, onClose, onStartService }: {
   const d = SERVICE_DETAILS[service] ?? SERVICE_DETAILS["Web Design & Development"];
   const [tab, setTab] = useState<"overview"|"features"|"stack">("overview");
   const isMobile = useIsMobile();
+  const customImg = getShowcaseImage(service);
+  const displayImg = customImg || image;
 
   useEffect(() => {
     const fn = (e: KeyboardEvent) => { if (e.key==="Escape") onClose(); };
@@ -478,10 +595,13 @@ function ServiceDetailModal({ service, image, onClose, onStartService }: {
 
         {/* ── hero header ── */}
         <div style={{ position:"relative",height:isMobile?160:220,flexShrink:0,overflow:"hidden" }}>
-          {image
-            ? <img src={image} alt={service} style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }} />
-            : <div style={{ width:"100%",height:"100%",background:CARD_GRADIENTS[service]??"linear-gradient(135deg,#0d0020,#7c3cce)" }} />
-          }
+          {service.toLowerCase().includes("ai") ? (
+            <VisualAI />
+          ) : displayImg ? (
+            <img src={displayImg} alt={service} style={{ width:"100%",height:"100%",objectFit:"cover",display:"block" }} />
+          ) : (
+            <div style={{ width:"100%",height:"100%",background:CARD_GRADIENTS[service]??"linear-gradient(135deg,#0d0020,#7c3cce)" }} />
+          )}
           {/* blobs */}
           <div style={{ position:"absolute",inset:0,overflow:"hidden",pointerEvents:"none" }}>
             <div style={{ position:"absolute",width:300,height:300,borderRadius:"50%",background:d.accentColor,opacity:.18,filter:"blur(60px)",top:"-30%",left:"60%",animation:"blobFloat 6s ease-in-out infinite" }} />
@@ -733,7 +853,8 @@ function ServiceSection({ service, index, onDetail, onStart }: {
 }) {
   const d      = SERVICE_DETAILS[service.name];
   const accent = d?.accentColor ?? "#b86cf9";
-  const bg     = SVC_BG[service.name] ?? "#111";
+  const bg     = index === 0 || service.name.toLowerCase().includes("web") || service.name.toLowerCase().includes("design") ? "#d2c3f6" : (SVC_BG[service.name] ?? "#111");
+  const isLight = bg.toLowerCase() === "#d2c3f6";
   const split  = SVC_SPLIT[service.name] ?? [service.name, ""];
   const Visual = SERVICE_VISUAL[service.name];
   const isMobile = useIsMobile();
@@ -752,10 +873,10 @@ function ServiceSection({ service, index, onDetail, onStart }: {
     }}>
       {/* ── top bar ── */}
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"20px 28px", flexShrink:0 }}>
-        <span style={{ fontFamily:"var(--f-mono)", fontSize:12, letterSpacing:".12em", color:"rgba(255,255,255,.32)" }}>
+        <span style={{ fontFamily:"var(--f-mono)", fontSize:12, letterSpacing:".12em", color: isLight ? "rgba(13,0,32,.55)" : "rgba(255,255,255,.32)" }}>
           ({String(index + 1).padStart(2, "0")})
         </span>
-        <button onClick={onDetail} style={{ background:"transparent", border:"none", cursor:"pointer", fontFamily:"var(--f-display)", fontSize:15, color:"rgba(255,255,255,.7)", letterSpacing:"-.01em", padding:0 }}>
+        <button onClick={onDetail} style={{ background:"transparent", border:"none", cursor:"pointer", fontFamily:"var(--f-display)", fontSize:15, color: isLight ? "#0d0020" : "rgba(255,255,255,.7)", letterSpacing:"-.01em", padding:0 }}>
           Explore services
         </button>
       </div>
@@ -763,8 +884,8 @@ function ServiceSection({ service, index, onDetail, onStart }: {
       {/* ── big heading ── */}
       <div style={{ textAlign:"center", padding: isMobile ? "4px 20px 14px" : "2px 40px 14px", flexShrink:0 }}>
         <h2 style={{ margin:0, lineHeight:1.0, letterSpacing:"-.025em", fontSize:"clamp(36px,6.5vw,96px)" }}>
-          <strong style={{ fontFamily:"var(--f-sans)", fontWeight:800, color:"#fff", fontStyle:"normal" }}>{split[0]}</strong>
-          {split[1] && <>{" "}<em style={{ fontFamily:"var(--f-display)", fontStyle:"italic", fontWeight:400, color:"rgba(255,255,255,.88)" }}>{split[1]}</em></>}
+          <strong style={{ fontFamily:"var(--f-sans)", fontWeight:800, color: isLight ? "#0d0020" : "#fff", fontStyle:"normal" }}>{split[0]}</strong>
+          {split[1] && <>{" "}<em style={{ fontFamily:"var(--f-display)", fontStyle:"italic", fontWeight:400, color: isLight ? "rgba(13,0,32,.82)" : "rgba(255,255,255,.88)" }}>{split[1]}</em></>}
         </h2>
         {service.badge && (
           <span style={{ display:"inline-block", marginTop:10, padding:"3px 12px", borderRadius:999, background:accent, fontFamily:"var(--f-mono)", fontSize:9, letterSpacing:".12em", textTransform:"uppercase", color:"#fff" }}>
@@ -785,13 +906,21 @@ function ServiceSection({ service, index, onDetail, onStart }: {
           aspectRatio:"4/3",
           position:"relative",
         }}>
-          {Visual && <Visual a={bg} />}
+          {getShowcaseImage(service.name, index) || service.image ? (
+            <img
+              src={getShowcaseImage(service.name, index) || service.image!}
+              alt={service.name}
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            />
+          ) : (
+            Visual && <Visual a={bg} />
+          )}
         </div>
       </div>
 
       {/* ── bottom CTAs ── */}
       <div style={{ display:"flex", gap:10, padding: isMobile ? "0 16px 24px" : "0 40px 24px", justifyContent:"center", flexShrink:0 }}>
-        <button onClick={onDetail} className="btn" style={{ "--bg":"rgba(255,255,255,.12)", "--fg":"#fff", "--chip":"rgba(255,255,255,.18)", "--chipfg":"#fff" } as React.CSSProperties}>
+        <button onClick={onDetail} className="btn" style={{ "--bg": isLight ? "rgba(13,0,32,.08)" : "rgba(255,255,255,.12)", "--fg": isLight ? "#0d0020" : "#fff", "--chip": isLight ? "rgba(13,0,32,.15)" : "rgba(255,255,255,.18)", "--chipfg": isLight ? "#0d0020" : "#fff" } as React.CSSProperties}>
           <span className="label">View details</span>
           <span className="chip"><ArrowIcon /></span>
         </button>
@@ -808,7 +937,7 @@ function ServiceSection({ service, index, onDetail, onStart }: {
    PAGE
    ════════════════════════════════════════════════════ */
 const STATIC_SERVICES: DbService[] = [
-  { id:1, name:"Web Design & Development",     descr:"Got an idea? A concept, a vision, a half-finished brief? Bring it as it is. We design it, build it, integrate it, and ship it — any website, any web application, start to finish.", count:"Next.js,React,TypeScript,Sanity,Postgres", badge:"Most popular", image:null },
+  { id:1, name:"Web Design & Development",     descr:"Got an idea? A concept, a vision, a half-finished brief? Bring it as it is. We design it, build it, integrate it, and ship it — any website, any web application, start to finish.", count:"Next.js,React,TypeScript,Sanity,Postgres", badge:"Most popular", image:"/assets/hero-showcase.png" },
   { id:2, name:"iOS, Android & Cross-platform",descr:"From your idea to a live App Store listing — in 8 to 12 weeks. We handle design, development, QA, and submission. You walk away with a product you fully own.",                   count:"React Native,Swift,Kotlin,Flutter,Firebase",  badge:null,           image:null },
   { id:3, name:"AI-Integrated Software",        descr:"Real AI that ships to production. RAG search, AI assistants, agentic workflows, fine-tuned models — embedded in your product where they actually change how it works.",              count:"OpenAI,Anthropic,LangChain,Pinecone,pgvector",badge:"New · 2026",   image:null },
   { id:4, name:"Ecommerce & Multi-vendor",      descr:"A store that converts, a marketplace that scales. Single-vendor or multi-vendor with Stripe Connect payouts. Fast, beautiful, and load-tested to 50K concurrent shoppers.",          count:"Shopify Plus,Medusa,Next.js,Stripe,Algolia", badge:null,           image:null },
@@ -823,7 +952,14 @@ export default function ServicesPage({ initialServices = [] }: { initialServices
   const [detailService, setDetailService] = useState<DbService | null>(null);
   const [inquiryService, setInquiryService] = useState<string | null>(null);
 
-  const services = dbServices.length > 0 ? dbServices : STATIC_SERVICES;
+  const rawServices = dbServices.length > 0 ? dbServices : STATIC_SERVICES;
+  const services = rawServices.map((s, idx) => {
+    const customImg = getShowcaseImage(s.name, idx);
+    if (customImg) {
+      return { ...s, image: customImg };
+    }
+    return s;
+  });
 
   const openDetail   = useCallback((s: DbService) => { setDetailService(s); document.body.style.overflow = "hidden"; }, []);
   const closeDetail  = useCallback(() => { setDetailService(null); document.body.style.overflow = ""; }, []);

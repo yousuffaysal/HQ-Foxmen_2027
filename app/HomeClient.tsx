@@ -1452,9 +1452,9 @@ export default function HomeClient({
                   desc: s.descr,
                   tags: s.count,
                   preview: s.badge || s.name.split(" ")[0],
-                  image: s.image || null,
+                  image: s.image || (i === 0 || s.name.toLowerCase().includes("web") ? "/assets/hero-showcase.png" : (i === 1 || s.name.toLowerCase().includes("ios") || s.name.toLowerCase().includes("android") ? "/assets/ios-showcase.png" : (i === 2 || s.name.toLowerCase().includes("ai") ? "/assets/ai-showcase.png" : null))),
                 }))
-              : svcRows.map(s => ({ ...s, image: null as string | null }))
+              : svcRows.map((s, i) => ({ ...s, image: (i === 0 ? "/assets/hero-showcase.png" : (i === 1 ? "/assets/ios-showcase.png" : (i === 2 ? "/assets/ai-showcase.png" : null))) as string | null }))
             ).map((s, i) => (
               <Link className="svc-row" href="/services" key={i}>
                 <span className="idx">{s.idx}</span>
