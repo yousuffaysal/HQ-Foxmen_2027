@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { constructMetadata } from "@/lib/metadata";
+import { BreadcrumbStructuredData } from "@/components/StructuredData";
 
 export const metadata: Metadata = constructMetadata({
   title: "Contact",
@@ -13,5 +14,10 @@ export const metadata: Metadata = constructMetadata({
 });
 
 export default function ContactLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return (
+    <>
+      <BreadcrumbStructuredData items={[{ name: "Contact Us", url: "/contact" }]} />
+      {children}
+    </>
+  );
 }

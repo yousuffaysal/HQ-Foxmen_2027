@@ -5,6 +5,7 @@ import "leaflet/dist/leaflet.css";
 import SiteShell from "@/components/SiteShell";
 import Script from "next/script";
 import { constructMetadata } from "@/lib/metadata";
+import { RootStructuredData } from "@/components/StructuredData";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -57,6 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         data-noise="on"
         suppressHydrationWarning
       >
+        <RootStructuredData />
         <SiteShell>{children}</SiteShell>
         <Script src="https://www.googletagmanager.com/gtag/js?id=G-J3RWYPW4EH" strategy="afterInteractive" />
         <Script id="google-analytics" strategy="afterInteractive">{`
