@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { cache } from "react";
 import { sql } from "@/lib/db";
+import { constructMetadata } from "@/lib/metadata";
 
 const BASE = "https://www.foxmen.studio";
 
@@ -87,17 +88,18 @@ export async function generateMetadata(
   const post = await fetchPost(slug);
 
   if (!post) {
-    return {
+    return constructMetadata({
       title: "Article",
       description: "An article from the Foxmen Studio journal — design craft, engineering, AI in production, and studio notes.",
-    };
+      url: `/journal/${slug}`,
+      type: "article",
+    });
   }
 
   const title = post.title;
   const description = post.excerpt ||
     "An article from the Foxmen Studio journal — design craft, engineering, AI in production, and studio notes.";
-  const url = `${BASE}/journal/${slug}`;
-  const image = post.cover_image || `${BASE}/assets/og-image.png`;
+  const image = post.cover_image || "/assets/og-image.png";
   const keywords = post.tags
     ? post.tags.split(",").map((t) => t.trim()).filter(Boolean)
     : [post.category, "Foxmen Studio"];
@@ -105,30 +107,16 @@ export async function generateMetadata(
     ? new Date(post.published_at).toISOString()
     : undefined;
 
-  return {
+  return constructMetadata({
     title,
     description,
+    url: `/journal/${slug}`,
+    image,
     keywords,
+    type: "article",
+    publishedTime,
     authors: [{ name: post.author_name || "Foxmen Studio", url: BASE }],
-    alternates: { canonical: url },
-    openGraph: {
-      title,
-      description,
-      url,
-      siteName: "Foxmen Studio",
-      type: "article",
-      publishedTime,
-      authors: post.author_name ? [post.author_name] : undefined,
-      tags: keywords,
-      images: [{ url: image, width: 1200, height: 630, alt: title }],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: [image],
-    },
-  };
+  });
 }
 
 export default async function JournalSlugLayout({

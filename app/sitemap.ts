@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { sql } from "@/lib/db";
+import { projectMap } from "@/app/work/data";
 
 const BASE = "https://www.foxmen.studio";
 
@@ -64,5 +65,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ];
 
-  return [...staticRoutes, ...journalRoutes];
+  const workRoutes: MetadataRoute.Sitemap = Object.keys(projectMap).map((slug) => ({
+    url: `${BASE}/work/${slug}`,
+    lastModified: now,
+    changeFrequency: "monthly" as const,
+    priority: 0.8,
+  }));
+
+  return [...staticRoutes, ...workRoutes, ...journalRoutes];
 }

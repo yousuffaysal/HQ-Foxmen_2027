@@ -4,6 +4,7 @@ import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import SiteShell from "@/components/SiteShell";
 import Script from "next/script";
+import { constructMetadata } from "@/lib/metadata";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,70 +40,9 @@ const urbanist = Urbanist({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL("https://www.foxmen.studio"),
-  title: {
-    default: "Foxmen Studio — Code. Craft. Care.",
-    template: "%s — Foxmen Studio",
-  },
-  description:
-    "Foxmen Studio is an international creative agency building websites, mobile apps, AI-integrated software, ecommerce and real estate platforms, design systems and brands. Est. 2025.",
-  keywords: [
-    "web design agency", "web development agency", "mobile app development",
-    "AI software development", "ecommerce development", "UI UX design agency",
-    "brand design", "Foxmen Studio", "Next.js development", "real estate platform",
-    "startup product agency", "digital agency", "design system",
-  ],
-  authors: [{ name: "Foxmen Studio", url: "https://www.foxmen.studio" }],
-  creator: "Foxmen Studio",
-  publisher: "Foxmen Studio",
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: "https://www.foxmen.studio",
-    siteName: "Foxmen Studio",
-    title: "Foxmen Studio — Code. Craft. Care.",
-    description:
-      "International creative agency building websites, mobile apps, AI-integrated software, ecommerce platforms, and design systems.",
-    images: [
-      {
-        url: "https://ik.imagekit.io/hkhhsyhak/foxmen-og-01.png",
-        width: 1200,
-        height: 630,
-        alt: "Foxmen Studio — Code. Craft. Care.",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Foxmen Studio — Code. Craft. Care.",
-    description:
-      "International creative agency building websites, mobile apps, AI-integrated software, ecommerce platforms, and design systems.",
-    images: ["https://ik.imagekit.io/hkhhsyhak/foxmen-og-01.png"],
-    creator: "@foxmenstudio",
-    site: "@foxmenstudio",
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-snippet": -1,
-      "max-image-preview": "large",
-      "max-video-preview": -1,
-    },
-  },
-  icons: {
-    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
-    apple: "/assets/logo-mark.svg",
-    shortcut: "/icon.svg",
-  },
-  alternates: {
-    canonical: "https://www.foxmen.studio/",
-  },
+export const metadata: Metadata = constructMetadata({
   category: "technology",
-};
+});
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
