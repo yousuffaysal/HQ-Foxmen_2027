@@ -319,7 +319,7 @@ function VisualMobile({ a }: { a:string }) {
   );
 }
 
-function VisualAI({ a }: { a?:string }) {
+export function VisualAI({ a }: { a?:string }) {
   return (
     <div style={{
       width: "100%", height: "100%", background: "#06060c",
@@ -337,41 +337,57 @@ function VisualAI({ a }: { a?:string }) {
       }} />
 
       {/* ── Top: 60 FPS Glowing Orb Ring ── */}
-      <div style={{ position: "relative", width: 120, height: 120, display: "grid", placeItems: "center", marginTop: 6, flexShrink: 0 }}>
-        {/* Outer glowing aura */}
+      <div style={{ position: "relative", width: 130, height: 130, display: "grid", placeItems: "center", marginTop: 4, flexShrink: 0 }}>
+        {/* Outer ambient glow */}
         <div style={{
           position: "absolute", inset: 0, borderRadius: "50%",
-          background: "conic-gradient(from 0deg, #ff2a85, #7928ca, #00f2fe, #ff2a85)",
-          filter: "blur(16px)", opacity: 0.75,
-          animation: "aiSpin 6s linear infinite",
+          background: "radial-gradient(circle, rgba(0,242,254,0.45) 0%, rgba(255,42,133,0.35) 50%, transparent 70%)",
+          filter: "blur(20px)",
+          animation: "aiPulse 3s ease-in-out infinite alternate",
         }} />
 
-        {/* Ring 1 - Base glowing Ribbon */}
+        {/* Morphing wrapper for organic torus breathing */}
         <div style={{
-          position: "absolute", inset: 4, borderRadius: "50%",
-          padding: 3.5, background: "conic-gradient(from 0deg, #ff2a85, #9333ea, #38bdf8, #f43f5e, #ff2a85)",
-          WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-          WebkitMaskComposite: "xor", maskComposite: "exclude",
-          animation: "aiSpin 4.5s linear infinite",
-        }} />
+          position: "absolute", inset: 6,
+          animation: "aiMorph 3.5s ease-in-out infinite alternate",
+          transformOrigin: "center center",
+        }}>
+          {/* Ring 1 - Forward spinning aurora ribbon */}
+          <div style={{
+            position: "absolute", inset: 0, borderRadius: "50%",
+            padding: 3.5, background: "conic-gradient(from 0deg, #ff2a85, #7928ca, #00f2fe, #ff2a85)",
+            WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+            WebkitMaskComposite: "xor", maskComposite: "exclude",
+            animation: "aiSpin 4s linear infinite",
+            filter: "drop-shadow(0 0 8px rgba(0,242,254,0.6))",
+          }} />
+        </div>
 
-        {/* Ring 2 - Reverse morphing Ribbon for 3D Torus effect */}
+        {/* Counter-rotating wrapper */}
         <div style={{
-          position: "absolute", inset: 8, borderRadius: "46%",
-          padding: 2.5, background: "conic-gradient(from 180deg, #38bdf8, #818cf8, #c084fc, #f43f5e, #38bdf8)",
-          WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-          WebkitMaskComposite: "xor", maskComposite: "exclude",
-          animation: "aiSpinReverse 7s linear infinite, aiMorph 3s ease-in-out infinite alternate",
-        }} />
+          position: "absolute", inset: 10,
+          animation: "aiMorphReverse 4s ease-in-out infinite alternate",
+          transformOrigin: "center center",
+        }}>
+          {/* Ring 2 - Reverse spinning purple/cyan ribbon */}
+          <div style={{
+            position: "absolute", inset: 0, borderRadius: "48%",
+            padding: 2.5, background: "conic-gradient(from 180deg, #00f2fe, #a855f7, #f43f5e, #00f2fe)",
+            WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+            WebkitMaskComposite: "xor", maskComposite: "exclude",
+            animation: "aiSpinReverse 6s linear infinite",
+            opacity: 0.85,
+          }} />
+        </div>
 
-        {/* Ring 3 - Inner core highlight */}
+        {/* Core highlight ring */}
         <div style={{
-          position: "absolute", inset: 16, borderRadius: "52%",
-          padding: 2, background: "conic-gradient(from 90deg, #fff, rgba(255,255,255,0), #38bdf8, rgba(255,255,255,0), #fff)",
+          position: "absolute", inset: 18, borderRadius: "50%",
+          padding: 2, background: "conic-gradient(from 90deg, #fff, rgba(255,255,255,0), #60a5fa, rgba(255,255,255,0), #fff)",
           WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
           WebkitMaskComposite: "xor", maskComposite: "exclude",
-          animation: "aiSpin 3s linear infinite",
-          opacity: 0.85,
+          animation: "aiSpin 2.5s linear infinite",
+          opacity: 0.9,
         }} />
       </div>
 
@@ -432,21 +448,24 @@ function VisualAI({ a }: { a?:string }) {
       {/* Embedded 60 FPS hardware accelerated keyframes */}
       <style>{`
         @keyframes aiSpin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+          0% { transform: rotate(0deg) translateZ(0); }
+          100% { transform: rotate(360deg) translateZ(0); }
         }
         @keyframes aiSpinReverse {
-          0% { transform: rotate(360deg); }
-          100% { transform: rotate(0deg); }
+          0% { transform: rotate(360deg) translateZ(0); }
+          100% { transform: rotate(0deg) translateZ(0); }
         }
         @keyframes aiMorph {
-          0% { transform: rotate(0deg) scale(1) skew(0deg); }
-          50% { transform: rotate(180deg) scaleX(1.08) scaleY(0.94) skew(3deg); }
-          100% { transform: rotate(360deg) scale(1) skew(0deg); }
+          0% { transform: scale(0.96, 1.04) skew(-3deg, 2deg) translateZ(0); }
+          100% { transform: scale(1.05, 0.95) skew(3deg, -2deg) translateZ(0); }
+        }
+        @keyframes aiMorphReverse {
+          0% { transform: scale(1.04, 0.96) skew(2deg, -3deg) translateZ(0); }
+          100% { transform: scale(0.95, 1.05) skew(-2deg, 3deg) translateZ(0); }
         }
         @keyframes aiPulse {
-          0% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.6; }
-          100% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.95; }
+          0% { transform: scale(0.9) translateZ(0); opacity: 0.5; }
+          100% { transform: scale(1.15) translateZ(0); opacity: 0.95; }
         }
       `}</style>
     </div>
@@ -565,6 +584,7 @@ function getShowcaseImage(name: string, idx?: number): string | null {
   const n = name.toLowerCase();
   if (idx === 0 || n.includes("web") || n.includes("design")) return "/assets/hero-showcase.png";
   if (idx === 1 || n.includes("ios") || n.includes("android") || n.includes("cross")) return "/assets/ios-showcase.png";
+  if (idx === 3 || n.includes("ecom") || n.includes("commerce") || n.includes("vendor") || n.includes("shop")) return "/assets/ecom-showcase.png";
   return null;
 }
 
@@ -906,7 +926,9 @@ function ServiceSection({ service, index, onDetail, onStart }: {
           aspectRatio:"4/3",
           position:"relative",
         }}>
-          {getShowcaseImage(service.name, index) || service.image ? (
+          {index === 2 || service.name.toLowerCase().includes("ai") || service.name.toLowerCase().includes("artificial") ? (
+            <VisualAI />
+          ) : getShowcaseImage(service.name, index) || service.image ? (
             <img
               src={getShowcaseImage(service.name, index) || service.image!}
               alt={service.name}

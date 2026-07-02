@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import ProjectEstimator from "@/app/components/ProjectEstimator";
+import { VisualAI } from "@/app/services/ServicesClient";
 import dynamic from "next/dynamic";
 const WorldMapDecoration = dynamic(
   () => import("@/app/components/WorldMapLeaflet"),
@@ -1452,9 +1453,9 @@ export default function HomeClient({
                   desc: s.descr,
                   tags: s.count,
                   preview: s.badge || s.name.split(" ")[0],
-                  image: s.image || (i === 0 || s.name.toLowerCase().includes("web") ? "/assets/hero-showcase.png" : (i === 1 || s.name.toLowerCase().includes("ios") || s.name.toLowerCase().includes("android") ? "/assets/ios-showcase.png" : (i === 2 || s.name.toLowerCase().includes("ai") ? "/assets/ai-showcase.png" : null))),
+                  image: s.image || (i === 0 || s.name.toLowerCase().includes("web") ? "/assets/hero-showcase.png" : (i === 1 || s.name.toLowerCase().includes("ios") || s.name.toLowerCase().includes("android") ? "/assets/ios-showcase.png" : (i === 3 || s.name.toLowerCase().includes("ecom") ? "/assets/ecom-showcase.png" : null))),
                 }))
-              : svcRows.map((s, i) => ({ ...s, image: (i === 0 ? "/assets/hero-showcase.png" : (i === 1 ? "/assets/ios-showcase.png" : (i === 2 ? "/assets/ai-showcase.png" : null))) as string | null }))
+              : svcRows.map((s, i) => ({ ...s, image: (i === 0 ? "/assets/hero-showcase.png" : (i === 1 ? "/assets/ios-showcase.png" : (i === 3 ? "/assets/ecom-showcase.png" : null))) as string | null }))
             ).map((s, i) => (
               <Link className="svc-row" href="/services" key={i}>
                 <span className="idx">{s.idx}</span>
@@ -1463,9 +1464,17 @@ export default function HomeClient({
                 <span className="tags">{s.tags}</span>
                 <span className="arrow"><SmArrow /></span>
                 <span className="preview">
-                  {s.image
-                    ? <img src={s.image} alt={s.title} style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:15,display:"block"}} />
-                    : s.preview}
+                  {i === 2 || s.title.toLowerCase().includes("ai") ? (
+                    <div style={{ width: "100%", height: "100%", borderRadius: 15, overflow: "hidden", position: "relative", background: "#06060c", pointerEvents: "none" }}>
+                      <div style={{ position: "absolute", inset: 0, transform: "scale(0.85)", transformOrigin: "center center" }}>
+                        <VisualAI />
+                      </div>
+                    </div>
+                  ) : s.image ? (
+                    <img src={s.image} alt={s.title} style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:15,display:"block"}} />
+                  ) : (
+                    s.preview
+                  )}
                 </span>
               </Link>
             ))}
