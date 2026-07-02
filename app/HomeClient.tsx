@@ -1453,9 +1453,9 @@ export default function HomeClient({
                   desc: s.descr,
                   tags: s.count,
                   preview: s.badge || s.name.split(" ")[0],
-                  image: s.image || (i === 0 || s.name.toLowerCase().includes("web") ? "/assets/hero-showcase.png" : (i === 1 || s.name.toLowerCase().includes("ios") || s.name.toLowerCase().includes("android") ? "/assets/ios-showcase.png" : (i === 3 || s.name.toLowerCase().includes("ecom") ? "/assets/ecom-showcase.png" : null))),
+                  image: s.image || (i === 0 || s.name.toLowerCase().includes("web") ? "/assets/hero-showcase.png" : (i === 1 || s.name.toLowerCase().includes("ios") || s.name.toLowerCase().includes("android") ? "/assets/ios-showcase.png" : (i === 3 || s.name.toLowerCase().includes("ecom") ? "/assets/ecom-showcase.png" : (i === 4 || s.name.toLowerCase().includes("real") || s.name.toLowerCase().includes("estate") ? "/assets/realestate-showcase.png" : (i === 5 || s.name.toLowerCase().includes("ui") || s.name.toLowerCase().includes("ux") ? "/assets/uiux-showcase.png" : null))))),
                 }))
-              : svcRows.map((s, i) => ({ ...s, image: (i === 0 ? "/assets/hero-showcase.png" : (i === 1 ? "/assets/ios-showcase.png" : (i === 3 ? "/assets/ecom-showcase.png" : null))) as string | null }))
+              : svcRows.map((s, i) => ({ ...s, image: (i === 0 ? "/assets/hero-showcase.png" : (i === 1 ? "/assets/ios-showcase.png" : (i === 3 ? "/assets/ecom-showcase.png" : (i === 4 ? "/assets/realestate-showcase.png" : (i === 5 ? "/assets/uiux-showcase.png" : null))))) as string | null }))
             ).map((s, i) => (
               <Link className="svc-row" href="/services" key={i}>
                 <span className="idx">{s.idx}</span>

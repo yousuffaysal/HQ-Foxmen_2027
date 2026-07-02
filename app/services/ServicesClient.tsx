@@ -250,7 +250,7 @@ const SVC_BG: Record<string, string> = {
   "AI-Integrated Software":       "#2A0A6B",
   "Ecommerce & Multi-vendor":     "#04422D",
   "Real-estate platforms":        "#6B2E09",
-  "UI · UX & Brand":              "#7A1048",
+  "UI · UX & Brand":              "#5a0618",
   "Performance marketing":        "#0A3324",
 };
 
@@ -573,18 +573,19 @@ const BUDGET_OPTIONS = [
   { value:"< $5k",      label:"< $5k",       sub:"Consultation / small scope" },
   { value:"$5k–$15k",   label:"$5k – $15k",  sub:"Landing page / MVP feature" },
   { value:"$15k–$50k",  label:"$15k – $50k", sub:"Full product build" },
-  { value:"$50k–$100k", label:"$50k – $100k",sub:"Complex platform" },
-  { value:"$100k+",     label:"$100k+",       sub:"Enterprise / long-term" },
-  { value:"custom",     label:"Custom",       sub:"Tell us your number" },
+  { value:"$50k–$150k", label:"$50k – $150k",sub:"Multi-platform ecosystem" },
+  { value:"$150k+",     label:"$150k+",      sub:"Enterprise transformation" },
 ];
 const TIMELINE_OPTIONS = ["ASAP","1–2 months","3–6 months","6+ months","Flexible"];
 type IForm = { service:string;name:string;email:string;company:string;description:string;budget:string;budget_custom:string;timeline:string;website:string };
 
 function getShowcaseImage(name: string, idx?: number): string | null {
   const n = name.toLowerCase();
+  if (idx === 5 || n.includes("ui") || n.includes("ux") || n.includes("brand")) return "/assets/uiux-showcase.png";
   if (idx === 0 || n.includes("web") || n.includes("design")) return "/assets/hero-showcase.png";
   if (idx === 1 || n.includes("ios") || n.includes("android") || n.includes("cross")) return "/assets/ios-showcase.png";
   if (idx === 3 || n.includes("ecom") || n.includes("commerce") || n.includes("vendor") || n.includes("shop")) return "/assets/ecom-showcase.png";
+  if (idx === 4 || n.includes("real-estate") || n.includes("real estate") || n.includes("property") || n.includes("estate")) return "/assets/realestate-showcase.png";
   return null;
 }
 
@@ -891,18 +892,21 @@ function ServiceSection({ service, index, onDetail, onStart }: {
       flexDirection: "column",
       overflow: "hidden",
     }}>
-      {/* ── top bar ── */}
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"20px 28px", flexShrink:0 }}>
-        <span style={{ fontFamily:"var(--f-mono)", fontSize:12, letterSpacing:".12em", color: isLight ? "rgba(13,0,32,.55)" : "rgba(255,255,255,.32)" }}>
+      {/* ── top bar: index on left, Start Project + Explore on right ── */}
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding: isMobile ? "16px 16px" : "20px 32px", flexShrink:0, flexWrap:"wrap", gap:14 }}>
+        <span style={{ fontFamily:"var(--f-mono)", fontSize:13, letterSpacing:".14em", color: isLight ? "rgba(13,0,32,.65)" : "rgba(255,255,255,.45)", fontWeight:600 }}>
           ({String(index + 1).padStart(2, "0")})
         </span>
-        <button onClick={onDetail} style={{ background:"transparent", border:"none", cursor:"pointer", fontFamily:"var(--f-display)", fontSize:15, color: isLight ? "#0d0020" : "rgba(255,255,255,.7)", letterSpacing:"-.01em", padding:0 }}>
-          Explore services
-        </button>
+        <div style={{ display:"flex", alignItems:"center" }}>
+          <button onClick={onStart} className="btn btn--brand" style={{ padding: "5px 6px 5px 16px", minHeight: 38 }}>
+            <span className="label" style={{ fontSize: 13.5 }}>Start this project</span>
+            <span className="chip" style={{ width: 28, height: 28 }}><ArrowIcon size={16} /></span>
+          </button>
+        </div>
       </div>
 
       {/* ── big heading ── */}
-      <div style={{ textAlign:"center", padding: isMobile ? "4px 20px 14px" : "2px 40px 14px", flexShrink:0 }}>
+      <div style={{ textAlign:"center", padding: isMobile ? "4px 20px 14px" : "4px 40px 16px", flexShrink:0 }}>
         <h2 style={{ margin:0, lineHeight:1.0, letterSpacing:"-.025em", fontSize:"clamp(36px,6.5vw,96px)" }}>
           <strong style={{ fontFamily:"var(--f-sans)", fontWeight:800, color: isLight ? "#0d0020" : "#fff", fontStyle:"normal" }}>{split[0]}</strong>
           {split[1] && <>{" "}<em style={{ fontFamily:"var(--f-display)", fontStyle:"italic", fontWeight:400, color: isLight ? "rgba(13,0,32,.82)" : "rgba(255,255,255,.88)" }}>{split[1]}</em></>}
@@ -915,7 +919,7 @@ function ServiceSection({ service, index, onDetail, onStart }: {
       </div>
 
       {/* ── central card mockup ── */}
-      <div style={{ flex:1, display:"flex", justifyContent:"center", alignItems:"center", padding: isMobile ? "0 16px 16px" : "0 40px 16px", overflow:"hidden", minHeight:0 }}>
+      <div style={{ flex:1, display:"flex", justifyContent:"center", alignItems:"center", padding: isMobile ? "0 16px 28px" : "0 40px 32px", overflow:"hidden", minHeight:0 }}>
         <div style={{
           background:"#fff",
           borderRadius:20,
@@ -937,19 +941,29 @@ function ServiceSection({ service, index, onDetail, onStart }: {
           ) : (
             Visual && <Visual a={bg} />
           )}
-        </div>
-      </div>
 
-      {/* ── bottom CTAs ── */}
-      <div style={{ display:"flex", gap:10, padding: isMobile ? "0 16px 24px" : "0 40px 24px", justifyContent:"center", flexShrink:0 }}>
-        <button onClick={onDetail} className="btn" style={{ "--bg": isLight ? "rgba(13,0,32,.08)" : "rgba(255,255,255,.12)", "--fg": isLight ? "#0d0020" : "#fff", "--chip": isLight ? "rgba(13,0,32,.15)" : "rgba(255,255,255,.18)", "--chipfg": isLight ? "#0d0020" : "#fff" } as React.CSSProperties}>
-          <span className="label">View details</span>
-          <span className="chip"><ArrowIcon /></span>
-        </button>
-        <button onClick={onStart} className="btn btn--brand">
-          <span className="label">Start this project</span>
-          <span className="chip"><ArrowIcon /></span>
-        </button>
+          {/* ── Floating View Details button inside image ── */}
+          <div style={{ position: "absolute", bottom: isMobile ? 12 : 20, right: isMobile ? 12 : 20, zIndex: 10 }}>
+            <button
+              onClick={onDetail}
+              className="btn"
+              style={{
+                "--bg": isLight ? "rgba(255,255,255,0.88)" : "rgba(10,10,14,0.82)",
+                "--fg": isLight ? "#0d0020" : "#fff",
+                "--chip": isLight ? "rgba(13,0,32,0.12)" : "rgba(255,255,255,0.18)",
+                "--chipfg": isLight ? "#0d0020" : "#fff",
+                backdropFilter: "blur(12px)",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+                border: isLight ? "1px solid rgba(0,0,0,0.12)" : "1px solid rgba(255,255,255,0.18)",
+                padding: "6px 8px 6px 18px",
+                minHeight: 42,
+              } as React.CSSProperties}
+            >
+              <span className="label" style={{ fontSize: 13.5, fontWeight: 600 }}>View details</span>
+              <span className="chip" style={{ width: 30, height: 30 }}><ArrowIcon size={16} /></span>
+            </button>
+          </div>
+        </div>
       </div>
     </section>
   );
