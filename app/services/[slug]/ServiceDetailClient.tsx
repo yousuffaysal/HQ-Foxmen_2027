@@ -1,684 +1,711 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useScrollReveal } from "@/hooks/useScrollReveal";
 
-/* ── Arrow Icon ── */
-function ArrowIcon({ size = 16 }: { size?: number }) {
+/* ═══════════════════════════════════════════════════════════════════════
+   FOXMEN STUDIO — SERVICE DETAIL PAGE (PIXEL-PERFECT ARCHITECTURE)
+   Matches /Details/Foxmen Studio.dc.html 1-to-1 in Layout, Style & Animation
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Animated Counter Hook ── */
+function AnimatedCounter({ target, suffix = "", duration = 1600 }: { target: number; suffix?: string; duration?: number }) {
+  const [val, setVal] = useState(0);
+  const [inView, setInView] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setInView(true);
+        observer.unobserve(entry.target);
+      }
+    }, { threshold: 0.3 });
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!inView) return;
+    let startTimestamp: number | null = null;
+    const step = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+      setVal(easeProgress * target);
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      } else {
+        setVal(target);
+      }
+    };
+    window.requestAnimationFrame(step);
+  }, [inView, target, duration]);
+
   return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M3.5 12.5L12.5 3.5M12.5 3.5H5.5M12.5 3.5V10.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+    <span ref={ref} style={{ fontVariantNumeric: "tabular-nums" }}>
+      {Math.round(val)}{suffix}
+    </span>
   );
 }
 
-/* ── Check / Plus Icon for Accordions ── */
-function AccordionIcon({ isOpen }: { isOpen: boolean }) {
-  return (
-    <div style={{
-      width: 28, height: 28, borderRadius: "50%",
-      background: isOpen ? "#000" : "rgba(0,0,0,0.06)",
-      color: isOpen ? "#fff" : "#000",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      transition: "all 0.25s ease", flexShrink: 0,
-      fontFamily: "var(--f-mono)", fontSize: 16, fontWeight: 700
-    }}>
-      {isOpen ? "−" : "+"}
-    </div>
-  );
-}
-
-/* ── DATA DEFINITIONS FOR ALL SERVICES ── */
-interface ServicePageData {
-  title: string;
-  subtitle: string;
-  heroImage: string;
-  heroBadge: string;
-  logos: string[];
-  bannerTitle: string;
-  bannerDesc: string;
-  bannerTag: string;
-  bannerColor: string;
-  gridTitle: string;
-  gridSub: string;
-  gridItems: Array<{ title: string; desc: string; color: string; tag: string }>;
-  darkRows: Array<{ title: string; desc: string; image: string; tag: string }>;
-  whyTitle: string;
-  whyItems: Array<{ title: string; desc: string }>;
-  industries: Array<{ name: string; desc: string; color: string }>;
-  metrics: Array<{ val: string; label: string; desc: string }>;
-  testimonials: Array<{ quote: string; name: string; title: string; avatar: string }>;
-  team: Array<{ name: string; role: string; bio: string; color: string }>;
+/* ── Universal Service Data Engine (Defaults to Web Design & Development exact copy) ── */
+interface ServiceContent {
+  h1Top: string;
+  h1MidPrefix: string;
+  h1MidEm: string;
+  h1Bottom: string;
+  heroDesc: string;
+  manifestoText: { before: string; em: string; after: string };
+  servicesTitle: { before: string; em: string };
+  servicesList: Array<{ title: string; desc: string }>;
+  caseStudies: Array<{ title: string; desc: string; tags: string[]; grad: string; image?: string; href?: string }>;
+  industries: Array<{ name: string; tag: string; grad: string }>;
   faqs: Array<{ q: string; a: string }>;
 }
 
-const SERVICES_DATA: Record<string, ServicePageData> = {
-  "web-design-development": {
-    title: "Website Design and Development Services",
-    subtitle: "Custom web development and award-winning UI/UX design engineered to scale your brand, accelerate performance, and drive high conversions.",
-    heroImage: "/assets/hero-showcase.png",
-    heroBadge: "Most Popular · Complete Web Ecosystem",
-    logos: ["Next.js 15", "React", "TypeScript", "Sanity CMS", "Stripe Connect", "Vercel Edge", "Tailwind CSS", "PostgreSQL", "Mapbox", "Algolia Search", "Figma Design", "GraphQL"],
-    bannerTitle: "Ready to reach more users and accelerate your digital transformation?",
-    bannerDesc: "We partner with ambitious startups, scale-ups, and global enterprises to craft blazing-fast web apps that outperform the competition.",
-    bannerTag: "RECHARGE 34% CONVERSION UPLIFT",
-    bannerColor: "#ff7597",
-    gridTitle: "Comprehensive Web Design & Development Services For Your Business",
-    gridSub: "Every project is architected from scratch using modern frameworks, ensuring zero technical debt and unlimited scalability.",
-    gridItems: [
-      { title: "UI/UX & Interactive Design", desc: "Award-winning interfaces engineered for visual clarity, intuitive workflows, and maximum customer conversion.", color: "#f3e8ff", tag: "Design Systems" },
-      { title: "Full-Stack Web Development", desc: "Custom React & Next.js architectures built for sub-second page loads, modularity, and rock-solid reliability.", color: "#d1fae5", tag: "Next.js & React" },
-      { title: "E-Commerce & Marketplaces", desc: "High-converting online stores with custom checkout flows, Stripe Connect multi-vendor payouts, and instant inventory sync.", color: "#fce7f3", tag: "High Conversion" },
-      { title: "Custom Web Applications", desc: "Scalable SaaS platforms, B2B customer portals, and internal enterprise dashboards designed for complex business logic.", color: "#ffedd5", tag: "SaaS & Portals" },
-      { title: "Headless CMS & API Integration", desc: "Seamless integration with Sanity, Strapi, and custom backend REST/GraphQL APIs for effortless content management.", color: "#dbeafe", tag: "Headless CMS" },
-      { title: "Performance & SEO Supremacy", desc: "100/100 Core Web Vitals, lightning-fast edge caching, semantic HTML5, and technical SEO wired into every component.", color: "#fef9c3", tag: "Core Web Vitals" },
-      { title: "AI & LLM Integration", desc: "Embed vector search, automated agentic assistants, and generative AI features directly into your core product workflow.", color: "#edd8ff", tag: "AI Powered" },
-      { title: "Enterprise Web Security", desc: "Bank-grade authentication, role-based access control (RBAC), end-to-end encryption, and automated security monitoring.", color: "#cffafe", tag: "SOC2 Compliance" },
-      { title: "24/7 SLA & Ongoing Scaling", desc: "Continuous monitoring, proactive performance upgrades, and dedicated engineering support after launch.", color: "#ecfdf5", tag: "SLA Support" },
+const SERVICE_CONFIGS: Record<string, ServiceContent> = {
+  "default": {
+    h1Top: "Web design",
+    h1MidPrefix: "& ",
+    h1MidEm: "development",
+    h1Bottom: "for bold brands",
+    heroDesc: "Foxmen Studio builds websites with the care of a print shop and the speed of a product team.",
+    manifestoText: {
+      before: "Your website is your hardest-working employee. It never sleeps, never goes off-script, and either earns trust in seconds — or loses it forever. We build the kind that ",
+      em: "earns it",
+      after: "."
+    },
+    servicesTitle: { before: "Everything a website needs, ", em: "under one roof" },
+    servicesList: [
+      { title: "Web strategy", desc: "Positioning, sitemaps and user journeys mapped before a single pixel is drawn." },
+      { title: "UX / UI design", desc: "Interfaces that feel effortless to use and unmistakably yours to look at." },
+      { title: "Web development", desc: "Fast, accessible builds in modern frameworks — no bloat, no shortcuts." },
+      { title: "eCommerce", desc: "Storefronts engineered to convert — from product page to checkout." },
+      { title: "CMS & WordPress", desc: "Publishing workflows your team will actually enjoy using." },
+      { title: "SEO & performance", desc: "Technical SEO, Core Web Vitals and tuning that compounds over time." }
     ],
-    darkRows: [
-      { title: "Bespoke Enterprise Web Platforms Engineered for Scale", desc: "We replace slow, monolithic legacy systems with modular headless web applications. Our architectures support millions of monthly active users without breaking a sweat.", image: "/assets/hero-showcase.png", tag: "Enterprise Architecture" },
-      { title: "High-Conversion Website Design for B2B Industry Leaders", desc: "First impressions dictate trust. We combine cinematic typography, subtle micro-animations, and data-driven UX patterns to turn enterprise visitors into high-value qualified pipelines.", image: "/assets/uiux-showcase.png", tag: "B2B Lead Generation" },
-      { title: "Modern Headless E-Commerce & Multi-Vendor Marketplaces", desc: "Unshackle your store from restrictive templates. We build custom front-ends on top of robust e-commerce engines, delivering sub-second checkout speeds and elevated brand experiences.", image: "/assets/ecom-showcase.png", tag: "Headless Commerce" },
-    ],
-    whyTitle: "Why Partner With Foxmen Studio As Your Web Design Agency?",
-    whyItems: [
-      { title: "Strategic Alignment With Your Business Goals", desc: "We don't just write code; we analyze your unit economics, target audience, and competitive landscape to build digital assets that directly impact your bottom line." },
-      { title: "Lightning-Fast Performance & SEO Supremacy", desc: "By leveraging Next.js server components and Vercel edge networks, our sites consistently hit 100/100 Google Lighthouse scores, driving organic search visibility." },
-      { title: "Modern Tech Stack With Zero Vendor Lock-in", desc: "We build on open-source, industry-standard frameworks like React, TypeScript, and PostgreSQL. You own 100% of your source code and intellectual property." },
-      { title: "Rigorous QA & Cross-Browser Testing", desc: "Every release undergoes extensive automated testing, responsive layout verification across 30+ devices, and strict accessibility (WCAG 2.1 AA) audits." },
-      { title: "Direct Access to Senior Engineers & Designers", desc: "No junior account managers or communication silos. You pair-program and collaborate directly with the senior architects designing and building your product." },
-      { title: "Post-Launch Growth & Continuous Optimization", desc: "Our partnership doesn't end at deployment. We monitor user analytics, run A/B conversion tests, and iteratively release enhancements to keep your lead growing." },
+    caseStudies: [
+      { title: "Celeste — AI-native marketplace", desc: "One conversation, one cart, every verified vendor — shopping, intelligently calm.", tags: ["E-commerce", "AI", "Branding"], grad: "repeating-linear-gradient(-45deg, #1e1b26, #1e1b26 12px, #272134 12px, #272134 24px)", image: "https://res.cloudinary.com/djofqa3vc/image/upload/v1780465629/foxmen-studio/ma7yhwsyq82ral5op4hg.png", href: "/work/celeste-ai-marketplace" },
+      { title: "Redleaf — AI-Powered Ecommerce", desc: "Revolutionizing Ecommerce with AI — high-converting storefronts with intelligent product recommendations.", tags: ["E-commerce", "AI", "Design"], grad: "repeating-linear-gradient(-45deg, #16202a, #16202a 12px, #1b2938 12px, #1b2938 24px)", image: "https://res.cloudinary.com/djofqa3vc/image/upload/v1778950272/foxmen-studio/i475h5xtcyrqofdgeuzl.png", href: "/work/redleaf-ai-powered-ecommerce" },
+      { title: "Skill-Bridge — Intelligent Learning Platform", desc: "An intelligent learning platform designed for seamless student engagement and AI-powered course delivery.", tags: ["E-Learning", "Web", "AI"], grad: "repeating-linear-gradient(-45deg, #241a2c, #241a2c 12px, #2f2138 12px, #2f2138 24px)", image: "https://res.cloudinary.com/djofqa3vc/image/upload/v1779473367/foxmen-studio/wwfc4njv26awz1jqufke.png", href: "/work/skill-bridge" }
     ],
     industries: [
-      { name: "Fintech & Banking", desc: "Secure transaction portals, real-time analytics dashboards, and compliant onboarding flows.", color: "#ffedd5" },
-      { name: "SaaS & Cloud Platforms", desc: "Intuitive product interfaces, subscription billing engines, and developer documentation portals.", color: "#f3e8ff" },
-      { name: "Healthcare & Telemed", desc: "HIPAA-compliant patient portals, virtual appointment booking, and encrypted medical data systems.", color: "#d1fae5" },
-      { name: "E-Commerce & Retail", desc: "Luxury brand experiences, headless shopping carts, and multi-currency global checkout systems.", color: "#dbeafe" },
-      { name: "Real Estate & PropTech", desc: "Interactive property map clustering, virtual 3D tours, and high-speed listing search engines.", color: "#fce7f3" },
-      { name: "Luxury & Lifestyle", desc: "Immersive visual storytelling, smooth WebGL motion graphics, and editorial brand design.", color: "#cffafe" },
-    ],
-    metrics: [
-      { val: "300%+", label: "Organic Search Growth", desc: "Average increase in non-paid search traffic within 6 months of launching our SEO-optimized Next.js architectures." },
-      { val: "< 0.8s", label: "Edge Page Load Time", desc: "Sub-second initial page render speeds globally, dramatically reducing bounce rates and boosting user engagement." },
-      { val: "45%", label: "Conversion Rate Uplift", desc: "Average increase in lead submission and checkout completion rates through our conversion-focused UX engineering." },
-      { val: "100%", label: "IP & Code Ownership", desc: "You retain full intellectual property rights, repository ownership, and zero recurring proprietary licensing fees." },
-      { val: "99.99%", label: "Enterprise Uptime", desc: "SLA-backed infrastructure reliability deployed across global multi-region edge networks." },
-      { val: "2x", label: "Faster Time-to-Market", desc: "Our modular component libraries and agile pair-programming sprints cut standard development cycles in half." },
-    ],
-    testimonials: [
-      { quote: "Foxmen Studio completely rebuilt our core web application in 8 weeks. Our conversion rate jumped by 42% in the first month, and our page load speed dropped from 4.2 seconds to 600 milliseconds.", name: "Marcus Vance", title: "VP of Product, Apex FinTech", avatar: "#6b46c1" },
-      { quote: "Working with Foxmen felt like having an elite internal engineering team. Their attention to UI/UX detail and clean TypeScript architecture set a new benchmark for our entire engineering org.", name: "Sarah Jenkins", title: "Founder & CEO, Lumina SaaS", avatar: "#10b981" },
-      { quote: "They delivered a headless multi-vendor e-commerce platform capable of handling 50,000 concurrent shoppers during our Black Friday drop without a single glitch or slowdown. Simply incredible.", name: "David K.", title: "Head of Digital, Peak Gear", avatar: "#f97316" },
-    ],
-    team: [
-      { name: "Alexander Fox", role: "Principal Architect & Founder", bio: "12+ years engineering high-scale web systems. Former senior tech lead specializing in distributed systems and Next.js performance.", color: "#e0e7ff" },
-      { name: "Elena Rostova", role: "Head of UI/UX & Design Systems", bio: "Award-winning design director obsessed with micro-typography, golden ratio grids, and seamless design-to-code design systems.", color: "#fce7f3" },
-      { name: "Liam Chen", role: "Lead Full-Stack Engineer", bio: "TypeScript and React compiler specialist. Architected real-time WebSocket trading engines and high-throughput PostgreSQL databases.", bio: "Expert in edge computing and modern state management.", color: "#d1fae5" },
-      { name: "Sofia Martinez", role: "VP of Growth & Technical SEO", bio: "Data scientist and technical SEO strategist who engineered organic search funnels generating $20M+ in pipeline revenue.", color: "#ffedd5" },
-      { name: "Julian Vance", role: "Principal Motion & WebGL Engineer", bio: "Pioneer in browser GPU acceleration, custom Three.js shaders, and buttery smooth 60 FPS interactive animations.", color: "#f3e8ff" },
+      { name: "Fintech", tag: "fintech project", grad: "repeating-linear-gradient(-45deg, #efeae2, #efeae2 10px, #e6e0d5 10px, #e6e0d5 20px)" },
+      { name: "Healthcare", tag: "health project", grad: "repeating-linear-gradient(-45deg, #f0e4fd, #f0e4fd 10px, #e5d2fb 10px, #e5d2fb 20px)" },
+      { name: "SaaS", tag: "saas project", grad: "repeating-linear-gradient(-45deg, #e9e9e9, #e9e9e9 10px, #dedede 10px, #dedede 20px)" },
+      { name: "E-commerce", tag: "retail project", grad: "repeating-linear-gradient(-45deg, #efeae2, #efeae2 10px, #e6e0d5 10px, #e6e0d5 20px)" },
+      { name: "Education", tag: "edtech project", grad: "repeating-linear-gradient(-45deg, #f0e4fd, #f0e4fd 10px, #e5d2fb 10px, #e5d2fb 20px)" }
     ],
     faqs: [
-      { q: "How long does a custom website or web application project typically take?", a: "A tailored marketing website or redesign typically takes 4 to 6 weeks from initial discovery to production launch. A comprehensive custom web application or multi-vendor e-commerce platform usually spans 8 to 12 weeks depending on integration complexity and feature scope." },
-      { q: "What is the difference between custom web development and website builders like WordPress or Wix?", a: "Website builders rely on bloated generic templates and third-party plugins that severely degrade page speed, create security vulnerabilities, and limit design freedom. Our custom Next.js architectures are engineered from scratch—delivering instant sub-second load times, impenetrable security, custom business logic, and 100/100 Google Core Web Vitals scores." },
-      { q: "Do you provide ongoing maintenance, hosting, and support after launch?", a: "Yes. We offer dedicated SLA support packages that include 24/7 infrastructure monitoring, automated security patches, Next.js framework upgrades, and a dedicated monthly engineering retainer for continuous feature scaling and optimization." },
-      { q: "How do we get started and what does the onboarding process look like?", a: "Getting started is simple: submit an inquiry through our form below or schedule an exploratory call. We'll review your brief, conduct a technical architecture audit, and deliver a detailed scope of work with guaranteed timeline milestones within 48 hours." },
-      { q: "Can you integrate our new website with our existing CRM, ERP, and payment gateways?", a: "Absolutely. We specialize in deep API integrations. Whether you use Salesforce, HubSpot, SAP, NetSuite, Stripe Connect, or proprietary internal databases, we build secure, automated middleware and real-time synchronization pipelines." },
-    ],
+      { q: "How much does a website cost?", a: "Most projects land between a focused landing page and a full replatform. After one scoping call we send a fixed quote — no hourly surprises, no scope creep." },
+      { q: "How long does a project take?", a: "A typical site ships in six to ten weeks: two for strategy, three to four for design, the rest for build and QA. Rebrands and eCommerce run longer." },
+      { q: "Do you work with in-house teams?", a: "Constantly. We slot in as the design-and-build arm next to your marketing or product team, working in your tools and handing off clean, documented code." },
+      { q: "What happens after launch?", a: "Thirty days of included support, then an optional care plan: performance monitoring, content updates and a quarterly conversion review." },
+      { q: "Can you redesign without replatforming?", a: "Yes — if your stack is healthy we redesign on top of it. If it's fighting you, we'll say so and show you the honest cost of both paths." }
+    ]
   },
+  "ios-android-mobile-apps": {
+    h1Top: "iOS & Android",
+    h1MidPrefix: "& ",
+    h1MidEm: "mobile apps",
+    h1Bottom: "for bold brands",
+    heroDesc: "Foxmen Studio engineers native mobile experiences that feel like Apple Design Award winners from day one.",
+    manifestoText: {
+      before: "A mobile application lives in your customer's pocket. If it stutters, drains battery, or feels clunky, it gets uninstalled in seconds. We design and build apps that become a daily ",
+      em: "obsession",
+      after: "."
+    },
+    servicesTitle: { before: "Everything a mobile app needs, ", em: "under one roof" },
+    servicesList: [
+      { title: "Mobile Strategy", desc: "Platform architecture, offline data sync, and monetization models mapped before writing code." },
+      { title: "Native iOS (Swift)", desc: "High-performance iOS experiences with custom SwiftUI animations and Metal shaders." },
+      { title: "Native Android", desc: "Kotlin architectures engineered for seamless frame rates across every Android device." },
+      { title: "React Native / Expo", desc: "Cross-platform mobile apps with native bridges that share code without sacrificing speed." },
+      { title: "App Store Optimization", desc: "Iconography, preview videos, and keyword strategy to rank #1 in the App Store." },
+      { title: "Backend API Integration", desc: "Real-time WebSockets, push notifications, and low-latency edge API synchronization." }
+    ],
+    caseStudies: [
+      { title: "Celeste — AI-native marketplace", desc: "One conversation, one cart, every verified vendor — shopping, intelligently calm.", tags: ["E-commerce", "AI", "Branding"], grad: "repeating-linear-gradient(-45deg, #1e1b26, #1e1b26 12px, #272134 12px, #272134 24px)", image: "https://res.cloudinary.com/djofqa3vc/image/upload/v1780465629/foxmen-studio/ma7yhwsyq82ral5op4hg.png", href: "/work/celeste-ai-marketplace" },
+      { title: "Redleaf — AI-Powered Ecommerce", desc: "Revolutionizing Ecommerce with AI — high-converting storefronts with intelligent product recommendations.", tags: ["E-commerce", "AI", "Design"], grad: "repeating-linear-gradient(-45deg, #16202a, #16202a 12px, #1b2938 12px, #1b2938 24px)", image: "https://res.cloudinary.com/djofqa3vc/image/upload/v1778950272/foxmen-studio/i475h5xtcyrqofdgeuzl.png", href: "/work/redleaf-ai-powered-ecommerce" },
+      { title: "Skill-Bridge — Intelligent Learning Platform", desc: "An intelligent learning platform designed for seamless student engagement and AI-powered course delivery.", tags: ["E-Learning", "Web", "AI"], grad: "repeating-linear-gradient(-45deg, #241a2c, #241a2c 12px, #2f2138 12px, #2f2138 24px)", image: "https://res.cloudinary.com/djofqa3vc/image/upload/v1779473367/foxmen-studio/wwfc4njv26awz1jqufke.png", href: "/work/skill-bridge" }
+    ],
+    industries: [
+      { name: "Fintech", tag: "mobile banking", grad: "repeating-linear-gradient(-45deg, #efeae2, #efeae2 10px, #e6e0d5 10px, #e6e0d5 20px)" },
+      { name: "Travel & GPS", tag: "offline maps", grad: "repeating-linear-gradient(-45deg, #f0e4fd, #f0e4fd 10px, #e5d2fb 10px, #e5d2fb 20px)" },
+      { name: "Health & Fit", tag: "healthkit sync", grad: "repeating-linear-gradient(-45deg, #e9e9e9, #e9e9e9 10px, #dedede 10px, #dedede 20px)" },
+      { name: "E-commerce", tag: "apple pay checkout", grad: "repeating-linear-gradient(-45deg, #efeae2, #efeae2 10px, #e6e0d5 10px, #e6e0d5 20px)" },
+      { name: "Media", tag: "audio streaming", grad: "repeating-linear-gradient(-45deg, #f0e4fd, #f0e4fd 10px, #e5d2fb 10px, #e5d2fb 20px)" }
+    ],
+    faqs: [
+      { q: "Should we build native iOS/Android or React Native?", a: "We analyze your performance needs, team structure, and budget. For maximum GPU animation and sensor usage, we build native Swift/Kotlin. For rapid cross-platform scale, we deploy custom Expo React Native." },
+      { q: "How long does a mobile app build take?", a: "An initial production release typically ships in 8 to 12 weeks, including App Store and Google Play review cycles." },
+      { q: "Do you handle App Store submission and compliance?", a: "Yes. We manage certificates, provisioning profiles, privacy disclosures, and Apple/Google review negotiations end-to-end." },
+      { q: "Can we integrate existing web backend systems?", a: "Constantly. We build secure mobile API gateways that authenticate directly with your legacy databases or cloud infrastructure." },
+      { q: "What post-launch support do you provide?", a: "We monitor crash telemetry, OS update compatibility (iOS 19 / Android 16 ready), and continuous conversion rate optimization." }
+    ]
+  }
 };
 
-/* Fallback for other slugs */
-const DEFAULT_DATA: ServicePageData = {
-  ...SERVICES_DATA["web-design-development"],
-  title: "Custom Digital Product & Software Engineering",
-  subtitle: "End-to-end product design, full-stack engineering, and scalable digital transformation tailored to your exact business specifications.",
+export type DbProject = {
+  id?: number;
+  name?: string;
+  tagline?: string;
+  industry?: string;
+  scope?: string;
+  thumbnail?: string;
+  slug?: string;
 };
 
-export default function ServiceDetailClient({ slug }: { slug: string }) {
-  useScrollReveal(".reveal, .fade");
-  const data = SERVICES_DATA[slug] || {
-    ...DEFAULT_DATA,
-    title: slug.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") + " Services",
-  };
+export default function ServiceDetailClient({ slug, dbProjects }: { slug: string; dbProjects?: DbProject[] }) {
+  const baseContent = SERVICE_CONFIGS[slug] || SERVICE_CONFIGS["default"];
+  const content = React.useMemo(() => {
+    if (!dbProjects || dbProjects.length === 0) return baseContent;
+    const mappedCases = dbProjects.slice(0, 3).map((p, idx) => ({
+      title: p.name ? p.name.trim() : "Featured Case Study",
+      desc: p.tagline || "An award-winning digital experience engineered for conversion and scalability.",
+      tags: p.scope ? p.scope.split("·").map(t => t.trim()).slice(0, 3) : [p.industry || "Web", "AI"],
+      grad: idx % 3 === 0
+        ? "repeating-linear-gradient(-45deg, #1e1b26, #1e1b26 12px, #272134 12px, #272134 24px)"
+        : idx % 3 === 1
+        ? "repeating-linear-gradient(-45deg, #16202a, #16202a 12px, #1b2938 12px, #1b2938 24px)"
+        : "repeating-linear-gradient(-45deg, #241a2c, #241a2c 12px, #2f2138 12px, #2f2138 24px)",
+      image: p.thumbnail || undefined,
+      href: p.slug ? `/work/${p.slug}` : "/work"
+    }));
+    return {
+      ...baseContent,
+      caseStudies: mappedCases
+    };
+  }, [baseContent, dbProjects]);
 
-  const [openWhy, setOpenWhy] = useState<number | null>(0);
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
+  /* ── State for FAQ Accordions ── */
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  /* Form State */
-  const [formState, setFormState] = useState({
-    name: "", email: "", company: "", budget: "$15k–$50k", desc: ""
-  });
-  const [submitted, setSubmitted] = useState(false);
+  /* ── Scroll Animations Engine (Parallax, Scrub, Horizontal, Rail) ── */
+  const [scrollY, setScrollY] = useState(0);
+  const [windowHeight, setWindowHeight] = useState(800);
+  const [windowWidth, setWindowWidth] = useState(1200);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-  };
+  /* Horizontal Scroll Section Refs */
+  const hWrapRef = useRef<HTMLDivElement>(null);
+  const hTrackRef = useRef<HTMLDivElement>(null);
+  const [hExtra, setHExtra] = useState(0);
+
+  /* Case Studies Rail Active State */
+  const caseRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [activeCase, setActiveCase] = useState(0);
+
+  /* Manifesto Scrub Ref */
+  const manifestoRef = useRef<HTMLDivElement>(null);
+  const [manifestoWords, setManifestoWords] = useState<string[]>([]);
+  const [manifestoScrubCount, setManifestoScrubCount] = useState(0);
+
+  useEffect(() => {
+    // Split manifesto text into words
+    const fullText = `${content.manifestoText.before} ${content.manifestoText.em} ${content.manifestoText.after}`;
+    setManifestoWords(fullText.split(/\s+/).filter(Boolean));
+  }, [content]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowHeight(window.innerHeight);
+      setWindowWidth(window.innerWidth);
+      if (hTrackRef.current) {
+        const extra = Math.max(0, hTrackRef.current.scrollWidth + 112 - window.innerWidth);
+        setHExtra(extra);
+        if (hWrapRef.current) {
+          hWrapRef.current.style.height = `${window.innerHeight + extra}px`;
+        }
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [content]);
+
+  useEffect(() => {
+    let rafId: number;
+    const handleScroll = () => {
+      const sy = window.scrollY;
+      setScrollY(sy);
+
+      const vh = window.innerHeight;
+
+      // Case studies active tracker
+      let activeIdx = 0;
+      caseRefs.current.forEach((el, i) => {
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        if (r.top < vh * 0.55) {
+          activeIdx = i;
+        }
+      });
+      setActiveCase(activeIdx);
+
+      // Manifesto word scrub
+      if (manifestoRef.current && manifestoWords.length > 0) {
+        const r = manifestoRef.current.getBoundingClientRect();
+        const p = Math.max(0, Math.min(1, (vh * 0.9 - r.top) / (r.height + vh * 0.55)));
+        const n = Math.floor(p * (manifestoWords.length + 2));
+        setManifestoScrubCount(n);
+      }
+    };
+
+    const onScroll = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(handleScroll);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    handleScroll();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(rafId);
+    };
+  }, [manifestoWords.length]);
+
+  /* Calculate Horizontal Progress */
+  let hProgress = 0;
+  if (hWrapRef.current && hExtra > 0) {
+    const r = hWrapRef.current.getBoundingClientRect();
+    const total = hWrapRef.current.offsetHeight - windowHeight;
+    if (total > 0) {
+      hProgress = Math.max(0, Math.min(1, -r.top / total));
+    }
+  }
+
+  /* Font Styles matching Foxmen Studio.dc.html */
+  const serifFont = "var(--font-instrument-serif, 'Instrument Serif', serif)";
+  const monoFont = "var(--font-geist-mono, ui-monospace, Menlo, monospace)";
+  const sansFont = "var(--font-geist-sans, Geist, system-ui, sans-serif)";
 
   return (
-    <div style={{ background: "#f8f9fb", minHeight: "100vh", color: "#0d0020", fontFamily: "var(--f-sans)", overflowX: "hidden" }}>
+    <div style={{ background: "#f5f3ee", color: "#141414", fontFamily: sansFont, WebkitFontSmoothing: "antialiased" } as React.CSSProperties}>
       
-      {/* ── TOP BREADCRUMB BAR ── */}
-      <div style={{ background: "#fff", borderBottom: "1px solid rgba(0,0,0,0.06)", padding: "16px 40px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Link href="/services" style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: "var(--f-mono)", fontSize: 13, color: "rgba(13,0,32,0.6)", textDecoration: "none", fontWeight: 600 }}>
-          <span style={{ transform: "rotate(180deg)", display: "inline-block" }}>↗</span> Back to all services
-        </Link>
-        <span style={{ fontFamily: "var(--f-mono)", fontSize: 12, color: "rgba(13,0,32,0.4)", textTransform: "uppercase", letterSpacing: ".12em" }}>
-          {data.heroBadge}
-        </span>
+      {/* Inline styles for marquee and specific animations */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes fx-marquee {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
+        }
+        .fx-hover-bg:hover {
+          background: #fbfaf6 !important;
+        }
+        .fx-hover-scale:hover {
+          transform: scale(1.04) !important;
+        }
+        .fx-hover-scale-lg:hover {
+          transform: scale(1.05) !important;
+        }
+        .fx-hover-white:hover {
+          color: #fff !important;
+        }
+      `}} />
+
+      {/* ============ HERO — LEDGER GRID ============ */}
+      <div data-screen-label="Hero" style={{ background: "#f5f3ee" }}>
+        
+        {/* Row 1 */}
+        <div style={{ borderBottom: "1px solid rgba(0,0,0,0.12)", padding: "64px 56px 10px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", overflow: "hidden" }}>
+          <h1 style={{ fontFamily: serifFont, fontWeight: 400, fontSize: "clamp(64px, 8.5vw, 148px)", lineHeight: 1, letterSpacing: "-0.015em", color: "#141414", margin: 0 }}>
+            {content.h1Top}
+          </h1>
+          <span style={{ font: `500 12px ${monoFont}`, color: "rgba(0,0,0,0.4)", paddingBottom: "20px" }}>(01)</span>
+        </div>
+
+        {/* Row 2 */}
+        <div style={{ borderBottom: "1px solid rgba(0,0,0,0.12)", padding: "24px 56px 10px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", overflow: "hidden" }}>
+          <h1 style={{ fontFamily: serifFont, fontWeight: 400, fontSize: "clamp(64px, 8.5vw, 148px)", lineHeight: 1, letterSpacing: "-0.015em", color: "#141414", margin: 0 }}>
+            {content.h1MidPrefix}<em style={{ color: "#B86CF9", fontStyle: "italic" }}>{content.h1MidEm}</em>
+          </h1>
+          <span style={{ font: `500 12px ${monoFont}`, color: "rgba(0,0,0,0.4)", paddingBottom: "20px" }}>(02)</span>
+        </div>
+
+        {/* Row 3 */}
+        <div style={{ borderBottom: "1px solid rgba(0,0,0,0.12)", padding: "24px 56px 10px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", overflow: "hidden" }}>
+          <h1 style={{ fontFamily: serifFont, fontWeight: 400, fontSize: "clamp(64px, 8.5vw, 148px)", lineHeight: 1, letterSpacing: "-0.015em", color: "rgba(20,20,20,0.35)", margin: 0 }}>
+            {content.h1Bottom}
+          </h1>
+          <span style={{ font: `500 12px ${monoFont}`, color: "rgba(0,0,0,0.4)", paddingBottom: "20px" }}>(03)</span>
+        </div>
+
+        {/* Meta Row */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", borderBottom: "1px solid rgba(0,0,0,0.12)" }}>
+          <div style={{ padding: "28px 32px 28px 56px", borderRight: "1px solid rgba(0,0,0,0.12)", fontSize: "15px", lineHeight: 1.55, color: "rgba(20,20,20,0.68)", display: "flex", alignItems: "center" }}>
+            {content.heroDesc}
+          </div>
+          <div style={{ padding: "28px 32px", borderRight: "1px solid rgba(0,0,0,0.12)" }}>
+            <div style={{ fontFamily: serifFont, fontSize: "42px", lineHeight: 1, color: "#141414" }}>
+              <AnimatedCounter target={120} suffix="+" />
+            </div>
+            <div style={{ fontSize: "12px", color: "rgba(0,0,0,0.45)", marginTop: "6px" }}>launches</div>
+          </div>
+          <div style={{ padding: "28px 32px", borderRight: "1px solid rgba(0,0,0,0.12)" }}>
+            <div style={{ fontFamily: serifFont, fontSize: "42px", lineHeight: 1, color: "#141414" }}>
+              <AnimatedCounter target={98} suffix="%" />
+            </div>
+            <div style={{ fontSize: "12px", color: "rgba(0,0,0,0.45)", marginTop: "6px" }}>return clients</div>
+          </div>
+          <div style={{ padding: "24px 56px 24px 32px", display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
+            <a href="#contact" className="fx-hover-scale" style={{ display: "flex", alignItems: "center", gap: "10px", background: "#141414", color: "#fff", borderRadius: "999px", padding: "10px 10px 10px 24px", fontSize: "15px", fontWeight: 500, textDecoration: "none", cursor: "pointer", transition: "transform 0.3s ease" }}>
+              Start a project
+              <span style={{ width: "36px", height: "36px", background: "#fff", color: "#141414", borderRadius: "999px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "15px" }}>↗</span>
+            </a>
+          </div>
+        </div>
+
+        {/* Work Strip with Parallax */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1px", background: "rgba(0,0,0,0.12)", borderBottom: "1px solid rgba(0,0,0,0.12)" }}>
+          <div style={{ height: "220px", overflow: "hidden", position: "relative" }}>
+            <div style={{ position: "absolute", left: 0, right: 0, top: "-50px", bottom: "-50px", background: "repeating-linear-gradient(-45deg, #efeae2, #efeae2 10px, #e6e0d5 10px, #e6e0d5 20px)", display: "flex", alignItems: "center", justifyContent: "center", transform: `translateY(${(-scrollY * 0.12).toFixed(1)}px)` }}>
+              <span style={{ font: `500 10px ${monoFont}`, color: "rgba(0,0,0,0.45)", background: "rgba(255,255,255,0.85)", padding: "3px 8px", borderRadius: "4px" }}>work 01</span>
+            </div>
+          </div>
+          <div style={{ height: "220px", overflow: "hidden", position: "relative" }}>
+            <div style={{ position: "absolute", left: 0, right: 0, top: "-50px", bottom: "-50px", background: "repeating-linear-gradient(-45deg, #f0e4fd, #f0e4fd 10px, #e5d2fb 10px, #e5d2fb 20px)", display: "flex", alignItems: "center", justifyContent: "center", transform: `translateY(${(-scrollY * 0.2).toFixed(1)}px)` }}>
+              <span style={{ font: `500 10px ${monoFont}`, color: "rgba(0,0,0,0.45)", background: "rgba(255,255,255,0.85)", padding: "3px 8px", borderRadius: "4px" }}>work 02</span>
+            </div>
+          </div>
+          <div style={{ height: "220px", overflow: "hidden", position: "relative" }}>
+            <div style={{ position: "absolute", left: 0, right: 0, top: "-50px", bottom: "-50px", background: "repeating-linear-gradient(-45deg, #e9e9e9, #e9e9e9 10px, #dedede 10px, #dedede 20px)", display: "flex", alignItems: "center", justifyContent: "center", transform: `translateY(${(-scrollY * 0.12).toFixed(1)}px)` }}>
+              <span style={{ font: `500 10px ${monoFont}`, color: "rgba(0,0,0,0.45)", background: "rgba(255,255,255,0.85)", padding: "3px 8px", borderRadius: "4px" }}>work 03</span>
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      {/* ── 1. HERO SECTION ── */}
-      <section className="reveal" style={{ padding: "80px 40px 100px", maxWidth: 1400, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: 60, alignItems: "center" }}>
-        <div>
-          <span style={{ display: "inline-block", padding: "6px 14px", borderRadius: 999, background: "#0d0020", color: "#fff", fontFamily: "var(--f-mono)", fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase", marginBottom: 24 }}>
-            {slug.replace(/-/g, " ")}
-          </span>
-          <h1 style={{ fontSize: "clamp(40px, 5.5vw, 76px)", fontWeight: 900, lineHeight: 1.02, letterSpacing: "-.035em", margin: "0 0 24px", color: "#0d0020" }}>
-            {data.title}
-          </h1>
-          <p style={{ fontSize: "clamp(18px, 1.6vw, 22px)", lineHeight: 1.6, color: "rgba(13,0,32,0.72)", margin: "0 0 40px", maxWidth: 620, fontWeight: 400 }}>
-            {data.subtitle}
-          </p>
-          <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-            <a href="#inquiry-form" className="btn btn--brand" style={{ padding: "14px 32px", fontSize: 16, minHeight: 56 }}>
-              <span className="label">Start a project</span>
-              <span className="chip" style={{ width: 34, height: 34 }}><ArrowIcon size={18} /></span>
-            </a>
-            <Link href="/services" className="btn" style={{ "--bg": "rgba(0,0,0,0.06)", "--fg": "#0d0020", "--chip": "rgba(0,0,0,0.12)", "--chipfg": "#0d0020", padding: "14px 28px", fontSize: 16, minHeight: 56 } as React.CSSProperties}>
-              <span className="label">Explore other services</span>
-            </Link>
-          </div>
+      {/* ============ LOGO MARQUEE ============ */}
+      <div data-screen-label="Trusted by" style={{ background: "#f5f3ee", borderBottom: "1px solid rgba(0,0,0,0.12)", padding: "36px 0", overflow: "hidden" }}>
+        <div style={{ textAlign: "center", font: `500 11px ${monoFont}`, letterSpacing: "0.14em", color: "rgba(0,0,0,0.4)", textTransform: "uppercase", marginBottom: "26px" }}>
+          Trusted by teams at
         </div>
-
-        <div style={{ position: "relative", display: "flex", justifyContent: "center" }}>
-          <div style={{ width: "100%", maxWidth: 680, aspectRatio: "4/3", borderRadius: 28, overflow: "hidden", boxShadow: "0 36px 90px rgba(0,0,0,0.18)", background: "#fff", border: "8px solid #fff", position: "relative" }}>
-            <img src={data.heroImage} alt={data.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          </div>
-          {/* Floating badge */}
-          <div style={{ position: "absolute", bottom: -20, left: 30, background: "#0d0020", color: "#fff", padding: "16px 24px", borderRadius: 16, boxShadow: "0 16px 40px rgba(0,0,0,0.3)", display: "flex", alignItems: "center", gap: 14, zIndex: 5 }}>
-            <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#10b981", boxShadow: "0 0 12px #10b981" }} />
-            <span style={{ fontFamily: "var(--f-mono)", fontSize: 13, letterSpacing: ".08em", fontWeight: 700 }}>100/100 LIGHTHOUSE SCORE GUARANTEED</span>
-          </div>
+        <div style={{ display: "flex", gap: "72px", width: "max-content", animation: "fx-marquee 26s linear infinite", fontSize: "17px", fontWeight: 600, color: "rgba(20,20,20,0.38)", whiteSpace: "nowrap", alignItems: "center" }}>
+          <span>NORTHWIND</span><span style={{ fontSize: "10px" }}>◆</span><span>ARC&amp;CO</span><span style={{ fontSize: "10px" }}>◆</span><span>HELIOTROPE</span><span style={{ fontSize: "10px" }}>◆</span><span>KILN</span><span style={{ fontSize: "10px" }}>◆</span><span>MARLOW</span><span style={{ fontSize: "10px" }}>◆</span><span>VESSEL</span><span style={{ fontSize: "10px" }}>◆</span>
+          <span>NORTHWIND</span><span style={{ fontSize: "10px" }}>◆</span><span>ARC&amp;CO</span><span style={{ fontSize: "10px" }}>◆</span><span>HELIOTROPE</span><span style={{ fontSize: "10px" }}>◆</span><span>KILN</span><span style={{ fontSize: "10px" }}>◆</span><span>MARLOW</span><span style={{ fontSize: "10px" }}>◆</span><span>VESSEL</span><span style={{ fontSize: "10px" }}>◆</span>
         </div>
-      </section>
+      </div>
 
-      {/* ── 2. LOGO CLOUD BAR ── */}
-      <section style={{ background: "#fff", padding: "48px 40px", borderTop: "1px solid rgba(0,0,0,0.06)", borderBottom: "1px solid rgba(0,0,0,0.06)", textAlign: "center" }}>
-        <p style={{ fontFamily: "var(--f-mono)", fontSize: 11, letterSpacing: ".18em", color: "rgba(13,0,32,0.45)", textTransform: "uppercase", margin: "0 0 28px", fontWeight: 700 }}>
-          TRUSTED BY LEADING BRANDS & ARCHITECTED WITH ELITE TECH STACKS
-        </p>
-        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 14, maxWidth: 1200, margin: "0 auto" }}>
-          {data.logos.map((logo, i) => (
-            <span key={i} style={{ padding: "10px 20px", borderRadius: 999, background: "#f3f5f8", color: "#0d0020", fontFamily: "var(--f-mono)", fontSize: 13, fontWeight: 600, border: "1px solid rgba(0,0,0,0.04)" }}>
-              {logo}
-            </span>
-          ))}
-        </div>
-      </section>
-
-      {/* ── 3. FEATURED HIGHLIGHT BANNER ── */}
-      <section className="reveal" style={{ padding: "80px 40px", maxWidth: 1400, margin: "0 auto" }}>
-        <div style={{ background: "#fff", borderRadius: 32, padding: "48px", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 20px 60px rgba(0,0,0,0.04)", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 48, alignItems: "center" }}>
-          <div style={{ background: data.bannerColor, borderRadius: 24, padding: "40px", minHeight: 320, display: "flex", flexDirection: "column", justifyContent: "space-between", color: "#fff", position: "relative", overflow: "hidden", boxShadow: "0 20px 50px rgba(255,117,151,0.3)" }}>
-            <span style={{ fontFamily: "var(--f-mono)", fontSize: 14, fontWeight: 800, letterSpacing: ".12em", background: "rgba(0,0,0,0.25)", padding: "6px 14px", borderRadius: 999, alignSelf: "flex-start" }}>
-              {data.bannerTag}
-            </span>
-            <div style={{ zIndex: 2 }}>
-              <h3 style={{ fontSize: 32, fontWeight: 900, margin: "0 0 8px", lineHeight: 1.1 }}>3.4x Faster</h3>
-              <p style={{ margin: 0, fontSize: 16, opacity: 0.9 }}>Average conversion velocity post-launch</p>
-            </div>
-            <div style={{ position: "absolute", right: -20, bottom: -20, width: 220, height: 220, background: "rgba(255,255,255,0.15)", borderRadius: "50%", filter: "blur(20px)" }} />
+      {/* ============ MANIFESTO — SCROLL-SCRUB WORD REVEAL ============ */}
+      <div data-screen-label="Manifesto" style={{ background: "#f5f3ee", borderBottom: "1px solid rgba(0,0,0,0.12)", padding: "160px 56px" }}>
+        <div style={{ maxWidth: "1080px", margin: "0 auto" }}>
+          <div style={{ font: `500 11px ${monoFont}`, letterSpacing: "0.14em", color: "rgba(0,0,0,0.4)", textTransform: "uppercase", marginBottom: "32px" }}>
+            (Why we exist)
           </div>
-
-          <div>
-            <span style={{ fontFamily: "var(--f-mono)", fontSize: 12, color: "#ff7597", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase" }}>TRANSFORMATION AT SCALE</span>
-            <h2 style={{ fontSize: "clamp(30px, 3.5vw, 44px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-.025em", margin: "12px 0 20px" }}>
-              {data.bannerTitle}
-            </h2>
-            <p style={{ fontSize: 18, lineHeight: 1.6, color: "rgba(13,0,32,0.7)", margin: "0 0 32px" }}>
-              {data.bannerDesc}
-            </p>
-            <Link href="/work" className="btn btn--brand" style={{ padding: "12px 28px" }}>
-              <span className="label">View our case studies</span>
-              <span className="chip"><ArrowIcon size={16} /></span>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 4. COMPREHENSIVE SERVICES GRID (9 ITEMS) ── */}
-      <section className="reveal" style={{ background: "#fff", padding: "100px 40px", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", maxWidth: 800, margin: "0 auto 60px" }}>
-            <h2 style={{ fontSize: "clamp(32px, 4vw, 52px)", fontWeight: 900, letterSpacing: "-.03em", margin: "0 0 16px", lineHeight: 1.1 }}>
-              {data.gridTitle}
-            </h2>
-            <p style={{ fontSize: 18, color: "rgba(13,0,32,0.65)", margin: 0, lineHeight: 1.6 }}>
-              {data.gridSub}
-            </p>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))", gap: 24 }}>
-            {data.gridItems.map((item, i) => (
-              <div key={i} style={{ background: "#f8f9fb", borderRadius: 24, padding: "36px", border: "1px solid rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", justifyContent: "space-between", transition: "transform 0.25s ease, box-shadow 0.25s ease" }}
-                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-6px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 20px 40px rgba(0,0,0,0.08)"; }}
-                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "none"; (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}
-              >
-                <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-                    <span style={{ padding: "6px 14px", borderRadius: 999, background: item.color, color: "#0d0020", fontFamily: "var(--f-mono)", fontSize: 11, fontWeight: 700, letterSpacing: ".08em" }}>
-                      {item.tag}
-                    </span>
-                    <span style={{ fontFamily: "var(--f-mono)", fontSize: 13, color: "rgba(13,0,32,0.3)", fontWeight: 700 }}>
-                      0{i + 1}
-                    </span>
-                  </div>
-                  <h3 style={{ fontSize: 24, fontWeight: 800, margin: "0 0 14px", letterSpacing: "-.015em", color: "#0d0020" }}>
-                    {item.title}
-                  </h3>
-                  <p style={{ fontSize: 16, lineHeight: 1.6, color: "rgba(13,0,32,0.68)", margin: 0 }}>
-                    {item.desc}
-                  </p>
-                </div>
-                <div style={{ marginTop: 28, paddingTop: 20, borderTop: "1px solid rgba(0,0,0,0.06)", display: "flex", alignItems: "center", gap: 8, fontFamily: "var(--f-mono)", fontSize: 12, fontWeight: 700, color: "#0d0020" }}>
-                  <span>Explore capabilities</span> <ArrowIcon size={14} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── 5. DARK FEATURE ROWS / CASE STUDIES ── */}
-      <section style={{ background: "#0d0020", color: "#fff", padding: "100px 40px" }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto", display: "flex", flexDirection: "column", gap: 80 }}>
-          {data.darkRows.map((row, i) => (
-            <div key={i} className="reveal" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: 60, alignItems: "center", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 32, padding: "48px", overflow: "hidden" }}>
-              <div style={{ order: i % 2 === 1 ? 2 : 1 }}>
-                <span style={{ display: "inline-block", padding: "6px 14px", borderRadius: 999, background: "rgba(255,255,255,0.1)", color: "#eab308", fontFamily: "var(--f-mono)", fontSize: 11, fontWeight: 700, letterSpacing: ".12em", marginBottom: 20 }}>
-                  {row.tag}
-                </span>
-                <h3 style={{ fontSize: "clamp(28px, 3.5vw, 42px)", fontWeight: 800, lineHeight: 1.1, letterSpacing: "-.025em", margin: "0 0 20px", color: "#fff" }}>
-                  {row.title}
-                </h3>
-                <p style={{ fontSize: 18, lineHeight: 1.6, color: "rgba(255,255,255,0.72)", margin: "0 0 32px" }}>
-                  {row.desc}
-                </p>
-                <Link href="/work" className="btn" style={{ "--bg": "#eab308", "--fg": "#0d0020", "--chip": "rgba(0,0,0,0.15)", "--chipfg": "#0d0020", padding: "12px 28px", fontWeight: 700 } as React.CSSProperties}>
-                  <span className="label">View Case Study</span>
-                  <span className="chip"><ArrowIcon size={16} /></span>
-                </Link>
-              </div>
-              <div style={{ order: i % 2 === 1 ? 1 : 2, borderRadius: 20, overflow: "hidden", aspectRatio: "16/10", boxShadow: "0 24px 60px rgba(0,0,0,0.5)", background: "#161622", position: "relative" }}>
-                <img src={row.image} alt={row.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── 6. WHY PARTNER WITH US (ACCORDION + GRAPHIC) ── */}
-      <section className="reveal" style={{ padding: "100px 40px", maxWidth: 1400, margin: "0 auto" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))", gap: 60, alignItems: "flex-start" }}>
-          <div style={{ position: "sticky", top: 100 }}>
-            <span style={{ fontFamily: "var(--f-mono)", fontSize: 12, color: "#6b46c1", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase" }}>THE FOXMEN ADVANTAGE</span>
-            <h2 style={{ fontSize: "clamp(32px, 4vw, 48px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-.03em", margin: "12px 0 24px" }}>
-              {data.whyTitle}
-            </h2>
-            <p style={{ fontSize: 18, lineHeight: 1.6, color: "rgba(13,0,32,0.7)", margin: "0 0 36px" }}>
-              We discard standard agency bureaucracy in favor of direct, agile pair-programming sprints. Here is how our engineering model guarantees superior results.
-            </p>
-            <a href="#inquiry-form" className="btn btn--brand" style={{ padding: "14px 32px" }}>
-              <span className="label">Schedule an exploratory call</span>
-              <span className="chip"><ArrowIcon size={16} /></span>
-            </a>
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {data.whyItems.map((item, idx) => {
-              const isOpen = openWhy === idx;
+          <p ref={manifestoRef} style={{ fontFamily: serifFont, fontSize: "clamp(42px, 4.4vw, 66px)", lineHeight: 1.22, letterSpacing: "-0.01em", color: "#141414", margin: 0 }}>
+            {manifestoWords.map((word, idx) => {
+              const isEm = word.toLowerCase().includes(content.manifestoText.em.toLowerCase()) || content.manifestoText.em.toLowerCase().includes(word.toLowerCase());
+              const isRevealed = idx < manifestoScrubCount;
               return (
-                <div key={idx} 
-                     onClick={() => setOpenWhy(isOpen ? null : idx)}
-                     style={{ background: "#fff", borderRadius: 20, padding: "28px", border: isOpen ? "2px solid #0d0020" : "1px solid rgba(0,0,0,0.06)", cursor: "pointer", transition: "all 0.25s ease", boxShadow: isOpen ? "0 16px 40px rgba(0,0,0,0.06)" : "none" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
-                    <h3 style={{ fontSize: 20, fontWeight: 800, margin: 0, color: "#0d0020" }}>
-                      {idx + 1}. {item.title}
-                    </h3>
-                    <AccordionIcon isOpen={isOpen} />
-                  </div>
-                  {isOpen && (
-                    <p style={{ margin: "16px 0 0", fontSize: 16, lineHeight: 1.6, color: "rgba(13,0,32,0.72)", paddingTop: 16, borderTop: "1px solid rgba(0,0,0,0.06)" }}>
-                      {item.desc}
-                    </p>
-                  )}
-                </div>
+                <span key={idx} style={{
+                  display: "inline-block",
+                  opacity: isRevealed ? 1 : 0.14,
+                  transition: "opacity 0.25s linear",
+                  marginRight: "0.24em",
+                  color: isEm ? "#B86CF9" : "inherit",
+                  fontStyle: isEm ? "italic" : "normal"
+                }}>
+                  {word}
+                </span>
               );
             })}
-          </div>
-        </div>
-      </section>
-
-      {/* ── 7. OUR INDUSTRY EXPERTISE GRID ── */}
-      <section className="reveal" style={{ background: "#fff", padding: "100px 40px", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", maxWidth: 700, margin: "0 auto 60px" }}>
-            <h2 style={{ fontSize: "clamp(32px, 4vw, 48px)", fontWeight: 900, letterSpacing: "-.03em", margin: "0 0 16px" }}>
-              Our Industry Expertise
-            </h2>
-            <p style={{ fontSize: 18, color: "rgba(13,0,32,0.65)", margin: 0 }}>
-              We bring specialized domain knowledge across high-compliance and high-velocity sectors.
-            </p>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20 }}>
-            {data.industries.map((ind, i) => (
-              <div key={i} style={{ background: "#f8f9fb", borderRadius: 24, padding: "32px 28px", border: "1px solid rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 220, position: "relative", overflow: "hidden" }}>
-                <div>
-                  <h3 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 12px", color: "#0d0020" }}>
-                    {ind.name}
-                  </h3>
-                  <p style={{ fontSize: 15, lineHeight: 1.6, color: "rgba(13,0,32,0.68)", margin: 0 }}>
-                    {ind.desc}
-                  </p>
-                </div>
-                <div style={{ marginTop: 24, width: 44, height: 6, borderRadius: 3, background: ind.color }} />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── 8. WHY MODERNIZE TODAY / METRICS ── */}
-      <section className="reveal" style={{ padding: "100px 40px", maxWidth: 1400, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", maxWidth: 750, margin: "0 auto 60px" }}>
-          <h2 style={{ fontSize: "clamp(32px, 4vw, 48px)", fontWeight: 900, letterSpacing: "-.03em", margin: "0 0 16px" }}>
-            Why Modernize Your Web Stack Today?
-          </h2>
-          <p style={{ fontSize: 18, color: "rgba(13,0,32,0.68)", margin: 0 }}>
-            Outdated architectures actively leak conversion revenue. Here are the documented benchmarks our clients achieve post-replatforming.
           </p>
         </div>
+      </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 24 }}>
-          {data.metrics.map((m, idx) => (
-            <div key={idx} style={{ background: "#fff", borderRadius: 24, padding: "36px 32px", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 12px 36px rgba(0,0,0,0.03)" }}>
-              <div style={{ fontFamily: "var(--f-mono)", fontSize: "clamp(36px, 4vw, 48px)", fontWeight: 900, color: "#6b46c1", lineHeight: 1.0, marginBottom: 12 }}>
-                {m.val}
-              </div>
-              <h3 style={{ fontSize: 20, fontWeight: 800, margin: "0 0 10px", color: "#0d0020" }}>
-                {m.label}
-              </h3>
-              <p style={{ fontSize: 15, lineHeight: 1.6, color: "rgba(13,0,32,0.68)", margin: 0 }}>
-                {m.desc}
-              </p>
+      {/* ============ SERVICES — STAGGERED REVEAL ============ */}
+      <div id="services" data-screen-label="Services" style={{ background: "#f5f3ee", borderBottom: "1px solid rgba(0,0,0,0.12)" }}>
+        <div style={{ padding: "96px 56px 0", display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 20 }}>
+          <h2 style={{ fontFamily: serifFont, fontWeight: 400, fontSize: "clamp(48px, 5.6vw, 84px)", lineHeight: 1.02, letterSpacing: "-0.01em", margin: 0, maxWidth: "560px" }}>
+            {content.servicesTitle.before}<em style={{ color: "#B86CF9", fontStyle: "italic" }}>{content.servicesTitle.em}</em>
+          </h2>
+          <span style={{ font: `500 12px ${monoFont}`, color: "rgba(0,0,0,0.4)", paddingBottom: "10px" }}>(services — 06)</span>
+        </div>
+        <div style={{ marginTop: "64px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "1px", background: "rgba(0,0,0,0.12)", borderTop: "1px solid rgba(0,0,0,0.12)" }}>
+          {content.servicesList.map((srv, i) => (
+            <div key={i} className="fx-hover-bg" style={{ background: "#f5f3ee", padding: "40px 40px 48px", transition: "background 0.4s ease" }}>
+              <div style={{ font: `500 12px ${monoFont}`, color: "rgba(0,0,0,0.4)" }}>(0{i + 1})</div>
+              <div style={{ fontFamily: serifFont, fontSize: "31px", marginTop: "44px", color: "#141414" }}>{srv.title}</div>
+              <p style={{ fontSize: "14.5px", lineHeight: 1.6, color: "rgba(20,20,20,0.6)", margin: "12px 0 0" }}>{srv.desc}</p>
             </div>
           ))}
         </div>
-      </section>
+      </div>
 
-      {/* ── 9. TESTIMONIALS / CLIENT REVIEWS ── */}
-      <section className="reveal" style={{ background: "#fff", padding: "100px 40px", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", maxWidth: 700, margin: "0 auto 60px" }}>
-            <h2 style={{ fontSize: "clamp(32px, 4vw, 48px)", fontWeight: 900, letterSpacing: "-.03em", margin: "0 0 16px" }}>
-              What Our Clients Say
+      {/* ============ CASE STUDIES — STICKY + SCRUB ============ */}
+      <div id="work" data-screen-label="Case studies" style={{ background: "#101013", color: "#f5f2ec" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "72px", padding: "130px 56px", alignItems: "start", maxWidth: 1600, margin: "0 auto" }}>
+          
+          {/* Sticky Rail */}
+          <div style={{ position: "sticky", top: "110px" }}>
+            <div style={{ font: `500 11px ${monoFont}`, letterSpacing: "0.14em", color: "rgba(245,242,236,0.45)", textTransform: "uppercase" }}>(Selected work)</div>
+            <h2 style={{ fontFamily: serifFont, fontWeight: 400, fontSize: "clamp(56px, 6vw, 72px)", lineHeight: 1.02, letterSpacing: "-0.01em", margin: "22px 0 0", color: "#f5f2ec" }}>
+              Case<br />studies
             </h2>
-            <p style={{ fontSize: 18, color: "rgba(13,0,32,0.65)", margin: 0 }}>
-              Read verified feedback from founders and VP of Engineering partners.
+            <p style={{ fontSize: "15px", lineHeight: 1.6, color: "rgba(245,242,236,0.6)", margin: "22px 0 0", maxWidth: "300px" }}>
+              This panel stays put while the work scrolls past. Images move at their own pace inside their frames.
             </p>
+            <div style={{ marginTop: "44px", display: "flex", flexDirection: "column", gap: "14px" }}>
+              {content.caseStudies.map((cs, idx) => {
+                const isAct = activeCase === idx;
+                return (
+                  <div key={idx} style={{ display: "flex", alignItems: "center", gap: "12px", fontSize: "14px", fontWeight: 500, opacity: isAct ? 1 : 0.38, transition: "opacity 0.4s ease", cursor: "pointer" }} onClick={() => caseRefs.current[idx]?.scrollIntoView({ behavior: "smooth", block: "center" })}>
+                    <span style={{ height: "1.5px", width: isAct ? "28px" : "12px", background: "#B86CF9", transition: "width 0.4s ease" }} />
+                    {cs.title}
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ marginTop: "40px", font: `500 12px ${monoFont}`, color: "rgba(245,242,236,0.4)" }}>
+              0{activeCase + 1} / 0{content.caseStudies.length}
+            </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: 24 }}>
-            {data.testimonials.map((t, i) => (
-              <div key={i} style={{ background: "#f8f9fb", borderRadius: 24, padding: "36px", border: "1px solid rgba(0,0,0,0.05)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                <div>
-                  <div style={{ display: "flex", gap: 4, color: "#eab308", marginBottom: 20, fontSize: 18 }}>
-                    ★ ★ ★ ★ ★
+          {/* Cards */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "96px" }}>
+            {content.caseStudies.map((cs, idx) => (
+              <div key={idx} ref={el => { caseRefs.current[idx] = el; }}>
+                <Link href={cs.href || "/work"} style={{ display: "block", textDecoration: "none" }} className="fx-hover-scale">
+                  <div style={{ borderRadius: "18px", overflow: "hidden", height: "520px", position: "relative", border: "1px solid rgba(255,255,255,0.1)", background: "#1c1a24" }}>
+                    {cs.image ? (
+                      <>
+                        <img src={cs.image} alt={cs.title} style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.85, transform: `scale(${1.05 - 0.02 * idx})` }} />
+                        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(16,16,19,0.8) 0%, transparent 60%)" }} />
+                      </>
+                    ) : (
+                      <div style={{ position: "absolute", left: 0, right: 0, top: "-70px", bottom: "-70px", background: cs.grad, display: "flex", alignItems: "center", justifyContent: "center" }} />
+                    )}
+                    <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+                      <span style={{ font: `500 11px ${monoFont}`, color: "rgba(255,255,255,0.7)", background: "rgba(0,0,0,0.65)", padding: "6px 14px", borderRadius: "6px", backdropFilter: "blur(6px)", border: "1px solid rgba(255,255,255,0.15)" }}>
+                        {cs.title}
+                      </span>
+                    </div>
                   </div>
-                  <p style={{ fontSize: 17, lineHeight: 1.6, color: "#0d0020", fontStyle: "italic", margin: "0 0 28px" }}>
-                    &ldquo;{t.quote}&rdquo;
-                  </p>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 14, paddingTop: 20, borderTop: "1px solid rgba(0,0,0,0.06)" }}>
-                  <div style={{ width: 44, height: 44, borderRadius: "50%", background: t.avatar, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--f-mono)", fontWeight: 700, fontSize: 16 }}>
-                    {t.name.charAt(0)}
-                  </div>
+                </Link>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginTop: "26px", gap: "32px", flexWrap: "wrap" }}>
                   <div>
-                    <div style={{ fontWeight: 800, fontSize: 16, color: "#0d0020" }}>{t.name}</div>
-                    <div style={{ fontSize: 13, color: "rgba(13,0,32,0.56)", fontFamily: "var(--f-mono)" }}>{t.title}</div>
+                    <Link href={cs.href || "/work"} style={{ textDecoration: "none" }}>
+                      <div className="fx-hover-white" style={{ fontFamily: serifFont, fontSize: "34px", color: "#f5f2ec", transition: "color 0.2s ease" }}>
+                        {cs.title} <span style={{ fontSize: "22px", opacity: 0.5 }}>↗</span>
+                      </div>
+                    </Link>
+                    <p style={{ fontSize: "15px", lineHeight: 1.6, color: "rgba(245,242,236,0.6)", margin: "10px 0 0", maxWidth: "520px" }}>
+                      {cs.desc}
+                    </p>
+                  </div>
+                  <div style={{ display: "flex", gap: "8px", flex: "none", paddingTop: "8px" }}>
+                    {cs.tags.map((tg, ti) => (
+                      <span key={ti} style={{ fontSize: "12px", fontWeight: 500, padding: "6px 12px", border: "1px solid rgba(255,255,255,0.2)", borderRadius: "999px", color: "#f5f2ec" }}>
+                        {tg}
+                      </span>
+                    ))}
                   </div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* ── 10. THE TEAM SECTION ── */}
-      <section className="reveal" style={{ padding: "100px 40px", maxWidth: 1400, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", maxWidth: 700, margin: "0 auto 60px" }}>
-          <h2 style={{ fontSize: "clamp(32px, 4vw, 48px)", fontWeight: 900, letterSpacing: "-.03em", margin: "0 0 16px" }}>
-            The Web Design & Development Team
+        </div>
+      </div>
+
+      {/* ============ HORIZONTAL SCROLL — INDUSTRIES ============ */}
+      <div ref={hWrapRef} data-screen-label="Industries" style={{ background: "#f5f3ee", position: "relative", borderBottom: "1px solid rgba(0,0,0,0.12)" }}>
+        <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", padding: "0 56px", marginBottom: "44px", flexWrap: "wrap", gap: 20 }}>
+            <h2 style={{ fontFamily: serifFont, fontWeight: 400, fontSize: "clamp(48px, 5.6vw, 84px)", lineHeight: 1.02, letterSpacing: "-0.01em", margin: 0, color: "#141414" }}>
+              Industry <em style={{ color: "#B86CF9", fontStyle: "italic" }}>expertise</em>
+            </h2>
+            <span style={{ font: `500 12px ${monoFont}`, color: "rgba(0,0,0,0.4)", paddingBottom: "10px" }}>(keep scrolling — it moves sideways)</span>
+          </div>
+
+          <div ref={hTrackRef} style={{ display: "flex", gap: "24px", padding: "0 56px", width: "max-content", willChange: "transform", transform: `translateX(${(-hProgress * hExtra).toFixed(1)}px)`, transition: "transform 0.05s linear" }}>
+            {content.industries.map((ind, i) => (
+              <div key={i} style={{ width: "min(400px, 80vw)", height: "440px", borderRadius: "18px", border: "1px solid rgba(0,0,0,0.1)", background: "#fbfaf6", overflow: "hidden", display: "flex", flexDirection: "column", flexShrink: 0 }}>
+                <div style={{ flex: 1, background: ind.grad, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <span style={{ font: `500 10px ${monoFont}`, color: "rgba(0,0,0,0.45)", background: "rgba(255,255,255,0.85)", padding: "3px 8px", borderRadius: "4px" }}>
+                    {ind.tag}
+                  </span>
+                </div>
+                <div style={{ padding: "20px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontFamily: serifFont, fontSize: "26px", color: "#141414" }}>{ind.name}</span>
+                  <span style={{ font: `500 12px ${monoFont}`, color: "rgba(0,0,0,0.4)" }}>(0{i + 1})</span>
+                </div>
+              </div>
+            ))}
+
+            {/* Final Dark CTA Card */}
+            <div style={{ width: "min(400px, 80vw)", height: "440px", borderRadius: "18px", background: "#141414", color: "#f5f2ec", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "32px", flexShrink: 0 }}>
+              <div style={{ fontFamily: serifFont, fontSize: "34px", lineHeight: 1.15 }}>
+                Your industry<br /><em style={{ color: "#B86CF9", fontStyle: "italic" }}>next?</em>
+              </div>
+              <a href="#contact" className="fx-hover-scale" style={{ display: "inline-flex", alignItems: "center", gap: "10px", background: "#f5f2ec", color: "#141414", borderRadius: "999px", padding: "10px 10px 10px 24px", fontSize: "15px", fontWeight: 500, textDecoration: "none", cursor: "pointer", alignSelf: "flex-start", transition: "transform 0.3s ease" }}>
+                Start a project
+                <span style={{ width: "36px", height: "36px", background: "#141414", color: "#fff", borderRadius: "999px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "15px" }}>↗</span>
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* ============ STATS — COUNTERS ============ */}
+      <div data-screen-label="Stats" style={{ background: "#f5f3ee", borderBottom: "1px solid rgba(0,0,0,0.12)" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1px", background: "rgba(0,0,0,0.12)" }}>
+          <div style={{ background: "#f5f3ee", padding: "64px 32px 64px 56px" }}>
+            <div style={{ fontFamily: serifFont, fontSize: "clamp(48px, 5vw, 84px)", lineHeight: 1, color: "#141414" }}>
+              <AnimatedCounter target={120} suffix="+" />
+            </div>
+            <div style={{ fontSize: "13px", color: "rgba(0,0,0,0.5)", marginTop: "12px" }}>websites shipped</div>
+          </div>
+          <div style={{ background: "#f5f3ee", padding: "64px 32px" }}>
+            <div style={{ fontFamily: serifFont, fontSize: "clamp(48px, 5vw, 84px)", lineHeight: 1, color: "#141414" }}>
+              <AnimatedCounter target={98} suffix="%" />
+            </div>
+            <div style={{ fontSize: "13px", color: "rgba(0,0,0,0.5)", marginTop: "12px" }}>clients who come back</div>
+          </div>
+          <div style={{ background: "#f5f3ee", padding: "64px 32px" }}>
+            <div style={{ fontFamily: serifFont, fontSize: "clamp(48px, 5vw, 84px)", lineHeight: 1, color: "#141414" }}>
+              <AnimatedCounter target={14} />
+            </div>
+            <div style={{ fontSize: "13px", color: "rgba(0,0,0,0.5)", marginTop: "12px" }}>industries served</div>
+          </div>
+          <div style={{ background: "#f5f3ee", padding: "64px 56px 64px 32px" }}>
+            <div style={{ fontFamily: serifFont, fontSize: "clamp(48px, 5vw, 84px)", lineHeight: 1, color: "#141414" }}>
+              <AnimatedCounter target={26} />
+            </div>
+            <div style={{ fontSize: "13px", color: "rgba(0,0,0,0.5)", marginTop: "12px" }}>awards &amp; mentions</div>
+          </div>
+        </div>
+      </div>
+
+      {/* ============ TESTIMONIALS ============ */}
+      <div id="testimonials" data-screen-label="Testimonials" style={{ background: "#f5f3ee", borderBottom: "1px solid rgba(0,0,0,0.12)", padding: "120px 0 0" }}>
+        <div style={{ padding: "0 56px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 20 }}>
+          <h2 style={{ fontFamily: serifFont, fontWeight: 400, fontSize: "clamp(48px, 5.6vw, 84px)", lineHeight: 1.02, letterSpacing: "-0.01em", margin: 0, color: "#141414" }}>
+            Kind words
           </h2>
-          <p style={{ fontSize: 18, color: "rgba(13,0,32,0.65)", margin: 0 }}>
-            Meet the senior architects, UI/UX directors, and full-stack specialists building your digital assets.
-          </p>
+          <span style={{ font: `500 12px ${monoFont}`, color: "rgba(0,0,0,0.4)", paddingBottom: "10px" }}>(client testimonial)</span>
         </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 24 }}>
-          {data.team.map((m, idx) => (
-            <div key={idx} style={{ background: "#fff", borderRadius: 24, padding: "28px", border: "1px solid rgba(0,0,0,0.06)", textAlign: "center", boxShadow: "0 10px 30px rgba(0,0,0,0.03)" }}>
-              <div style={{ width: 88, height: 88, borderRadius: "50%", background: m.color, margin: "0 auto 20px", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--f-mono)", fontSize: 28, fontWeight: 800, color: "#0d0020", boxShadow: "0 8px 20px rgba(0,0,0,0.08)" }}>
-                {m.name.split(" ").map(n => n[0]).join("")}
-              </div>
-              <h3 style={{ fontSize: 20, fontWeight: 800, margin: "0 0 6px", color: "#0d0020" }}>
-                {m.name}
-              </h3>
-              <div style={{ fontFamily: "var(--f-mono)", fontSize: 12, color: "#6b46c1", fontWeight: 700, marginBottom: 14 }}>
-                {m.role}
-              </div>
-              <p style={{ fontSize: 14, lineHeight: 1.5, color: "rgba(13,0,32,0.65)", margin: 0 }}>
-                {m.bio}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── 11. DARK CTA BANNER ── */}
-      <section className="reveal" style={{ padding: "0 40px 100px", maxWidth: 1400, margin: "0 auto" }}>
-        <div style={{ background: "linear-gradient(135deg, #0d0020 0%, #2a0a6b 100%)", borderRadius: 36, padding: "60px 48px", color: "#fff", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 48, alignItems: "center", boxShadow: "0 30px 80px rgba(42,10,107,0.3)", position: "relative", overflow: "hidden" }}>
-          <div style={{ zIndex: 2 }}>
-            <span style={{ fontFamily: "var(--f-mono)", fontSize: 12, color: "#eab308", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase" }}>GUARANTEED LAUNCH VELOCITY</span>
-            <h2 style={{ fontSize: "clamp(32px, 4vw, 52px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-.03em", margin: "16px 0 20px", color: "#fff" }}>
-              Ready to build a website that commands attention and drives revenue?
-            </h2>
-            <p style={{ fontSize: 18, lineHeight: 1.6, color: "rgba(255,255,255,0.78)", margin: "0 0 36px", maxWidth: 540 }}>
-              Let&apos;s schedule a 30-minute technical discovery session. We will audit your current architecture and outline a custom roadmap.
+        <div style={{ marginTop: "56px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "1px", background: "rgba(0,0,0,0.12)", borderTop: "1px solid rgba(0,0,0,0.12)" }}>
+          <div style={{ background: "#f5f3ee", padding: "48px 40px 56px 56px", display: "flex", flexDirection: "column", gap: "28px" }}>
+            <div style={{ fontFamily: serifFont, fontSize: "64px", lineHeight: 0.6, color: "#B86CF9" }}>“</div>
+            <p style={{ fontFamily: serifFont, fontSize: "23px", lineHeight: 1.35, margin: 0, flex: 1, color: "#141414" }}>
+              Foxmen rebuilt our site in eight weeks and demo bookings doubled the month we launched.
             </p>
-            <a href="#inquiry-form" className="btn" style={{ "--bg": "#eab308", "--fg": "#0d0020", "--chip": "rgba(0,0,0,0.15)", "--chipfg": "#0d0020", padding: "14px 32px", fontSize: 16, fontWeight: 800 } as React.CSSProperties}>
-              <span className="label">Get in touch now</span>
-              <span className="chip"><ArrowIcon size={18} /></span>
-            </a>
-          </div>
-
-          <div style={{ position: "relative", display: "flex", justifyContent: "center", zIndex: 2 }}>
-            <div style={{ width: "100%", maxWidth: 420, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 24, padding: 32, backdropFilter: "blur(16px)" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-                <span style={{ fontFamily: "var(--f-mono)", fontSize: 12, color: "#eab308" }}>● LIVE ENGINE STATUS</span>
-                <span style={{ fontFamily: "var(--f-mono)", fontSize: 12 }}>60 FPS</span>
-              </div>
-              <div style={{ height: 180, borderRadius: 16, background: "linear-gradient(45deg, #ff7597, #6b46c1)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 24, letterSpacing: "-.02em" }}>
-                FOXMEN STUDIO v3.0
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <span style={{ width: "40px", height: "40px", borderRadius: "999px", background: "repeating-linear-gradient(-45deg, #e9e4da, #e9e4da 6px, #dfd8ca 6px, #dfd8ca 12px)", border: "1px solid rgba(0,0,0,0.1)" }} />
+              <div>
+                <div style={{ fontSize: "14px", fontWeight: 600, color: "#141414" }}>Dana Keller</div>
+                <div style={{ fontSize: "12.5px", color: "rgba(0,0,0,0.5)" }}>VP Marketing, Marlow</div>
               </div>
             </div>
           </div>
-          <div style={{ position: "absolute", right: "-10%", bottom: "-20%", width: 500, height: 500, background: "radial-gradient(circle, rgba(255,117,151,0.25) 0%, rgba(0,0,0,0) 70%)", pointerEvents: "none" }} />
-        </div>
-      </section>
 
-      {/* ── 12. FAQ SECTION ── */}
-      <section className="reveal" style={{ background: "#fff", padding: "100px 40px", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
-        <div style={{ maxWidth: 1400, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))", gap: 60, alignItems: "flex-start" }}>
-          <div>
-            <span style={{ fontFamily: "var(--f-mono)", fontSize: 12, color: "#6b46c1", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase" }}>GOT QUESTIONS?</span>
-            <h2 style={{ fontSize: "clamp(32px, 4vw, 48px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-.03em", margin: "12px 0 20px" }}>
-              Frequently Asked Questions
-            </h2>
-            <p style={{ fontSize: 18, lineHeight: 1.6, color: "rgba(13,0,32,0.7)", margin: "0 0 32px" }}>
-              Have a specific technical or onboarding question not answered here? Reach out to our engineering team directly.
+          <div style={{ background: "#f5f3ee", padding: "48px 40px 56px", display: "flex", flexDirection: "column", gap: "28px" }}>
+            <div style={{ fontFamily: serifFont, fontSize: "64px", lineHeight: 0.6, color: "#B86CF9" }}>“</div>
+            <p style={{ fontFamily: serifFont, fontSize: "23px", lineHeight: 1.35, margin: 0, flex: 1, color: "#141414" }}>
+              They think like a product team, not an agency. Every decision came with a reason attached.
             </p>
-            <a href="#inquiry-form" className="btn" style={{ "--bg": "rgba(0,0,0,0.06)", "--fg": "#0d0020", "--chip": "rgba(0,0,0,0.12)", "--chipfg": "#0d0020", padding: "12px 28px" } as React.CSSProperties}>
-              <span className="label">Ask a custom question</span>
-              <span className="chip"><ArrowIcon size={16} /></span>
-            </a>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <span style={{ width: "40px", height: "40px", borderRadius: "999px", background: "repeating-linear-gradient(-45deg, #f0e4fd, #f0e4fd 6px, #e5d2fb 6px, #e5d2fb 12px)", border: "1px solid rgba(0,0,0,0.1)" }} />
+              <div>
+                <div style={{ fontSize: "14px", fontWeight: 600, color: "#141414" }}>Sam Okafor</div>
+                <div style={{ fontSize: "12.5px", color: "rgba(0,0,0,0.5)" }}>Founder, Kiln</div>
+              </div>
+            </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {data.faqs.map((f, idx) => {
+          <div style={{ background: "#f5f3ee", padding: "48px 56px 56px 40px", display: "flex", flexDirection: "column", gap: "28px" }}>
+            <div style={{ fontFamily: serifFont, fontSize: "64px", lineHeight: 0.6, color: "#B86CF9" }}>“</div>
+            <p style={{ fontFamily: serifFont, fontSize: "23px", lineHeight: 1.35, margin: 0, flex: 1, color: "#141414" }}>
+              The rebrand paid for itself before the year was out. Our site finally sounds like us.
+            </p>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <span style={{ width: "40px", height: "40px", borderRadius: "999px", background: "repeating-linear-gradient(-45deg, #e9e9e9, #e9e9e9 6px, #dedede 6px, #dedede 12px)", border: "1px solid rgba(0,0,0,0.1)" }} />
+              <div>
+                <div style={{ fontSize: "14px", fontWeight: 600, color: "#141414" }}>Ines Marchetti</div>
+                <div style={{ fontSize: "12.5px", color: "rgba(0,0,0,0.5)" }}>CEO, Heliotrope</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ============ FAQ ============ */}
+      <div id="faq" data-screen-label="FAQ" style={{ background: "#f5f3ee", borderBottom: "1px solid rgba(0,0,0,0.12)", padding: "120px 56px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "72px", alignItems: "start", maxWidth: 1400, margin: "0 auto" }}>
+          
+          <div style={{ position: "sticky", top: "110px" }}>
+            <div style={{ font: `500 11px ${monoFont}`, letterSpacing: "0.14em", color: "rgba(0,0,0,0.4)", textTransform: "uppercase" }}>(Have questions?)</div>
+            <h2 style={{ fontFamily: serifFont, fontWeight: 400, fontSize: "clamp(56px, 6vw, 72px)", lineHeight: 1.02, letterSpacing: "-0.01em", margin: "22px 0 0", color: "#141414" }}>
+              Fair <em style={{ color: "#B86CF9", fontStyle: "italic" }}>asks</em>
+            </h2>
+            <p style={{ fontSize: "15px", lineHeight: 1.6, color: "rgba(0,0,0,0.6)", margin: "22px 0 0", maxWidth: "300px" }}>
+              The things every client asks before starting — answered straight.
+            </p>
+          </div>
+
+          <div style={{ borderTop: "1px solid rgba(0,0,0,0.12)" }}>
+            {content.faqs.map((f, idx) => {
               const isOpen = openFaq === idx;
               return (
-                <div key={idx}
-                     onClick={() => setOpenFaq(isOpen ? null : idx)}
-                     style={{ background: "#f8f9fb", borderRadius: 20, padding: "28px", border: isOpen ? "2px solid #0d0020" : "1px solid rgba(0,0,0,0.05)", cursor: "pointer", transition: "all 0.25s ease" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
-                    <h3 style={{ fontSize: 18, fontWeight: 800, margin: 0, color: "#0d0020", lineHeight: 1.3 }}>
-                      {f.q}
-                    </h3>
-                    <AccordionIcon isOpen={isOpen} />
+                <div key={idx} style={{ borderBottom: "1px solid rgba(0,0,0,0.12)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "24px", padding: "26px 4px", cursor: "pointer" }} onClick={() => setOpenFaq(isOpen ? null : idx)}>
+                    <span style={{ fontFamily: serifFont, fontSize: "24px", color: "#141414" }}>{f.q}</span>
+                    <span style={{ fontSize: "22px", fontWeight: 400, color: "rgba(0,0,0,0.5)", transition: "transform 0.4s ease", transform: isOpen ? "rotate(45deg)" : "rotate(0deg)", flex: "none" }}>+</span>
                   </div>
                   {isOpen && (
-                    <p style={{ margin: "16px 0 0", fontSize: 16, lineHeight: 1.6, color: "rgba(13,0,32,0.72)", paddingTop: 16, borderTop: "1px solid rgba(0,0,0,0.06)" }}>
-                      {f.a}
-                    </p>
+                    <div style={{ overflow: "hidden", transition: "all 0.4s cubic-bezier(0.22,1,0.36,1)" }}>
+                      <p style={{ fontSize: "15px", lineHeight: 1.65, color: "rgba(0,0,0,0.65)", margin: 0, padding: "0 48px 28px 4px", maxWidth: "640px" }}>
+                        {f.a}
+                      </p>
+                    </div>
                   )}
                 </div>
               );
             })}
           </div>
+
         </div>
-      </section>
+      </div>
 
-      {/* ── 13. PROJECT INQUIRY FORM SECTION ── */}
-      <section id="inquiry-form" className="reveal" style={{ padding: "100px 40px", maxWidth: 1400, margin: "0 auto" }}>
-        <div style={{ background: "#fff", borderRadius: 36, padding: "60px", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 20px 60px rgba(0,0,0,0.04)", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: 60 }}>
-          <div>
-            <span style={{ fontFamily: "var(--f-mono)", fontSize: 12, color: "#6b46c1", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase" }}>PROJECT INQUIRY</span>
-            <h2 style={{ fontSize: "clamp(32px, 4vw, 52px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-.03em", margin: "12px 0 24px" }}>
-              Have a project in mind? Let&apos;s get started.
-            </h2>
-            <p style={{ fontSize: 18, lineHeight: 1.6, color: "rgba(13,0,32,0.7)", margin: "0 0 40px" }}>
-              Fill out the form with your initial project brief. Our principal architects will review your requirements and respond within 24 hours.
-            </p>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "20px", borderRadius: 20, background: "#f8f9fb", border: "1px solid rgba(0,0,0,0.05)", maxWidth: 360 }}>
-              <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#6b46c1", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--f-mono)", fontSize: 22, fontWeight: 800 }}>
-                AF
-              </div>
-              <div>
-                <div style={{ fontWeight: 800, fontSize: 16, color: "#0d0020" }}>Alexander Fox</div>
-                <div style={{ fontSize: 13, color: "rgba(13,0,32,0.6)", fontFamily: "var(--f-mono)" }}>Principal Architect & Founder</div>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            {submitted ? (
-              <div style={{ background: "#ecfdf5", border: "1px solid #10b981", borderRadius: 24, padding: "48px", textAlign: "center" }}>
-                <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#10b981", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, margin: "0 auto 20px" }}>✓</div>
-                <h3 style={{ fontSize: 28, fontWeight: 800, color: "#065f46", margin: "0 0 12px" }}>Inquiry Received!</h3>
-                <p style={{ fontSize: 16, color: "#047857", margin: "0 0 24px", lineHeight: 1.6 }}>
-                  Thank you for reaching out, {formState.name || "partner"}. We have received your project brief and our engineering team will get back to you within 24 hours.
-                </p>
-                <button onClick={() => setSubmitted(false)} className="btn btn--brand" style={{ margin: "0 auto" }}>
-                  <span className="label">Send another inquiry</span>
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                <div>
-                  <label style={{ display: "block", fontFamily: "var(--f-mono)", fontSize: 12, fontWeight: 700, marginBottom: 8, color: "rgba(13,0,32,0.7)", textTransform: "uppercase" }}>Your Name *</label>
-                  <input
-                    required
-                    type="text"
-                    placeholder="e.g. Marcus Vance"
-                    value={formState.name}
-                    onChange={e => setFormState({ ...formState, name: e.target.value })}
-                    style={{ width: "100%", padding: "16px 20px", borderRadius: 14, border: "1px solid rgba(0,0,0,0.12)", background: "#f8f9fb", fontSize: 16, outline: "none", fontFamily: "var(--f-sans)", transition: "border 0.2s ease" }}
-                    onFocus={e => (e.target.style.borderColor = "#0d0020")}
-                    onBlur={e => (e.target.style.borderColor = "rgba(0,0,0,0.12)")}
-                  />
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 20 }}>
-                  <div>
-                    <label style={{ display: "block", fontFamily: "var(--f-mono)", fontSize: 12, fontWeight: 700, marginBottom: 8, color: "rgba(13,0,32,0.7)", textTransform: "uppercase" }}>Work Email *</label>
-                    <input
-                      required
-                      type="email"
-                      placeholder="marcus@company.com"
-                      value={formState.email}
-                      onChange={e => setFormState({ ...formState, email: e.target.value })}
-                      style={{ width: "100%", padding: "16px 20px", borderRadius: 14, border: "1px solid rgba(0,0,0,0.12)", background: "#f8f9fb", fontSize: 16, outline: "none", fontFamily: "var(--f-sans)" }}
-                      onFocus={e => (e.target.style.borderColor = "#0d0020")}
-                      onBlur={e => (e.target.style.borderColor = "rgba(0,0,0,0.12)")}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: "block", fontFamily: "var(--f-mono)", fontSize: 12, fontWeight: 700, marginBottom: 8, color: "rgba(13,0,32,0.7)", textTransform: "uppercase" }}>Company / Organization</label>
-                    <input
-                      type="text"
-                      placeholder="Apex FinTech"
-                      value={formState.company}
-                      onChange={e => setFormState({ ...formState, company: e.target.value })}
-                      style={{ width: "100%", padding: "16px 20px", borderRadius: 14, border: "1px solid rgba(0,0,0,0.12)", background: "#f8f9fb", fontSize: 16, outline: "none", fontFamily: "var(--f-sans)" }}
-                      onFocus={e => (e.target.style.borderColor = "#0d0020")}
-                      onBlur={e => (e.target.style.borderColor = "rgba(0,0,0,0.12)")}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label style={{ display: "block", fontFamily: "var(--f-mono)", fontSize: 12, fontWeight: 700, marginBottom: 8, color: "rgba(13,0,32,0.7)", textTransform: "uppercase" }}>Estimated Budget</label>
-                  <select
-                    value={formState.budget}
-                    onChange={e => setFormState({ ...formState, budget: e.target.value })}
-                    style={{ width: "100%", padding: "16px 20px", borderRadius: 14, border: "1px solid rgba(0,0,0,0.12)", background: "#f8f9fb", fontSize: 16, outline: "none", fontFamily: "var(--f-sans)", cursor: "pointer" }}
-                  >
-                    <option value="< $15k">&lt; $15k (Landing Page / MVP Feature)</option>
-                    <option value="$15k–$50k">$15k – $50k (Full Custom Web Build)</option>
-                    <option value="$50k–$150k">$50k – $150k (Multi-Platform Ecosystem)</option>
-                    <option value="$150k+">$150k+ (Enterprise Transformation)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: "block", fontFamily: "var(--f-mono)", fontSize: 12, fontWeight: 700, marginBottom: 8, color: "rgba(13,0,32,0.7)", textTransform: "uppercase" }}>Project Scope & Timeline *</label>
-                  <textarea
-                    required
-                    rows={4}
-                    placeholder="Tell us about your objectives, current tech stack, and target launch date..."
-                    value={formState.desc}
-                    onChange={e => setFormState({ ...formState, desc: e.target.value })}
-                    style={{ width: "100%", padding: "16px 20px", borderRadius: 14, border: "1px solid rgba(0,0,0,0.12)", background: "#f8f9fb", fontSize: 16, outline: "none", fontFamily: "var(--f-sans)", resize: "vertical" }}
-                    onFocus={e => (e.target.style.borderColor = "#0d0020")}
-                    onBlur={e => (e.target.style.borderColor = "rgba(0,0,0,0.12)")}
-                  />
-                </div>
-
-                <button type="submit" className="btn btn--brand" style={{ width: "100%", justifyContent: "center", padding: "16px 28px", fontSize: 16, marginTop: 10 }}>
-                  <span className="label">Submit Project Inquiry</span>
-                  <span className="chip"><ArrowIcon size={18} /></span>
-                </button>
-              </form>
-            )}
+      {/* ============ CTA (At last, followed by site's current Footer) ============ */}
+      <div id="contact" data-screen-label="CTA" style={{ background: "#101013", color: "#f5f2ec", position: "relative", overflow: "hidden", padding: "170px 56px 150px", textAlign: "center" }}>
+        
+        {/* Floating Parallax Card Right */}
+        <div style={{ position: "absolute", top: "80px", right: "8%", width: "220px", height: "150px", borderRadius: "14px", background: "repeating-linear-gradient(-45deg, #1e1b26, #1e1b26 10px, #272134 10px, #272134 20px)", border: "1px solid rgba(255,255,255,0.1)", transform: `rotate(5deg) translateY(${(-scrollY * 0.08).toFixed(1)}px)` }}>
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <span style={{ font: `500 10px ${monoFont}`, color: "rgba(255,255,255,0.45)" }}>recent work</span>
           </div>
         </div>
-      </section>
+
+        {/* Floating Parallax Card Left */}
+        <div style={{ position: "absolute", bottom: "80px", left: "6%", width: "150px", height: "200px", borderRadius: "14px", background: "repeating-linear-gradient(-45deg, #1c1c22, #1c1c22 10px, #232330 10px, #232330 20px)", border: "1px solid rgba(255,255,255,0.1)", transform: `rotate(-6deg) translateY(${(-scrollY * 0.06).toFixed(1)}px)` }}>
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <span style={{ font: `500 10px ${monoFont}`, color: "rgba(255,255,255,0.45)" }}>mobile</span>
+          </div>
+        </div>
+
+        <div style={{ position: "relative", zIndex: 2, maxWidth: "900px", margin: "0 auto" }}>
+          <div style={{ font: `500 11px ${monoFont}`, letterSpacing: "0.14em", color: "rgba(245,242,236,0.45)", textTransform: "uppercase" }}>(Ready when you are)</div>
+          <h2 style={{ fontFamily: serifFont, fontWeight: 400, fontSize: "clamp(54px, 7vw, 116px)", lineHeight: 1.02, letterSpacing: "-0.015em", margin: "28px auto 0", color: "#f5f2ec" }}>
+            Have a project in mind? Let&apos;s make it <em style={{ color: "#B86CF9", fontStyle: "italic" }}>happen</em>
+          </h2>
+          <p style={{ fontSize: "16px", lineHeight: 1.6, color: "rgba(245,242,236,0.6)", maxWidth: "460px", margin: "26px auto 0" }}>
+            Tell us where your website is falling short. We&apos;ll reply within one business day with an honest read.
+          </p>
+          <div style={{ display: "flex", justifyContent: "center", marginTop: "40px" }}>
+            <a href="/portal" className="fx-hover-scale-lg" style={{ display: "flex", alignItems: "center", gap: "10px", background: "#B86CF9", color: "#141414", borderRadius: "999px", padding: "14px 14px 14px 32px", fontSize: "17px", fontWeight: 600, textDecoration: "none", cursor: "pointer", transition: "transform 0.3s ease" }}>
+              Start a project
+              <span style={{ width: "44px", height: "44px", background: "#101013", color: "#fff", borderRadius: "999px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px" }}>↗</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
 
     </div>
   );

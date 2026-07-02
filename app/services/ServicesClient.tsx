@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 /* ─────────────── icons ─────────────── */
@@ -589,6 +590,18 @@ function getShowcaseImage(name: string, idx?: number): string | null {
   return null;
 }
 
+export function getServiceSlug(name: string, idx?: number): string {
+  const n = name.toLowerCase();
+  if (idx === 0 || n.includes("web") || n.includes("design")) return "web-design-development";
+  if (idx === 1 || n.includes("ios") || n.includes("android") || n.includes("cross")) return "ios-android-mobile";
+  if (idx === 2 || n.includes("ai") || n.includes("artificial")) return "ai-integrated-software";
+  if (idx === 3 || n.includes("ecom") || n.includes("commerce") || n.includes("vendor") || n.includes("shop")) return "ecommerce-multi-vendor";
+  if (idx === 4 || n.includes("real-estate") || n.includes("real estate") || n.includes("property") || n.includes("estate")) return "real-estate-platforms";
+  if (idx === 5 || n.includes("ui") || n.includes("ux") || n.includes("brand")) return "ui-ux-brand";
+  if (idx === 6 || n.includes("marketing") || n.includes("performance")) return "performance-marketing";
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
 /* ════════════════════════════════════════════════════
    DETAIL MODAL — redesigned with animations
    ════════════════════════════════════════════════════ */
@@ -997,7 +1010,8 @@ export default function ServicesPage({ initialServices = [] }: { initialServices
     return s;
   });
 
-  const openDetail   = useCallback((s: DbService) => { setDetailService(s); document.body.style.overflow = "hidden"; }, []);
+  const router = useRouter();
+  const openDetail   = useCallback((s: DbService, idx?: number) => { router.push(`/services/${getServiceSlug(s.name, idx)}`); }, [router]);
   const closeDetail  = useCallback(() => { setDetailService(null); document.body.style.overflow = ""; }, []);
   const openInquiry  = useCallback((name: string) => { setDetailService(null); setInquiryService(name); document.body.style.overflow = "hidden"; }, []);
   const closeInquiry = useCallback(() => { setInquiryService(null); document.body.style.overflow = ""; }, []);
@@ -1044,7 +1058,7 @@ export default function ServicesPage({ initialServices = [] }: { initialServices
             key={s.id}
             service={s}
             index={i}
-            onDetail={() => openDetail(s)}
+            onDetail={() => openDetail(s, i)}
             onStart={() => openInquiry(s.name)}
           />
         ))}

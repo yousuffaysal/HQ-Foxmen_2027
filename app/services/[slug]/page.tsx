@@ -1,6 +1,7 @@
 import React from "react";
 import { Metadata } from "next";
-import ServiceDetailClient from "./ServiceDetailClient";
+import { sql } from "@/lib/db";
+import ServiceDetailClient, { DbProject } from "./ServiceDetailClient";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -17,5 +18,18 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ServiceDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  return <ServiceDetailClient slug={slug} />;
+  let projects: DbProject[] = [];
+  try {
+    const rows = await sql`
+      SELECT id, name, tagline, industry, scope, thumbnail, slug
+      FROM projects
+      WHERE status != 'archived'
+      ORDER BY id DESC
+      LIMIT 3
+    `;
+    projects = rows as unknown as DbProject[];
+  } catch {
+    projects = [];
+  }
+  return <ServiceDetailClient slug={slug} dbProjects={projects} />;
 }
