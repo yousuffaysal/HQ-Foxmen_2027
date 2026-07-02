@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const SITE_NAME = "Foxmen Studio";
 export const TAGLINE = "Code. Craft. Care.";
 export const BASE_URL = "https://www.foxmen.studio";
-export const DEFAULT_OG_IMAGE = "/assets/og-image.png";
+export const DEFAULT_OG_IMAGE = "https://ik.imagekit.io/hkhhsyhak/foxmen-og-01.png?updatedAt=1782208193979";
 export const DEFAULT_TWITTER_CREATOR = "@foxmenstudio";
 
 export const DEFAULT_KEYWORDS = [

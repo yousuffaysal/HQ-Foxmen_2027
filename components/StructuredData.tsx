@@ -3,7 +3,7 @@ import React from "react";
 const BASE_URL = "https://www.foxmen.studio";
 const SITE_NAME = "Foxmen Studio";
 const LOGO_URL = `${BASE_URL}/assets/logo-mark.svg`;
-const OG_IMAGE_URL = `${BASE_URL}/assets/og-image.png`;
+const OG_IMAGE_URL = "https://ik.imagekit.io/hkhhsyhak/foxmen-og-01.png?updatedAt=1782208193979";
 
 const SOCIAL_LINKS = [
   "https://x.com/FoxmenStudio",

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { cache } from "react";
 import { sql } from "@/lib/db";
-import { constructMetadata } from "@/lib/metadata";
+import { constructMetadata, DEFAULT_OG_IMAGE } from "@/lib/metadata";
 
 const BASE = "https://www.foxmen.studio";
 
@@ -99,7 +99,7 @@ export async function generateMetadata(
   const title = post.title;
   const description = post.excerpt ||
     "An article from the Foxmen Studio journal — design craft, engineering, AI in production, and studio notes.";
-  const image = post.cover_image || "/assets/og-image.png";
+  const image = post.cover_image || DEFAULT_OG_IMAGE;
   const keywords = post.tags
     ? post.tags.split(",").map((t) => t.trim()).filter(Boolean)
     : [post.category, "Foxmen Studio"];
@@ -140,12 +140,12 @@ export default async function JournalSlugLayout({
           "@type": "Organization",
           name: "Foxmen Studio",
           url: BASE,
-          logo: { "@type": "ImageObject", url: `${BASE}/assets/og-image.png` },
+          logo: { "@type": "ImageObject", url: DEFAULT_OG_IMAGE },
         },
         datePublished: post.published_at
           ? new Date(post.published_at).toISOString()
           : undefined,
-        image: post.cover_image || `${BASE}/assets/og-image.png`,
+        image: post.cover_image || DEFAULT_OG_IMAGE,
         url: `${BASE}/journal/${slug}`,
         keywords: post.tags || post.category,
         mainEntityOfPage: { "@type": "WebPage", "@id": `${BASE}/journal/${slug}` },
