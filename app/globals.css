@@ -2108,16 +2108,19 @@ body.page-revealed .hero::after {
 }
 .reel .frame {
   --reel-p: 0;
-  width: calc(56vw + 44vw * var(--reel-p));
-  max-width: 1800px;
+  width: calc(58vw + 34vw * var(--reel-p));
+  /* Height-capped so the full 16:9 rectangle always fits within the viewport
+     (leaves ~10vh of vertical breathing room); width capped for side margins. */
+  max-width: min(1760px, calc(90vh * 16 / 9));
   aspect-ratio: 16 / 9;
-  border-radius: calc(15px - 15px * var(--reel-p));
+  /* Constant radius — corners stay rounded, never snap to sharp at full size. */
+  border-radius: 22px;
   overflow: hidden;
   position: relative;
   box-shadow: 0 40px 100px -30px rgba(0,0,0,.45);
   background: #0a0a0a;
-  transform: scale(calc(.92 + .08 * var(--reel-p)));
-  will-change: transform, width, border-radius;
+  transform: scale(calc(.94 + .06 * var(--reel-p)));
+  will-change: transform, width;
 }
 .reel .frame::after {
   content: ""; position: absolute; inset: 0;
