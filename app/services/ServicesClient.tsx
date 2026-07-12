@@ -590,16 +590,16 @@ function getShowcaseImage(name: string, idx?: number): string | null {
   return null;
 }
 
-export function getServiceSlug(name: string, idx?: number): string {
-  const n = name.toLowerCase();
-  if (idx === 0 || n.includes("web") || n.includes("design")) return "web-design-development";
-  if (idx === 1 || n.includes("ios") || n.includes("android") || n.includes("cross")) return "ios-android-mobile";
-  if (idx === 2 || n.includes("ai") || n.includes("artificial")) return "ai-integrated-software";
-  if (idx === 3 || n.includes("ecom") || n.includes("commerce") || n.includes("vendor") || n.includes("shop")) return "ecommerce-multi-vendor";
-  if (idx === 4 || n.includes("real-estate") || n.includes("real estate") || n.includes("property") || n.includes("estate")) return "real-estate-platforms";
-  if (idx === 5 || n.includes("ui") || n.includes("ux") || n.includes("brand")) return "ui-ux-brand";
-  if (idx === 6 || n.includes("marketing") || n.includes("performance")) return "performance-marketing";
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+export function getServiceSlug(name: string, _idx?: number): string {
+  const n = (name || "").toLowerCase();
+  if (n.includes("ui") || n.includes("ux") || n.includes("brand") || n.includes("figma") || n.includes("token") || (n.includes("design") && !n.includes("web"))) return "ui-ux-brand";
+  if (n.includes("ai") || n.includes("artificial") || n.includes("agent") || n.includes("rag") || n.includes("llm")) return "ai-integrated-software";
+  if (n.includes("ios") || n.includes("android") || n.includes("mobile") || n.includes("app") || n.includes("cross") || n.includes("flutter")) return "ios-android-mobile";
+  if (n.includes("ecom") || n.includes("commerce") || n.includes("vendor") || n.includes("shop") || n.includes("medusa") || n.includes("stripe") || n.includes("store")) return "ecommerce-multi-vendor";
+  if (n.includes("real-estate") || n.includes("real estate") || n.includes("property") || n.includes("estate") || n.includes("mortgage") || n.includes("listing")) return "real-estate-platforms";
+  if (n.includes("marketing") || n.includes("performance") || n.includes("seo") || n.includes("growth") || n.includes("ad") || n.includes("cro")) return "performance-marketing";
+  if (n.includes("web") || n.includes("development") || n.includes("site") || n.includes("saas") || n.includes("next")) return "web-design-development";
+  return n.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "default";
 }
 
 /* ════════════════════════════════════════════════════

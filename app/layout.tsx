@@ -41,9 +41,14 @@ const urbanist = Urbanist({
   display: "swap",
 });
 
-export const metadata: Metadata = constructMetadata({
-  category: "technology",
-});
+export const metadata: Metadata = {
+  ...constructMetadata({
+    category: "technology",
+  }),
+  other: {
+    "p:domain_verify": "21219fd3e40b159af585737929893236",
+  },
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

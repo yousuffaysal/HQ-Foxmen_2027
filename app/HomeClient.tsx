@@ -124,7 +124,6 @@ function SlideButton({ href, label, ghost = false }: {
 
 function Hero() {
   const orbitRef = useRef<HTMLDivElement>(null);
-  const [count, setCount] = useState(0);
 
   useEffect(() => {
     const onScroll = () => {
@@ -134,38 +133,8 @@ function Hero() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => {
-    const TARGET = 50;
-    const DURATION = 1800; // ms
-
-    function startCount() {
-      const start = performance.now();
-      function frame(now: number) {
-        const progress = Math.min((now - start) / DURATION, 1);
-        // ease-out
-        const eased = 1 - Math.pow(1 - progress, 3);
-        setCount(Math.floor(eased * TARGET));
-        if (progress < 1) requestAnimationFrame(frame);
-      }
-      requestAnimationFrame(frame);
-    }
-
-    if (document.body.classList.contains("page-revealed")) {
-      startCount();
-      return;
-    }
-    const obs = new MutationObserver(() => {
-      if (document.body.classList.contains("page-revealed")) {
-        obs.disconnect();
-        startCount();
-      }
-    });
-    obs.observe(document.body, { attributes: true, attributeFilter: ["class"] });
-    return () => obs.disconnect();
-  }, []);
-
   return (
-    <section className="hero" id="top">
+    <section className="hero hero--center" id="top">
       <div className="hero-orbit" ref={orbitRef} aria-hidden="true">
         <svg viewBox="0 0 200 200">
           <defs>
@@ -178,51 +147,43 @@ function Hero() {
           <image href="/assets/logo_sn_fox.png" x="64" y="64" width="72" height="72" />
         </svg>
       </div>
-      <div className="wrap">
-        <div className="hero-tag fade in">
-          <span className="eyebrow">International Digital Studio</span>
+
+      <div className="wrap hero-inner">
+        <div className="hero-badge fade in">
+          <span className="hero-badge-dot" aria-hidden="true" />
+          Accepting new projects — Q3 2026
         </div>
-        <h1 className="display in">
-          <span className="row">
-            <span className="reveal in"><span className="reveal-inner">We build</span></span>
-            <span className="reveal in reveal-delay-1"><span className="reveal-inner it">digital</span></span>
-          </span>
-          <span className="row">
-            <span className="reveal in reveal-delay-2"><span className="reveal-inner">products</span></span>
-            <span className="reveal in reveal-delay-3"><span className="reveal-inner">that</span></span>
-            <span className="reveal in reveal-delay-4"><span className="reveal-inner it">ship.</span></span>
-          </span>
+
+        <h1 className="display hero-headline in">
+          <span className="reveal in"><span className="reveal-inner">We build digital products</span></span>
+          <span className="reveal in reveal-delay-1"><span className="reveal-inner">that feel <span className="it">alive.</span></span></span>
         </h1>
-        <div className="hero-bottom">
-          <p className="fade d2">
-            From custom AI to full-stack development — we design, develop and
-            deploy digital products that grow with you.
-          </p>
-          <div className="fade d3">
-            <div className="stat">{count}+</div>
-            <div className="stat-sub">Products shipped worldwide</div>
-          </div>
-          <div className="fade d4 hero-actions">
-            {/* Desktop: original btn--lg */}
-            <div className="hero-cta-desktop">
-              <Link href="/work" className="btn btn--lg">
-                <span className="label">See our work</span>
-                <span className="chip" aria-hidden="true"><ArrowIcon /></span>
-              </Link>
-              <button
-                className="tlink"
-                data-cal-link="yousuf-faysal/project-discussion-call"
-                data-cal-namespace="project-discussion-call"
-                data-cal-config='{"layout":"week_view","useSlotsViewOnSmallScreen":"true","theme":"auto"}'
-                style={{ background: "none", border: "none", padding: 0, cursor: "pointer", font: "inherit" }}
-              >Book a 20-min call →</button>
-            </div>
-            {/* Mobile: slide-to-activate */}
-            <div className="hero-cta-mobile">
-              <SlideButton href="/work"   label="See our work"  />
-              <SlideButton href="/portal" label="Client Portal" ghost />
-            </div>
-          </div>
+
+        <p className="hero-sub fade d2">
+          Web development, mobile apps, AI-integrated applications, SaaS
+          products &amp; digital marketing — crafted end to end.
+        </p>
+
+        <div className="hero-actions fade d3">
+          <button
+            type="button"
+            className="btn btn--lg"
+            data-cal-link="yousuf-faysal/project-discussion-call"
+            data-cal-namespace="project-discussion-call"
+            data-cal-config='{"layout":"week_view","useSlotsViewOnSmallScreen":"true","theme":"auto"}'
+          >
+            <span className="label">Start a project</span>
+            <span className="chip" aria-hidden="true"><ArrowIcon /></span>
+          </button>
+          <Link href="/work" className="btn btn--ghost btn--lg btn--nochip">
+            <span className="label">See our work</span>
+          </Link>
+        </div>
+      </div>
+
+      <div className="hero-ticker" aria-hidden="true">
+        <div className="hero-ticker-track">
+          {[...heroTicker, ...heroTicker].map((t, i) => <span key={i}>{t}</span>)}
         </div>
       </div>
     </section>
@@ -355,6 +316,7 @@ const steps = [
 ];
 
 const marqueeItems = ["Web Design","Mobile Apps","AI Integration","Ecommerce","Real-Estate Platforms","Multi-Vendor","UI · UX","Brand Systems","Marketing"];
+const heroTicker = ["Mobile Apps","AI-Integrated Apps","SaaS Products","Digital Marketing","Web Development"];
 const techItems    = ["React","Next.js","Swift","Flutter","OpenAI","Anthropic","Stripe","Postgres","Figma","Webflow"];
 
 type DbService = { id:number; ord:number; name:string; descr:string; count:string; visible:boolean; badge:string|null; image:string|null };
