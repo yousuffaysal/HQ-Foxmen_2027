@@ -118,7 +118,7 @@ export default function Nav() {
               </span>
             </Link>
             <Link href="/contact" className="btn">
-              <span className="label">Start a project</span>
+              <span className="label">Contact us</span>
               <span className="chip" aria-hidden="true">
                 <ArrowIcon />
               </span>

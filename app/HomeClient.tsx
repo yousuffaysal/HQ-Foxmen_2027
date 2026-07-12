@@ -124,6 +124,7 @@ function SlideButton({ href, label, ghost = false }: {
 
 function Hero() {
   const orbitRef = useRef<HTMLDivElement>(null);
+  const [count, setCount] = useState(0);
 
   useEffect(() => {
     const onScroll = () => {
@@ -131,6 +132,36 @@ function Hero() {
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Counter for the original (mobile) hero stat
+  useEffect(() => {
+    const TARGET = 50;
+    const DURATION = 1800; // ms
+
+    function startCount() {
+      const start = performance.now();
+      function frame(now: number) {
+        const progress = Math.min((now - start) / DURATION, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        setCount(Math.floor(eased * TARGET));
+        if (progress < 1) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    if (document.body.classList.contains("page-revealed")) {
+      startCount();
+      return;
+    }
+    const obs = new MutationObserver(() => {
+      if (document.body.classList.contains("page-revealed")) {
+        obs.disconnect();
+        startCount();
+      }
+    });
+    obs.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+    return () => obs.disconnect();
   }, []);
 
   return (
@@ -148,6 +179,7 @@ function Hero() {
         </svg>
       </div>
 
+      {/* ── Desktop / laptop hero (new centered design) ── */}
       <div className="wrap hero-inner">
         <div className="hero-badge fade in">
           <span className="hero-badge-dot" aria-hidden="true" />
@@ -184,6 +216,40 @@ function Hero() {
       <div className="hero-ticker" aria-hidden="true">
         <div className="hero-ticker-track">
           {[...heroTicker, ...heroTicker].map((t, i) => <span key={i}>{t}</span>)}
+        </div>
+      </div>
+
+      {/* ── Mobile hero (original design) ── */}
+      <div className="wrap hero-legacy">
+        <div className="hero-tag fade in">
+          <span className="eyebrow">International Digital Studio</span>
+        </div>
+        <h1 className="display in">
+          <span className="row">
+            <span className="reveal in"><span className="reveal-inner">We build</span></span>
+            <span className="reveal in reveal-delay-1"><span className="reveal-inner it">digital</span></span>
+          </span>
+          <span className="row">
+            <span className="reveal in reveal-delay-2"><span className="reveal-inner">products</span></span>
+            <span className="reveal in reveal-delay-3"><span className="reveal-inner">that</span></span>
+            <span className="reveal in reveal-delay-4"><span className="reveal-inner it">ship.</span></span>
+          </span>
+        </h1>
+        <div className="hero-bottom">
+          <p className="fade d2">
+            From custom AI to full-stack development — we design, develop and
+            deploy digital products that grow with you.
+          </p>
+          <div className="fade d3">
+            <div className="stat">{count}+</div>
+            <div className="stat-sub">Products shipped worldwide</div>
+          </div>
+          <div className="fade d4 hero-actions">
+            <div className="hero-cta-mobile">
+              <SlideButton href="/work"   label="See our work"  />
+              <SlideButton href="/portal" label="Client Portal" ghost />
+            </div>
+          </div>
         </div>
       </div>
     </section>

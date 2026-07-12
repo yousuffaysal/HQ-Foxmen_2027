@@ -117,8 +117,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 /* ============================================================
    LAYOUT PRIMITIVES
    ============================================================ */
-.wrap       { width: min(1728px, 100% - clamp(40px, 5vw, 112px)); margin-inline: auto; }
-.wrap-tight { width: min(1180px, 100% - clamp(40px, 5vw, 112px)); margin-inline: auto; }
+.wrap       { width: min(1728px, 100% - clamp(48px, 5vw, 112px)); margin-inline: auto; }
+.wrap-tight { width: min(1180px, 100% - clamp(48px, 5vw, 112px)); margin-inline: auto; }
 .section    { padding: 120px 0; position: relative; }
 @media (max-width:760px) { .section { padding: 80px 0; } }
 
@@ -354,6 +354,7 @@ h1, h2, h3, h4 { margin: 0; font-weight: 400; letter-spacing: -0.02em; }
 @media (max-width:900px) {
   .nav-links  { display: none; }
   .nav-cta    { display: none; }
+  .nav-inner  { width: 100%; max-width: none; padding-inline: 20px; }
 
   /* Keep nav visible and solid when menu is open */
   .nav.menu-open {
@@ -567,6 +568,8 @@ body.page-revealed .hero::after {
 
 /* ── Centered hero (home) ────────────────────────────────── */
 .hero--center { text-align: center; }
+/* The original hero markup is desktop-hidden; it takes over on mobile only. */
+.hero-legacy { display: none !important; }
 .hero--center > .hero-inner {
   flex: 1;
   display: flex;
@@ -601,12 +604,12 @@ body.page-revealed .hero::after {
 .hero-headline {
   font-family: var(--f-display);
   font-size: clamp(38px, 5.4vw, 80px);
-  line-height: 1.04;
+  line-height: 1.14;
   letter-spacing: -0.02em;
   margin: 0;
   max-width: none;
 }
-.hero-headline .reveal { display: block; white-space: nowrap; padding-bottom: .08em; margin-bottom: -0.08em; }
+.hero-headline .reveal { display: block; white-space: nowrap; padding-bottom: .12em; margin-bottom: -0.12em; }
 .hero-headline .reveal:last-child { margin-bottom: 0; }
 .hero-headline .it { font-style: italic; color: var(--brand); }
 
@@ -792,19 +795,14 @@ body.page-revealed .hero::after {
     height: 150px;
     right: 12px;
     top: 108px;
-    opacity: .4;
+    opacity: .55;
   }
   .hero-scroll { display: none; }
 
-  /* centered hero — mobile */
-  .hero--center > .hero-inner { gap: 20px; padding-top: 20px; }
-  .hero-headline { font-size: clamp(21px, 6.4vw, 36px); max-width: 100%; }
-  .hero-sub { font-size: 15px; max-width: 100%; }
-  .hero--center .hero-actions { flex-direction: column; align-items: stretch; width: 100%; }
-  .hero--center .hero-actions .btn { width: 100%; justify-content: space-between; }
-  .hero--center .hero-actions .btn--nochip { justify-content: center; }
-  .hero-ticker-track span { font-size: 12px; gap: 32px; }
-  .hero-ticker-track { gap: 32px; }
+  /* mobile → swap the new centered hero out for the original one */
+  .hero-inner, .hero-ticker { display: none !important; }
+  .hero-legacy { display: flex !important; }
+  .hero--center { text-align: left; }
 }
 
 /* ============================================================
