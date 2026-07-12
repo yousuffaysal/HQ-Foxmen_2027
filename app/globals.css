@@ -299,6 +299,14 @@ h1, h2, h3, h4 { margin: 0; font-weight: 400; letter-spacing: -0.02em; }
 .nav-links a:hover { background: var(--ink); color: #fff; }
 .nav-links a.active { background: var(--ink); color: #fff; }
 
+/* Desktop only — larger nav text + logo (mobile untouched) */
+@media (min-width: 901px) {
+  .nav-links a   { font-size: 20px; padding: 11px 22px; }
+  .nav-cta .btn  { font-size: 19px; }
+  .brand         { font-size: 38px; }
+  .brand .mark   { width: 62px; height: 62px; }
+}
+
 .nav-cta { display: flex; align-items: center; gap: 12px; }
 .nav-time {
   font-family: var(--f-mono); font-size: 11px; letter-spacing: .12em; color: var(--muted);
