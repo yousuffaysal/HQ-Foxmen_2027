@@ -183,7 +183,7 @@ function Hero() {
       <div className="wrap hero-inner">
         <div className="hero-badge fade in">
           <span className="hero-badge-dot" aria-hidden="true" />
-          Accepting new projects — Q3 2026
+          Accepting new projects for Q3 2026
         </div>
 
         <h1 className="display hero-headline in">
@@ -193,7 +193,7 @@ function Hero() {
 
         <p className="hero-sub fade d2">
           Web development, mobile apps, AI-integrated applications, SaaS
-          products &amp; digital marketing — crafted end to end.
+          products &amp; digital marketing, crafted end to end.
         </p>
 
         <div className="hero-actions fade d3">
@@ -237,7 +237,7 @@ function Hero() {
         </h1>
         <div className="hero-bottom">
           <p className="fade d2">
-            From custom AI to full-stack development — we design, develop and
+            From custom AI to full-stack development, we design, develop and
             deploy digital products that grow with you.
           </p>
           <div className="fade d3">
@@ -290,12 +290,12 @@ function Reel() {
     // Scroll handler reads only window.scrollY — zero layout cost
     const onScroll = () => {
       const raw = (window.scrollY - reelTop) / (scrollable || 1);
-      tgt = Math.min(1, Math.max(0, (Math.min(Math.max(raw, 0), 1) - 0.08) / 0.55));
+      tgt = Math.min(1, Math.max(0, (Math.min(Math.max(raw, 0), 1) - 0.05) / 0.35));
     };
 
     // 60fps lerp loop — decouples DOM writes from scroll events
     const tick = () => {
-      cur += (tgt - cur) * 0.09;
+      cur += (tgt - cur) * 0.2;
       frame.style.setProperty("--reel-p", cur.toFixed(4));
       if (labelRef.current)
         labelRef.current.style.setProperty("--reel-label-op", (1 - Math.min(1, cur * 1.5)).toFixed(3));
