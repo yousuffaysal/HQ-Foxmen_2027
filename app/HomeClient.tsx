@@ -277,9 +277,14 @@ function Reel() {
     const frame = frameRef.current;
     if (!reel || !frame) return;
 
+    // Scroll fractions (of the reel's scrollable range) across which the
+    // small→full expand plays. Below A: not started. Above B: full-screen hold.
+    const ANIM_A = 0.05, ANIM_B = 0.42;
+
     // Cache layout values — only re-read on resize, never on scroll
     let reelTop = 0, scrollable = 0, winH = 0;
     let cur = 0, tgt = 0, raf = 0;
+    let lastY = 0, dir = 1, snapTimer = 0, isSnapping = false;
 
     const measure = () => {
       winH       = window.innerHeight;
@@ -287,10 +292,56 @@ function Reel() {
       scrollable = reel.offsetHeight - winH;
     };
 
+    // Custom eased auto-scroll (rAF). The page sets `scroll-behavior: smooth`
+    // globally, which would smooth each of our per-frame scrollTo calls and
+    // cancel them out — so we disable it for the duration, then restore it.
+    const root = document.documentElement;
+    const animateScrollTo = (destY: number, duration: number) => {
+      const startY = window.scrollY;
+      const dist = destY - startY;
+      if (Math.abs(dist) < 2) return;
+      const prevBehavior = root.style.scrollBehavior;
+      root.style.scrollBehavior = "auto";
+      const restore = () => { root.style.scrollBehavior = prevBehavior; };
+      const t0 = performance.now();
+      isSnapping = true;
+      const stepFn = (now: number) => {
+        if (!isSnapping) { restore(); return; }
+        const k = Math.min(1, (now - t0) / duration);
+        const eased = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2; // easeInOutCubic
+        window.scrollTo(0, startY + dist * eased);
+        if (k < 1) requestAnimationFrame(stepFn);
+        else { isSnapping = false; restore(); }
+      };
+      requestAnimationFrame(stepFn);
+    };
+
+    // Auto-complete the hero → reel transition: once you commit to leaving the
+    // hero, glide all the way to the full-screen reel (playing the expand), and
+    // never rest in between. Scrolling up glides back to the hero. Desktop only.
+    const maybeSnap = () => {
+      if (window.innerWidth <= 760 || scrollable <= 0) return;
+      const y     = window.scrollY;
+      const full  = reelTop + (ANIM_B + 0.02) * scrollable; // reel fully expanded
+      const lower = 0.3 * winH;                             // committed to leaving hero
+      if (y > lower && y < full - 0.03 * scrollable) {
+        const dest = dir >= 0 ? full : 0;
+        const dur  = Math.min(1000, Math.max(480, Math.abs(dest - y) * 0.4));
+        animateScrollTo(dest, dur);
+      }
+    };
+
     // Scroll handler reads only window.scrollY — zero layout cost
     const onScroll = () => {
-      const raw = (window.scrollY - reelTop) / (scrollable || 1);
-      tgt = Math.min(1, Math.max(0, (Math.min(Math.max(raw, 0), 1) - 0.05) / 0.35));
+      const y = window.scrollY;
+      dir = y >= lastY ? 1 : -1;
+      lastY = y;
+      const raw = (y - reelTop) / (scrollable || 1);
+      tgt = Math.min(1, Math.max(0, (Math.min(Math.max(raw, 0), 1) - ANIM_A) / (ANIM_B - ANIM_A)));
+      if (!isSnapping) {
+        clearTimeout(snapTimer);
+        snapTimer = window.setTimeout(maybeSnap, 80);
+      }
     };
 
     // 60fps lerp loop — decouples DOM writes from scroll events
@@ -302,16 +353,26 @@ function Reel() {
       raf = requestAnimationFrame(tick);
     };
 
+    // A deliberate wheel/touch cancels an in-progress auto-glide so the user
+    // is never fighting the page. (Programmatic scrollTo doesn't fire these.)
+    const cancelSnap = () => { isSnapping = false; };
+
+    lastY = window.scrollY;
     measure();
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", measure,  { passive: true });
+    window.addEventListener("wheel", cancelSnap, { passive: true });
+    window.addEventListener("touchmove", cancelSnap, { passive: true });
     raf = requestAnimationFrame(tick);
 
     return () => {
       cancelAnimationFrame(raf);
+      clearTimeout(snapTimer);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", measure);
+      window.removeEventListener("wheel", cancelSnap);
+      window.removeEventListener("touchmove", cancelSnap);
     };
   }, []);
 
