@@ -2091,6 +2091,8 @@ body.page-revealed .hero::after {
   display: grid;
   place-items: center;
   overflow: hidden;
+  /* Clear the fixed navbar so the full-size video sits below it, not under it. */
+  padding: 110px 0 40px;
 }
 .reel .label {
   position: absolute;
@@ -2108,10 +2110,12 @@ body.page-revealed .hero::after {
 }
 .reel .frame {
   --reel-p: 0;
-  /* Grows from a small card to (near) full-screen. Height-capped so the whole
-     16:9 frame stays visible; on 16:9 displays this is effectively full-screen. */
+  /* Grows from a small card to full-size. Capped by the height available BELOW
+     the navbar (100vh minus the sticky's 150px top+bottom padding) so the whole
+     16:9 video always fits under the nav and never tucks beneath it. */
   width: calc(60vw + 40vw * var(--reel-p));
-  max-width: calc(96vh * 16 / 9);
+  max-width: calc((100vh - 150px) * 16 / 9);
+  max-height: calc(100vh - 150px);
   aspect-ratio: 16 / 9;
   /* Consistent 13px rounded corners at every stage, including full-screen. */
   border-radius: 13px;

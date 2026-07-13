@@ -284,7 +284,7 @@ function Reel() {
     // Cache layout values — only re-read on resize, never on scroll
     let reelTop = 0, scrollable = 0, winH = 0;
     let cur = 0, tgt = 0, raf = 0;
-    let lastY = 0, dir = 1, snapTimer = 0, isSnapping = false;
+    let lastY = 0, dir = 1, isSnapping = false;
 
     const measure = () => {
       winH       = window.innerHeight;
@@ -308,7 +308,7 @@ function Reel() {
       const stepFn = (now: number) => {
         if (!isSnapping) { restore(); return; }
         const k = Math.min(1, (now - t0) / duration);
-        const eased = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2; // easeInOutCubic
+        const eased = 1 - Math.pow(1 - k, 3); // easeOutCubic — moves instantly, no lag at start
         window.scrollTo(0, startY + dist * eased);
         if (k < 1) requestAnimationFrame(stepFn);
         else { isSnapping = false; restore(); }
@@ -323,25 +323,23 @@ function Reel() {
       if (window.innerWidth <= 760 || scrollable <= 0) return;
       const y     = window.scrollY;
       const full  = reelTop + (ANIM_B + 0.02) * scrollable; // reel fully expanded
-      const lower = 0.3 * winH;                             // committed to leaving hero
+      const lower = 0.08 * winH;                            // the moment you start leaving the hero
       if (y > lower && y < full - 0.03 * scrollable) {
         const dest = dir >= 0 ? full : 0;
-        const dur  = Math.min(1000, Math.max(480, Math.abs(dest - y) * 0.4));
+        const dur  = Math.min(1000, Math.max(450, Math.abs(dest - y) * 0.4));
         animateScrollTo(dest, dur);
       }
     };
 
-    // Scroll handler reads only window.scrollY — zero layout cost
+    // Scroll handler reads only window.scrollY — zero layout cost.
+    // Fires the auto-glide immediately (no settle delay) so there's no pause.
     const onScroll = () => {
       const y = window.scrollY;
       dir = y >= lastY ? 1 : -1;
       lastY = y;
       const raw = (y - reelTop) / (scrollable || 1);
       tgt = Math.min(1, Math.max(0, (Math.min(Math.max(raw, 0), 1) - ANIM_A) / (ANIM_B - ANIM_A)));
-      if (!isSnapping) {
-        clearTimeout(snapTimer);
-        snapTimer = window.setTimeout(maybeSnap, 80);
-      }
+      if (!isSnapping) maybeSnap();
     };
 
     // 60fps lerp loop — decouples DOM writes from scroll events
@@ -353,26 +351,17 @@ function Reel() {
       raf = requestAnimationFrame(tick);
     };
 
-    // A deliberate wheel/touch cancels an in-progress auto-glide so the user
-    // is never fighting the page. (Programmatic scrollTo doesn't fire these.)
-    const cancelSnap = () => { isSnapping = false; };
-
     lastY = window.scrollY;
     measure();
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", measure,  { passive: true });
-    window.addEventListener("wheel", cancelSnap, { passive: true });
-    window.addEventListener("touchmove", cancelSnap, { passive: true });
     raf = requestAnimationFrame(tick);
 
     return () => {
       cancelAnimationFrame(raf);
-      clearTimeout(snapTimer);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", measure);
-      window.removeEventListener("wheel", cancelSnap);
-      window.removeEventListener("touchmove", cancelSnap);
     };
   }, []);
 
@@ -541,8 +530,8 @@ const PF_CSS = `
 .pf-step--active .pf-step-title { color:var(--brand,#b86cf9); }
 .pf-step-copy { font-size:17px; line-height:1.72; opacity:.62; max-width:380px; }
 
-/* sticky col */
-.pf-sticky-col { position:sticky; top:80px; }
+/* sticky col — offset clears the fixed navbar so the mockup never tucks under it */
+.pf-sticky-col { position:sticky; top:120px; }
 
 /* mock window */
 .pf-mock {
