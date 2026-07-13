@@ -204,7 +204,7 @@ function Hero() {
             data-cal-namespace="project-discussion-call"
             data-cal-config='{"layout":"week_view","useSlotsViewOnSmallScreen":"true","theme":"auto"}'
           >
-            <span className="label">Start a project</span>
+            <span className="label">Book a 20-minute call</span>
             <span className="chip" aria-hidden="true"><ArrowIcon /></span>
           </button>
           <Link href="/work" className="btn btn--ghost btn--lg btn--nochip">
@@ -989,28 +989,90 @@ const LC_CSS = `
   margin-top:22px; font-size:19px; line-height:1.68;
   color:rgba(255,255,255,.5); max-width:480px;
 }
-.lc-opts { display:flex; flex-direction:column; gap:14px; margin-top:40px; }
+.lc-opts { display:flex; flex-direction:column; gap:18px; margin-top:40px; }
 .lc-opt {
-  display:flex; align-items:flex-start; gap:16px;
-  background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
-  border-radius:14px; padding:22px; transition:border-color .3s ease, background .3s ease;
+  --accent:#b86cf9;
+  position:relative; isolation:isolate; overflow:hidden;
+  display:flex; align-items:flex-start; gap:18px;
+  padding:24px 26px; border-radius:18px;
+  background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015));
+  border:1px solid rgba(255,255,255,.08);
+  cursor:pointer;
+  transition:transform .5s var(--ease-out), border-color .4s ease, box-shadow .5s ease;
 }
-.lc-opt:hover { border-color:rgba(184,108,249,.35); background:rgba(184,108,249,.06); }
+.lc-opt--ai   { --accent:#b86cf9; }
+.lc-opt--live { --accent:#4ade80; }
+/* soft accent glow that drifts on hover */
+.lc-opt::before {
+  content:""; position:absolute; z-index:-1; left:-20%; bottom:-45%;
+  width:260px; height:260px; border-radius:50%;
+  background:radial-gradient(circle, color-mix(in srgb, var(--accent) 60%, transparent), transparent 70%);
+  filter:blur(34px); opacity:0; pointer-events:none;
+  transition:opacity .55s ease, transform .7s var(--ease-out);
+}
+.lc-opt:hover::before { opacity:.45; transform:translate(34px,-34px); }
+/* accent hairline on the left edge, reveals on hover */
+.lc-opt::after {
+  content:""; position:absolute; left:0; top:16%; bottom:16%; width:2.5px; border-radius:3px;
+  background:linear-gradient(180deg, transparent, var(--accent), transparent);
+  transform:scaleY(0); transition:transform .5s var(--ease-out);
+}
+.lc-opt:hover {
+  transform:translateY(-4px);
+  border-color:color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow:0 26px 60px -32px color-mix(in srgb, var(--accent) 65%, transparent);
+}
+.lc-opt:hover::after { transform:scaleY(1); }
+
 .lc-opt-ico {
-  width:44px; height:44px; border-radius:12px; flex-shrink:0;
+  position:relative; width:50px; height:50px; border-radius:15px; flex-shrink:0;
   display:flex; align-items:center; justify-content:center;
+  background:color-mix(in srgb, var(--accent) 16%, transparent);
+  color:var(--accent);
 }
-.lc-opt-ico--ai   { background:rgba(184,108,249,.18); color:var(--brand,#b86cf9); }
-.lc-opt-ico--live { background:rgba(74,222,128,.12); color:#4ade80; }
-.lc-opt-title { font-size:16px; font-weight:600; color:#fff; margin-bottom:5px; }
-.lc-opt-desc  { font-size:14px; color:rgba(255,255,255,.45); line-height:1.58; }
+/* concentric pulse rings — signals an always-on channel */
+.lc-opt-ico::before, .lc-opt-ico::after {
+  content:""; position:absolute; inset:0; border-radius:inherit;
+  border:1.5px solid var(--accent); opacity:0;
+  animation:lc-pulse 2.8s ease-out infinite;
+}
+.lc-opt-ico::after { animation-delay:1.4s; }
+@keyframes lc-pulse { 0%{opacity:.5; transform:scale(1);} 100%{opacity:0; transform:scale(1.55);} }
+
+.lc-opt-main { flex:1; min-width:0; }
+.lc-opt-kicker {
+  display:block; font-family:var(--f-mono); font-size:10px; letter-spacing:.16em;
+  text-transform:uppercase; color:color-mix(in srgb, var(--accent) 70%, #fff);
+  opacity:.72; margin-bottom:9px;
+}
+.lc-opt-head { display:flex; align-items:center; gap:12px; }
+.lc-opt-title { font-size:17px; font-weight:600; color:#fff; letter-spacing:-.01em; }
+.lc-opt-desc  { font-size:14px; color:rgba(255,255,255,.5); line-height:1.6; margin-top:7px; max-width:46ch; }
 .lc-opt-badge {
-  margin-left:auto; align-self:flex-start; flex-shrink:0;
-  font-size:10px; font-weight:600; letter-spacing:.05em;
-  padding:3px 9px; border-radius:20px;
+  margin-left:auto; flex-shrink:0;
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:var(--f-mono); font-size:10.5px; font-weight:500; letter-spacing:.05em;
+  padding:5px 11px; border-radius:20px;
+  background:color-mix(in srgb, var(--accent) 13%, transparent);
+  color:color-mix(in srgb, var(--accent) 82%, #fff);
+  border:1px solid color-mix(in srgb, var(--accent) 26%, transparent);
 }
-.lc-opt-badge--ai   { background:rgba(184,108,249,.15); color:var(--brand,#b86cf9); }
-.lc-opt-badge--live { background:rgba(74,222,128,.12);  color:#4ade80; }
+.lc-opt-badge-dot {
+  width:6px; height:6px; border-radius:50%; background:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+  animation:lc-blink 2s ease-in-out infinite;
+}
+@keyframes lc-blink { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+/* arrow slides in on hover — the card feels actionable */
+.lc-opt-arrow {
+  position:absolute; right:22px; bottom:20px;
+  width:34px; height:34px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--accent); background:color-mix(in srgb, var(--accent) 15%, transparent);
+  opacity:0; transform:translateX(-10px);
+  transition:opacity .4s ease, transform .5s var(--ease-out);
+}
+.lc-opt:hover .lc-opt-arrow { opacity:1; transform:translateX(0); }
 
 /* chat widget mockup */
 .lc-widget {
@@ -1225,30 +1287,42 @@ function LiveChatSection() {
             </p>
 
             <div className="lc-opts fade d3">
-              <div className="lc-opt">
+              <div className="lc-opt lc-opt--ai">
                 <div className="lc-opt-ico lc-opt-ico--ai">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><circle cx="19" cy="5" r="3" fill="currentColor" stroke="none"/>
                   </svg>
                 </div>
-                <div>
-                  <div className="lc-opt-title">Foxo AI</div>
-                  <div className="lc-opt-desc">Instant answers about services, pricing, timelines and case studies — 24 hours a day.</div>
+                <div className="lc-opt-main">
+                  <span className="lc-opt-kicker">Automated · GPT-powered</span>
+                  <div className="lc-opt-head">
+                    <span className="lc-opt-title">Foxo AI</span>
+                    <span className="lc-opt-badge"><span className="lc-opt-badge-dot" />24 / 7</span>
+                  </div>
+                  <div className="lc-opt-desc">Instant answers about services, pricing, timelines and case studies, round the clock.</div>
                 </div>
-                <span className="lc-opt-badge lc-opt-badge--ai">24 / 7</span>
+                <span className="lc-opt-arrow" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </span>
               </div>
 
-              <div className="lc-opt">
+              <div className="lc-opt lc-opt--live">
                 <div className="lc-opt-ico lc-opt-ico--live">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                   </svg>
                 </div>
-                <div>
-                  <div className="lc-opt-title">Live Chat</div>
+                <div className="lc-opt-main">
+                  <span className="lc-opt-kicker">Human · Founder-led</span>
+                  <div className="lc-opt-head">
+                    <span className="lc-opt-title">Live Chat</span>
+                    <span className="lc-opt-badge"><span className="lc-opt-badge-dot" />Mon – Fri</span>
+                  </div>
                   <div className="lc-opt-desc">Real people from the team. For scoping, briefs, or anything that deserves a proper conversation.</div>
                 </div>
-                <span className="lc-opt-badge lc-opt-badge--live">Mon – Fri</span>
+                <span className="lc-opt-arrow" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </span>
               </div>
             </div>
           </div>
