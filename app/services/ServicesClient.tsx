@@ -1028,7 +1028,7 @@ export default function ServicesPage({ initialServices = [] }: { initialServices
           .page-hero--video > .wrap {
             width: min(1728px, 100% - clamp(48px, 5vw, 112px));
             max-width: none; margin-inline: auto; padding-inline: 0;
-            padding-top: 112px; padding-bottom: 56px;
+            padding-top: 188px; padding-bottom: 56px;
           }
           .page-hero--video .svc-hero-video {
             position: absolute; inset: 0; width: 100%; height: 100%;
@@ -1059,16 +1059,13 @@ export default function ServicesPage({ initialServices = [] }: { initialServices
         />
         <div className="svc-hero-scrim" aria-hidden="true" />
         <div className="wrap">
-          <div className="crumbs fade in">
-            <Link href="/">Home</Link><span className="sep">/</span><span>Services</span>
-          </div>
           <div className="svc-hero-chip fade in">
             <span className="svc-chip-dot" />07 capabilities
           </div>
           <h1 className="display" style={{ margin: "20px 0 24px", fontSize: "clamp(64px,12vw,187px)", lineHeight: 0.85, letterSpacing: "-.03em" }}>
-            <span className="reveal in"><span className="reveal-inner">Seven ways we</span></span>
-            <span className="reveal in reveal-delay-1"><span className="reveal-inner">can help</span></span>
-            <span className="reveal in reveal-delay-2"><span className="reveal-inner it">you ship.</span></span>
+            <span className="reveal in"><span className="reveal-inner">The ways we can</span></span>
+            <span className="reveal in reveal-delay-1"><span className="reveal-inner">help to grow</span></span>
+            <span className="reveal in reveal-delay-2"><span className="reveal-inner it">your business.</span></span>
           </h1>
           <p className="lede fade in d2" style={{ maxWidth: "52ch", marginBottom: 36 }}>
             From concept to code to launch — design, engineering, AI, ecommerce, brand and growth. All under one roof. No handoffs. No gaps.
