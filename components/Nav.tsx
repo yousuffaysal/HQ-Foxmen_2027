@@ -26,7 +26,7 @@ type Profile = { name?: string; avatar?: string };
 export default function Nav() {
   const pathname = usePathname();
   // Pages whose hero sits behind the nav on a dark background (e.g. video hero)
-  const darkTop = pathname === "/services" || pathname.startsWith("/services/");
+  const darkTop = pathname === "/services" || pathname.startsWith("/services/") || pathname === "/work";
   const [scrolled,  setScrolled]  = useState(false);
   const [clock,     setClock]     = useState("— : —");
   const [profile,   setProfile]   = useState<Profile | null>(null);

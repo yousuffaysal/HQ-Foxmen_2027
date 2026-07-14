@@ -14,12 +14,19 @@ function ArrowIcon() {
 const filters = ["All", "Web", "Mobile", "AI", "Ecommerce", "Real Estate", "Brand"];
 
 const TONE: Record<string, string> = { "(purple)": "violet", "": "violet", b: "dark", c: "brand", d: "bone" };
-const THUMB_BG: Record<string, string> = { dark: "#0a0a0a", brand: "#b86cf9", bone: "#efece6", violet: "#1a0c2c" };
-const THUMB_FG: Record<string, string> = { dark: "rgba(255,255,255,.4)", brand: "rgba(255,255,255,.8)", bone: "var(--muted)", violet: "rgba(255,255,255,.4)" };
 const STATUS_LABEL: Record<string, string> = { draft: "Draft", review: "In review", live: "Live", archived: "Archived" };
 
 function toSlug(name: string): string {
   return name.toLowerCase().replace(/[—–]/g, "-").replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").trim();
+}
+
+/** Project names arrive from the DB as "Celeste — AI-native marketplace"; the page shows no dashes, and the trailing half is already the tagline's job. */
+function shortName(name: string): string {
+  return name.split(/\s+[—–]\s+/)[0].trim();
+}
+/** Dashes inside DB prose become commas rather than being dropped. */
+function dedash(s: string): string {
+  return s.replace(/\s*[—–]\s*/g, ", ");
 }
 
 type DbProject = {
@@ -40,8 +47,17 @@ export default function WorkGrid({ projects }: { projects: DbProject[] }) {
   });
 
   return (
-    <section className="section" style={{ paddingTop: 48 }}>
+    <section className="section" id="work-archive" style={{ paddingTop: 48 }}>
       <div className="wrap">
+        <div className="work-rule fade in">
+          <h2>Selected <span className="it">work.</span></h2>
+          <span className="count">
+            {visible.length === projects.length
+              ? `${String(projects.length).padStart(2, "0")} projects`
+              : `${String(visible.length).padStart(2, "0")} of ${String(projects.length).padStart(2, "0")}`}
+          </span>
+        </div>
+
         <div className="proj-filters fade in">
           {filters.map(f => (
             <button key={f} className={active === f ? "on" : ""} onClick={() => setActive(f)}>{f}</button>
@@ -69,42 +85,30 @@ export default function WorkGrid({ projects }: { projects: DbProject[] }) {
               const num  = String(i + 1).padStart(2, "0");
 
               return (
-                <article key={p.id} className={`item ${tone} fade${i % 4 === 0 ? "" : ` d${i % 4}`}`}>
-                  <div className="thumb" style={{
-                    width: "100%",
-                    aspectRatio: "16 / 9",
-                    position: "relative",
-                    display: "grid",
-                    placeItems: "center",
-                    overflow: "hidden",
-                    background: THUMB_BG[tone] ?? "#1a0c2c",
-                    color: THUMB_FG[tone] ?? "rgba(255,255,255,.4)",
-                    fontFamily: "var(--f-mono)",
-                    fontSize: 10,
-                    letterSpacing: ".2em",
-                    textTransform: "uppercase",
-                  }}>
+                <article
+                  key={p.id}
+                  className={`item ${tone}${i === 0 ? " is-feature" : ""} fade${i % 4 === 0 ? "" : ` d${i % 4}`}`}
+                  style={{ ["--si" as string]: i }}
+                >
+                  <div className="thumb">
                     {img
-                      ? <img src={img} alt={p.name} loading="lazy" decoding="async" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center", display: "block" }} />
-                      : <span style={{ fontFamily: "var(--f-mono)", fontSize: 10, letterSpacing: ".2em", textTransform: "uppercase", opacity: .35 }}>No image yet</span>
+                      ? <img src={img} alt={p.name} loading="lazy" decoding="async" />
+                      : <span className="proj-thumb-empty">No image yet</span>
                     }
+                    <span className="work-index" aria-hidden="true">{num}</span>
                     {p.status !== "live" && (
                       <span className="proj-status-badge">{STATUS_LABEL[p.status] ?? p.status}</span>
                     )}
                   </div>
 
-                  <div className="body" style={{ textAlign: "left" }}>
-                    <div className="meta" style={{ textAlign: "left" }}>
+                  <div className="body">
+                    <div className="meta">
                       <span>Case {num}</span>
                       <span>{p.year}</span>
                     </div>
-                    <h3 style={{ textAlign: "left" }}>{p.name}</h3>
-                    {p.tagline && <p style={{ color: "#3a3a3a", margin: 0, fontSize: 15, lineHeight: 1.55, textAlign: "left" }}>{p.tagline}</p>}
-                    {p.scope && (
-                      <div style={{ fontFamily: "var(--f-mono)", fontSize: 10, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--muted)", textAlign: "left" }}>
-                        {p.scope}
-                      </div>
-                    )}
+                    <h3>{shortName(p.name)}</h3>
+                    {p.tagline && <p className="proj-tagline">{dedash(p.tagline)}</p>}
+                    {p.scope && <div className="proj-scope">{dedash(p.scope)}</div>}
                     <div className="proj-cta-row">
                       {p.live_url && (
                         <a href={p.live_url} target="_blank" rel="noopener noreferrer" className="btn btn--ghost btn--sm">

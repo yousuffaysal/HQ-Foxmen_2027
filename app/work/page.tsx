@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { sql } from "@/lib/db";
 import WorkGrid from "./WorkGrid";
+import WorkHero from "./WorkHero";
+import { WorkManifesto, WorkReel, WorkStats } from "./WorkStory";
 import { constructMetadata } from "@/lib/metadata";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +11,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = constructMetadata({
   title: "Work",
   description:
-    "Case studies and selected work from Foxmen Studio — websites, mobile apps, AI products, ecommerce stores, and real estate platforms built for global clients.",
+    "Case studies and selected work from Foxmen Studio: websites, mobile apps, AI products, ecommerce stores, and real estate platforms built for global clients.",
   url: "/work",
   keywords: [
     "web design portfolio", "agency case studies", "web development projects",
@@ -51,27 +53,19 @@ export default async function WorkPage() {
   return (
     <>
       {/* ── HERO ── */}
-      <section className="page-hero">
-        <div className="wrap">
-          <div className="crumbs fade in">
-            <Link href="/">Home</Link><span className="sep">/</span><span>Work</span>
-          </div>
-          <h1 className="display">
-            <span className="reveal in"><span className="reveal-inner">Selected</span></span>
-            <span className="reveal in reveal-delay-1"><span className="reveal-inner it">work.</span></span>
-          </h1>
-          <p className="lede fade in d2">
-            Products built end to end — from seed-stage MVPs to multi-vendor platforms shipping at scale.
-          </p>
-        </div>
-      </section>
+      <WorkHero count={projects.length} />
+
+      {/* ── SCROLL STORY: sticky manifesto → pinned horizontal reel → counters ── */}
+      <WorkManifesto />
+      <WorkReel projects={projects} />
+      <WorkStats projects={projects} />
 
       {/* ── GRID + FILTERS (client component) ── */}
       <WorkGrid projects={projects} />
 
       {/* ── CTA ── */}
       <section id="contact" style={{ padding: "60px 0" }}>
-        <div className="cta">
+        <div className="cta work-cta">
           <div className="wrap-tight">
             <div className="fade in"><span className="eyebrow">Let&apos;s build</span></div>
             <h2 className="fade in d1">Got a brief? <span className="it">Or just</span><br />a half-formed idea?</h2>

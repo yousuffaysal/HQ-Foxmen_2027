@@ -5725,3 +5725,252 @@ body.loading { overflow: hidden; }
   .post-related-thumb { height: 120px; }
 }
 
+
+/* ============================================================
+   WORK — type-scale pass
+   Base rules below replace inline styles that used to live in
+   WorkGrid.tsx and reproduce the existing mobile rendering 1:1.
+   Everything in the 1025px block is the desktop redesign.
+   ============================================================ */
+.proj-grid .item .thumb { aspect-ratio: 16 / 9; }
+.proj-grid .item .thumb img { object-position: top center; }
+.proj-thumb-empty {
+  font-family: var(--f-mono); font-size: 10px; letter-spacing: .2em;
+  text-transform: uppercase; opacity: .35;
+}
+.proj-tagline { margin: 0; color: #3a3a3a; font-size: 15px; line-height: 1.55; }
+.proj-scope {
+  font-family: var(--f-mono); font-size: 10px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--muted);
+}
+/* hero entrance — staggered per the hero spec */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* editorial extras stay desktop-only */
+.work-index, .work-rule { display: none; }
+
+@media (min-width: 1025px) {
+  /* ── Section head + filters ───────────────────────────── */
+  .work-rule {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 32px; padding-bottom: 20px; border-bottom: 1px solid var(--line);
+  }
+  /* section h2 — same scale as the home page heads (.svc-head / .work-head) */
+  .work-rule h2 {
+    margin: 0; font-family: var(--f-display); font-weight: 400;
+    font-size: clamp(48px, 7vw, 112px);
+    line-height: .95; letter-spacing: -.025em;
+  }
+  .work-rule h2 .it { font-style: italic; color: var(--brand); }
+  .work-rule .count {
+    font-family: var(--f-mono); font-size: 10px; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--muted); white-space: nowrap;
+  }
+
+  .proj-filters { gap: 4px; margin: 28px 0 56px; }
+  .proj-filters button {
+    padding: 8px 0; margin-right: 28px; border: none; background: none;
+    border-radius: 0; border-bottom: 1px solid transparent;
+    font-family: var(--f-mono); font-size: 11px; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .proj-filters button:hover { color: var(--ink); }
+  .proj-filters button.on {
+    background: none; color: var(--ink); border-bottom-color: var(--brand);
+  }
+
+  /* ── Grid ─────────────────────────────────────────────── */
+  .proj-grid { gap: 64px 40px; }
+  .proj-grid .item {
+    border: none; border-radius: 0; background: none; overflow: visible;
+  }
+  .proj-grid .item:hover { transform: none; }
+  .proj-grid .item .thumb {
+    border-radius: 14px; border: 1px solid var(--line);
+    transition: border-color .4s var(--ease);
+  }
+  .proj-grid .item:hover .thumb { border-color: var(--brand); }
+  .proj-grid .item .thumb img {
+    transition: transform .8s var(--ease-out), filter .6s var(--ease);
+  }
+  .proj-grid .item:hover .thumb img { transform: scale(1.035); }
+
+  .work-index {
+    display: block; position: absolute; z-index: 2; top: 16px; right: 18px;
+    font-family: var(--f-mono); font-size: 10px; letter-spacing: .2em;
+    color: rgba(255,255,255,.85); mix-blend-mode: difference;
+  }
+
+  .proj-grid .item .body { padding: 22px 2px 0; gap: 12px; }
+  .proj-grid .item .meta { font-size: 10px; letter-spacing: .18em; }
+  /* card title: serif 400 · 44px · lh 1.1 */
+  .proj-grid .item .body h3 {
+    font-weight: 400; font-size: var(--fs-h3);
+    line-height: 1.1; letter-spacing: -.02em;
+  }
+  /* body copy: sans 17px · lh 1.65 */
+  .proj-tagline { font-size: var(--fs-body); line-height: 1.65; max-width: 46ch; }
+  .proj-cta-row { padding-top: 18px; }
+
+  /* feature card — first result spans the row */
+  .proj-grid .item.is-feature {
+    grid-column: 1 / -1;
+    display: grid; grid-template-columns: 1.35fr 1fr;
+    gap: 48px; align-items: center;
+  }
+  .proj-grid .item.is-feature .thumb { aspect-ratio: 16 / 10; }
+  .proj-grid .item.is-feature .body { padding: 0; gap: 16px; }
+  .proj-grid .item.is-feature .body h3 { font-size: clamp(48px, 4.6vw, var(--fs-h2)); }
+  .proj-grid .item.is-feature .proj-tagline { font-size: var(--fs-lead); line-height: 1.5; }
+
+  /* ── CTA ──────────────────────────────────────────────── */
+  .work-cta h2 {
+    font-size: clamp(56px, 8vw, 140px); line-height: .9; letter-spacing: -.03em;
+  }
+}
+
+/* ============================================================
+   WORK — scroll story
+   Desktop only. Every resting state below is the *finished* state,
+   so if the JS is inert (mobile / reduced motion) nothing is hidden.
+   ============================================================ */
+.wk-manifesto, .wk-reel, .wk-stats { display: none; }
+
+@media (min-width: 1025px) {
+  /* ── Manifesto: pinned, words lit by scroll position ── */
+  .wk-manifesto { display: block; height: 240vh; position: relative; }
+  .wk-manifesto-pin {
+    position: sticky; top: 0; height: 100vh;
+    display: flex; align-items: center;
+  }
+  .wk-manifesto-pin .wrap { text-align: center; }
+  .wk-manifesto .eyebrow { margin-bottom: 40px; display: inline-flex; }
+  /* h2 scale: serif 400 · lh 1.15 · ls -.02em */
+  /* top tier matches the home-page section-head scale; lower tiers step down from it */
+  .wk-words {
+    font-family: var(--f-display); font-weight: 400;
+    font-size: clamp(48px, 7vw, 112px);
+    letter-spacing: -.025em;
+    margin-inline: auto; color: var(--ink);
+  }
+  /* one line per pyramid tier; each sets its own em size, so the block tapers */
+  .wk-line {
+    display: block; white-space: nowrap;
+    line-height: .98; margin-bottom: .08em;
+  }
+  .wk-word { transition: opacity .25s linear; }
+
+  /* ── Reel: sticky pin, vertical scroll drives horizontal travel ── */
+  .wk-reel { display: block; position: relative; background: var(--ink); color: #fff; }
+  .wk-reel-pin {
+    position: sticky; top: 0; height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    overflow: hidden;
+  }
+  .wk-reel-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 32px; padding-bottom: 40px; flex-shrink: 0;
+  }
+  .wk-reel-head h2 {
+    margin: 0; font-family: var(--f-display); font-weight: 400; color: #fff;
+    font-size: clamp(48px, 7vw, 112px); line-height: .95; letter-spacing: -.025em;
+  }
+  .wk-reel-head h2 .it { font-style: italic; color: var(--brand); }
+  .wk-reel-count {
+    font-family: var(--f-mono); font-size: 10px; letter-spacing: .18em;
+    text-transform: uppercase; color: rgba(255,255,255,.5); white-space: nowrap;
+  }
+  .wk-reel-arrow { display: inline-block; animation: wk-nudge 1.8s var(--ease) infinite; }
+  @keyframes wk-nudge {
+    0%, 100% { transform: translateX(0); }
+    50%      { transform: translateX(4px); }
+  }
+
+  /* translate = p × (viewport − track width); negative because the track is wider */
+  .wk-reel-track {
+    display: flex; gap: 32px; width: max-content;
+    padding-inline: clamp(24px, 2.5vw, 56px);
+    transform: translate3d(calc(var(--p, 0) * (100vw - 100%)), 0, 0);
+    will-change: transform;
+  }
+  .wk-reel-card { width: min(46vw, 720px); flex-shrink: 0; color: inherit; }
+  .wk-reel-shot {
+    display: block; position: relative; overflow: hidden;
+    aspect-ratio: 16 / 10; border-radius: 16px;
+    background: #1a0c2c; border: 1px solid rgba(255,255,255,.1);
+  }
+  .wk-reel-shot img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; object-position: top center; display: block;
+    transition: transform .9s var(--ease-out);
+  }
+  .wk-reel-card:hover .wk-reel-shot img { transform: scale(1.04); }
+  .wk-reel-meta {
+    display: flex; align-items: baseline; gap: 16px; padding-top: 20px;
+  }
+  .wk-reel-num, .wk-reel-scope {
+    font-family: var(--f-mono); font-size: 10px; letter-spacing: .18em;
+    text-transform: uppercase; color: rgba(255,255,255,.45);
+  }
+  .wk-reel-name {
+    font-family: var(--f-display); font-weight: 400; color: #fff;
+    font-size: var(--fs-h3); line-height: 1.1; letter-spacing: -.02em;
+    margin-right: auto;
+  }
+  .wk-reel-card:hover .wk-reel-name { font-style: italic; color: var(--brand); }
+  .wk-reel-progress {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+    background: rgba(255,255,255,.12);
+  }
+  .wk-reel-progress span {
+    display: block; height: 100%; width: 100%;
+    background: var(--brand); transform-origin: left center;
+  }
+
+  /* ── Stats: parallax glow, counters ── */
+  .wk-stats { display: block; position: relative; overflow: hidden; padding: 140px 0; }
+  .wk-stats-glow {
+    position: absolute; z-index: 0; pointer-events: none;
+    top: -40%; left: 50%; width: 70vw; height: 70vw; margin-left: -35vw;
+    background: radial-gradient(closest-side, rgba(184,108,249,.16), transparent 70%);
+    filter: blur(24px); will-change: transform;
+  }
+  .wk-stats .wrap { position: relative; z-index: 1; }
+  .wk-stats-row {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 40px; margin: 0;
+    border-top: 1px solid var(--line); padding-top: 48px;
+  }
+  .wk-stat dd {
+    margin: 0; font-family: var(--f-display); font-weight: 400;
+    font-size: clamp(64px, 8vw, 140px); line-height: .9; letter-spacing: -.03em;
+    font-variant-numeric: tabular-nums;
+  }
+  .wk-stat:first-child dd { color: var(--brand); }
+  .wk-stat dt {
+    margin-top: 16px;
+    font-family: var(--f-mono); font-size: 10px; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--muted);
+  }
+
+  /* ── Grid: sticky filter bar + per-card stagger ── */
+  .proj-filters {
+    position: sticky; top: 0; z-index: 5;
+    background: color-mix(in srgb, var(--canvas) 88%, transparent);
+    backdrop-filter: blur(10px);
+    padding-block: 14px; margin: 28px 0 48px;
+  }
+  .proj-grid .item.fade { transition-delay: calc(var(--si, 0) * .08s); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wk-manifesto { height: auto; }
+    .wk-manifesto-pin { position: static; height: auto; padding: 140px 0; }
+    .wk-word { opacity: 1 !important; }
+    .wk-reel { height: auto !important; }
+    .wk-reel-pin { position: static; height: auto; padding: 120px 0; overflow-x: auto; }
+    .wk-reel-track { transform: none; }
+    .wk-reel-arrow { animation: none; }
+  }
+}
