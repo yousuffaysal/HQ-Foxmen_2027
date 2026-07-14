@@ -920,8 +920,8 @@ function ServiceSection({ service, index, onDetail, onStart }: {
 
       {/* ── big heading ── */}
       <div style={{ textAlign:"center", padding: isMobile ? "4px 20px 14px" : "4px 40px 16px", flexShrink:0 }}>
-        <h2 style={{ margin:0, lineHeight:1.0, letterSpacing:"-.025em", fontSize:"clamp(36px,6.5vw,96px)" }}>
-          <strong style={{ fontFamily:"var(--f-sans)", fontWeight:800, color: isLight ? "#0d0020" : "#fff", fontStyle:"normal" }}>{split[0]}</strong>
+        <h2 style={{ margin:0, lineHeight:0.92, letterSpacing:"-.02em", fontSize:"clamp(36px,6.5vw,96px)" }}>
+          <strong style={{ fontFamily:"var(--f-display)", fontWeight:400, color: isLight ? "#0d0020" : "#fff", fontStyle:"normal" }}>{split[0]}</strong>
           {split[1] && <>{" "}<em style={{ fontFamily:"var(--f-display)", fontStyle:"italic", fontWeight:400, color: isLight ? "rgba(13,0,32,.82)" : "rgba(255,255,255,.88)" }}>{split[1]}</em></>}
         </h2>
         {service.badge && (
@@ -1022,7 +1022,42 @@ export default function ServicesPage({ initialServices = [] }: { initialServices
       {inquiryService && <ServiceInquiryModal service={inquiryService} onClose={closeInquiry} />}
 
       {/* ── HERO ── */}
-      <section className="page-hero">
+      <section className="page-hero page-hero--video">
+        <style dangerouslySetInnerHTML={{ __html: `
+          .page-hero--video { position: relative; overflow: hidden; min-height: 100vh; padding: 0; display: flex; flex-direction: column; justify-content: flex-start; }
+          .page-hero--video > .wrap {
+            width: min(1728px, 100% - clamp(48px, 5vw, 112px));
+            max-width: none; margin-inline: auto; padding-inline: 0;
+            padding-top: 112px; padding-bottom: 56px;
+          }
+          .page-hero--video .svc-hero-video {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: cover; object-position: center 88%; z-index: 0; pointer-events: none;
+          }
+          .page-hero--video .svc-hero-scrim {
+            position: absolute; inset: 0; z-index: 1; pointer-events: none;
+            background: linear-gradient(180deg, rgba(4,16,26,.5) 0%, rgba(4,16,26,.28) 42%, rgba(4,16,26,.82) 100%);
+          }
+          .page-hero--video > .wrap { position: relative; z-index: 2; }
+          .page-hero--video h1, .page-hero--video h1 .reveal-inner { color: #fff; }
+          .page-hero--video h1 .it, .page-hero--video h1 .reveal-inner.it { color: var(--brand); }
+          .page-hero--video .lede { color: rgba(255,255,255,.76); font-family: var(--f-sans); font-size: var(--fs-lead); line-height: 1.5; }
+          .page-hero--video .crumbs, .page-hero--video .crumbs a, .page-hero--video .crumbs .sep { color: rgba(255,255,255,.72); }
+          .page-hero--video .svc-hero-chip { color:#fff; background: rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.2); }
+          .page-hero--video .btn--ghost { border-color: rgba(255,255,255,.4); color:#fff; }
+          .page-hero--video .btn--ghost .chip { background:#fff; color:#0a0a0a; }
+          .page-hero--video .svc-hero-fade {
+            position: absolute; left: 0; right: 0; bottom: 0; height: 30%; z-index: 1; pointer-events: none;
+            background: linear-gradient(180deg, rgba(210,195,246,0) 0%, rgba(210,195,246,0) 48%, #d2c3f6 100%);
+          }
+        ` }} />
+        <video
+          className="svc-hero-video"
+          autoPlay loop muted playsInline preload="auto"
+          aria-hidden="true"
+          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4"
+        />
+        <div className="svc-hero-scrim" aria-hidden="true" />
         <div className="wrap">
           <div className="crumbs fade in">
             <Link href="/">Home</Link><span className="sep">/</span><span>Services</span>
@@ -1030,7 +1065,7 @@ export default function ServicesPage({ initialServices = [] }: { initialServices
           <div className="svc-hero-chip fade in">
             <span className="svc-chip-dot" />07 capabilities
           </div>
-          <h1 className="display" style={{ margin: "20px 0 24px", fontSize: "clamp(52px,8.5vw,116px)", lineHeight: 0.92, letterSpacing: "-.03em" }}>
+          <h1 className="display" style={{ margin: "20px 0 24px", fontSize: "clamp(64px,12vw,187px)", lineHeight: 0.85, letterSpacing: "-.03em" }}>
             <span className="reveal in"><span className="reveal-inner">Seven ways we</span></span>
             <span className="reveal in reveal-delay-1"><span className="reveal-inner">can help</span></span>
             <span className="reveal in reveal-delay-2"><span className="reveal-inner it">you ship.</span></span>

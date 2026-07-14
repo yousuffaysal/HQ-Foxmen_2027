@@ -393,20 +393,20 @@ function Reel() {
 }
 
 const svcRows = [
-  { idx:"/ 01", title:"Web Design & Development", desc:"Marketing sites, SaaS dashboards, and bespoke web apps built on Next.js, React, and headless CMS — buttery animations and 100/100 Lighthouse out of the box.", tags:"Next.js · Framer · Sanity", preview:"Sites" },
+  { idx:"/ 01", title:"Web Design & Development", desc:"Marketing sites, SaaS dashboards, and bespoke web apps built on Next.js, React, and headless CMS, buttery animations and 100/100 Lighthouse out of the box.", tags:"Next.js · Framer · Sanity", preview:"Sites" },
   { idx:"/ 02", title:"Mobile Apps", desc:"Cross-platform iOS & Android apps in React Native and Flutter. From MVP to App Store in 8–12 weeks, with native performance and tight design QA.", tags:"iOS · Android · Flutter", preview:"Apps" },
-  { idx:"/ 03", title:"AI-Integrated Software", desc:"Embed GPT-class intelligence into your product — copilots, semantic search, retrieval pipelines, agents, and fine-tuned models that actually ship.", tags:"LLMs · RAG · Agents", preview:"AI" },
+  { idx:"/ 03", title:"AI-Integrated Software", desc:"Embed GPT-class intelligence into your product: copilots, semantic search, retrieval pipelines, agents, and fine-tuned models that actually ship.", tags:"LLMs · RAG · Agents", preview:"AI" },
   { idx:"/ 04", title:"Ecommerce & Multi-Vendor", desc:"Shopify, custom Medusa stacks, and marketplace platforms with vendor portals, payouts, and the unit economics you need to scale.", tags:"Shopify · Medusa · Stripe", preview:"Stores" },
-  { idx:"/ 05", title:"Real-Estate Platforms", desc:"Listings, brokerage CRMs, search with map clustering, mortgage tooling, agent dashboards — performant at portfolio scale.", tags:"Mapbox · Algolia · Postgres", preview:"Real Estate" },
+  { idx:"/ 05", title:"Real-Estate Platforms", desc:"Listings, brokerage CRMs, search with map clustering, mortgage tooling, agent dashboards, performant at portfolio scale.", tags:"Mapbox · Algolia · Postgres", preview:"Real Estate" },
   { idx:"/ 06", title:"UI · UX & Brand", desc:"Identity, design systems, and product flows that hold up at scale. We design for clarity, then make it sing with motion.", tags:"Figma · Tokens · Motion", preview:"Design" },
-  { idx:"/ 07", title:"Performance Marketing", desc:"Funnels, paid acquisition, SEO, and creative ops — wired to the same analytics stack as the product you just launched.", tags:"SEO · Ads · Lifecycle", preview:"Growth" },
+  { idx:"/ 07", title:"Performance Marketing", desc:"Funnels, paid acquisition, SEO, and creative ops, wired to the same analytics stack as the product you just launched.", tags:"SEO · Ads · Lifecycle", preview:"Growth" },
 ];
 
 const cards = [
-  { tone:"violet", slug:"nestaro", num:"CASE 01 / 06", name:"Nestaro", sub:"— real-estate OS", copy:"A search-first listings platform with map clustering, saved searches, agent CRMs and mortgage tools. We rebuilt the search index from scratch — page-loads dropped from 4.1s to 380ms.", meta:[["Industry","Real Estate"],["Year","2025"],["Scope","Design · Build · AI"]], eyebrow:"Web · iOS · Android", screenTitle:"Nestaro", screenSub:"— real estate", lns:["w2","w1","w3","w4","w2"], ph:"Product · 01", phColor:undefined },
-  { tone:"ink",    slug:"pulse",   num:"CASE 02 / 06", name:"Pulse",   sub:"— AI copilot",     copy:"RAG-powered sales copilot for a B2B SaaS, with custom embeddings, agent tooling and an interface that feels closer to Linear than to ChatGPT. Adoption hit 92% in week one.", meta:[["Industry","B2B SaaS"],["Year","2025"],["Scope","AI · UX · Build"]], eyebrow:"LLMs · Vector DB", screenTitle:"Pulse", screenSub:"— ai copilot", lns:["w2","w3","w1","w2","w4"], ph:"Product · 02", phColor:undefined },
-  { tone:"bone",   slug:"marketo", num:"CASE 03 / 06", name:"Marketo", sub:"— multi-vendor",   copy:"A multi-vendor marketplace with vendor onboarding, split payouts via Stripe Connect, ratings, and an opinionated commerce design language. Now hosts 2,400+ sellers.", meta:[["Industry","Ecommerce"],["Year","2024"],["Scope","Platform · Brand"]], eyebrow:"Medusa · Stripe", screenTitle:"Marketo", screenSub:"— marketplace", lns:["w1","w2","w3","w4","w2"], ph:"Product · 03", phColor:"rgba(10,10,10,.35)" },
-  { tone:"brand",  slug:"atlas",   num:"CASE 04 / 06", name:"Atlas",   sub:"— travel app",     copy:"A native iOS travel planner with AI-generated itineraries and offline maps. The first version shipped in 9 weeks; #6 in App Store Travel within a month.", meta:[["Industry","Travel"],["Year","2025"],["Scope","iOS · AI"]], eyebrow:"Swift · Mapbox", screenTitle:"Atlas", screenSub:"— mobile", lns:["w2","w1","w3","w2","w4"], ph:"Product · 04", phColor:"rgba(255,255,255,.55)" },
+  { tone:"violet", slug:"nestaro", num:"CASE 01 / 06", name:"Nestaro", sub:"· real-estate OS", copy:"A search-first listings platform with map clustering, saved searches, agent CRMs and mortgage tools. We rebuilt the search index from scratch, page-loads dropped from 4.1s to 380ms.", meta:[["Industry","Real Estate"],["Year","2025"],["Scope","Design · Build · AI"]], eyebrow:"Web · iOS · Android", screenTitle:"Nestaro", screenSub:"· real estate", lns:["w2","w1","w3","w4","w2"], ph:"Product · 01", phColor:undefined },
+  { tone:"ink",    slug:"pulse",   num:"CASE 02 / 06", name:"Pulse",   sub:"· AI copilot",     copy:"RAG-powered sales copilot for a B2B SaaS, with custom embeddings, agent tooling and an interface that feels closer to Linear than to ChatGPT. Adoption hit 92% in week one.", meta:[["Industry","B2B SaaS"],["Year","2025"],["Scope","AI · UX · Build"]], eyebrow:"LLMs · Vector DB", screenTitle:"Pulse", screenSub:"· ai copilot", lns:["w2","w3","w1","w2","w4"], ph:"Product · 02", phColor:undefined },
+  { tone:"bone",   slug:"marketo", num:"CASE 03 / 06", name:"Marketo", sub:"· multi-vendor",   copy:"A multi-vendor marketplace with vendor onboarding, split payouts via Stripe Connect, ratings, and an opinionated commerce design language. Now hosts 2,400+ sellers.", meta:[["Industry","Ecommerce"],["Year","2024"],["Scope","Platform · Brand"]], eyebrow:"Medusa · Stripe", screenTitle:"Marketo", screenSub:"· marketplace", lns:["w1","w2","w3","w4","w2"], ph:"Product · 03", phColor:"rgba(10,10,10,.35)" },
+  { tone:"brand",  slug:"atlas",   num:"CASE 04 / 06", name:"Atlas",   sub:"· travel app",     copy:"A native iOS travel planner with AI-generated itineraries and offline maps. The first version shipped in 9 weeks; #6 in App Store Travel within a month.", meta:[["Industry","Travel"],["Year","2025"],["Scope","iOS · AI"]], eyebrow:"Swift · Mapbox", screenTitle:"Atlas", screenSub:"· mobile", lns:["w2","w1","w3","w2","w4"], ph:"Product · 04", phColor:"rgba(255,255,255,.55)" },
 ];
 
 const proofCells = [
@@ -426,8 +426,8 @@ const proofCells = [
 
 const steps = [
   { num:"01", title:"Discover", copy:"Workshops, audits, user research. We unpack the problem from every angle and write a brief that the founders, engineers and designers all agree on.", items:["Audit","Stakeholder map","JTBD"] },
-  { num:"02", title:"Design",   copy:"Information architecture, flows, components, prototypes. We design in the browser so what you see is what ships — no Figma-to-code gap.", items:["IA","Design system","Hi-fi prototypes"] },
-  { num:"03", title:"Build",    copy:"Production engineering with weekly demos. CI, observability and analytics from day one — never bolted on at the end.", items:["Next.js · Swift","Postgres","CI / CD"] },
+  { num:"02", title:"Design",   copy:"Information architecture, flows, components, prototypes. We design in the browser so what you see is what ships, no Figma-to-code gap.", items:["IA","Design system","Hi-fi prototypes"] },
+  { num:"03", title:"Build",    copy:"Production engineering with weekly demos. CI, observability and analytics from day one, never bolted on at the end.", items:["Next.js · Swift","Postgres","CI / CD"] },
   { num:"04", title:"Care",     copy:"Launch is a milestone, not the finish line. We retain a small pod after launch to ship the next 90 days and tune for growth.", items:["SLA","Experiments","Roadmap"] },
 ];
 
@@ -447,7 +447,7 @@ function toSlug(n: string) { return n.toLowerCase().replace(/[—–]/g,"-").rep
 const STATIC_TESTIS = [
   { id:-1, av:"SK", img:"", name:"Sara Köhler",  role:"CEO · Nestaro",          hi:"actually used", rating:5, date:"09/30/2024", quote:"Foxmen turned a vague pitch deck into a product our investors actually used during the round. They ship like a product team, not an agency." },
   { id:-2, av:"DA", img:"", name:"Devon Arias",  role:"Head of Product · Pulse", hi:"activation rate", rating:5, date:"08/14/2024", quote:"The AI copilot they built drove our activation rate from 28% to 71%. Every meeting felt like we got our money back twice." },
-  { id:-3, av:"RM", img:"", name:"Rina Mehta",   role:"CTO · Marketo",           hi:"zero", rating:5, date:"07/02/2024", quote:"Care is in the name and it shows. Our launch had zero P0s in week one — a first for us across three agencies." },
+  { id:-3, av:"RM", img:"", name:"Rina Mehta",   role:"CTO · Marketo",           hi:"zero", rating:5, date:"07/02/2024", quote:"Care is in the name and it shows. Our launch had zero P0s in week one, a first for us across three agencies." },
 ];
 
 const BRAND_REPLIES = [
@@ -805,8 +805,8 @@ function PortalFeatureSection() {
   }, []);
 
   const STEPS = [
-    { num: "01", title: "Get invited", copy: "A secure invite lands in your inbox on day one. One click and you're inside your private portal — zero setup, zero friction." },
-    { num: "02", title: "See everything", copy: "Live status, file drops, sprint timelines and team progress — one clean view. No chasing emails, no wondering what's happening." },
+    { num: "01", title: "Get invited", copy: "A secure invite lands in your inbox on day one. One click and you're inside your private portal, zero setup, zero friction." },
+    { num: "02", title: "See everything", copy: "Live status, file drops, sprint timelines and team progress, one clean view. No chasing emails, no wondering what's happening." },
     { num: "03", title: "Stay notified", copy: "Push alerts the moment a milestone lands, a design is ready, or something needs your eyes. Always in the loop without asking." },
     { num: "04", title: "Approve & ship", copy: "Review deliverables, drop comments, sign off on milestones right inside the portal. No email threads. Pure momentum." },
   ];
@@ -824,7 +824,7 @@ function PortalFeatureSection() {
           Your project, always <span className="it">in the light.</span>
         </h2>
         <p className="pf-intro fade d2">
-          Every Foxmen project ships with a private client portal — real-time progress, files, milestones and a direct line to the team.
+          Every Foxmen project ships with a private client portal, real-time progress, files, milestones and a direct line to the team.
         </p>
 
         <div className="pf-split">
@@ -1075,6 +1075,75 @@ const LC_CSS = `
 .lc-opt:hover .lc-opt-arrow { opacity:1; transform:translateX(0); }
 
 /* chat widget mockup */
+/* ── iPhone mockup wrapping the chat widget ── */
+.lc-phone-wrap { display:flex; justify-content:center; }
+.lc-phone {
+  position:relative; width:360px; max-width:100%; padding:13px; flex-shrink:0;
+  display:flex; flex-direction:column;
+  aspect-ratio:71.6 / 147.6;   /* real iPhone 16 device outline */
+  border-radius:54px;
+  background:linear-gradient(155deg,#3c3c42 0%,#161618 46%,#0b0b0d 100%);
+  box-shadow:
+    inset 0 0 0 2px rgba(255,255,255,.08),
+    inset 0 1px 1px rgba(255,255,255,.22),
+    0 0 0 1px #000,
+    0 60px 120px -34px rgba(0,0,0,.75),
+    0 24px 60px -26px rgba(124,58,237,.32);
+}
+.lc-phone-screen {
+  position:relative; flex:1; min-height:0;
+  display:flex; flex-direction:column;
+  border-radius:42px; overflow:hidden; background:#111113;
+}
+.lc-phone-status { flex-shrink:0; }
+.lc-phone-island {
+  position:absolute; top:25px; left:50%; transform:translateX(-50%);
+  width:104px; height:30px; border-radius:16px; background:#000; z-index:6;
+}
+.lc-phone-status {
+  position:relative; z-index:5;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:21px 30px 9px; color:#fff;
+}
+.lc-phone-time { font-size:14px; font-weight:600; letter-spacing:.02em; }
+.lc-phone-sys { display:flex; align-items:center; gap:6px; }
+.lc-phone-batt {
+  width:23px; height:12px; border-radius:3px; position:relative;
+  border:1px solid rgba(255,255,255,.5); padding:1.6px;
+}
+.lc-phone-batt::after {
+  content:""; position:absolute; right:-3px; top:50%; transform:translateY(-50%);
+  width:1.6px; height:4px; border-radius:0 1px 1px 0; background:rgba(255,255,255,.5);
+}
+.lc-phone-batt > span { display:block; width:100%; height:100%; border-radius:1.5px; background:#fff; }
+.lc-phone .lc-widget {
+  flex:1; min-height:0; display:flex; flex-direction:column;
+  border:none; border-radius:0; box-shadow:none; max-width:none; margin:0; background:transparent;
+}
+.lc-widget-hd, .lc-tabs, .lc-input-row { flex-shrink:0; }
+
+/* ── Light theme inside the phone (#f8f8f8) ── */
+.lc-phone-screen { background:#f8f8f8; }
+.lc-phone-status { color:#0a0a0a; }
+.lc-phone-batt { border-color:rgba(0,0,0,.55); }
+.lc-phone-batt::after { background:rgba(0,0,0,.55); }
+.lc-phone-batt > span { background:#0a0a0a; }
+.lc-phone .lc-widget-hd { background:#fff; border-bottom-color:rgba(0,0,0,.07); }
+.lc-phone .lc-widget-hd-name { color:#0a0a0a; }
+.lc-phone .lc-widget-hd-sub  { color:rgba(0,0,0,.45); }
+.lc-phone .lc-tab            { color:rgba(0,0,0,.4); }
+.lc-phone .lc-tab--active    { background:rgba(184,108,249,.14); color:var(--brand,#b86cf9); }
+.lc-phone .lc-msg--in .lc-bubble { background:#e9e9e9; color:#1a1a1a; }
+.lc-phone .lc-msg-time       { color:rgba(0,0,0,.3); }
+.lc-phone .lc-typing         { background:#e9e9e9; }
+.lc-phone .lc-typing-dot     { background:rgba(0,0,0,.4); }
+.lc-phone .lc-input-row      { background:#fff; border-top-color:rgba(0,0,0,.07); }
+.lc-phone .lc-input-bar      { background:#f0f0f0; color:#0a0a0a; border-color:rgba(0,0,0,.08); }
+.lc-phone .lc-input-bar::placeholder { color:rgba(0,0,0,.35); }
+.lc-phone .lc-input-bar:focus { border-color:rgba(184,108,249,.5); background:#fff; }
+.lc-phone .lc-chat-body { scrollbar-color:rgba(0,0,0,.22) transparent; }
+.lc-phone .lc-chat-body::-webkit-scrollbar-thumb { background:rgba(0,0,0,.18); }
+
 .lc-widget {
   background:#1a1a1a; border-radius:20px; overflow:hidden;
   border:1px solid rgba(255,255,255,.07);
@@ -1088,11 +1157,12 @@ const LC_CSS = `
   display:flex; align-items:center; gap:12px;
 }
 .lc-widget-av {
-  width:36px; height:36px; border-radius:50%; flex-shrink:0;
-  background:linear-gradient(135deg,#7c3aed,#b86cf9);
+  width:38px; height:38px; border-radius:50%; flex-shrink:0;
+  background:rgba(184,108,249,.13);
   display:flex; align-items:center; justify-content:center;
-  font-size:14px; font-weight:700; color:#fff;
+  color:var(--brand,#b86cf9);
 }
+.lc-widget-av img { width:24px; height:24px; }
 .lc-widget-hd-name  { font-size:14px; font-weight:600; color:#fff; }
 .lc-widget-hd-sub   { font-size:11px; color:rgba(255,255,255,.38); margin-top:1px; }
 .lc-widget-hd-badge {
@@ -1107,9 +1177,12 @@ const LC_CSS = `
 
 /* chat body */
 .lc-chat-body {
+  flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain;
   padding:20px 16px; display:flex; flex-direction:column; gap:10px;
-  min-height:280px;
+  scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.15) transparent;
 }
+.lc-chat-body::-webkit-scrollbar { width:5px; }
+.lc-chat-body::-webkit-scrollbar-thumb { background:rgba(255,255,255,.14); border-radius:3px; }
 .lc-msg {
   display:flex; flex-direction:column; gap:2px;
   animation:lcMsgIn .5s cubic-bezier(.16,1,.3,1) both;
@@ -1148,15 +1221,20 @@ const LC_CSS = `
   background:rgba(255,255,255,.02);
 }
 .lc-input-bar {
-  flex:1; background:rgba(255,255,255,.07); border-radius:20px;
-  padding:9px 14px; font-size:13px; color:rgba(255,255,255,.25);
-  border:1px solid rgba(255,255,255,.06);
+  flex:1; min-width:0; background:rgba(255,255,255,.07); border-radius:20px;
+  padding:10px 15px; font-size:13px; color:#fff; font-family:inherit;
+  border:1px solid rgba(255,255,255,.06); outline:none;
+  transition:border-color .25s ease, background .25s ease;
 }
+.lc-input-bar::placeholder { color:rgba(255,255,255,.3); }
+.lc-input-bar:focus { border-color:rgba(184,108,249,.5); background:rgba(255,255,255,.09); }
 .lc-send {
-  width:34px; height:34px; border-radius:50%; flex-shrink:0;
+  width:36px; height:36px; border-radius:50%; flex-shrink:0; padding:0; border:none;
   background:var(--brand,#b86cf9); display:flex; align-items:center; justify-content:center;
-  cursor:default;
+  cursor:pointer; transition:transform .2s ease, opacity .2s ease;
 }
+.lc-send:hover { transform:scale(1.06); }
+.lc-send:disabled { opacity:.4; cursor:default; transform:none; }
 
 /* tab switcher */
 .lc-tabs {
@@ -1164,7 +1242,7 @@ const LC_CSS = `
 }
 .lc-tab {
   flex:1; padding:8px; border-radius:10px; font-size:12px; font-weight:500;
-  text-align:center; cursor:default; transition:background .25s ease, color .25s ease;
+  text-align:center; cursor:pointer; transition:background .25s ease, color .25s ease;
   color:rgba(255,255,255,.35);
 }
 .lc-tab--active { background:rgba(184,108,249,.2); color:var(--brand,#b86cf9); }
@@ -1204,7 +1282,7 @@ const LC_CSS = `
 const CONVERSATIONS: { from: "in" | "out"; text: string; delay: number }[][] = [
   [
     { from: "out", text: "Hey, what services do you offer?", delay: 0 },
-    { from: "in",  text: "We build websites, mobile apps, AI software, ecommerce and real estate platforms — and we handle brand & design too.", delay: 900 },
+    { from: "in",  text: "We build websites, mobile apps, AI software, ecommerce and real estate platforms, and we handle brand & design too.", delay: 900 },
     { from: "in",  text: "What kind of project are you thinking about?", delay: 1800 },
     { from: "out", text: "A mobile app with AI features 👀", delay: 2700 },
     { from: "in",  text: "Perfect fit. We've shipped 30+ of those. Want a quick estimate?", delay: 3600 },
@@ -1212,7 +1290,7 @@ const CONVERSATIONS: { from: "in" | "out"; text: string; delay: number }[][] = [
   [
     { from: "out", text: "How long does a website project take?", delay: 0 },
     { from: "in",  text: "Typically 4–8 weeks from kickoff to launch, depending on scope.", delay: 900 },
-    { from: "in",  text: "Marketing sites are faster — 3–4 weeks. Full apps take 8–14 weeks.", delay: 1800 },
+    { from: "in",  text: "Marketing sites are faster, 3–4 weeks. Full apps take 8–14 weeks.", delay: 1800 },
     { from: "out", text: "And pricing?", delay: 2700 },
     { from: "in",  text: "Web projects start around $3K. Apps from $8K. We can scope yours properly on a quick call.", delay: 3600 },
   ],
@@ -1220,40 +1298,39 @@ const CONVERSATIONS: { from: "in" | "out"; text: string; delay: number }[][] = [
 
 function LiveChatSection() {
   const [tab,      setTab]      = useState<0 | 1>(0);
-  const [visible,  setVisible]  = useState<number[]>([]);
+  const [messages, setMessages] = useState<{ from: "in" | "out"; text: string }[]>([]);
   const [typing,   setTyping]   = useState(false);
-  const [convKey,  setConvKey]  = useState(0);
+  const [input,    setInput]    = useState("");
   const sectionRef = useRef<HTMLDivElement>(null);
+  const bodyRef    = useRef<HTMLDivElement>(null);
   const started    = useRef(false);
+  const interacted = useRef(false);
+  const timers     = useRef<number[]>([]);
 
-  useEffect(() => {
-    const el = document.createElement("style");
-    el.id = "lc-css";
-    el.textContent = LC_CSS;
-    if (!document.getElementById("lc-css")) document.head.appendChild(el);
-    return () => { document.getElementById("lc-css")?.remove(); };
-  }, []);
+  const clearTimers = () => { timers.current.forEach(clearTimeout); timers.current = []; };
 
-  const runConversation = () => {
-    const msgs = CONVERSATIONS[convKey % CONVERSATIONS.length];
-    setVisible([]);
+  // Auto-play a scripted intro into the live message list, until the user chats.
+  const playScript = (idx: number) => {
+    clearTimers();
+    interacted.current = false;
+    setMessages([]);
     setTyping(false);
-    msgs.forEach((m, i) => {
+    const script = CONVERSATIONS[idx % CONVERSATIONS.length];
+    script.forEach((m, i) => {
       if (m.from === "in" && i > 0) {
-        setTimeout(() => setTyping(true),  m.delay - 600);
-        setTimeout(() => { setTyping(false); setVisible(v => [...v, i]); }, m.delay);
-      } else {
-        setTimeout(() => setVisible(v => [...v, i]), m.delay);
+        timers.current.push(window.setTimeout(() => { if (!interacted.current) setTyping(true); }, Math.max(0, m.delay - 550)));
       }
+      timers.current.push(window.setTimeout(() => {
+        if (interacted.current) return;
+        setTyping(false);
+        setMessages(v => [...v, { from: m.from, text: m.text }]);
+      }, m.delay));
     });
-    setTimeout(() => {
-      setConvKey(k => k + 1);
-    }, msgs[msgs.length - 1].delay + 4000);
   };
 
   useEffect(() => {
     const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting && !started.current) { started.current = true; runConversation(); } },
+      ([e]) => { if (e.isIntersecting && !started.current) { started.current = true; playScript(tab === 0 ? 1 : 0); } },
       { threshold: 0.3 }
     );
     if (sectionRef.current) obs.observe(sectionRef.current);
@@ -1261,16 +1338,48 @@ function LiveChatSection() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (convKey === 0) return;
-    runConversation();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [convKey]);
+  useEffect(() => clearTimers, []);
 
-  const msgs = CONVERSATIONS[convKey % CONVERSATIONS.length];
+  // keep the newest message in view
+  useEffect(() => {
+    const b = bodyRef.current;
+    if (b) b.scrollTop = b.scrollHeight;
+  }, [messages, typing]);
+
+  const switchTab = (t: 0 | 1) => {
+    if (t === tab) return;
+    setTab(t);
+    setInput("");
+    if (started.current) playScript(t === 0 ? 1 : 0);
+  };
+
+  const botReply = (q: string): string => {
+    const t = q.toLowerCase();
+    if (/(price|pricing|cost|budget|quote|\$)/.test(t)) return "Web projects start around $3K, apps from $8K. We'll scope yours exactly on a quick call.";
+    if (/(time|long|week|deadline|when|fast)/.test(t))  return "Most marketing sites ship in 3–4 weeks, full apps in 8–14. What's your timeline?";
+    if (/(app|mobile|ios|android)/.test(t))             return "Love mobile work, React Native or native. We've shipped 30+ apps. What's the idea?";
+    if (/(\bai\b|ml|gpt|agent|chatbot|llm)/.test(t))    return "AI is our sharpest tool: copilots, RAG, agents. What should it do for your users?";
+    if (/\b(hi|hello|hey|yo|sup)\b/.test(t))            return "Hey! 👋 Ask me anything about services, pricing or timelines.";
+    return "Great question. Book a 20-min call and we'll get you exact answers.";
+  };
+
+  const send = () => {
+    const text = input.trim();
+    if (!text) return;
+    interacted.current = true;
+    clearTimers();
+    setInput("");
+    setMessages(v => [...v, { from: "out", text }]);
+    setTyping(true);
+    timers.current.push(window.setTimeout(() => {
+      setTyping(false);
+      setMessages(v => [...v, { from: "in", text: botReply(text) }]);
+    }, 1000 + Math.random() * 500));
+  };
 
   return (
     <section className="lc-section" ref={sectionRef}>
+      <style dangerouslySetInnerHTML={{ __html: LC_CSS }} />
       <div className="lc-bg-glow" aria-hidden="true" />
       <div className="wrap">
         <div className="lc-inner">
@@ -1283,7 +1392,7 @@ function LiveChatSection() {
               <span className="it">when you need it.</span>
             </h2>
             <p className="lc-desc fade d2">
-              Whether it&apos;s a quick question at midnight or a project kickoff call at noon — we&apos;re covered. AI answers instantly, humans follow up when it matters.
+              Whether it&apos;s a quick question at midnight or a project kickoff call at noon, we&apos;re covered. AI answers instantly, humans follow up when it matters.
             </p>
 
             <div className="lc-opts fade d3">
@@ -1327,12 +1436,23 @@ function LiveChatSection() {
             </div>
           </div>
 
-          {/* RIGHT: animated chat widget */}
-          <div className="fade d2">
-            <div className="lc-widget">
-              {/* Header */}
-              <div className="lc-widget-hd">
-                <div className="lc-widget-av">F</div>
+          {/* RIGHT: animated chat widget inside an iPhone mockup */}
+          <div className="fade d2 lc-phone-wrap">
+            <div className="lc-phone">
+              <div className="lc-phone-island" aria-hidden="true" />
+              <div className="lc-phone-screen">
+                <div className="lc-phone-status" aria-hidden="true">
+                  <span className="lc-phone-time">9:41</span>
+                  <span className="lc-phone-sys">
+                    <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.6" y="5" width="3" height="6" rx="1"/><rect x="9.2" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.8" y="0" width="3" height="11" rx="1"/></svg>
+                    <svg width="16" height="11" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.7c2.2 0 4.3.85 5.9 2.4L15.3 3.6A11.2 11.2 0 0 0 8 .5 11.2 11.2 0 0 0 .7 3.6L2.1 5.1A8.3 8.3 0 0 1 8 2.7Zm0 3.5c1.3 0 2.5.5 3.4 1.4l1.4-1.4A6.7 6.7 0 0 0 8 3.9a6.7 6.7 0 0 0-4.8 2.3l1.4 1.4A4.8 4.8 0 0 1 8 6.2Zm0 3.4 1.9-2a2.6 2.6 0 0 0-3.8 0L8 9.6Z"/></svg>
+                    <span className="lc-phone-batt"><span /></span>
+                  </span>
+                </div>
+                <div className="lc-widget">
+                  {/* Header */}
+                  <div className="lc-widget-hd">
+                    <div className="lc-widget-av"><img src="/assets/logo-mark.svg" alt="Foxmen" /></div>
                 <div>
                   <div className="lc-widget-hd-name">{tab === 0 ? "Foxo AI" : "Yousuf · Foxmen"}</div>
                   <div className="lc-widget-hd-sub">{tab === 0 ? "Powered by Foxmen Studio" : "Founder & CEO"}</div>
@@ -1342,20 +1462,18 @@ function LiveChatSection() {
 
               {/* Tab switcher */}
               <div className="lc-tabs">
-                <div className={`lc-tab${tab === 0 ? " lc-tab--active" : ""}`} onClick={() => setTab(0)}>Foxo AI</div>
-                <div className={`lc-tab${tab === 1 ? " lc-tab--active" : ""}`} onClick={() => setTab(1)}>Live Chat</div>
+                <div className={`lc-tab${tab === 0 ? " lc-tab--active" : ""}`} onClick={() => switchTab(0)}>Foxo AI</div>
+                <div className={`lc-tab${tab === 1 ? " lc-tab--active" : ""}`} onClick={() => switchTab(1)}>Live Chat</div>
               </div>
 
               {/* Chat body */}
-              <div className="lc-chat-body" key={`${tab}-${convKey}`}>
-                {msgs.map((m, i) =>
-                  visible.includes(i) ? (
-                    <div key={i} className={`lc-msg lc-msg--${m.from}`} style={{ animationDelay: "0ms" }}>
-                      <div className="lc-bubble">{m.text}</div>
-                      {m.from === "out" && <span className="lc-msg-time">Just now</span>}
-                    </div>
-                  ) : null
-                )}
+              <div className="lc-chat-body" ref={bodyRef}>
+                {messages.map((m, i) => (
+                  <div key={i} className={`lc-msg lc-msg--${m.from}`}>
+                    <div className="lc-bubble">{m.text}</div>
+                    {m.from === "out" && <span className="lc-msg-time">Just now</span>}
+                  </div>
+                ))}
                 {typing && (
                   <div className="lc-typing">
                     <span className="lc-typing-dot" />
@@ -1366,12 +1484,21 @@ function LiveChatSection() {
               </div>
 
               {/* Input bar */}
-              <div className="lc-input-row">
-                <div className="lc-input-bar">Ask anything…</div>
-                <div className="lc-send">
+              <form className="lc-input-row" onSubmit={(e) => { e.preventDefault(); send(); }}>
+                <input
+                  className="lc-input-bar"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={tab === 0 ? "Ask Foxo anything…" : "Message the team…"}
+                  aria-label="Chat message"
+                  enterKeyHint="send"
+                />
+                <button type="submit" className="lc-send" aria-label="Send message" disabled={!input.trim()}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 19V5M5 12l7-7 7 7"/>
                   </svg>
+                </button>
+              </form>
                 </div>
               </div>
             </div>
@@ -1380,6 +1507,61 @@ function LiveChatSection() {
         </div>
       </div>
     </section>
+  );
+}
+
+/* Scroll-controlled heading: words start grey and fill to black one-by-one as
+   the heading scrolls up through the viewport; scrolling back up reverses it.
+   Self-contained (own scroll listener + inline styles) — independent of global CSS. */
+function WordFadeHeading({ words, className, dark }: { words: { t: string; it?: boolean }[]; className?: string; dark?: boolean }) {
+  const ref = useRef<HTMLHeadingElement>(null);
+  const [p, setP] = useState(0);   // 0 → 1 scroll progress through the reveal band
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let raf = 0;
+    const update = () => {
+      const r = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const start = vh * 0.85;   // begins filling when the heading top passes 85% of viewport
+      const end   = vh * 0.35;   // fully black when it reaches 35%
+      const prog = (start - r.top) / (start - end);
+      setP(Math.min(1, Math.max(0, prog)));
+    };
+    const onScroll = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(update); };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", update, { passive: true });
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", update);
+    };
+  }, []);
+
+  const N = words.length;
+  const GREY = dark ? 92 : 199;                                   // dim base per theme
+  const ink: [number, number, number] = dark ? [244, 244, 244] : [10, 10, 10];
+  const mix = (t: number, target: [number, number, number]) => {
+    const c = (a: number) => Math.round(GREY + (a - GREY) * t);
+    return `rgb(${c(target[0])},${c(target[1])},${c(target[2])})`;
+  };
+  return (
+    <h2 className={className} ref={ref}>
+      {words.map((w, i) => {
+        const t = Math.min(1, Math.max(0, p * N - i));           // per-word fill 0→1
+        const color = w.it ? mix(t, [184, 108, 249]) : mix(t, ink);
+        return (
+          <span
+            key={i}
+            className={w.it ? "it" : undefined}
+            style={{ display: "inline-block", marginRight: "0.26em", color, fontStyle: w.it ? "italic" : undefined, transition: "color .12s linear" }}
+          >
+            {w.t}
+          </span>
+        );
+      })}
+    </h2>
   );
 }
 
@@ -1500,7 +1682,7 @@ function TestimonialsSection({ testis }: { testis: DbTesti[] }) {
         <header className="tv-head fade">
           <div>
             <span className="tv-badge">Testimonial</span>
-            <h2 className="tv-title">Chosen by 50+ growing<br /><span className="tv-title-dim">businesses worldwide!</span></h2>
+            <h2 className="tv-title" style={{ fontFamily: "var(--f-display)", fontWeight: 400, letterSpacing: "-0.02em", fontSize: "clamp(40px, 5vw, 72px)", lineHeight: 1.02 }}>Chosen by 50+ growing<br /><span className="tv-title-dim">businesses worldwide!</span></h2>
           </div>
           <Link href="/contact" className="tv-contact">Contact Now</Link>
         </header>
@@ -1592,10 +1774,14 @@ export default function HomeClient({
         <div className="wrap">
           <div className="svc-head">
             <div className="fade"><span className="eyebrow">What we do</span></div>
-            <h2 className="display fade d1">
-              A studio built for <span className="it">every</span> layer of the product —
-              strategy, design, code, and care.
-            </h2>
+            <WordFadeHeading
+              className="display"
+              words={[
+                { t: "A" }, { t: "studio" }, { t: "built" }, { t: "for" }, { t: "every", it: true },
+                { t: "layer" }, { t: "of" }, { t: "the" }, { t: "product:" }, { t: "strategy," },
+                { t: "design," }, { t: "code," }, { t: "and" }, { t: "care." },
+              ]}
+            />
           </div>
           <div className="svc-list">
             {(dbServices.length > 0
@@ -1642,7 +1828,7 @@ export default function HomeClient({
         <div className="wrap">
           <div className="work-head">
             <div>
-              <div className="fade"><span className="eyebrow">Featured work — 2024 / 2026</span></div>
+              <div className="fade"><span className="eyebrow">Featured work · 2024 / 2026</span></div>
               <h2 className="display fade d1" style={{ marginTop: 18 }}>
                 Selected <span className="it">recent</span> projects
               </h2>
@@ -1761,12 +1947,12 @@ export default function HomeClient({
             <div className="ai-copy">
               <div className="fade"><span className="eyebrow">AI is our sharpest tool</span></div>
               <h2 className="fade d1" style={{ marginTop: 18 }}>
-                We <span className="it">embed</span> intelligence —
+                We <span className="it">embed</span> intelligence,
                 not bolt it on after launch.
               </h2>
               <p className="fade d2">
                 AI is no longer a feature; it&apos;s a layer. We design product
-                surfaces where AI does the heavy lifting invisibly — fewer clicks,
+                surfaces where AI does the heavy lifting invisibly, fewer clicks,
                 faster answers, defensible moats.
               </p>
               <ul>
@@ -1796,10 +1982,13 @@ export default function HomeClient({
           <div className="wrap">
             <div className="process-head">
               <div><div className="fade"><span className="eyebrow" style={{ color:"#bdbdbd" }}>How we work</span></div></div>
-              <h2 className="fade d1">
-                A <span style={{ fontStyle:"italic", color:"var(--brand)" }}>deliberate</span> process —
-                four chapters from brief to launch.
-              </h2>
+              <WordFadeHeading
+                dark
+                words={[
+                  { t: "A" }, { t: "deliberate", it: true }, { t: "process:" }, { t: "four" },
+                  { t: "chapters" }, { t: "from" }, { t: "brief" }, { t: "to" }, { t: "launch." },
+                ]}
+              />
             </div>
             <div className="steps">
               {steps.map((s) => (

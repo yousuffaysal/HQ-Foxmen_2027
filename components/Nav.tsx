@@ -25,6 +25,8 @@ type Profile = { name?: string; avatar?: string };
 
 export default function Nav() {
   const pathname = usePathname();
+  // Pages whose hero sits behind the nav on a dark background (e.g. video hero)
+  const darkTop = pathname === "/services" || pathname.startsWith("/services/");
   const [scrolled,  setScrolled]  = useState(false);
   const [clock,     setClock]     = useState("— : —");
   const [profile,   setProfile]   = useState<Profile | null>(null);
@@ -73,15 +75,39 @@ export default function Nav() {
 
   return (
     <>
+      <style dangerouslySetInnerHTML={{ __html: `
+        .brand .wm-studio { font-style: italic; color: var(--brand); }
+        .nav--darktop .brand, .nav--darktop .brand .wm { color:#fff; }
+        .nav--darktop .brand .wm-studio { color: var(--brand); }
+        .nav--darktop .brand .wm .small { color: rgba(255,255,255,.62); }
+        .nav--darktop .nav-links { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.2); }
+        .nav--darktop .nav-links a { color: rgba(255,255,255,.85); }
+        .nav--darktop .nav-links a:hover, .nav--darktop .nav-links a.active { background:#fff; color:#0a0a0a; }
+        .nav--darktop .nav-time { color: rgba(255,255,255,.72); }
+        .nav--darktop .nav-cta .btn--ghost { border-color: rgba(255,255,255,.5); color:#fff; }
+        .nav--darktop .nav-cta .btn--ghost .chip { background:#fff; color:#0a0a0a; }
+        .nav--darktop .nav-hamburger span { background:#fff; }
+      ` }} />
       <header
-        className={`nav${scrolled ? " scrolled" : ""}${menuOpen ? " menu-open" : ""}`}
+        className={`nav${scrolled ? " scrolled" : ""}${menuOpen ? " menu-open" : ""}${darkTop && !scrolled && !menuOpen ? " nav--darktop" : ""}`}
         id="nav"
+        style={
+          scrolled && !menuOpen
+            ? {
+                background: "#f8f8f8",
+                backdropFilter: "none",
+                WebkitBackdropFilter: "none",
+                borderBottom: "1px solid var(--line)",
+                boxShadow: "0 8px 24px -18px rgba(0,0,0,0.25)",
+              }
+            : undefined
+        }
       >
         <div className="wrap nav-inner">
           <Link href="/" className="brand" aria-label="Foxmen Studio home">
             <Image className="mark" src="/assets/logo-mark.svg" alt="" width={40} height={40} />
             <span className="wm">
-              Foxmen Studio
+              Foxmen <span className="wm-studio">Studio</span>
               <span className="small">Code · Craft · Care</span>
             </span>
           </Link>
