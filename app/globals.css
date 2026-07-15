@@ -286,6 +286,15 @@ h4 {
 
 .btn--brand { --bg: var(--brand); --chip: #fff; --chipfg: var(--brand); }
 
+/* Same button, inverted for dark/video backdrops. The brand sweep still runs on hover,
+   so the label flips to white and the chip inverts with it. */
+.btn--on-dark { --bg: #fff; --fg: var(--ink); --chip: var(--ink); --chipfg: #fff; }
+.btn--on-dark:hover .chip { background: #fff; color: var(--ink); }
+.btn--ghost.btn--on-dark {
+  --bg: transparent; --fg: #fff; --chip: #fff; --chipfg: var(--ink);
+  border-color: rgba(255,255,255,.55);
+}
+
 .btn--sm { padding: 5px 5px 5px 18px; font-size: 13px; }
 .btn--sm .chip { width: 32px; height: 32px; }
 .btn--sm .chip svg { width: 15px; height: 15px; }
@@ -5748,6 +5757,25 @@ body.loading { overflow: hidden; }
   from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+/* the site .btn, inverted for the dark hero video:
+   white pill + black label, black chip + white arrow. Brand sweep on hover is inherited from .btn. */
+.work-hero-btn {
+  --bg: #fff;          /* button box: white */
+  --fg: #0a0a0a;       /* label: black */
+  --chip: #0a0a0a;     /* circle: black */
+  --chipfg: #fff;      /* arrow: white */
+  background: #fff;
+  color: #0a0a0a;
+}
+.work-hero-btn .chip { background: #0a0a0a; color: #fff; }
+/* trimmed down from the default .btn height */
+.work-hero-btn { padding: 5px 5px 5px 22px; font-size: 14px; }
+.work-hero-btn .label { padding: 4px 4px 4px 0; }
+.work-hero-btn .chip { width: 36px; height: 36px; }
+.work-hero-btn .chip svg { width: 17px; height: 17px; }
+/* on hover the brand fill sweeps up, so the label flips to white and the chip inverts to match */
+.work-hero-btn:hover { color: #fff; }
+.work-hero-btn:hover .chip { background: #fff; color: #0a0a0a; }
 /* editorial extras stay desktop-only */
 .work-index, .work-rule { display: none; }
 

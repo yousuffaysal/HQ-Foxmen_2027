@@ -3,7 +3,7 @@ import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
-import s from "./about.module.css";
+import AboutHero from "./AboutHero";
 
 const WorldMapDecoration = dynamic(
   () => import("@/app/components/WorldMapLeaflet"),
@@ -410,7 +410,9 @@ export default function AboutPage() {
     <>
       <style>{`
         /* ── text reveal ── */
-        .ab-r  { display:block; overflow:hidden; }
+        /* padding-bottom/negative-margin keeps the overflow:hidden mask from clipping
+           descenders (g, p, y) — same trick as .hero-headline .reveal */
+        .ab-r  { display:block; overflow:hidden; padding-bottom:.14em; margin-bottom:-.14em; }
         .ab-ri { display:block; transform:translateY(110%); transition:transform .9s cubic-bezier(.16,1,.3,1); }
         .reveal.in .ab-ri           { transform:translateY(0); }
         .reveal.in.ab-d1 .ab-ri    { transform:translateY(0); transition-delay:.14s; }
@@ -424,38 +426,53 @@ export default function AboutPage() {
         .fade.in.d3  { transition-delay:.34s; }
         .fade.in.d4  { transition-delay:.46s; }
 
-        /* ── hero ── */
-        .ab-hero { padding:140px 0 100px; border-bottom:1px solid var(--line); }
-        .ab-badge { display:inline-flex; align-items:center; gap:10px; margin-bottom:44px; padding:7px 16px 7px 12px; border:1px solid var(--line); border-radius:99px; font-family:var(--f-mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+        /* ── hero — layered plate + cursor spotlight that reveals the video underneath ── */
+        .ab-hero { position:relative; min-height:100vh; min-height:100svh; display:flex; align-items:flex-end; overflow:hidden; background:#050505; }
+        .ab-hero-grid { position:absolute; inset:-24px; z-index:0; opacity:.1; will-change:transform; }
+        .ab-hero-bg { position:absolute; inset:0; z-index:10; background-position:center; background-size:cover; background-repeat:no-repeat; }
+        .ab-hero-overlay { position:absolute; inset:0; z-index:20; width:100%; height:100%; object-fit:cover; pointer-events:none; }
+        /* mask-image is written per frame from the cursor; hidden until the pointer enters */
+        .ab-hero-spot { position:absolute; inset:0; z-index:30; pointer-events:none; opacity:0; transition:opacity .5s ease; }
+        .ab-hero-video { width:100%; height:100%; object-fit:cover; clip-path:inset(40% 0 0 0); }
+        .ab-hero-scrim { position:absolute; inset:0; z-index:35; pointer-events:none;
+          background:linear-gradient(180deg,rgba(0,0,0,.6) 0%,rgba(0,0,0,.22) 42%,rgba(0,0,0,.85) 100%); }
+        /* bottom-anchored, so the extra bottom padding is what lifts the block toward the nav */
+        .ab-hero-content { position:relative; z-index:40; width:100%; padding:200px 0 180px; }
+        @media(max-width:760px){ .ab-hero-content { padding:160px 0 80px; } }
+
+        .ab-badge { display:inline-flex; align-items:center; gap:10px; margin-bottom:44px; padding:7px 16px 7px 12px; border:1px solid rgba(255,255,255,.28); border-radius:99px; font-family:var(--f-mono); font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,.78); backdrop-filter:blur(6px); }
         .ab-dot { width:7px; height:7px; border-radius:50%; background:#22c55e; animation:abpulse 2s infinite; flex-shrink:0; }
-        .ab-dot.off { background:#ef4444; animation:none; }
+        .ab-dot.off { background:var(--brand); animation:none; }
         @keyframes abpulse { 0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4)} 70%{box-shadow:0 0 0 8px rgba(34,197,94,0)} }
 
-        .ab-h1  { font-family:var(--f-display); font-size:clamp(64px,9.5vw,118px); line-height:.9; letter-spacing:-.045em; margin:0 0 36px; }
+        .ab-h1  { font-family:var(--f-display); font-size:clamp(60px,8.5vw,var(--fs-h1)); line-height:.90; letter-spacing:-.02em; color:#fff; margin:0 0 36px; }
         .ab-h1 em { font-style:italic; color:var(--brand); }
-        .ab-sub { font-size:20px; line-height:1.65; color:var(--muted); max-width:50ch; margin:0 0 44px; }
+        .ab-sub { font-size:var(--fs-lead); line-height:1.5; color:rgba(255,255,255,.72); max-width:50ch; margin:0 0 44px; }
         .ab-acts { display:flex; gap:14px; flex-wrap:wrap; }
 
         /* ── stats ── */
         .ab-stats { display:grid; grid-template-columns:repeat(4,1fr); border-bottom:1px solid var(--line); }
         .ab-stat  { padding:56px 36px; border-right:1px solid var(--line); }
         .ab-stat:last-child { border-right:none; }
-        .ab-stat-n { font-family:var(--f-display); font-size:clamp(44px,5.5vw,72px); letter-spacing:-.045em; line-height:1; }
-        .ab-stat-l { font-family:var(--f-mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin-top:10px; }
+        .ab-stat-n { font-family:var(--f-display); font-size:clamp(40px,6vw,var(--fs-h2)); letter-spacing:-.01em; line-height:1; }
+        .ab-stat-l { font-family:var(--f-mono); font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); margin-top:10px; }
         @media(max-width:760px){ .ab-stats{grid-template-columns:1fr 1fr;} .ab-stat{border-right:none;border-bottom:1px solid var(--line);} .ab-stat:nth-child(odd){border-right:1px solid var(--line);} .ab-stat:nth-child(3),.ab-stat:nth-child(4){border-bottom:none;} }
         @media(max-width:480px){ .ab-stats{grid-template-columns:1fr;} .ab-stat{border-right:none!important;border-bottom:1px solid var(--line)!important;} .ab-stat:last-child{border-bottom:none!important;} }
 
         /* ── story ── */
-        .ab-story { display:grid; grid-template-columns:380px 1fr; gap:80px; padding:100px 0; border-bottom:1px solid var(--line); align-items:start; }
-        .ab-ey { font-family:var(--f-mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:20px; }
-        .ab-h2  { font-family:var(--f-display); font-size:clamp(44px,5.5vw,72px); letter-spacing:-.045em; line-height:.92; margin:0; }
+        .ab-story { display:grid; grid-template-columns:380px 1fr; gap:80px; padding:120px 0; border-bottom:1px solid var(--line); align-items:start; }
+        .ab-ey { font-family:var(--f-mono); font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:20px; }
+        /* the site-wide section-header recipe (.svc-head h2 / .work-head h2) — 112px display */
+        .ab-h2  { font-family:var(--f-display); font-size:clamp(48px,7vw,112px); letter-spacing:-.025em; line-height:.95; margin:0; }
         .ab-h2 em { font-style:italic; color:var(--brand); }
-        .ab-story-body p { font-size:18px; line-height:1.8; color:var(--muted); margin:0 0 22px; }
+        .ab-story-body p { font-size:var(--fs-body); line-height:1.65; color:var(--muted); margin:0 0 22px; }
         .ab-story-body p:last-child { margin:0; }
         @media(max-width:860px){ .ab-story{grid-template-columns:1fr;gap:40px;} }
+        @media(max-width:760px){ .ab-story{padding:80px 0;} }
 
         /* ── team ── */
-        .ab-team { padding:100px 0; border-bottom:1px solid var(--line); text-align:center; }
+        .ab-team { padding:120px 0; border-bottom:1px solid var(--line); text-align:center; }
+        @media(max-width:760px){ .ab-team{padding:80px 0;} }
         .ab-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:32px; margin-top:56px; max-width:1100px; margin-left:auto; margin-right:auto; }
 
         /* ── profile card (Codepen pattern) ── */
@@ -608,11 +625,12 @@ export default function AboutPage() {
         @media(max-width:600px){ .ab-cards{grid-template-columns:1fr;max-width:360px;} }
 
         /* ── cta ── */
-        .ab-cta { padding:100px 0; text-align:center; }
-        .ab-cta-h  { font-family:var(--f-display); font-size:clamp(44px,7.5vw,100px); letter-spacing:-.045em; line-height:.9; margin:0 0 24px; }
+        .ab-cta { padding:120px 0; text-align:center; }
+        .ab-cta-h  { font-family:var(--f-display); font-size:clamp(48px,7vw,112px); letter-spacing:-.025em; line-height:.95; margin:0 0 24px; }
         .ab-cta-h em { font-style:italic; color:var(--brand); }
-        .ab-cta-sub { font-size:18px; line-height:1.65; color:var(--muted); margin:0 0 36px; }
+        .ab-cta-sub { font-size:var(--fs-lead); line-height:1.5; color:var(--muted); margin:0 0 36px; }
         .ab-cta-row { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+        @media(max-width:760px){ .ab-cta{padding:80px 0;} }
 
         @media(max-width:560px){
           .ab-h1 { font-size:58px; }
@@ -624,8 +642,8 @@ export default function AboutPage() {
         /* ═══════════════════════════════════════════════════
            AI SHOWCASE SECTIONS
            ═══════════════════════════════════════════════════ */
-        .ai-ey { font-family:var(--f-mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#666; display:block; margin-bottom:20px; }
-        .ai-ey-dark { font-family:var(--f-mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#555; display:block; margin-bottom:20px; }
+        .ai-ey { font-family:var(--f-mono); font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:#666; display:block; margin-bottom:20px; }
+        .ai-ey-dark { font-family:var(--f-mono); font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:#8a8a8a; display:block; margin-bottom:20px; }
 
         /* ── S1: Chat Demo ── */
         .ai-s1 { background:#0b0b0d; padding:120px 0; position:relative; overflow:hidden; }
@@ -659,7 +677,7 @@ export default function AboutPage() {
 
         .ai-outcome { opacity:0; transform:translateX(22px); transition:opacity .8s cubic-bezier(.16,1,.3,1) .3s,transform .8s cubic-bezier(.16,1,.3,1) .3s; }
         .ai-outcome.vis { opacity:1; transform:translateX(0); }
-        .ai-out-h { font-family:var(--f-display); font-size:clamp(36px,4.5vw,60px); letter-spacing:-.03em; line-height:.95; color:#fff; margin:0 0 36px; }
+        .ai-out-h { font-family:var(--f-display); font-size:clamp(30px,4vw,var(--fs-h3)); letter-spacing:-.01em; line-height:1.10; color:#fff; margin:0 0 36px; }
         .ai-metrics { display:flex; flex-direction:column; gap:10px; }
         .ai-mc { background:#0f0f11; border:1px solid rgba(255,255,255,.07); border-radius:13px; padding:18px 22px; display:flex; justify-content:space-between; align-items:center; transition:border-color .3s; }
         .ai-mc:hover { border-color:rgba(184,108,249,.28); }
@@ -709,7 +727,7 @@ export default function AboutPage() {
         .ai-gc { border:1px solid var(--line); border-radius:20px; padding:32px; background:#fff; overflow:hidden; position:relative; opacity:0; transform:translateY(22px) scale(.985); transition:opacity .65s cubic-bezier(.16,1,.3,1),transform .65s cubic-bezier(.16,1,.3,1); }
         .ai-gc.vis { opacity:1; transform:translateY(0) scale(1); }
         .ai-gc::before { content:""; position:absolute; inset:0; background:linear-gradient(160deg,rgba(184,108,249,.04),transparent 55%); pointer-events:none; border-radius:20px; }
-        .ai-gc-num { font-family:var(--f-display); font-size:clamp(48px,5.5vw,72px); letter-spacing:-.04em; line-height:1; color:var(--ink); }
+        .ai-gc-num { font-family:var(--f-display); font-size:clamp(40px,6vw,var(--fs-h2)); letter-spacing:-.01em; line-height:1; color:var(--ink); }
         .ai-gc-suf { font-style:italic; color:var(--brand); }
         .ai-gc-lbl { font-family:var(--f-mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin-top:8px; display:block; }
         .ai-gc-desc { font-size:13.5px; color:#3a3a3a; line-height:1.55; margin-top:10px; max-width:38ch; }
@@ -818,6 +836,8 @@ export default function AboutPage() {
         @media(max-width:600px){ .sf-h1{font-size:34px} .sf-pnav-portal{display:none} }
 
         /* ── AI responsive ── */
+        /* match .section's 760px → 80px vertical-padding step */
+        @media(max-width:760px){ .ai-s1,.ai-s2,.ai-s3,.ai-s4,.ai-s5 { padding:80px 0; } }
         @media(max-width:960px){
           .ai-chat-grid { grid-template-columns:1fr; }
           .ai-time-grid { grid-template-columns:1fr; gap:44px; }
@@ -830,7 +850,6 @@ export default function AboutPage() {
           .ai-eco-grid { grid-template-columns:1fr 1fr; }
         }
         @media(max-width:680px){
-          .ai-s1,.ai-s2,.ai-s3,.ai-s4,.ai-s5 { padding:80px 0; }
           .ai-pnode { flex:0 0 calc(50% - 14px); }
           .ai-growth-cards { grid-template-columns:1fr; }
           .ai-eco-grid { grid-template-columns:1fr; max-width:100%; }
@@ -838,55 +857,23 @@ export default function AboutPage() {
       `}</style>
 
       {/* ── HERO ── */}
-      <section className={s.aboutHero} style={{ padding: "140px 0 100px", borderBottom: "1px solid var(--line)" }}>
-        <div className="wrap">
-          <div className="ab-badge fade in">
-            <span className={`ab-dot${isOpen ? "" : " off"}`} />
-            About Foxmen Studio &nbsp;·&nbsp; {isOpen ? "Available now" : "Open · Q3 2026"}
-          </div>
-
-          <h1 className="ab-h1">
-            <span className="reveal in">
-              <span className="ab-r"><span className="ab-ri">We design, build,</span></span>
-            </span>
-            <span className="reveal in ab-d1">
-              <span className="ab-r"><span className="ab-ri">and ship digital</span></span>
-            </span>
-            <span className="reveal in ab-d2">
-              <span className="ab-r"><span className="ab-ri">products that <em>last.</em></span></span>
-            </span>
-          </h1>
-
-          <p className="ab-sub fade in d2">
-            Foxmen Studio is a global digital product agency partnering with founders and growth-stage companies to build websites, apps, and AI-integrated products — from brief to launch and beyond.
-          </p>
-
-          <div className="ab-acts fade in d3">
-            <Link href="/contact" className="btn btn--lg">
-              <span className="label">Start a project</span>
-              <span className="chip" aria-hidden="true"><ArrowIcon /></span>
-            </Link>
-            <Link href="/work" className="btn btn--ghost btn--lg">
-              <span className="label">See our work</span>
-              <span className="chip" aria-hidden="true"><ArrowIcon /></span>
-            </Link>
-          </div>
-        </div>
-      </section>
+      <AboutHero isOpen={isOpen} />
 
       {/* ── STATS ── */}
-      <div className="ab-stats">
-        {[
-          { n: "50+",   l: "Projects completed" },
-          { n: "5+",    l: "Countries served" },
-          { n: "< 14w", l: "Avg. time to launch" },
-          { n: "4.9★",  l: "Client satisfaction" },
-        ].map((st, i) => (
-          <div key={i} className={`ab-stat fade d${i}`}>
-            <div className="ab-stat-n">{st.n}</div>
-            <div className="ab-stat-l">{st.l}</div>
-          </div>
-        ))}
+      <div className="wrap">
+        <div className="ab-stats">
+          {[
+            { n: "50+",   l: "Projects completed" },
+            { n: "5+",    l: "Countries served" },
+            { n: "< 14w", l: "Avg. time to launch" },
+            { n: "4.9★",  l: "Client satisfaction" },
+          ].map((st, i) => (
+            <div key={i} className={`ab-stat fade d${i}`}>
+              <div className="ab-stat-n">{st.n}</div>
+              <div className="ab-stat-l">{st.l}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* ── STORY ── */}
@@ -928,8 +915,8 @@ export default function AboutPage() {
       <section className="ai-s1" data-ai-section="chat">
         <div className="wrap" style={{ position: "relative", zIndex: 1 }}>
           <span className="ai-ey-dark fade">AI in action</span>
-          <h2 style={{ fontFamily: "var(--f-display)", fontSize: "clamp(40px,5.5vw,72px)", letterSpacing: "-.03em", lineHeight: .94, color: "#fff", margin: "0 0 64px", maxWidth: "20ch" }}>
-            From first message to <em style={{ color: "var(--brand)", fontStyle: "italic" }}>live product.</em>
+          <h2 className="ab-h2" style={{ color: "#fff", margin: "0 0 64px", maxWidth: "20ch" }}>
+            From first message to <em>live product.</em>
           </h2>
           <div className="ai-chat-grid">
 
