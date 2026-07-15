@@ -901,6 +901,15 @@ body.page-revealed .hero::after {
 .strip--dark { background: var(--ink); border-color: #222; }
 .strip--dark .marquee span { color: #fff; }
 
+/* Real brand logos in the marquee — height-normalised, keep the purple dot separator */
+.marquee--logos .tech-logo { gap: 60px; }
+.marquee--logos .tech-logo img {
+  height: 38px; width: auto; display: block;
+  -webkit-user-drag: none; user-select: none;
+}
+/* pure-black marks (Next.js, OpenAI) → white on the dark strip */
+.marquee--logos .tech-logo--mono img { filter: brightness(0) invert(1); }
+
 /* ============================================================
    SERVICES (what we do)
    ============================================================ */

@@ -433,7 +433,20 @@ const steps = [
 
 const marqueeItems = ["Web Design","Mobile Apps","AI Integration","Ecommerce","Real-Estate Platforms","Multi-Vendor","UI · UX","Brand Systems","Marketing"];
 const heroTicker = ["Mobile Apps","AI-Integrated Apps","SaaS Products","Digital Marketing","Web Development"];
-const techItems    = ["React","Next.js","Swift","Flutter","OpenAI","Anthropic","Stripe","Postgres","Figma","Webflow"];
+// Real brand marks (self-hosted, official colors). `mono` marks are pure black,
+// so they render white on the dark strip; the rest keep their brand color.
+const techLogos = [
+  { src: "/assets/logos/react.svg",     alt: "React" },
+  { src: "/assets/logos/nextjs.svg",    alt: "Next.js",    mono: true },
+  { src: "/assets/logos/swift.svg",     alt: "Swift" },
+  { src: "/assets/logos/flutter.svg",   alt: "Flutter" },
+  { src: "/assets/logos/openai.svg",    alt: "OpenAI",     mono: true },
+  { src: "/assets/logos/anthropic.svg", alt: "Anthropic" },
+  { src: "/assets/logos/stripe.svg",    alt: "Stripe" },
+  { src: "/assets/logos/postgres.svg",  alt: "PostgreSQL" },
+  { src: "/assets/logos/figma.svg",     alt: "Figma" },
+  { src: "/assets/logos/webflow.svg",   alt: "Webflow" },
+];
 
 type DbService = { id:number; ord:number; name:string; descr:string; count:string; visible:boolean; badge:string|null; image:string|null };
 type DbProject = { id:number; name:string; tagline:string; industry:string; year:string; scope:string; status:string; thumbnail:string; slug:string; color_cls:string; live_url:string; home_featured:boolean; home_order:number };
@@ -1926,8 +1939,13 @@ export default function HomeClient({
 
       {/* Tech strip */}
       <section className="strip strip--dark" aria-label="Tech stack">
-        <div className="marquee">
-          {[...techItems, ...techItems].map((s, i) => <span key={i}>{s}</span>)}
+        <div className="marquee marquee--logos">
+          {[...techLogos, ...techLogos].map((l, i) => (
+            <span key={i} className={`tech-logo${l.mono ? " tech-logo--mono" : ""}`}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={l.src} alt={l.alt} loading="lazy" />
+            </span>
+          ))}
         </div>
       </section>
 
