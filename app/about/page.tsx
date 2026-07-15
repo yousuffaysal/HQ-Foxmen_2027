@@ -410,10 +410,12 @@ export default function AboutPage() {
     <>
       <style>{`
         /* ── text reveal ── */
-        /* padding-bottom/negative-margin keeps the overflow:hidden mask from clipping
-           descenders (g, p, y) — same trick as .hero-headline .reveal */
-        .ab-r  { display:block; overflow:hidden; padding-bottom:.14em; margin-bottom:-.14em; }
-        .ab-ri { display:block; transform:translateY(110%); transition:transform .9s cubic-bezier(.16,1,.3,1); }
+        /* .reveal (global) is the overflow:hidden mask; .ab-r is just a passthrough.
+           Bottom padding on the mask itself gives descenders (g, p, y, j) room, and the
+           matching negative margin keeps the line rhythm — same trick as .hero-headline. */
+        .ab-h1 .reveal, .ab-h2 .reveal, .ab-cta-h .reveal { padding-bottom:.18em; margin-bottom:-.18em; }
+        .ab-r  { display:block; }
+        .ab-ri { display:block; transform:translateY(120%); transition:transform .9s cubic-bezier(.16,1,.3,1); }
         .reveal.in .ab-ri           { transform:translateY(0); }
         .reveal.in.ab-d1 .ab-ri    { transform:translateY(0); transition-delay:.14s; }
         .reveal.in.ab-d2 .ab-ri    { transform:translateY(0); transition-delay:.28s; }
@@ -630,6 +632,8 @@ export default function AboutPage() {
         .ab-cta-h em { font-style:italic; color:var(--brand); }
         .ab-cta-sub { font-size:var(--fs-lead); line-height:1.5; color:var(--muted); margin:0 0 36px; }
         .ab-cta-row { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+        /* ArrowIcon carries an inline width/height, so override needs !important */
+        .ab-cta-row .chip svg { width:30px !important; height:30px !important; }
         @media(max-width:760px){ .ab-cta{padding:80px 0;} }
 
         @media(max-width:560px){
