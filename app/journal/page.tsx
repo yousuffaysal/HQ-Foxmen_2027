@@ -50,7 +50,7 @@ export default function JournalPage() {
   return (
     <>
       <section className="page-hero">
-        <div className="wrap page-hero-split">
+        <div className={`wrap${posts.length > 0 ? " page-hero-split" : ""}`}>
           <div>
             <div className="crumbs fade in">
               <Link href="/">Home</Link><span className="sep">/</span><span>Journal</span>
