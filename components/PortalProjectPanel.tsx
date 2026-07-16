@@ -50,6 +50,9 @@ function inject() {
     .pp-ms-item:hover { box-shadow: 0 2px 12px rgba(0,0,0,.08) }
     .pp-overlay { animation: ppFade .2s ease both }
     @keyframes ppFade { from{opacity:0} to{opacity:1} }
+    .pp-resize { position:absolute; left:-3px; top:0; width:8px; height:100%; cursor:col-resize; z-index:5 }
+    .pp-resize::after { content:""; position:absolute; left:3px; top:50%; transform:translateY(-50%); width:3px; height:40px; border-radius:3px; background:#e7e5e2; transition:background .2s, height .2s }
+    .pp-resize:hover::after { background:#b86cf9; height:60px }
   `;
   document.head.appendChild(s);
 }
@@ -68,6 +71,29 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
   const fileRef = useRef<HTMLInputElement>(null);
   const handledIds = useRef(new Set<number>());
   const [isMobile, setIsMobile] = useState(false);
+
+  // adjustable width
+  const [panelW, setPanelW] = useState(500);
+  const [draggingP, setDraggingP] = useState(false);
+  useEffect(() => {
+    const w = Number(localStorage.getItem("pp-panel-w"));
+    if (w >= 400 && w <= 820) setPanelW(w);
+  }, []);
+  function startPanelResize(e: React.MouseEvent) {
+    e.preventDefault();
+    setDraggingP(true);
+    const move = (ev: MouseEvent) => setPanelW(Math.min(820, Math.max(400, window.innerWidth - ev.clientX)));
+    const up = () => {
+      setDraggingP(false);
+      setPanelW(w => { localStorage.setItem("pp-panel-w", String(w)); return w; });
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", up);
+      document.body.style.userSelect = "";
+    };
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+    document.body.style.userSelect = "none";
+  }
 
   const done  = project.milestones.filter(m => m.status === "completed").length;
   const total = project.milestones.length;
@@ -191,12 +217,16 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
       {/* Panel */}
       <div className="pp-panel" style={{
         position: "fixed", right: 0, top: 0, bottom: 0,
-        width: isMobile ? "100%" : 500,
+        width: isMobile ? "100%" : panelW,
         left: isMobile ? 0 : undefined,
         zIndex: 201, background: "#fff", display: "flex", flexDirection: "column",
         boxShadow: isMobile ? "none" : "-16px 0 60px rgba(0,0,0,.14)",
-        fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        fontFamily: "var(--f-sans)",
+        transition: draggingP ? "none" : "width .22s cubic-bezier(.22,1,.36,1)",
       }}>
+        {/* Resize handle */}
+        {!isMobile && <div className="pp-resize" onMouseDown={startPanelResize} title="Drag to resize" />}
+
         {/* Header */}
         <div style={{ padding: "18px 22px 0", flexShrink: 0 }}>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 16 }}>
@@ -213,7 +243,7 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
                   <span style={{ fontSize: 11, color: "#9a9a9a" }}>{project.service_type}</span>
                 )}
               </div>
-              <h2 style={{ fontSize: 20, fontWeight: 700, color: "#0a0a0a", letterSpacing: "-.02em", margin: 0, lineHeight: 1.2 }}>
+              <h2 style={{ fontFamily: "var(--f-display)", fontSize: 24, fontWeight: 400, color: "#0a0a0a", letterSpacing: "-.02em", margin: 0, lineHeight: 1.15 }}>
                 {project.title}
               </h2>
             </div>

@@ -35,6 +35,11 @@ export default function PortalPage() {
   const [isMobile, setIsMobile] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
+  // adjustable sidebar
+  const [sidebarW,  setSidebarW]  = useState(248);
+  const [collapsed, setCollapsed] = useState(false);
+  const [draggingSb, setDraggingSb] = useState(false);
+
   // side panel
   const [sidePanel,    setSidePanel]    = useState<Project | null>(null);
   const [sidePanelTab, setSidePanelTab] = useState<"details" | "milestones" | "chat">("details");
@@ -124,7 +129,28 @@ export default function PortalPage() {
     if (!document.getElementById("portal-mobile-css")) {
       const s = document.createElement("style");
       s.id = "portal-mobile-css";
-      s.textContent = `@keyframes ptSlideIn{from{transform:translateX(-100%)}to{transform:translateX(0)}} .pt-mob-drawer{animation:ptSlideIn .26s cubic-bezier(.22,1,.36,1) both}`;
+      s.textContent = `
+        @keyframes ptSlideIn{from{transform:translateX(-100%)}to{transform:translateX(0)}}
+        @keyframes ptFadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+        @keyframes ptPop{from{opacity:0;transform:scale(.97) translateY(-4px)}to{opacity:1;transform:none}}
+        .pt-mob-drawer{animation:ptSlideIn .26s cubic-bezier(.22,1,.36,1) both}
+        .pt-view{animation:ptFadeUp .34s cubic-bezier(.22,1,.36,1) both}
+        .pt-stat{animation:ptFadeUp .45s cubic-bezier(.22,1,.36,1) both}
+        .pt-drop{animation:ptPop .18s cubic-bezier(.22,1,.36,1) both;transform-origin:top right}
+        .pt-modal{animation:ptPop .22s cubic-bezier(.22,1,.36,1) both}
+        .pt-sidebar{transition:width .34s cubic-bezier(.22,1,.36,1)}
+        .pt-sidebar.pt-dragging{transition:none;user-select:none}
+        .pt-navbtn{transition:background .18s cubic-bezier(.22,1,.36,1),color .18s,transform .2s}
+        .pt-navbtn:hover{transform:translateX(2px)}
+        .pt-sidebar.pt-collapsed .pt-navbtn:hover{transform:none}
+        .pt-card{transition:transform .3s cubic-bezier(.22,1,.36,1),border-color .2s,box-shadow .3s}
+        .pt-card:hover{transform:translateY(-4px)}
+        .pt-press{transition:transform .12s ease}
+        .pt-press:active{transform:scale(.95)}
+        .pt-resize{position:absolute;top:0;right:-3px;width:7px;height:100%;cursor:col-resize;z-index:60}
+        .pt-resize::after{content:"";position:absolute;top:50%;right:2px;transform:translateY(-50%);width:3px;height:34px;border-radius:3px;background:rgba(255,255,255,.14);transition:background .2s,height .2s}
+        .pt-resize:hover::after{background:rgba(184,108,249,.85);height:52px}
+      `;
       document.head.appendChild(s);
     }
     function check() { setIsMobile(window.innerWidth <= 768); }
@@ -132,6 +158,15 @@ export default function PortalPage() {
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
+
+  // load + persist sidebar prefs
+  useEffect(() => {
+    const w = Number(localStorage.getItem("pt-sidebar-w"));
+    if (w >= 208 && w <= 360) setSidebarW(w);
+    if (localStorage.getItem("pt-sidebar-collapsed") === "1") setCollapsed(true);
+  }, []);
+  useEffect(() => { localStorage.setItem("pt-sidebar-w", String(sidebarW)); }, [sidebarW]);
+  useEffect(() => { localStorage.setItem("pt-sidebar-collapsed", collapsed ? "1" : "0"); }, [collapsed]);
 
   const unread        = notifs.filter(n => !n.read).length;
   const pendingOffers = offers.filter(o => o.status === "pending");
@@ -173,6 +208,21 @@ export default function PortalPage() {
     setProjectUnreads(prev => ({ ...prev, [projectId]: (prev[projectId] ?? 0) + count }));
   }
 
+  function startSidebarResize(e: React.MouseEvent) {
+    e.preventDefault();
+    setDraggingSb(true);
+    const move = (ev: MouseEvent) => setSidebarW(Math.min(360, Math.max(208, ev.clientX)));
+    const up = () => {
+      setDraggingSb(false);
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", up);
+      document.body.style.userSelect = "";
+    };
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+    document.body.style.userSelect = "none";
+  }
+
   if (status === "loading" || loading) return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#0a0a0a" }}>
       <div style={{ color: "rgba(255,255,255,.3)", fontSize: 14 }}>Loading…</div>
@@ -191,38 +241,44 @@ export default function PortalPage() {
     <div style={{ display: "flex", minHeight: "100vh", background: "#f7f6f4", fontFamily: "var(--f-sans)" }}>
 
       {/* ── SIDEBAR ── */}
-      <aside style={{ width: 240, background: "#0a0a0a", color: "#fff", display: isMobile ? "none" : "flex", flexDirection: "column", position: "sticky", top: 0, height: "100vh", flexShrink: 0, zIndex: 50 }}>
+      <aside className={`pt-sidebar${draggingSb ? " pt-dragging" : ""}${collapsed ? " pt-collapsed" : ""}`} style={{ width: collapsed ? 68 : sidebarW, background: "#0a0a0a", color: "#fff", display: isMobile ? "none" : "flex", flexDirection: "column", position: "sticky", top: 0, height: "100vh", flexShrink: 0, zIndex: 50 }}>
         {/* Brand */}
-        <div style={{ padding: "22px 20px 18px", borderBottom: "1px solid rgba(255,255,255,.07)" }}>
+        <div style={{ padding: collapsed ? "22px 0 18px" : "22px 20px 18px", borderBottom: "1px solid rgba(255,255,255,.07)", display: "flex", justifyContent: collapsed ? "center" : "flex-start" }}>
           <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-            <img src="/assets/logo-mark.svg" alt="Foxmen" style={{ width: 28, height: 28 }} />
-            <div>
-              <div style={{ fontWeight: 600, fontSize: 15, color: "#fff", fontFamily: "var(--f-display)", letterSpacing: "-.01em" }}>
-                Foxmen <em style={{ fontStyle: "italic", color: "#b86cf9" }}>Studio</em>
+            <img src="/assets/logo-mark.svg" alt="Foxmen" style={{ width: 28, height: 28, flexShrink: 0 }} />
+            {!collapsed && (
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 15, color: "#fff", fontFamily: "var(--f-display)", letterSpacing: "-.01em", whiteSpace: "nowrap" }}>
+                  Foxmen <em style={{ fontStyle: "italic", color: "#b86cf9" }}>Studio</em>
+                </div>
+                <div style={{ fontSize: 9, color: "rgba(255,255,255,.3)", letterSpacing: ".18em", textTransform: "uppercase", marginTop: 1 }}>Client Portal</div>
               </div>
-              <div style={{ fontSize: 9, color: "rgba(255,255,255,.3)", letterSpacing: ".18em", textTransform: "uppercase", marginTop: 1 }}>Client Portal</div>
-            </div>
+            )}
           </a>
         </div>
 
         {/* Nav */}
-        <nav style={{ flex: 1, padding: "14px 10px", display: "flex", flexDirection: "column", gap: 2, overflowY: "auto" }}>
-          <div style={{ fontSize: 9, color: "rgba(255,255,255,.25)", letterSpacing: ".2em", textTransform: "uppercase", padding: "8px 10px 6px" }}>Menu</div>
+        <nav style={{ flex: 1, padding: collapsed ? "14px 8px" : "14px 10px", display: "flex", flexDirection: "column", gap: 2, overflowY: "auto", overflowX: "hidden" }}>
+          {!collapsed && <div style={{ fontSize: 9, color: "rgba(255,255,255,.25)", letterSpacing: ".2em", textTransform: "uppercase", padding: "8px 10px 6px" }}>Menu</div>}
           {navItems.map(item => (
-            <button key={item.key} onClick={() => setTab(item.key as typeof tab)}
-              style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 500, width: "100%", textAlign: "left", background: tab === item.key ? "rgba(184,108,249,.15)" : "transparent", color: tab === item.key ? "#b86cf9" : "rgba(255,255,255,.6)", transition: "all .15s" }}>
-              <span style={{ opacity: tab === item.key ? 1 : 0.7, flexShrink: 0 }}>{item.icon}</span>
-              <span style={{ flex: 1 }}>{item.label}</span>
-              {item.badge ? <span style={{ background: "#b86cf9", color: "#fff", fontSize: 10, fontWeight: 700, padding: "1px 7px", borderRadius: 50, minWidth: 18, textAlign: "center" }}>{item.badge}</span> : null}
+            <button key={item.key} className="pt-navbtn" onClick={() => setTab(item.key as typeof tab)} title={collapsed ? item.label : undefined}
+              style={{ display: "flex", alignItems: "center", gap: 10, padding: collapsed ? "10px 0" : "9px 12px", justifyContent: collapsed ? "center" : "flex-start", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 500, width: "100%", textAlign: "left", background: tab === item.key ? "rgba(184,108,249,.15)" : "transparent", color: tab === item.key ? "#b86cf9" : "rgba(255,255,255,.6)", position: "relative" }}>
+              <span style={{ opacity: tab === item.key ? 1 : 0.7, flexShrink: 0, display: "flex" }}>{item.icon}</span>
+              {!collapsed && <span style={{ flex: 1 }}>{item.label}</span>}
+              {item.badge ? (
+                collapsed
+                  ? <span style={{ position: "absolute", top: 6, right: 13, width: 7, height: 7, borderRadius: "50%", background: "#b86cf9" }} />
+                  : <span style={{ background: "#b86cf9", color: "#fff", fontSize: 10, fontWeight: 700, padding: "1px 7px", borderRadius: 50, minWidth: 18, textAlign: "center" }}>{item.badge}</span>
+              ) : null}
             </button>
           ))}
 
-          {projects.length > 0 && (
+          {projects.length > 0 && !collapsed && (
             <div style={{ marginTop: 16 }}>
               <div style={{ fontSize: 9, color: "rgba(255,255,255,.25)", letterSpacing: ".2em", textTransform: "uppercase", padding: "8px 10px 6px" }}>Projects</div>
               {projects.slice(0, 5).map(p => (
-                <button key={p.id} onClick={() => openProjectPanel(p)}
-                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 12px", borderRadius: 8, border: "none", cursor: "pointer", width: "100%", textAlign: "left", background: "transparent", transition: "background .15s" }}
+                <button key={p.id} className="pt-navbtn" onClick={() => openProjectPanel(p)}
+                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 12px", borderRadius: 8, border: "none", cursor: "pointer", width: "100%", textAlign: "left", background: "transparent" }}
                   onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,.05)")}
                   onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
                   <span style={{ width: 6, height: 6, borderRadius: "50%", background: STATUS_COLOR[p.status] ?? "#888", flexShrink: 0 }} />
@@ -234,35 +290,51 @@ export default function PortalPage() {
           )}
         </nav>
 
+        {/* Collapse toggle */}
+        <div style={{ padding: collapsed ? "8px" : "8px 10px", borderTop: "1px solid rgba(255,255,255,.07)" }}>
+          <button className="pt-navbtn" onClick={() => setCollapsed(c => !c)} title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            style={{ display: "flex", alignItems: "center", gap: 10, padding: collapsed ? "9px 0" : "9px 12px", justifyContent: collapsed ? "center" : "flex-start", borderRadius: 10, border: "none", cursor: "pointer", color: "rgba(255,255,255,.5)", fontSize: 13, fontWeight: 500, width: "100%", background: "transparent" }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" style={{ flexShrink: 0, transform: collapsed ? "rotate(180deg)" : "none", transition: "transform .34s cubic-bezier(.22,1,.36,1)" }}><path d="M15 18l-6-6 6-6"/></svg>
+            {!collapsed && <span>Collapse</span>}
+          </button>
+        </div>
+
         {/* Home link */}
-        <div style={{ padding: "8px 10px", borderTop: "1px solid rgba(255,255,255,.07)" }}>
-          <a href="/"
-            style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 10, textDecoration: "none", color: "rgba(255,255,255,.5)", fontSize: 13, fontWeight: 500, transition: "background .15s, color .15s" }}
+        <div style={{ padding: collapsed ? "0 8px 8px" : "0 10px 8px" }}>
+          <a href="/" className="pt-navbtn" title={collapsed ? "Back to website" : undefined}
+            style={{ display: "flex", alignItems: "center", gap: 10, padding: collapsed ? "9px 0" : "9px 12px", justifyContent: collapsed ? "center" : "flex-start", borderRadius: 10, textDecoration: "none", color: "rgba(255,255,255,.5)", fontSize: 13, fontWeight: 500 }}
             onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,.06)"; e.currentTarget.style.color = "#fff"; }}
             onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "rgba(255,255,255,.5)"; }}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" style={{ flexShrink: 0, opacity: 0.7 }}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            Back to website
+            {!collapsed && "Back to website"}
           </a>
         </div>
 
         {/* User footer */}
-        <div style={{ padding: "12px 16px", borderTop: "1px solid rgba(255,255,255,.07)", display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ padding: collapsed ? "12px 0" : "12px 16px", borderTop: "1px solid rgba(255,255,255,.07)", display: "flex", alignItems: "center", justifyContent: collapsed ? "center" : "flex-start", gap: 10 }}>
           <div style={{ width: 32, height: 32, borderRadius: "50%", flexShrink: 0, overflow: "hidden", background: "#b86cf9", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#fff" }}>
             {settingAvatar
               ? <img src={settingAvatar} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               : initials}
           </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 500, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.name}</div>
-            <div style={{ fontSize: 10, color: "rgba(255,255,255,.3)", fontFamily: "monospace", letterSpacing: ".04em" }}>{foxId ?? (user?.role ?? "client")}</div>
-          </div>
-          <button onClick={() => signOut({ callbackUrl: "/login" })} title="Sign out"
-            style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,.3)", padding: 4, borderRadius: 6, transition: "color .15s" }}
-            onMouseEnter={e => (e.currentTarget.style.color = "#fff")}
-            onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,.3)")}>
-            <IconSignOut />
-          </button>
+          {!collapsed && (
+            <>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 500, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.name}</div>
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,.3)", fontFamily: "var(--f-mono)", letterSpacing: ".04em" }}>{foxId ?? (user?.role ?? "client")}</div>
+              </div>
+              <button onClick={() => signOut({ callbackUrl: "/login" })} title="Sign out" className="pt-press"
+                style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,.3)", padding: 4, borderRadius: 6, transition: "color .15s" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "#fff")}
+                onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,.3)")}>
+                <IconSignOut />
+              </button>
+            </>
+          )}
         </div>
+
+        {/* Resize handle */}
+        {!collapsed && <div className="pt-resize" onMouseDown={startSidebarResize} title="Drag to resize" />}
       </aside>
 
       {/* ── MAIN ── */}
@@ -307,7 +379,7 @@ export default function PortalPage() {
               )}
             </button>
             {chatDrop && (
-              <div style={{ position: "absolute", right: 0, top: 44, width: 300, background: "#fff", borderRadius: 14, boxShadow: "0 8px 40px rgba(0,0,0,.14)", border: "1.5px solid #e7e5e2", zIndex: 100, overflow: "hidden" }}>
+              <div className="pt-drop" style={{ position: "absolute", right: 0, top: 44, width: 300, background: "#fff", borderRadius: 14, boxShadow: "0 8px 40px rgba(0,0,0,.14)", border: "1.5px solid #e7e5e2", zIndex: 100, overflow: "hidden" }}>
                 <div style={{ padding: "12px 16px 8px", fontSize: 11, fontWeight: 600, color: "#9a9a9a", letterSpacing: ".1em", textTransform: "uppercase" }}>Project Chats</div>
                 {projects.length === 0 ? (
                   <div style={{ padding: "16px", fontSize: 13, color: "#9a9a9a", textAlign: "center" }}>No projects yet</div>
@@ -337,7 +409,7 @@ export default function PortalPage() {
               )}
             </button>
             {notifDrop && (
-              <div style={{ position: "absolute", right: 0, top: 44, width: 320, background: "#fff", borderRadius: 14, boxShadow: "0 8px 40px rgba(0,0,0,.14)", border: "1.5px solid #e7e5e2", zIndex: 100, overflow: "hidden" }}>
+              <div className="pt-drop" style={{ position: "absolute", right: 0, top: 44, width: 320, background: "#fff", borderRadius: 14, boxShadow: "0 8px 40px rgba(0,0,0,.14)", border: "1.5px solid #e7e5e2", zIndex: 100, overflow: "hidden" }}>
                 <div style={{ padding: "12px 16px 8px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <span style={{ fontSize: 11, fontWeight: 600, color: "#9a9a9a", letterSpacing: ".1em", textTransform: "uppercase" }}>Notifications</span>
                   {unread > 0 && <button onClick={() => { markAllRead(); setNotifDrop(false); }} style={{ fontSize: 11, color: "#b86cf9", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>Mark all read</button>}
@@ -367,13 +439,13 @@ export default function PortalPage() {
         </header>
 
         {/* ── CONTENT ── */}
-        <div style={{ flex: 1, padding: isMobile ? "16px 14px 86px" : "28px", overflowY: "auto" }}>
+        <div key={tab} className="pt-view" style={{ flex: 1, padding: isMobile ? "16px 14px 86px" : "28px", overflowY: "auto" }}>
 
           {/* ══ DASHBOARD ══ */}
           {tab === "dashboard" && (
             <div>
               <div style={{ marginBottom: 24 }}>
-                <h1 style={{ fontSize: 26, fontWeight: 400, letterSpacing: "-.02em", margin: 0, marginBottom: 4 }}>
+                <h1 style={{ fontFamily: "var(--f-display)", fontSize: 32, fontWeight: 400, letterSpacing: "-.02em", margin: 0, marginBottom: 4 }}>
                   Hello, <em style={{ fontStyle: "italic", color: "#b86cf9" }}>{user?.name?.split(" ")[0]}</em>
                 </h1>
                 <p style={{ color: "#6b6b6b", fontSize: 14, margin: 0 }}>Here&apos;s what&apos;s happening with your projects.</p>
@@ -388,8 +460,8 @@ export default function PortalPage() {
                   { label: "Active",            value: activeProjects.length,                              color: "#3b82f6", icon: <IconActivity /> },
                   { label: "Completed",         value: projects.filter(p => p.status === "completed").length, color: "#22c55e", icon: <IconCheck /> },
                   { label: "Pending Offers",    value: pendingOffers.length,                               color: "#f59e0b", icon: <IconOffers /> },
-                ].map(s => (
-                  <div key={s.label} style={{ background: "#fff", border: "1.5px solid #e7e5e2", borderRadius: 16, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
+                ].map((s, i) => (
+                  <div key={s.label} className="pt-stat pt-card" style={{ animationDelay: `${i * 70}ms`, background: "#fff", border: "1.5px solid #e7e5e2", borderRadius: 16, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
                     <div style={{ width: 36, height: 36, borderRadius: 10, background: s.color + "15", display: "flex", alignItems: "center", justifyContent: "center", color: s.color }}>
                       {s.icon}
                     </div>
@@ -495,7 +567,7 @@ export default function PortalPage() {
           {tab === "projects" && (
             <div>
               <div style={{ marginBottom: 20 }}>
-                <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-.01em", marginBottom: 4 }}>Projects</h1>
+                <h1 style={{ fontFamily: "var(--f-display)", fontSize: 26, fontWeight: 400, letterSpacing: "-.01em", marginBottom: 4 }}>Projects</h1>
                 <p style={{ color: "#6b6b6b", fontSize: 13 }}>Track progress and chat with your project team.</p>
               </div>
               {projects.length === 0 ? (
@@ -524,7 +596,7 @@ export default function PortalPage() {
           {tab === "offers" && (
             <div>
               <div style={{ marginBottom: 20 }}>
-                <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-.01em", marginBottom: 4 }}>Offers & Upgrades</h1>
+                <h1 style={{ fontFamily: "var(--f-display)", fontSize: 26, fontWeight: 400, letterSpacing: "-.01em", marginBottom: 4 }}>Offers & Upgrades</h1>
                 <p style={{ color: "#6b6b6b", fontSize: 13 }}>Proposals and upgrade packages from Foxmen Studio.</p>
               </div>
               {offers.length === 0 ? (
@@ -558,7 +630,7 @@ export default function PortalPage() {
           {tab === "notifications" && (
             <div>
               <div style={{ marginBottom: 20 }}>
-                <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-.01em", marginBottom: 4 }}>Notifications</h1>
+                <h1 style={{ fontFamily: "var(--f-display)", fontSize: 26, fontWeight: 400, letterSpacing: "-.01em", marginBottom: 4 }}>Notifications</h1>
                 <p style={{ color: "#6b6b6b", fontSize: 13 }}>{unread > 0 ? `${unread} unread` : "All caught up"}</p>
               </div>
               {notifs.length === 0 ? (
@@ -589,7 +661,7 @@ export default function PortalPage() {
           {tab === "settings" && (
             <div style={{ maxWidth: 520 }}>
               <div style={{ marginBottom: 24 }}>
-                <h1 style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-.01em", marginBottom: 4 }}>Settings</h1>
+                <h1 style={{ fontFamily: "var(--f-display)", fontSize: 26, fontWeight: 400, letterSpacing: "-.01em", marginBottom: 4 }}>Settings</h1>
                 <p style={{ color: "#6b6b6b", fontSize: 13 }}>Manage your account details.</p>
               </div>
               <div style={{ background: "#fff", border: "1.5px solid #e7e5e2", borderRadius: 14, overflow: "hidden", marginBottom: 16 }}>
@@ -779,9 +851,9 @@ export default function PortalPage() {
       {showNew && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.5)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
           onClick={e => { if (e.target === e.currentTarget) setShowNew(false); }}>
-          <div style={{ background: "#fff", borderRadius: 18, width: "100%", maxWidth: 500, maxHeight: "90vh", overflowY: "auto" }}>
+          <div className="pt-modal" style={{ background: "#fff", borderRadius: 18, width: "100%", maxWidth: 500, maxHeight: "90vh", overflowY: "auto" }}>
             <div style={{ padding: "22px 24px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <h2 style={{ fontSize: 18, fontWeight: 500, letterSpacing: "-.01em" }}>New Project Request</h2>
+              <h2 style={{ fontFamily: "var(--f-display)", fontSize: 22, fontWeight: 400, letterSpacing: "-.01em" }}>New Project Request</h2>
               <button onClick={() => setShowNew(false)} style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "#6b6b6b", lineHeight: 1 }}>×</button>
             </div>
             <form onSubmit={submitProject} style={{ padding: 24, display: "flex", flexDirection: "column", gap: 14 }}>
@@ -868,8 +940,8 @@ function ProjectCard({ project: p, onDetails, onChat, chatUnread }: { project: P
   const total = p.milestones.length;
   const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
   return (
-    <div style={{ background: "#fff", border: "1.5px solid #e7e5e2", borderRadius: 14, padding: "18px 20px", transition: "border-color .15s, box-shadow .15s" }}
-      onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.borderColor = "#b86cf9"; (e.currentTarget as HTMLDivElement).style.boxShadow = "0 4px 20px rgba(184,108,249,.1)"; }}
+    <div className="pt-card" style={{ background: "#fff", border: "1.5px solid #e7e5e2", borderRadius: 14, padding: "18px 20px" }}
+      onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.borderColor = "#b86cf9"; (e.currentTarget as HTMLDivElement).style.boxShadow = "0 14px 34px -18px rgba(184,108,249,.4)"; }}
       onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.borderColor = "#e7e5e2"; (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, marginBottom: 10 }}>
         <div>
