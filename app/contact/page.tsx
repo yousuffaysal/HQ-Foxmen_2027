@@ -186,25 +186,27 @@ export default function ContactPage() {
         .cf-page { background: #f4f3f0; min-height: 100vh; padding: 160px 0 80px; }
         .cf-grid { display: grid; grid-template-columns: 1fr 1.35fr; gap: 80px; align-items: start; }
         /* LEFT */
-        .cf-left-title { font-family: var(--f-display); font-size: clamp(38px,5vw,62px); line-height: 1.05; letter-spacing: -.03em; color: var(--ink); font-weight: 400; margin-bottom: 24px; }
+        /* H2 role — serif 400, lh 1.0, ls -.01em */
+        .cf-left-title { font-family: var(--f-display); font-size: clamp(40px,5vw,var(--fs-h2)); line-height: 1.0; letter-spacing: -.01em; color: var(--ink); font-weight: 400; margin-bottom: 24px; }
         .cf-left-title em { font-style: italic; color: var(--ink); }
-        .cf-left-desc { font-family: var(--f-sans); font-size: 15px; line-height: 1.65; color: #666; max-width: 400px; margin-bottom: 48px; }
+        /* Body role — Geist 400, 17px, lh 1.65 */
+        .cf-left-desc { font-family: var(--f-sans); font-size: var(--fs-body); line-height: 1.65; color: #666; max-width: 400px; margin-bottom: 48px; }
         .cf-founder { display: flex; align-items: flex-end; gap: 20px; margin-bottom: 32px; }
         .cf-founder-photo { width: 90px; height: 90px; border-radius: 14px; overflow: hidden; background: var(--ink); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: var(--f-display); font-size: 28px; color: rgba(255,255,255,.3); }
         .cf-founder-photo img { width: 100%; height: 100%; object-fit: cover; }
         .cf-founder-name { font-family: var(--f-sans); font-size: 17px; font-weight: 600; color: var(--ink); }
-        .cf-founder-role { font-family: var(--f-sans); font-size: 13px; color: #888; margin-top: 3px; }
+        .cf-founder-role { font-family: var(--f-sans); font-size: var(--fs-caption); line-height: 1.4; color: #888; margin-top: 3px; }
         .cf-proof { display: flex; align-items: center; gap: 14px; }
         .cf-avatars { display: flex; }
         .cf-avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #f4f3f0; background: var(--ink); margin-left: -10px; display: flex; align-items: center; justify-content: center; font-family: var(--f-mono); font-size: 9px; color: rgba(255,255,255,.6); }
         .cf-avatar:first-child { margin-left: 0; }
-        .cf-proof-text { font-family: var(--f-sans); font-size: 13px; color: #666; }
+        .cf-proof-text { font-family: var(--f-sans); font-size: var(--fs-caption); line-height: 1.4; color: #666; }
         .cf-stars { display: flex; align-items: center; gap: 2px; color: #f59e0b; font-size: 14px; }
         /* RIGHT — form */
         .cf-form-wrap { background: #fff; border-radius: 24px; padding: 48px 44px; }
         .cf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
         .cf-field { display: flex; flex-direction: column; margin-bottom: 28px; }
-        .cf-label { font-family: var(--f-sans); font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 8px; }
+        .cf-label { font-family: var(--f-sans); font-size: var(--fs-caption); font-weight: 500; color: var(--ink); margin-bottom: 8px; }
         .cf-input { border: none; border-bottom: 1.5px solid #d8d6d2; background: transparent; padding: 8px 0 10px; font-family: var(--f-sans); font-size: 15px; color: var(--ink); outline: none; transition: border-color .2s; width: 100%; }
         .cf-input::placeholder { color: #b0aea9; }
         .cf-input:focus { border-bottom-color: var(--ink); }
@@ -217,7 +219,7 @@ export default function ContactPage() {
         .cf-phone-input { border: none; background: transparent; padding: 8px 0 10px; font-family: var(--f-sans); font-size: 15px; color: var(--ink); outline: none; width: 100%; }
         .cf-phone-input::placeholder { color: #b0aea9; }
         .cf-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
-        .cf-pill { padding: 7px 16px; border-radius: 999px; border: 1.5px solid #d8d6d2; background: transparent; font-family: var(--f-sans); font-size: 13px; color: var(--ink); cursor: pointer; transition: background .15s, border-color .15s, color .15s; }
+        .cf-pill { padding: 7px 16px; border-radius: 999px; border: 1.5px solid #d8d6d2; background: transparent; font-family: var(--f-sans); font-size: var(--fs-caption); color: var(--ink); cursor: pointer; transition: background .15s, border-color .15s, color .15s; }
         .cf-pill.on { background: var(--ink); border-color: var(--ink); color: #fff; }
         .cf-textarea { border: none; border-bottom: 1.5px solid #d8d6d2; background: transparent; padding: 8px 0 10px; font-family: var(--f-sans); font-size: 15px; color: var(--ink); outline: none; resize: none; width: 100%; min-height: 80px; transition: border-color .2s; }
         .cf-textarea::placeholder { color: #b0aea9; }
@@ -225,18 +227,20 @@ export default function ContactPage() {
         .cf-check-row { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; cursor: pointer; }
         .cf-check-box { width: 18px; height: 18px; border: 1.5px solid #d8d6d2; border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
         .cf-check-box.on { background: var(--ink); border-color: var(--ink); }
-        .cf-check-label { font-family: var(--f-sans); font-size: 13px; color: #666; }
+        .cf-check-label { font-family: var(--f-sans); font-size: var(--fs-caption); line-height: 1.4; color: #666; }
         .cf-form-foot { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
         .cf-submit { display: inline-flex; align-items: center; justify-content: center; padding: 14px 36px; border-radius: 999px; background: var(--ink); color: #fff; border: none; font-family: var(--f-sans); font-size: 15px; font-weight: 500; cursor: pointer; transition: opacity .2s; }
         .cf-submit:hover { opacity: .85; }
-        .cf-book { font-family: var(--f-sans); font-size: 13px; color: #666; }
+        .cf-book { font-family: var(--f-sans); font-size: var(--fs-caption); line-height: 1.4; color: #666; }
         .cf-book a { color: var(--ink); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
         @media(max-width:900px){
           .cf-grid { grid-template-columns: 1fr; gap: 40px; }
           .cf-form-wrap { padding: 28px 20px; border-radius: 18px; }
           .cf-row { grid-template-columns: 1fr; }
           .cf-page { padding: 100px 0 60px; }
-          .cf-left-title { font-size: clamp(32px, 8vw, 52px); }
+          /* keep mobile as-is (desktop-only type changes) */
+          .cf-left-title { font-size: clamp(32px, 8vw, 52px); line-height: 1.05; letter-spacing: -.03em; }
+          .cf-left-desc { font-size: 15px; }
           .cf-form-foot { flex-direction: column; align-items: flex-start; gap: 14px; }
         }
       `}</style>
@@ -285,8 +289,8 @@ export default function ContactPage() {
             <div className="cf-form-wrap">
               {sent ? (
                 <div style={{ textAlign:"center", padding:"60px 0" }}>
-                  <div style={{ fontFamily:"var(--f-display)", fontSize:40, marginBottom:16 }}>Got it ✓</div>
-                  <p style={{ fontFamily:"var(--f-sans)", fontSize:16, color:"#666" }}>We&apos;ll be in touch within 24 hours.</p>
+                  <div style={{ fontFamily:"var(--f-display)", fontSize:"var(--fs-h3)", lineHeight:1.1, marginBottom:16 }}>Got it ✓</div>
+                  <p style={{ fontFamily:"var(--f-sans)", fontSize:"var(--fs-body)", lineHeight:1.65, color:"#666" }}>We&apos;ll be in touch within 24 hours.</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit}>
@@ -361,7 +365,7 @@ export default function ContactPage() {
                   </label>
 
                   {/* Error */}
-                  {error && <p style={{ fontFamily:"var(--f-sans)", fontSize:13, color:"#e53e3e", marginBottom:16 }}>{error}</p>}
+                  {error && <p style={{ fontFamily:"var(--f-sans)", fontSize:"var(--fs-caption)", color:"#e53e3e", marginBottom:16 }}>{error}</p>}
 
                   {/* Footer */}
                   <div className="cf-form-foot">

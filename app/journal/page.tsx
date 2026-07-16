@@ -1,30 +1,51 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import NewsletterForm from "@/components/NewsletterForm";
 
-const cats = ["All", "Design", "Engineering", "AI", "Studio notes", "Case studies"];
+type Post = {
+  id: number; slug: string; title: string; category: string;
+  author_init: string; author_name: string; read_time: string;
+  published_at: string | null; excerpt: string; cover_image?: string;
+  tags?: string; status: string;
+};
 
-const articles = [
-  { slug: "designing-in-the-browser-not-in-figma",         thumb: "t1", tag: "Design",       read: "6 min",  sym: "B", title: <>Designing in the <span className="it">browser</span>, not in Figma.</>, desc: "Why our team retired the static mock six months ago — and what we replaced it with. The case for designing live, in code, against real data.", av: "SK", who: "Sara Köhler",  date: "Apr 28", delay: ""  },
-  { slug: "the-eval-loop-that-saved-our-copilot",           thumb: "t2", tag: "AI",           read: "9 min",  sym: "⊕", title: <>The <span className="it">eval loop</span> that saved our copilot.</>,     desc: "A practical, boring system for catching regressions before users do. Fixtures, scorecards, gold sets, and the meeting we run every Friday.", av: "IS", who: "Imran Sheikh", date: "Apr 14", delay: "d1" },
-  { slug: "sticky-scroll-the-right-way",                   thumb: "t3", tag: "Engineering",  read: "7 min",  sym: "↧", title: <>Sticky scroll, the <span className="it">right</span> way.</>,               desc: "The four CSS techniques we use to make stacks, panels, and reveals feel buttery — without scroll-jacking or scroll-jank.", av: "MV", who: "Marta Vidal",  date: "Mar 30", delay: "d2" },
-  { slug: "tokens-are-a-product-not-a-deliverable",        thumb: "t4", tag: "Design",       read: "5 min",  sym: "◇", title: <>Tokens are a <span className="it">product</span>, not a deliverable.</>,    desc: "Five years of design systems taught us this: tokens need a roadmap, a release notes channel, and somebody whose job it is to ship them.", av: "AP", who: "Aiden Park",   date: "Mar 11", delay: ""  },
-  { slug: "how-we-shipped-nestaro-in-14-weeks",            thumb: "t5", tag: "Studio notes", read: "14 min", sym: "N", title: <>How we shipped Nestaro <span className="it">in 14 weeks.</span></>,         desc: "A behind-the-scenes look at our biggest 2025 launch: the brief, the timeline, the moments that nearly broke us, the call that saved it.", av: "RM", who: "Rina Mehta",   date: "Feb 22", delay: "d1" },
-  { slug: "a-short-defense-of-the-italic-headline",        thumb: "t6", tag: "Design",       read: "4 min",  sym: "i", title: <>A short defense of the <span className="it">italic</span> headline.</>,     desc: "One typographic choice — and the eight reasons it shows up in every Foxmen brief. Yes, including this one.", av: "LB", who: "Léa Bouchard", date: "Feb 04", delay: "d2" },
-  { slug: "retrieval-but-make-it-boring",                  thumb: "t7", tag: "AI",           read: "11 min", sym: "R", title: <>Retrieval, <span className="it">but make it boring.</span></>,              desc: "RAG is mostly plumbing. Here's our hard-won checklist for a retrieval stack you can actually leave alone for a quarter.", av: "IS", who: "Imran Sheikh", date: "Jan 19", delay: ""  },
-  { slug: "the-case-for-monorepos-in-design-agencies",     thumb: "t8", tag: "Engineering",  read: "8 min",  sym: "≡", title: <>The case for <span className="it">monorepos</span> in design agencies.</>,  desc: "Why our 38 active client codebases live in one repo, what it cost to get there, and the day it paid for itself ten times over.", av: "DT", who: "Daniel Tan",   date: "Jan 06", delay: "d1" },
-  { slug: "atlas-shipping-an-ios-travel-app-in-9-weeks",   thumb: "t9", tag: "Case studies", read: "10 min", sym: "A", title: <>Atlas: shipping an iOS travel app <span className="it">in 9 weeks.</span></>, desc: "From Figma to App Store, with AI-generated itineraries and offline maps. A complete project breakdown — scope, stack, sprint cadence.", av: "YO", who: "Yuki Ono",     date: "Dec 18", delay: "d2" },
-];
+/* fallback thumb gradients (used when a post has no cover image) */
+const FALLBACK_THUMBS = ["t1", "t2", "t3", "t4", "t5", "t6", "t7", "t8", "t9"];
+const fmtDate = (iso: string | null) =>
+  iso ? new Date(iso).toLocaleDateString("en-US", { month: "short", day: "2-digit" }) : "";
 
 export default function JournalPage() {
   useScrollReveal();
+  const [posts, setPosts]       = useState<Post[]>([]);
+  const [loading, setLoading]   = useState(true);
   const [activeCat, setActiveCat] = useState("All");
+  const [query, setQuery]       = useState("");
 
-  const visible = activeCat === "All"
-    ? articles
-    : articles.filter((a) => a.tag === activeCat);
+  useEffect(() => {
+    fetch("/api/blog")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((rows: Post[]) =>
+        setPosts(Array.isArray(rows) ? rows.filter((p) => p.status === "live") : [])
+      )
+      .catch(() => setPosts([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const cats = useMemo(
+    () => ["All", ...Array.from(new Set(posts.map((p) => p.category).filter(Boolean)))],
+    [posts]
+  );
+
+  const featured = posts[0]; // latest live post
+
+  const filtered = useMemo(() => {
+    let list = activeCat === "All" ? posts : posts.filter((p) => p.category === activeCat);
+    const q = query.trim().toLowerCase();
+    if (q) list = list.filter((p) => p.title.toLowerCase().includes(q) || (p.excerpt ?? "").toLowerCase().includes(q));
+    return list.filter((p) => p.slug !== featured?.slug);
+  }, [posts, activeCat, query, featured]);
 
   return (
     <>
@@ -43,108 +64,141 @@ export default function JournalPage() {
               Essays, deep-dives and case notes from the team — what we&apos;re learning about design systems, AI products, and the craft of shipping.
             </p>
           </div>
-          <div className="page-hero-right" aria-hidden="true">
-            <div className="ph-feed">
-              {([
-                { tag: "AI",          who: "Imran Sheikh", date: "Apr 14" },
-                { tag: "Design",      who: "Sara Köhler",  date: "Apr 28" },
-                { tag: "Engineering", who: "Marta Vidal",  date: "Mar 30" },
-                { tag: "Case study",  who: "Rina Mehta",   date: "Feb 22" },
-                { tag: "AI",          who: "Imran Sheikh", date: "Jan 19" },
-              ] as { tag: string; who: string; date: string }[]).map((a, i) => (
-                <div key={i} className="ph-feed-row" style={{ "--di": i } as React.CSSProperties}>
-                  <span className="fi-tag">{a.tag}</span>
-                  <div className="fi-meta"><span>{a.who}</span><span>{a.date}</span></div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FEATURED */}
-      <section className="blog-feat-section">
-        <div className="wrap">
-          <div className="blog-featured">
-            <div className="img fade">
-              <div className="badge-row">
-                <span className="pill">Featured · Essay</span>
-                <span>12 min read</span>
-              </div>
-            </div>
-            <div className="body">
-              <div>
-                <div className="fade"><span className="eyebrow">May 12, 2026 · Devon Arias</span></div>
-                <h2 className="fade d1" style={{ marginTop: 18 }}>Why <span className="it">AI features</span> fail in production — and what to ship instead.</h2>
-                <p className="excerpt fade d2">
-                  After deploying retrieval pipelines for fourteen products in 2025, a pattern emerged: most AI features die not from bad models but from bad surfaces. Here&apos;s our playbook for shipping copilots users actually open — five principles, eight anti-patterns, and the eval loop that saved our biggest launch.
-                </p>
-              </div>
-              <div className="author-row fade d3">
-                <div className="av">DA</div>
-                <div>
-                  <div style={{ color: "var(--ink)", fontFamily: "var(--f-sans)", textTransform: "none", letterSpacing: 0, fontSize: 15 }}>Devon Arias</div>
-                  <div style={{ marginTop: 4 }}>Head of AI · Foxmen Studio</div>
-                </div>
-              </div>
-              <div className="actions fade d4">
-                <Link href="/journal/why-ai-features-fail-in-production" className="btn btn--lg">
-                  <span className="label">Read the essay</span>
-                  <span className="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h18M13 5l7 7-7 7" /></svg></span>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* GRID */}
-      <section className="section blog-articles-section">
-        <div className="wrap">
-          <div className="blog-toolbar fade in">
-            <div className="cats">
-              {cats.map((c) => (
-                <button key={c} className={activeCat === c ? "on" : ""} onClick={() => setActiveCat(c)}>{c}</button>
-              ))}
-            </div>
-            <label className="search">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="m20 20-3-3" /></svg>
-              <input type="search" placeholder="Search the journal" />
-            </label>
-          </div>
-
-          <div className="blog-grid">
-            {visible.map((a, i) => (
-              <Link key={i} href={`/journal/${a.slug}`} style={{ textDecoration: "none", display: "contents" }}>
-                <article className={`card fade${a.delay ? ` ${a.delay}` : ""}`}>
-                  <div className={`thumb ${a.thumb}`}>
-                    <div className="inner" />
-                    <span className="tag">{a.tag}</span>
-                    <span className="read">{a.read}</span>
-                    <span className="badge-sym">{a.sym}</span>
+          {posts.length > 0 && (
+            <div className="page-hero-right" aria-hidden="true">
+              <div className="ph-feed">
+                {posts.slice(0, 5).map((a, i) => (
+                  <div key={a.id} className="ph-feed-row" style={{ "--di": i } as React.CSSProperties}>
+                    <span className="fi-tag">{a.category}</span>
+                    <div className="fi-meta"><span>{a.author_name}</span><span>{fmtDate(a.published_at)}</span></div>
                   </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {loading ? (
+        <div style={{ minHeight: "40vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div className="post-loader" />
+        </div>
+      ) : posts.length === 0 ? (
+        /* EMPTY STATE */
+        <section className="section">
+          <div className="wrap" style={{ textAlign: "center", padding: "40px 0 80px" }}>
+            <h2 style={{ fontFamily: "var(--f-display)", fontSize: "var(--fs-h3)", lineHeight: 1.1, letterSpacing: "-.01em", color: "var(--ink)", marginBottom: 16 }}>
+              No essays yet.
+            </h2>
+            <p style={{ fontFamily: "var(--f-sans)", fontSize: "var(--fs-body)", lineHeight: 1.65, color: "var(--muted)", maxWidth: "46ch", margin: "0 auto" }}>
+              We&apos;re writing the first pieces now. Subscribe below and we&apos;ll send them the moment they&apos;re live.
+            </p>
+          </div>
+        </section>
+      ) : (
+        <>
+          {/* FEATURED — latest live post */}
+          {featured && (
+            <section className="blog-feat-section">
+              <div className="wrap">
+                <div className="blog-featured">
+                  <Link href={`/journal/${featured.slug}`} className="img fade" style={{ display: "block" }}>
+                    {featured.cover_image && (
+                      <img
+                        src={featured.cover_image}
+                        alt={featured.title}
+                        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }}
+                      />
+                    )}
+                    <div className="badge-row">
+                      <span className="pill">Featured{featured.category ? ` · ${featured.category}` : ""}</span>
+                      {featured.read_time && <span>{featured.read_time} read</span>}
+                    </div>
+                  </Link>
                   <div className="body">
-                    <h3>{a.title}</h3>
-                    <p>{a.desc}</p>
-                    <div className="card-foot">
-                      <div className="av">{a.av}</div>
-                      <span className="who">{a.who}</span>
-                      <span className="date">{a.date}</span>
+                    <div>
+                      <div className="fade">
+                        <span className="eyebrow">
+                          {fmtDate(featured.published_at)}{featured.author_name ? ` · ${featured.author_name}` : ""}
+                        </span>
+                      </div>
+                      <h2 className="fade d1" style={{ marginTop: 18 }}>{featured.title}</h2>
+                      {featured.excerpt && <p className="excerpt fade d2">{featured.excerpt}</p>}
+                    </div>
+                    {featured.author_name && (
+                      <div className="author-row fade d3">
+                        <div className="av">{featured.author_init}</div>
+                        <div>
+                          <div style={{ color: "var(--ink)", fontFamily: "var(--f-sans)", textTransform: "none", letterSpacing: 0, fontSize: "var(--fs-caption)" }}>{featured.author_name}</div>
+                          {featured.category && <div style={{ marginTop: 4 }}>{featured.category} · Foxmen Studio</div>}
+                        </div>
+                      </div>
+                    )}
+                    <div className="actions fade d4">
+                      <Link href={`/journal/${featured.slug}`} className="btn btn--lg">
+                        <span className="label">Read the essay</span>
+                        <span className="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h18M13 5l7 7-7 7" /></svg></span>
+                      </Link>
                     </div>
                   </div>
-                </article>
-              </Link>
-            ))}
-          </div>
+                </div>
+              </div>
+            </section>
+          )}
 
-          <div style={{ display: "flex", justifyContent: "center", marginTop: 48 }}>
-            <a href="#" className="btn btn--ghost btn--lg">
-              <span className="label">Load more articles</span>
-              <span className="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h18M13 5l7 7-7 7" /></svg></span>
-            </a>
-          </div>
-        </div>
-      </section>
+          {/* GRID */}
+          <section className="section blog-articles-section">
+            <div className="wrap">
+              <div className="blog-toolbar fade in">
+                <div className="cats">
+                  {cats.map((c) => (
+                    <button key={c} className={activeCat === c ? "on" : ""} onClick={() => setActiveCat(c)}>{c}</button>
+                  ))}
+                </div>
+                <label className="search">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="m20 20-3-3" /></svg>
+                  <input type="search" placeholder="Search the journal" value={query} onChange={(e) => setQuery(e.target.value)} />
+                </label>
+              </div>
+
+              {filtered.length === 0 ? (
+                <p style={{ fontFamily: "var(--f-sans)", fontSize: "var(--fs-body)", lineHeight: 1.65, color: "var(--muted)", padding: "24px 0" }}>
+                  No articles{activeCat !== "All" ? ` in ${activeCat}` : ""}{query.trim() ? ` matching “${query.trim()}”` : ""} yet.
+                </p>
+              ) : (
+                <div className="blog-grid">
+                  {filtered.map((a, i) => {
+                    const coverClass = a.cover_image ? "" : FALLBACK_THUMBS[i % FALLBACK_THUMBS.length];
+                    return (
+                      <Link key={a.id} href={`/journal/${a.slug}`} style={{ textDecoration: "none", display: "contents" }}>
+                        <article className="card fade">
+                          <div className={`thumb ${coverClass}`.trim()}>
+                            {a.cover_image
+                              ? <img className="inner" src={a.cover_image} alt="" style={{ objectFit: "cover", width: "100%", height: "100%" }} />
+                              : <div className="inner" />}
+                            <span className="tag">{a.category}</span>
+                            {a.read_time && <span className="read">{a.read_time}</span>}
+                            {!a.cover_image && <span className="badge-sym">{(a.title[0] ?? "F").toUpperCase()}</span>}
+                          </div>
+                          <div className="body">
+                            <h3>{a.title}</h3>
+                            {a.excerpt && <p>{a.excerpt}</p>}
+                            <div className="card-foot">
+                              <div className="av">{a.author_init}</div>
+                              <span className="who">{a.author_name}</span>
+                              <span className="date">{fmtDate(a.published_at)}</span>
+                            </div>
+                          </div>
+                        </article>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </section>
+        </>
+      )}
 
       {/* NEWSLETTER */}
       <section style={{ padding: "80px 24px" }}>

@@ -2891,7 +2891,7 @@ body.page-revealed .hero::after {
 .blog-featured .body { display: flex; flex-direction: column; justify-content: space-between; gap: 24px; }
 .blog-featured h2 { font-family: var(--f-display); font-size: clamp(40px, 5vw, var(--fs-h2)); line-height: 1.0; letter-spacing: -.01em; }
 .blog-featured h2 .it { font-style: italic; color: var(--brand); }
-.blog-featured .excerpt { font-size: 18px; color: #2a2a2a; max-width: 50ch; line-height: 1.6; }
+.blog-featured .excerpt { font-size: var(--fs-lead); color: #2a2a2a; max-width: 50ch; line-height: 1.5; }
 .blog-featured .author-row {
   display: flex; align-items: center; gap: 16px;
   font-family: var(--f-mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted);
@@ -2970,7 +2970,7 @@ body.page-revealed .hero::after {
 .blog-grid .body { padding: 24px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
 .blog-grid .body h3 { font-family: var(--f-display); font-size: 28px; line-height: 1.1; letter-spacing: -.015em; }
 .blog-grid .body h3 .it { font-style: italic; color: var(--brand); }
-.blog-grid .body p { font-size: 14px; color: #4a4a4a; line-height: 1.55; margin: 0; }
+.blog-grid .body p { font-size: var(--fs-caption); color: #4a4a4a; line-height: 1.4; margin: 0; }
 .blog-grid .body .card-foot {
   display: flex; align-items: center; gap: 12px; margin-top: auto; padding-top: 14px;
   border-top: 1px solid var(--line);
@@ -2982,7 +2982,7 @@ body.page-revealed .hero::after {
   display: grid; place-items: center; color: var(--brand-deep); font-family: var(--f-sans); font-weight: 600; font-size: 12px;
   letter-spacing: 0; text-transform: none;
 }
-.blog-grid .body .card-foot .who { color: var(--ink); text-transform: none; letter-spacing: 0; font-family: var(--f-sans); font-size: 13px; }
+.blog-grid .body .card-foot .who { color: var(--ink); text-transform: none; letter-spacing: 0; font-family: var(--f-sans); font-size: var(--fs-caption); }
 .blog-grid .body .card-foot .dot { color: var(--muted); }
 .blog-grid .body .card-foot .date { margin-left: auto; }
 @media (max-width:1000px) { .blog-grid { grid-template-columns: repeat(2, 1fr); } }
