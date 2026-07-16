@@ -233,17 +233,17 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                 <span style={{
-                  fontSize: 11, fontWeight: 700, padding: "2px 9px", borderRadius: 50,
+                  fontSize: 12, fontWeight: 700, padding: "3px 10px", borderRadius: 50,
                   background: `${STATUS_COLOR[project.status] ?? "#888"}1a`,
                   color: STATUS_COLOR[project.status] ?? "#888",
                 }}>
                   {STATUS_LABEL[project.status] ?? project.status}
                 </span>
                 {project.service_type && (
-                  <span style={{ fontSize: 11, color: "#9a9a9a" }}>{project.service_type}</span>
+                  <span style={{ fontSize: 12.5, color: "#9a9a9a" }}>{project.service_type}</span>
                 )}
               </div>
-              <h2 style={{ fontFamily: "var(--f-display)", fontSize: 24, fontWeight: 400, color: "#0a0a0a", letterSpacing: "-.02em", margin: 0, lineHeight: 1.15 }}>
+              <h2 style={{ fontFamily: "var(--f-display)", fontSize: 27, fontWeight: 400, color: "#0a0a0a", letterSpacing: "-.02em", margin: 0, lineHeight: 1.15 }}>
                 {project.title}
               </h2>
             </div>
@@ -260,8 +260,8 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
           {total > 0 && (
             <div style={{ marginBottom: 14 }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ fontSize: 11, color: "#6b6b6b" }}>Progress</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: pct === 100 ? "#22c55e" : "#b86cf9" }}>{pct}%</span>
+                <span style={{ fontSize: 12, color: "#6b6b6b" }}>Progress</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: pct === 100 ? "#22c55e" : "#b86cf9" }}>{pct}%</span>
               </div>
               <div style={{ height: 5, background: "#f0ede8", borderRadius: 99, overflow: "hidden" }}>
                 <div style={{ height: "100%", width: `${pct}%`, background: pct === 100 ? "#22c55e" : "linear-gradient(90deg,#b86cf9,#7c3aed)", borderRadius: 99, transition: "width .6s cubic-bezier(.22,1,.36,1)" }} />
@@ -276,7 +276,7 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
                 style={{
                   display: "flex", alignItems: "center", gap: 6,
                   padding: "10px 16px", border: "none", background: "none", cursor: "pointer",
-                  fontSize: 13, fontWeight: tab === t.key ? 600 : 400,
+                  fontSize: 14.5, fontWeight: tab === t.key ? 600 : 400,
                   color: tab === t.key ? "#0a0a0a" : "#9a9a9a",
                   borderBottom: `2px solid ${tab === t.key ? "#b86cf9" : "transparent"}`,
                   marginBottom: "-1.5px", transition: "color .15s",
@@ -296,8 +296,8 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
             <div style={{ padding: "20px 22px", display: "flex", flexDirection: "column", gap: 14 }}>
               {project.description && (
                 <div style={{ background: "#fafaf8", border: "1.5px solid #f0ede8", borderRadius: 12, padding: "14px 16px" }}>
-                  <div style={{ fontSize: 10, fontWeight: 600, color: "#9a9a9a", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: 6 }}>Description</div>
-                  <p style={{ fontSize: 13.5, color: "#333", lineHeight: 1.7, margin: 0 }}>{project.description}</p>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: "#9a9a9a", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: 6 }}>Description</div>
+                  <p style={{ fontSize: 15, color: "#333", lineHeight: 1.7, margin: 0 }}>{project.description}</p>
                 </div>
               )}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
@@ -308,8 +308,8 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
                   { label: "Submitted", value: new Date(project.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) },
                 ].map(({ label, value }) => value ? (
                   <div key={label} style={{ background: "#fafaf8", border: "1.5px solid #f0ede8", borderRadius: 10, padding: "12px 14px" }}>
-                    <div style={{ fontSize: 10, fontWeight: 600, color: "#9a9a9a", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: 4 }}>{label}</div>
-                    <div style={{ fontSize: 13.5, fontWeight: 500, color: "#0a0a0a" }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: "#9a9a9a", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: 4 }}>{label}</div>
+                    <div style={{ fontSize: 15, fontWeight: 500, color: "#0a0a0a" }}>
                       {label === "Website" ? <a href={value} target="_blank" rel="noopener" style={{ color: "#b86cf9", textDecoration: "none" }}>{value}</a> : value}
                     </div>
                   </div>
@@ -318,7 +318,7 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
               {project.admin_note && (
                 <div style={{ background: "rgba(184,108,249,.06)", border: "1.5px solid rgba(184,108,249,.2)", borderRadius: 12, padding: "14px 16px" }}>
                   <div style={{ fontSize: 10, fontWeight: 600, color: "#b86cf9", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: 6 }}>Note from Foxmen</div>
-                  <p style={{ fontSize: 13.5, color: "#333", lineHeight: 1.7, margin: 0 }}>{project.admin_note}</p>
+                  <p style={{ fontSize: 15, color: "#333", lineHeight: 1.7, margin: 0 }}>{project.admin_note}</p>
                 </div>
               )}
             </div>
@@ -328,7 +328,7 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
           {tab === "milestones" && (
             <div style={{ padding: "20px 22px" }}>
               {project.milestones.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "48px 20px", color: "#9a9a9a", fontSize: 13, lineHeight: 1.7 }}>
+                <div style={{ textAlign: "center", padding: "48px 20px", color: "#9a9a9a", fontSize: 14.5, lineHeight: 1.7 }}>
                   No milestones added yet.<br/>Your project team will add them soon.
                 </div>
               ) : (
@@ -349,14 +349,14 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
                         </div>
                         <div style={{ flex: 1 }}>
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 4 }}>
-                            <span style={{ fontSize: 13.5, fontWeight: 600, color: "#0a0a0a" }}>{m.title}</span>
-                            <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 50, background: c.dot + "20", color: c.fg, whiteSpace: "nowrap" }}>
+                            <span style={{ fontSize: 15, fontWeight: 600, color: "#0a0a0a" }}>{m.title}</span>
+                            <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 9px", borderRadius: 50, background: c.dot + "20", color: c.fg, whiteSpace: "nowrap" }}>
                               {m.status.replace("_", " ")}
                             </span>
                           </div>
-                          {m.description && <p style={{ fontSize: 12.5, color: "#6b6b6b", margin: 0, lineHeight: 1.6 }}>{m.description}</p>}
+                          {m.description && <p style={{ fontSize: 13.5, color: "#6b6b6b", margin: 0, lineHeight: 1.6 }}>{m.description}</p>}
                           {m.due_date && (
-                            <div style={{ fontSize: 11, color: "#9a9a9a", marginTop: 5 }}>
+                            <div style={{ fontSize: 12, color: "#9a9a9a", marginTop: 5 }}>
                               Due: {new Date(m.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                             </div>
                           )}
@@ -374,10 +374,10 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
             <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
               <div style={{ flex: 1, padding: "16px 18px 8px", display: "flex", flexDirection: "column", gap: 8, overflowY: "auto" }}>
                 {loadingMsgs && (
-                  <div style={{ textAlign: "center", color: "#9a9a9a", fontSize: 13, paddingTop: 40 }}>Loading…</div>
+                  <div style={{ textAlign: "center", color: "#9a9a9a", fontSize: 14.5, paddingTop: 40 }}>Loading…</div>
                 )}
                 {!loadingMsgs && msgs.length === 0 && (
-                  <div style={{ textAlign: "center", color: "#9a9a9a", fontSize: 13, paddingTop: 48, lineHeight: 1.8 }}>
+                  <div style={{ textAlign: "center", color: "#9a9a9a", fontSize: 14.5, paddingTop: 48, lineHeight: 1.8 }}>
                     No messages yet.<br/>Send a message to your project team.
                   </div>
                 )}
@@ -385,13 +385,13 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
                   const isClient = m.sender_role === "client";
                   return (
                     <div key={m.id} className="pp-msg" style={{ display: "flex", flexDirection: "column", alignItems: isClient ? "flex-end" : "flex-start" }}>
-                      <div style={{ fontSize: 10, color: "#9a9a9a", marginBottom: 3, paddingLeft: 2, paddingRight: 2 }}>
+                      <div style={{ fontSize: 11, color: "#9a9a9a", marginBottom: 3, paddingLeft: 2, paddingRight: 2 }}>
                         {isClient ? "You" : "Foxmen Studio"}
                       </div>
                       <div style={{
-                        maxWidth: "78%", padding: m.image_url && !m.message ? "4px" : "10px 14px",
+                        maxWidth: "78%", padding: m.image_url && !m.message ? "4px" : "11px 15px",
                         borderRadius: isClient ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-                        fontSize: 13.5, lineHeight: 1.55, wordBreak: "break-word",
+                        fontSize: 15, lineHeight: 1.55, wordBreak: "break-word",
                         background: isClient ? "#b86cf9" : "#f4f3f1",
                         color: isClient ? "#fff" : "#0a0a0a",
                         overflow: "hidden",
@@ -412,7 +412,7 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
                           <span style={{ display: "block", padding: (m.image_url || m.had_image) ? "8px 10px 4px" : undefined }}>{m.message}</span>
                         )}
                       </div>
-                      <div style={{ fontSize: 10, color: "#b0b0b0", marginTop: 3, paddingLeft: 2, paddingRight: 2 }}>
+                      <div style={{ fontSize: 11, color: "#b0b0b0", marginTop: 3, paddingLeft: 2, paddingRight: 2 }}>
                         {new Date(m.created_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
                       </div>
                     </div>
@@ -450,7 +450,7 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
                     value={input}
                     onChange={e => setInput(e.target.value)}
                     placeholder={imgPreview ? "Add a caption… (optional)" : "Message the team…"}
-                    style={{ flex: 1, padding: "11px 16px", borderRadius: 50, border: "1.5px solid #e7e5e2", fontSize: 13.5, fontFamily: "inherit", background: "#fff", color: "#0a0a0a", transition: "border-color .15s, box-shadow .15s" }}
+                    style={{ flex: 1, padding: "12px 17px", borderRadius: 50, border: "1.5px solid #e7e5e2", fontSize: 15, fontFamily: "inherit", background: "#fff", color: "#0a0a0a", transition: "border-color .15s, box-shadow .15s" }}
                   />
                   <button type="submit" className="pp-send" disabled={(!input.trim() && !imgFile) || sending}
                     style={{ width: 44, height: 44, borderRadius: "50%", background: "#b86cf9", color: "#fff", border: "none", cursor: (!input.trim() && !imgFile) ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, opacity: (!input.trim() && !imgFile) ? 0.4 : 1, transition: "opacity .15s, background .15s" }}>
