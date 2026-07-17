@@ -74,7 +74,7 @@ function blockText(text: string): string {
       while (i < lines.length && /^\d+\.\s/.test(lines[i])) { items.push(`<li>${inline(lines[i].replace(/^\d+\.\s/, ""))}</li>`); i++; }
       out.push(`<ol>${items.join("")}</ol>`); continue;
     }
-    if (!line.trim()) { out.push("<br/>"); i++; continue; }
+    if (!line.trim()) { i++; continue; }  // blank line = paragraph separator, not a <br>
     const pl: string[] = [];
     while (i < lines.length && lines[i].trim() && !/^#/.test(lines[i]) && !/^[-*+]\s/.test(lines[i]) && !/^\d+\.\s/.test(lines[i]) && !lines[i].startsWith("> ") && !/^(-{3,}|\*{3,})$/.test(lines[i].trim())) {
       pl.push(lines[i]); i++;
