@@ -111,10 +111,10 @@ export default function BlogPostPage() {
   return (
     <>
       <style>{`
-        .post-prose { font-family:var(--f-sans); font-size:var(--fs-body); line-height:1.65; color:var(--ink); }
-        .post-prose h2 { font-family:var(--f-display); font-size:clamp(24px,3vw,34px); line-height:1.12; letter-spacing:-.022em; margin:52px 0 16px; color:var(--ink); scroll-margin-top:100px; }
-        .post-prose h3 { font-family:var(--f-display); font-size:clamp(18px,2.2vw,24px); line-height:1.2; letter-spacing:-.018em; margin:36px 0 12px; color:var(--ink); scroll-margin-top:100px; }
-        .post-prose p { margin:0 0 22px; }
+        .post-prose { font-family:var(--f-sans); font-size:var(--fs-body); line-height:1.55; color:var(--ink); }
+        .post-prose h2 { font-family:var(--f-display); font-size:clamp(24px,3vw,34px); line-height:1.15; letter-spacing:-.022em; margin:44px 0 14px; color:var(--ink); scroll-margin-top:100px; }
+        .post-prose h3 { font-family:var(--f-display); font-size:clamp(18px,2.2vw,24px); line-height:1.25; letter-spacing:-.018em; margin:32px 0 10px; color:var(--ink); scroll-margin-top:100px; }
+        .post-prose p { margin:0 0 18px; }
         .post-prose strong { font-weight:600; }
         .post-prose em { font-style:italic; color:var(--brand); }
         .post-prose del { text-decoration:line-through; color:var(--muted); }
@@ -196,7 +196,7 @@ export default function BlogPostPage() {
         {/* ── MAIN CONTENT ── */}
         <div style={{ minWidth: 0 }}>
           {/* cover image / thumb */}
-          <div style={{ position: "relative", width: "100%", height: "clamp(260px,42vw,480px)", borderRadius: 20, overflow: "hidden", marginBottom: 48 }}>
+          <div style={{ position: "relative", width: "100%", height: "clamp(340px,48vw,600px)", borderRadius: 20, overflow: "hidden", marginBottom: 48 }}>
             {post.cover_image
               ? <img src={post.cover_image} alt={post.title} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
               : <div style={{ width: "100%", height: "100%", background: bg }} />
