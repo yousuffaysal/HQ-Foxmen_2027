@@ -20,6 +20,8 @@ export const DEFAULT_KEYWORDS = [
   "startup product agency",
   "digital agency",
   "design system",
+  "client portal",
+  "client project dashboard",
 ];
 
 export interface ConstructMetadataProps {
