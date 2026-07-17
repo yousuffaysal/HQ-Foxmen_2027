@@ -257,16 +257,19 @@ export default function AdminBlogEditor({ post, onSave, onClose }: Props) {
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(""), 3000); };
 
-  const save = async () => {
+  const save = async (statusOverride?: string) => {
     if (!data.title.trim()) { showToast("Title is required."); return; }
     setSaving(true);
-    const payload = { ...data, author_init: data.author_init || autoInitials(data.author_name), read_time: data.read_time || calcReadTime(data.body), published_at: data.status === "live" && !data.published_at ? new Date().toISOString() : data.published_at };
+    const status = statusOverride ?? data.status;
+    const payload = { ...data, status, author_init: data.author_init || autoInitials(data.author_name), read_time: data.read_time || calcReadTime(data.body), published_at: status === "live" && !data.published_at ? new Date().toISOString() : data.published_at };
     const url = data.id ? `/api/blog/${data.id}` : "/api/blog";
     const res = await fetch(url, { method: data.id ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }).catch(() => null);
     if (res?.ok) {
       const row = await res.json();
+      // reflect saved status + persist new id so a second save updates instead of duplicating
+      setData(d => ({ ...d, ...row, status }));
       onSave({ ...payload, ...row });
-      showToast("Saved!");
+      showToast(status === "live" ? "Published — live on the journal" : "Draft saved");
     } else {
       showToast("Error saving post.");
     }
@@ -324,8 +327,11 @@ export default function AdminBlogEditor({ post, onSave, onClose }: Props) {
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 5, verticalAlign: "middle" }}><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             Preview
           </button>
-          <button onClick={save} disabled={saving} style={{ padding: "8px 20px", border: "none", borderRadius: 8, background: saving ? "#d4a8f8" : "var(--brand)", color: "#fff", fontWeight: 700, fontSize: 13, cursor: saving ? "not-allowed" : "pointer" }}>
-            {saving ? "Saving…" : data.id ? "Update" : "Publish"}
+          <button onClick={() => save(data.status === "live" ? "draft" : data.status)} disabled={saving} style={{ padding: "8px 16px", border: "1.5px solid #e5e2de", borderRadius: 8, background: "#fff", color: "#444", fontWeight: 600, fontSize: 13, cursor: saving ? "not-allowed" : "pointer" }}>
+            Save draft
+          </button>
+          <button onClick={() => save("live")} disabled={saving} style={{ padding: "8px 20px", border: "none", borderRadius: 8, background: saving ? "#d4a8f8" : "var(--brand)", color: "#fff", fontWeight: 700, fontSize: 13, cursor: saving ? "not-allowed" : "pointer" }}>
+            {saving ? "Saving…" : (data.id && data.status === "live") ? "Update" : "Publish"}
           </button>
         </div>
       </div>
