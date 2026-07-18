@@ -20,7 +20,7 @@ interface Props {
 
 const STATUS_COLOR: Record<string, string> = {
   pending: "#f59e0b", in_progress: "#b86cf9", review: "#3b82f6",
-  completed: "#22c55e", on_hold: "#6b6b6b",
+  completed: "#22c55e", on_hold: "var(--pt-muted)",
 };
 const STATUS_LABEL: Record<string, string> = {
   pending: "Pending", in_progress: "In Progress", review: "In Review",
@@ -41,7 +41,7 @@ function inject() {
     @keyframes ppMsg   { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
     .pp-panel { animation: ppSlide .28s cubic-bezier(.22,1,.36,1) both }
     .pp-msg   { animation: ppMsg .18s cubic-bezier(.22,1,.36,1) both }
-    .pp-tab:hover { color: #0a0a0a !important }
+    .pp-tab:hover { color: var(--pt-ink) !important }
     .pp-chat-input:focus { border-color:#b86cf9!important;box-shadow:0 0 0 3px rgba(184,108,249,.12)!important;outline:none }
     .pp-send:not(:disabled):hover { background:#a05ce8!important }
     .pp-img-btn:hover { background:rgba(184,108,249,.12)!important;color:#b86cf9!important }
@@ -51,7 +51,7 @@ function inject() {
     .pp-overlay { animation: ppFade .2s ease both }
     @keyframes ppFade { from{opacity:0} to{opacity:1} }
     .pp-resize { position:absolute; left:-3px; top:0; width:8px; height:100%; cursor:col-resize; z-index:5 }
-    .pp-resize::after { content:""; position:absolute; left:3px; top:50%; transform:translateY(-50%); width:3px; height:40px; border-radius:3px; background:#e7e5e2; transition:background .2s, height .2s }
+    .pp-resize::after { content:""; position:absolute; left:3px; top:50%; transform:translateY(-50%); width:3px; height:40px; border-radius:3px; background:var(--pt-line); transition:background .2s, height .2s }
     .pp-resize:hover::after { background:#b86cf9; height:60px }
   `;
   document.head.appendChild(s);
@@ -216,70 +216,61 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
 
       {/* Panel */}
       <div className="pp-panel" style={{
-        position: "fixed", right: 0, top: 0, bottom: 0,
+        position: "fixed", right: isMobile ? 0 : 14, top: isMobile ? 0 : 14, bottom: isMobile ? 0 : 14,
         width: isMobile ? "100%" : panelW,
         left: isMobile ? 0 : undefined,
-        zIndex: 201, background: "#fff", display: "flex", flexDirection: "column",
-        boxShadow: isMobile ? "none" : "-16px 0 60px rgba(0,0,0,.14)",
-        fontFamily: "var(--f-sans)",
+        zIndex: 201, background: "#fff", borderRadius: isMobile ? 0 : 22, display: "flex", flexDirection: "column",
+        boxShadow: isMobile ? "none" : "-24px 0 60px -30px rgba(23,18,29,.4)",
+        fontFamily: "var(--f-sans)", overflow: "hidden",
         transition: draggingP ? "none" : "width .22s cubic-bezier(.22,1,.36,1)",
       }}>
         {/* Resize handle */}
         {!isMobile && <div className="pp-resize" onMouseDown={startPanelResize} title="Drag to resize" />}
 
-        {/* Header */}
-        <div style={{ padding: "18px 22px 0", flexShrink: 0 }}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 16 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                <span style={{
-                  fontSize: 12, fontWeight: 700, padding: "3px 10px", borderRadius: 50,
-                  background: `${STATUS_COLOR[project.status] ?? "#888"}1a`,
-                  color: STATUS_COLOR[project.status] ?? "#888",
-                }}>
-                  {STATUS_LABEL[project.status] ?? project.status}
-                </span>
-                {project.service_type && (
-                  <span style={{ fontSize: 12.5, color: "#9a9a9a" }}>{project.service_type}</span>
-                )}
-              </div>
-              <h2 style={{ fontFamily: "var(--f-display)", fontSize: 27, fontWeight: 400, color: "#0a0a0a", letterSpacing: "-.02em", margin: 0, lineHeight: 1.15 }}>
-                {project.title}
-              </h2>
-            </div>
+        {/* Header — plum gradient */}
+        <div style={{ flexShrink: 0, background: "linear-gradient(150deg,#2A1740,var(--side-bg) 60%)", padding: "22px 26px 22px", color: "#fff", position: "relative", overflow: "hidden" }}>
+          <div style={{ position: "absolute", top: -70, right: -50, width: 230, height: 230, borderRadius: "50%", background: "radial-gradient(circle,var(--accent) 0%,transparent 68%)", opacity: 0.4 }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 8, position: "relative" }}>
+            <span style={{ fontSize: 12, fontWeight: 600, padding: "5px 12px", borderRadius: 999, background: "rgba(255,255,255,.14)", border: "1px solid rgba(255,255,255,.18)", color: "#fff" }}>
+              {STATUS_LABEL[project.status] ?? project.status}
+            </span>
+            {project.service_type && <span style={{ fontSize: 13, color: "#B7ABC9" }}>{project.service_type}</span>}
+            <div style={{ flex: 1 }} />
             <button onClick={onClose}
-              style={{ width: 32, height: 32, borderRadius: "50%", background: "#f4f3f1", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#6b6b6b", flexShrink: 0, transition: "background .15s" }}
-              onMouseEnter={e => (e.currentTarget.style.background = "#e7e5e2")}
-              onMouseLeave={e => (e.currentTarget.style.background = "#f4f3f1")}
-            >
+              style={{ width: 33, height: 33, borderRadius: "50%", border: "1px solid rgba(255,255,255,.22)", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#D9CFE8", flexShrink: 0, transition: "all .15s" }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.color = "#fff"; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,.22)"; e.currentTarget.style.color = "#D9CFE8"; }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
             </button>
           </div>
-
-          {/* Progress bar */}
+          <h2 style={{ fontFamily: "var(--f-display)", fontSize: 30, fontWeight: 400, letterSpacing: "-.01em", margin: "14px 0 0", lineHeight: 1.12, position: "relative", color: "#fff" }}>
+            {project.title}
+          </h2>
           {total > 0 && (
-            <div style={{ marginBottom: 14 }}>
+            <div style={{ marginTop: 18, position: "relative" }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ fontSize: 12, color: "#6b6b6b" }}>Progress</span>
-                <span style={{ fontSize: 12, fontWeight: 600, color: pct === 100 ? "#22c55e" : "#b86cf9" }}>{pct}%</span>
+                <span style={{ fontSize: 12, color: "#B7ABC9" }}>Progress</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "#fff" }}>{pct}%</span>
               </div>
-              <div style={{ height: 5, background: "#f0ede8", borderRadius: 99, overflow: "hidden" }}>
-                <div style={{ height: "100%", width: `${pct}%`, background: pct === 100 ? "#22c55e" : "linear-gradient(90deg,#b86cf9,#7c3aed)", borderRadius: 99, transition: "width .6s cubic-bezier(.22,1,.36,1)" }} />
+              <div style={{ height: 6, background: "rgba(255,255,255,.14)", borderRadius: 99, overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${pct}%`, background: pct === 100 ? "#4CBB74" : "linear-gradient(90deg,var(--accent-soft),var(--accent))", borderRadius: 99, transition: "width .6s cubic-bezier(.22,1,.36,1)" }} />
               </div>
             </div>
           )}
+        </div>
 
-          {/* Tabs */}
-          <div style={{ display: "flex", borderBottom: "1.5px solid #f0ede8", gap: 0 }}>
+        {/* Tabs — segmented pills */}
+        <div style={{ flexShrink: 0, padding: "14px 20px 4px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, background: "var(--pt-line2)", borderRadius: 14, padding: 5 }}>
             {TABS.map(t => (
               <button key={t.key} className="pp-tab" onClick={() => setTab(t.key)}
                 style={{
-                  display: "flex", alignItems: "center", gap: 6,
-                  padding: "10px 16px", border: "none", background: "none", cursor: "pointer",
-                  fontSize: 14.5, fontWeight: tab === t.key ? 600 : 400,
-                  color: tab === t.key ? "#0a0a0a" : "#9a9a9a",
-                  borderBottom: `2px solid ${tab === t.key ? "#b86cf9" : "transparent"}`,
-                  marginBottom: "-1.5px", transition: "color .15s",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                  padding: "10px 0", borderRadius: 11, border: "none", cursor: "pointer", fontFamily: "inherit",
+                  fontSize: 14, fontWeight: tab === t.key ? 600 : 500,
+                  color: tab === t.key ? "var(--accent-deep)" : "var(--pt-muted)",
+                  background: tab === t.key ? "#fff" : "transparent",
+                  boxShadow: tab === t.key ? "0 4px 12px -4px rgba(43,17,70,.18)" : "none", transition: "all .15s",
                 }}>
                 {t.icon}
                 {t.label}
@@ -289,14 +280,14 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
         </div>
 
         {/* Content */}
-        <div style={{ flex: 1, overflowY: "auto", scrollbarWidth: "thin", scrollbarColor: "#e7e5e2 transparent" }}>
+        <div style={{ flex: 1, overflowY: "auto", scrollbarWidth: "thin", scrollbarColor: "var(--pt-line) transparent" }}>
 
           {/* ── DETAILS ── */}
           {tab === "details" && (
             <div style={{ padding: "20px 22px", display: "flex", flexDirection: "column", gap: 14 }}>
               {project.description && (
-                <div style={{ background: "#fafaf8", border: "1.5px solid #f0ede8", borderRadius: 12, padding: "14px 16px" }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: "#9a9a9a", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: 6 }}>Description</div>
+                <div style={{ background: "var(--accent-mist)", border: "1.5px solid var(--pt-line2)", borderRadius: 12, padding: "14px 16px" }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: "var(--pt-muted2)", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: 6 }}>Description</div>
                   <p style={{ fontSize: 15, color: "#333", lineHeight: 1.7, margin: 0 }}>{project.description}</p>
                 </div>
               )}
@@ -307,17 +298,17 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
                   { label: "Website", value: project.website },
                   { label: "Submitted", value: new Date(project.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) },
                 ].map(({ label, value }) => value ? (
-                  <div key={label} style={{ background: "#fafaf8", border: "1.5px solid #f0ede8", borderRadius: 10, padding: "12px 14px" }}>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: "#9a9a9a", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: 4 }}>{label}</div>
-                    <div style={{ fontSize: 15, fontWeight: 500, color: "#0a0a0a" }}>
-                      {label === "Website" ? <a href={value} target="_blank" rel="noopener" style={{ color: "#b86cf9", textDecoration: "none" }}>{value}</a> : value}
+                  <div key={label} style={{ background: "var(--accent-mist)", border: "1.5px solid var(--pt-line2)", borderRadius: 10, padding: "12px 14px" }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: "var(--pt-muted2)", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: 4 }}>{label}</div>
+                    <div style={{ fontSize: 15, fontWeight: 500, color: "var(--pt-ink)" }}>
+                      {label === "Website" ? <a href={value} target="_blank" rel="noopener" style={{ color: "var(--accent-deep)", textDecoration: "none" }}>{value}</a> : value}
                     </div>
                   </div>
                 ) : null)}
               </div>
               {project.admin_note && (
                 <div style={{ background: "rgba(184,108,249,.06)", border: "1.5px solid rgba(184,108,249,.2)", borderRadius: 12, padding: "14px 16px" }}>
-                  <div style={{ fontSize: 10, fontWeight: 600, color: "#b86cf9", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: 6 }}>Note from Foxmen</div>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: "var(--accent-deep)", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: 6 }}>Note from Foxmen</div>
                   <p style={{ fontSize: 15, color: "#333", lineHeight: 1.7, margin: 0 }}>{project.admin_note}</p>
                 </div>
               )}
@@ -328,7 +319,7 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
           {tab === "milestones" && (
             <div style={{ padding: "20px 22px" }}>
               {project.milestones.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "48px 20px", color: "#9a9a9a", fontSize: 14.5, lineHeight: 1.7 }}>
+                <div style={{ textAlign: "center", padding: "48px 20px", color: "var(--pt-muted2)", fontSize: 14.5, lineHeight: 1.7 }}>
                   No milestones added yet.<br/>Your project team will add them soon.
                 </div>
               ) : (
@@ -344,19 +335,19 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 2, flexShrink: 0 }}>
                           <div style={{ width: 10, height: 10, borderRadius: "50%", background: c.dot, boxShadow: `0 0 0 3px ${c.dot}25` }} />
                           {i < project.milestones.length - 1 && (
-                            <div style={{ width: 1.5, height: 24, background: "#e7e5e2", margin: "4px 0" }} />
+                            <div style={{ width: 1.5, height: 24, background: "var(--pt-line)", margin: "4px 0" }} />
                           )}
                         </div>
                         <div style={{ flex: 1 }}>
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 4 }}>
-                            <span style={{ fontSize: 15, fontWeight: 600, color: "#0a0a0a" }}>{m.title}</span>
+                            <span style={{ fontSize: 15, fontWeight: 600, color: "var(--pt-ink)" }}>{m.title}</span>
                             <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 9px", borderRadius: 50, background: c.dot + "20", color: c.fg, whiteSpace: "nowrap" }}>
                               {m.status.replace("_", " ")}
                             </span>
                           </div>
-                          {m.description && <p style={{ fontSize: 13.5, color: "#6b6b6b", margin: 0, lineHeight: 1.6 }}>{m.description}</p>}
+                          {m.description && <p style={{ fontSize: 13.5, color: "var(--pt-muted)", margin: 0, lineHeight: 1.6 }}>{m.description}</p>}
                           {m.due_date && (
-                            <div style={{ fontSize: 12, color: "#9a9a9a", marginTop: 5 }}>
+                            <div style={{ fontSize: 12, color: "var(--pt-muted2)", marginTop: 5 }}>
                               Due: {new Date(m.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                             </div>
                           )}
@@ -374,10 +365,10 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
             <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
               <div style={{ flex: 1, padding: "16px 18px 8px", display: "flex", flexDirection: "column", gap: 8, overflowY: "auto" }}>
                 {loadingMsgs && (
-                  <div style={{ textAlign: "center", color: "#9a9a9a", fontSize: 14.5, paddingTop: 40 }}>Loading…</div>
+                  <div style={{ textAlign: "center", color: "var(--pt-muted2)", fontSize: 14.5, paddingTop: 40 }}>Loading…</div>
                 )}
                 {!loadingMsgs && msgs.length === 0 && (
-                  <div style={{ textAlign: "center", color: "#9a9a9a", fontSize: 14.5, paddingTop: 48, lineHeight: 1.8 }}>
+                  <div style={{ textAlign: "center", color: "var(--pt-muted2)", fontSize: 14.5, paddingTop: 48, lineHeight: 1.8 }}>
                     No messages yet.<br/>Send a message to your project team.
                   </div>
                 )}
@@ -385,15 +376,15 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
                   const isClient = m.sender_role === "client";
                   return (
                     <div key={m.id} className="pp-msg" style={{ display: "flex", flexDirection: "column", alignItems: isClient ? "flex-end" : "flex-start" }}>
-                      <div style={{ fontSize: 11, color: "#9a9a9a", marginBottom: 3, paddingLeft: 2, paddingRight: 2 }}>
+                      <div style={{ fontSize: 11, color: "var(--pt-muted2)", marginBottom: 3, paddingLeft: 2, paddingRight: 2 }}>
                         {isClient ? "You" : "Foxmen Studio"}
                       </div>
                       <div style={{
                         maxWidth: "78%", padding: m.image_url && !m.message ? "4px" : "11px 15px",
                         borderRadius: isClient ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
                         fontSize: 15, lineHeight: 1.55, wordBreak: "break-word",
-                        background: isClient ? "#b86cf9" : "#f4f3f1",
-                        color: isClient ? "#fff" : "#0a0a0a",
+                        background: isClient ? "linear-gradient(135deg,var(--accent),var(--accent-deep))" : "var(--pt-line2)",
+                        color: isClient ? "#fff" : "var(--pt-ink)",
                         overflow: "hidden",
                       }}>
                         {m.image_url ? (
@@ -421,18 +412,18 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
                 <div ref={endRef} />
               </div>
 
-              <div style={{ borderTop: "1.5px solid #f0ede8", background: "#fafaf8", flexShrink: 0 }}>
+              <div style={{ borderTop: "1.5px solid var(--pt-line2)", background: "var(--accent-mist)", flexShrink: 0 }}>
                 {/* Image preview strip */}
                 {imgPreview && (
                   <div className="pp-img-thumb" style={{ padding: "10px 14px 0", display: "flex", alignItems: "flex-start", gap: 8 }}>
                     <div style={{ position: "relative", display: "inline-flex" }}>
-                      <img src={imgPreview} alt="preview" style={{ height: 72, width: 72, objectFit: "cover", borderRadius: 10, border: "1.5px solid #e7e5e2" }} />
+                      <img src={imgPreview} alt="preview" style={{ height: 72, width: 72, objectFit: "cover", borderRadius: 10, border: "1.5px solid var(--pt-line)" }} />
                       <button onClick={clearImage}
-                        style={{ position: "absolute", top: -6, right: -6, width: 18, height: 18, borderRadius: "50%", background: "#0a0a0a", color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, lineHeight: 1, fontWeight: 700 }}>
+                        style={{ position: "absolute", top: -6, right: -6, width: 18, height: 18, borderRadius: "50%", background: "var(--pt-ink)", color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, lineHeight: 1, fontWeight: 700 }}>
                         ×
                       </button>
                     </div>
-                    <span style={{ fontSize: 11, color: "#9a9a9a", paddingTop: 4 }}>Image ready to send</span>
+                    <span style={{ fontSize: 11, color: "var(--pt-muted2)", paddingTop: 4 }}>Image ready to send</span>
                   </div>
                 )}
                 <form onSubmit={send} style={{ padding: "10px 14px 16px", display: "flex", gap: 8, alignItems: "center" }}>
@@ -441,7 +432,7 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
                   {/* Attachment button */}
                   <button type="button" className="pp-img-btn" onClick={() => fileRef.current?.click()}
                     title="Attach image"
-                    style={{ width: 38, height: 38, borderRadius: "50%", background: imgPreview ? "rgba(184,108,249,.15)" : "#f0ede8", color: imgPreview ? "#b86cf9" : "#9a9a9a", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "background .15s, color .15s" }}>
+                    style={{ width: 38, height: 38, borderRadius: "50%", background: imgPreview ? "rgba(184,108,249,.15)" : "var(--pt-line2)", color: imgPreview ? "#b86cf9" : "var(--pt-muted2)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "background .15s, color .15s" }}>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.41 17.41a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
                   </button>
                   <input
@@ -450,10 +441,10 @@ export default function PortalProjectPanel({ project, onClose, defaultTab = "det
                     value={input}
                     onChange={e => setInput(e.target.value)}
                     placeholder={imgPreview ? "Add a caption… (optional)" : "Message the team…"}
-                    style={{ flex: 1, padding: "12px 17px", borderRadius: 50, border: "1.5px solid #e7e5e2", fontSize: 15, fontFamily: "inherit", background: "#fff", color: "#0a0a0a", transition: "border-color .15s, box-shadow .15s" }}
+                    style={{ flex: 1, padding: "12px 17px", borderRadius: 50, border: "1.5px solid var(--pt-line)", fontSize: 15, fontFamily: "inherit", background: "#fff", color: "var(--pt-ink)", transition: "border-color .15s, box-shadow .15s" }}
                   />
                   <button type="submit" className="pp-send" disabled={(!input.trim() && !imgFile) || sending}
-                    style={{ width: 44, height: 44, borderRadius: "50%", background: "#b86cf9", color: "#fff", border: "none", cursor: (!input.trim() && !imgFile) ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, opacity: (!input.trim() && !imgFile) ? 0.4 : 1, transition: "opacity .15s, background .15s" }}>
+                    style={{ width: 44, height: 44, borderRadius: "50%", background: "linear-gradient(135deg,var(--accent),var(--accent-deep))", color: "#fff", border: "none", cursor: (!input.trim() && !imgFile) ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, opacity: (!input.trim() && !imgFile) ? 0.4 : 1, boxShadow: "0 6px 16px -6px rgba(140,70,220,.55)", transition: "opacity .15s, filter .15s" }}>
                     {sending
                       ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
                       : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>
