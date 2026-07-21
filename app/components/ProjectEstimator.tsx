@@ -84,16 +84,17 @@ export default function ProjectEstimator() {
   const stepNum = step === "result" ? 4 : step;
 
   return (
-    <section className="est" id="estimator">
-      <div className="est-wrap">
+    <section id="estimator" style={{ padding: "80px 0" }}>
+      <div className="est">
+        <div className="est-wrap">
 
-        {/* Header */}
-        <div className="est-head">
-          <div className="fade"><span className="eyebrow" style={{ color:"#b86cf9" }}>AI Project Estimator ✦</span></div>
-          <h2 className="fade d1" style={{ color:"#fff", marginTop:16 }}>
-            Get an instant price range<br />
-            <span className="it" style={{ color:"#b86cf9" }}>for your project</span>
-          </h2>
+          {/* Header */}
+          <div className="est-head">
+            <div className="fade"><span className="eyebrow" style={{ color:"#b86cf9" }}>AI Project Estimator ✦</span></div>
+            <h2 className="display fade d1" style={{ color:"#fff", marginTop:16 }}>
+              Get an instant price range<br />
+              <span className="it" style={{ color:"#b86cf9" }}>for your project</span>
+            </h2>
           <p className="fade d2" style={{ color:"#9b9b9b", marginTop:12, maxWidth:440, margin:"12px auto 0" }}>
             Answer 4 quick questions. Our AI generates a real estimate — no fluff, no forms.
           </p>
@@ -293,6 +294,7 @@ export default function ProjectEstimator() {
             </div>
           )}
         </div>
+      </div>
       </div>
     </section>
   );

@@ -676,16 +676,20 @@ body.page-revealed .hero::after {
   box-shadow: 0 0 0 4px rgba(184,108,249,.18);
 }
 
+.hero h1.hero-headline,
 .hero-headline {
   font-family: var(--f-display);
   font-size: clamp(38px, 9vw, 187px);
-  line-height: 1.14;
+  line-height: 1.22;
   letter-spacing: -0.02em;
   margin: 0;
   max-width: none;
 }
-.hero-headline .reveal { display: block; white-space: nowrap; padding-bottom: .12em; margin-bottom: -0.12em; }
+.hero h1.hero-headline .reveal,
+.hero-headline .reveal { display: block; white-space: nowrap; padding-bottom: .16em; margin-bottom: -0.04em; }
+.hero h1.hero-headline .reveal:last-child,
 .hero-headline .reveal:last-child { margin-bottom: 0; }
+.hero h1.hero-headline .it,
 .hero-headline .it { font-style: italic; color: var(--brand); }
 
 .hero-sub {
@@ -3494,6 +3498,9 @@ body.loading { overflow: hidden; }
    ============================================================ */
 .est {
   background: var(--ink);
+  color: #fff;
+  border-radius: 15px;
+  margin: 0 24px;
   padding: 120px 0;
   position: relative;
   overflow: hidden;
@@ -3516,10 +3523,20 @@ body.loading { overflow: hidden; }
 }
 .est-head h2 {
   font-family: var(--f-display);
-  font-size: clamp(32px, 5vw, 52px);
+  font-size: clamp(44px, 5.5vw, 72px) !important;
   font-weight: 400;
-  line-height: 1.1;
+  line-height: 1.08 !important;
+  letter-spacing: -0.02em;
   margin: 0;
+}
+.est-head h2 .it { font-style: italic; color: var(--brand, #b86cf9); }
+@media (max-width: 900px) {
+  .est { margin: 0; border-radius: 0; padding: 80px 0; }
+  .est-head h2 { font-size: clamp(36px, 8vw, 56px) !important; }
+}
+@media (max-width: 600px) {
+  .est { padding: 64px 0; }
+  .est-head h2 { font-size: clamp(30px, 9vw, 44px) !important; line-height: 1.1 !important; }
 }
 
 /* Wizard card */

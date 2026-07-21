@@ -981,9 +981,16 @@ function PortalFeatureSection() {
    Live Chat / Foxo AI Support Section
 ───────────────────────────────────────────────────────────────────────── */
 const LC_CSS = `
-.lc-section {
-  padding:120px 0; background:#0a0a0a; overflow:hidden; position:relative;
+.lc-box {
+  background: var(--ink, #0a0a0a);
+  color: #fff;
+  border-radius: 15px;
+  margin: 0 24px;
+  padding: 120px 0;
+  position: relative;
+  overflow: hidden;
 }
+.lc-box .wrap { width: min(1380px, 100% - 80px); }
 .lc-bg-glow {
   position:absolute; inset:0; pointer-events:none;
   background:radial-gradient(ellipse 60% 55% at 75% 50%, rgba(184,108,249,.13) 0%, transparent 70%);
@@ -1262,7 +1269,7 @@ const LC_CSS = `
 
 /* ── responsive ── */
 @media(max-width:900px) {
-  .lc-section { padding:72px 0; }
+  .lc-box { margin: 0; border-radius: 0; padding: 80px 0; }
   .lc-inner { grid-template-columns:1fr; gap:44px; }
   .lc-copy h2 { font-size:clamp(36px,8vw,56px) !important; }
   .lc-desc { font-size:17px; max-width:100%; }
@@ -1272,7 +1279,7 @@ const LC_CSS = `
   .lc-bg-glow { background:radial-gradient(ellipse 80% 40% at 50% 20%, rgba(184,108,249,.11) 0%, transparent 70%); }
 }
 @media(max-width:600px) {
-  .lc-section { padding:56px 0; }
+  .lc-box { padding: 64px 0; }
   .lc-copy h2 { font-size:clamp(30px,9vw,44px) !important; }
   .lc-desc { font-size:16px; }
   /* option cards — tighter on phones */
@@ -1391,11 +1398,12 @@ function LiveChatSection() {
   };
 
   return (
-    <section className="lc-section" ref={sectionRef}>
+    <section id="support" style={{ padding: "80px 0" }} ref={sectionRef}>
       <style dangerouslySetInnerHTML={{ __html: LC_CSS }} />
-      <div className="lc-bg-glow" aria-hidden="true" />
-      <div className="wrap">
-        <div className="lc-inner">
+      <div className="lc-box">
+        <div className="lc-bg-glow" aria-hidden="true" />
+        <div className="wrap">
+          <div className="lc-inner">
 
           {/* LEFT: copy */}
           <div className="lc-copy">
@@ -1517,6 +1525,7 @@ function LiveChatSection() {
             </div>
           </div>
 
+          </div>
         </div>
       </div>
     </section>
@@ -1988,11 +1997,11 @@ export default function HomeClient({
         </div>
       </section>
 
-      {/* Portal Feature */}
-      <PortalFeatureSection />
-
       {/* Live Chat Support */}
       <LiveChatSection />
+
+      {/* Portal Feature */}
+      <PortalFeatureSection />
 
       {/* Process */}
       <section id="process" style={{ padding: "80px 0" }}>
