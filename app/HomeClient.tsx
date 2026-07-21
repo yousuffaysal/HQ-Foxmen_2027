@@ -1269,7 +1269,7 @@ const LC_CSS = `
 
 /* ── responsive ── */
 @media(max-width:900px) {
-  .lc-box { margin: 0; border-radius: 0; padding: 80px 0; }
+  .lc-box { margin: 0 16px; border-radius: 15px; padding: 80px 0; }
   .lc-inner { grid-template-columns:1fr; gap:44px; }
   .lc-copy h2 { font-size:clamp(36px,8vw,56px) !important; }
   .lc-desc { font-size:17px; max-width:100%; }
@@ -1279,7 +1279,7 @@ const LC_CSS = `
   .lc-bg-glow { background:radial-gradient(ellipse 80% 40% at 50% 20%, rgba(184,108,249,.11) 0%, transparent 70%); }
 }
 @media(max-width:600px) {
-  .lc-box { padding: 64px 0; }
+  .lc-box { margin: 0 12px; border-radius: 15px; padding: 64px 0; }
   .lc-copy h2 { font-size:clamp(30px,9vw,44px) !important; }
   .lc-desc { font-size:16px; }
   /* option cards — tighter on phones */

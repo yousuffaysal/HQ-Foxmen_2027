@@ -1213,10 +1213,13 @@ body.page-revealed .hero::after {
 }
 .step .copy ul li::before { content: ""; width: 6px; height: 6px; background: var(--brand); border-radius: 50%; }
 @media (max-width:900px) {
-  .process { margin: 0; border-radius: 0; padding: 80px 0; }
+  .process { margin: 0 16px; border-radius: 15px; padding: 80px 0; }
   .step { grid-template-columns: 1fr; gap: 16px; padding: 36px 0; }
   .step .num { font-size: 60px; }
   .process-head { grid-template-columns: 1fr; }
+}
+@media (max-width:600px) {
+  .process { margin: 0 12px; border-radius: 15px; padding: 64px 0; }
 }
 
 /* ============================================================
@@ -3531,11 +3534,11 @@ body.loading { overflow: hidden; }
 }
 .est-head h2 .it { font-style: italic; color: var(--brand, #b86cf9); }
 @media (max-width: 900px) {
-  .est { margin: 0; border-radius: 0; padding: 80px 0; }
+  .est { margin: 0 16px; border-radius: 15px; padding: 80px 0; }
   .est-head h2 { font-size: clamp(36px, 8vw, 56px) !important; }
 }
 @media (max-width: 600px) {
-  .est { padding: 64px 0; }
+  .est { margin: 0 12px; border-radius: 15px; padding: 64px 0; }
   .est-head h2 { font-size: clamp(30px, 9vw, 44px) !important; line-height: 1.1 !important; }
 }
 
