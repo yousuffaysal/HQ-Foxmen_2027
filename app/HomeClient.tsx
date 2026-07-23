@@ -2047,8 +2047,8 @@ export default function HomeClient({
               a half-formed idea?
             </h2>
             <div className="row fade d2">
-              <a href="mailto:hello@foxmenstudio.com" className="btn btn--lg">
-                <span className="label">hello@foxmenstudio.com</span>
+              <a href="mailto:hello@foxmen.studio" className="btn btn--lg">
+                <span className="label">hello@foxmen.studio</span>
                 <span className="chip"><ArrowIcon /></span>
               </a>
               <button

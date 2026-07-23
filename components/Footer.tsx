@@ -29,8 +29,8 @@ export default function Footer() {
         {/* Hero title + email row */}
         <div className="foot-hero">
           <h2 className="foot-hero-title">Work with us</h2>
-          <a className="foot-hero-email" href="mailto:hello@foxmenstudio.com">
-            hello@foxmenstudio.com
+          <a className="foot-hero-email" href="mailto:hello@foxmen.studio">
+            hello@foxmen.studio
           </a>
         </div>
 

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 
-const NOTIFY_TO = "yousuf.h.faysal@foxmenstudio.com";
-const FROM      = "Foxmen Studio <team@foxmenstudio.com>";
+const NOTIFY_TO = "yousuf.h.faysal@foxmen.studio";
+const FROM      = "Foxmen Studio <team@foxmen.studio>";
 
 export async function POST(req: Request) {
   const { name, email, company, whatsapp, message, budget, service, sources, trial } = await req.json();

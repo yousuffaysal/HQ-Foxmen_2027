@@ -740,7 +740,7 @@ export default function AdminPage() {
   const [emailPdfLabel,      setEmailPdfLabel]      = useState("Download PDF");
   const [emailPdfUrl,        setEmailPdfUrl]        = useState("");
   const [emailPdfUploading,  setEmailPdfUploading]  = useState(false);
-  const [emailFrom,          setEmailFrom]          = useState("contact@foxmenstudio.com");
+  const [emailFrom,          setEmailFrom]          = useState("contact@foxmen.studio");
   const [invAiLoading,   setInvAiLoading]   = useState(false);
   const [projAiPrompt,   setProjAiPrompt]   = useState("");
   const [projAiLoading,  setProjAiLoading]  = useState(false);
@@ -2724,11 +2724,11 @@ ${emailPayNotes?`<div style="margin-top:24px;padding:16px 20px;background:#faf8f
                 <div className="field" style={{marginBottom:12}}>
                   <label style={{fontSize:12,fontWeight:500,color:"var(--muted)",display:"block",marginBottom:5}}>From</label>
                   <select value={emailFrom} onChange={e=>setEmailFrom(e.target.value)} style={{width:"100%",padding:"8px 11px",background:"var(--canvas)",border:"1px solid var(--line)",borderRadius:"var(--r-sm)",color:"var(--ink)",fontSize:13,fontFamily:"var(--f-mono)",outline:"none",cursor:"pointer"}}>
-                    <option value="contact@foxmenstudio.com">contact@foxmenstudio.com</option>
-                    <option value="hello@foxmenstudio.com">hello@foxmenstudio.com</option>
-                    <option value="team@foxmenstudio.com">team@foxmenstudio.com</option>
-                    <option value="careers@foxmenstudio.com">careers@foxmenstudio.com</option>
-                    <option value="yousuf.h.faysal@foxmenstudio.com">yousuf.h.faysal@foxmenstudio.com</option>
+                    <option value="contact@foxmen.studio">contact@foxmen.studio</option>
+                    <option value="hello@foxmen.studio">hello@foxmen.studio</option>
+                    <option value="team@foxmen.studio">team@foxmen.studio</option>
+                    <option value="careers@foxmen.studio">careers@foxmen.studio</option>
+                    <option value="yousuf.h.faysal@foxmen.studio">yousuf.h.faysal@foxmen.studio</option>
                   </select>
                 </div>
                 <Field label="To (recipient email)" value={emailTo} onChange={setEmailTo} placeholder="client@company.com" type="email"/>

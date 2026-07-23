@@ -31,7 +31,7 @@ export function RootStructuredData() {
     description:
       "International creative agency building websites, mobile apps, AI-integrated software, ecommerce and real estate platforms, design systems and brands. Est. 2025.",
     slogan: "Code. Craft. Care.",
-    email: "contact@foxmenstudio.com",
+    email: "contact@foxmen.studio",
     foundingDate: "2025",
     founders: [
       {
@@ -139,7 +139,7 @@ export function RootStructuredData() {
     priceRange: "$$$",
     description:
       "International creative agency building high-end digital products, AI solutions, web apps, mobile apps, and brands.",
-    email: "contact@foxmenstudio.com",
+    email: "contact@foxmen.studio",
     sameAs: SOCIAL_LINKS,
   };
 
