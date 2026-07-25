@@ -28,7 +28,6 @@ export default function Nav() {
   // Pages whose hero sits behind the nav on a dark background (e.g. video hero)
   const darkTop = pathname === "/services" || pathname.startsWith("/services/") || pathname === "/work" || pathname === "/about";
   const [scrolled,  setScrolled]  = useState(false);
-  const [clock,     setClock]     = useState("— : —");
   const [profile,   setProfile]   = useState<Profile | null>(null);
   const [menuOpen,  setMenuOpen]  = useState(false);
 
@@ -51,16 +50,6 @@ export default function Nav() {
       document.body.classList.remove("nav-menu-open");
     };
   }, [menuOpen]);
-
-  useEffect(() => {
-    const fmt = new Intl.DateTimeFormat("en-US", {
-      hour: "numeric", minute: "2-digit", hour12: true, timeZone: "Asia/Dhaka",
-    });
-    const update = () => setClock(fmt.format(new Date()) + " · DHK");
-    update();
-    const id = setInterval(update, 30000);
-    return () => clearInterval(id);
-  }, []);
 
   useEffect(() => {
     fetch("/api/auth/profile")
@@ -125,10 +114,7 @@ export default function Nav() {
           </nav>
 
           <div className="nav-cta">
-            <span className="nav-time">
-              <span className="dot" />
-              <span>{clock}</span>
-            </span>
+            {/* Client Portal button hidden — bring back later.
             <Link href="/portal" className="btn btn--ghost" style={{ marginRight: 4 }}>
               <span className="label">{isLoggedIn ? firstName : "Client Portal"}</span>
               <span className="chip" aria-hidden="true">
@@ -143,6 +129,7 @@ export default function Nav() {
                 )}
               </span>
             </Link>
+            */}
             <Link href="/contact" className="btn">
               <span className="label">Contact us</span>
               <span className="chip" aria-hidden="true">
@@ -182,10 +169,6 @@ export default function Nav() {
         </nav>
 
         <div className="mobile-menu-footer">
-          <div className="mobile-menu-time">
-            <span className="dot" />
-            <span>{clock}</span>
-          </div>
           <Link href="/contact" className="btn btn--sm" onClick={() => setMenuOpen(false)}>
             <span className="label">Start a project</span>
             <span className="chip" aria-hidden="true"><ArrowIcon /></span>

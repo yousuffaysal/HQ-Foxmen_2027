@@ -639,8 +639,12 @@ body.page-revealed .hero::after {
 .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
 
 .hero-orbit {
-  position: absolute; right: 24px; top: 120px;
-  width: 340px; height: 340px; pointer-events: none;
+  position: absolute;
+  top: 120px;
+  right: max(clamp(24px, 2vw, 48px), calc((100vw - 1760px) / 2 + 24px));
+  width: 340px;
+  height: 340px;
+  pointer-events: none;
   opacity: .5;
   animation: spin 36s linear infinite;
 }
@@ -685,13 +689,13 @@ body.page-revealed .hero::after {
 .hero-headline {
   font-family: var(--f-display);
   font-size: clamp(38px, 9vw, 187px);
-  line-height: 1.22;
+  line-height: 1.02;
   letter-spacing: -0.02em;
   margin: 0;
   max-width: none;
 }
 .hero h1.hero-headline .reveal,
-.hero-headline .reveal { display: block; white-space: nowrap; padding-bottom: .16em; margin-bottom: -0.04em; }
+.hero-headline .reveal { display: block; white-space: nowrap; padding-bottom: .1em; margin-bottom: -0.1em; }
 .hero h1.hero-headline .reveal:last-child,
 .hero-headline .reveal:last-child { margin-bottom: 0; }
 .hero h1.hero-headline .it,
