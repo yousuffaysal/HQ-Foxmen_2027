@@ -172,26 +172,33 @@ export default function HomeV2Client({
 
   return (
     <div className="hv2">
+      {/* .fade starts at opacity 0 and is revealed by useScrollReveal; with
+          JS off nothing would ever become visible, so opt out entirely. */}
+      <noscript>
+        <style>{".hv2 .fade{opacity:1!important;transform:none!important}"}</style>
+      </noscript>
       {/* ══ 1. HERO ══ */}
       <section className="hv2-hero" id="top">
-        <div className="hv2-hero__grid" aria-hidden="true" />
-        <div className="hv2-hero__flare" aria-hidden="true" />
         <div className="hv2-hero__glow" aria-hidden="true" />
+        <div className="hv2-hero__flare" aria-hidden="true" />
+        <div className="hv2-hero__streaks" aria-hidden="true" />
+        <div className="hv2-hero__glass" aria-hidden="true" />
+        <div className="hv2-hero__rules" aria-hidden="true" />
 
         <div className="wrap hv2-hero__inner">
-          <span className="hv2-hero__badge">Accepting new projects for Q3 2026</span>
+          <span className="hv2-hero__badge fade">Accepting new projects for Q3 2026</span>
 
-          <h1 className="v2-display v2-display--light hv2-hero__title">
+          <h1 className="v2-display v2-display--light hv2-hero__title fade d1">
             We build digital products
             <br />
             that feel alive.
           </h1>
 
-          <p className="hv2-hero__sub">
+          <p className="hv2-hero__sub fade d2">
             Web development, mobile apps, AI-integrated applications, SaaS products &amp; digital marketing.
           </p>
 
-          <div className="hv2-hero__cta">
+          <div className="hv2-hero__cta fade d3">
             <Link href="/contact" className="v2-btn">
               Book a 20-minute call
               <span className="v2-btn__chip"><Arrow /></span>
@@ -204,8 +211,8 @@ export default function HomeV2Client({
         </div>
 
         <div className="wrap hv2-hero__stats">
-          {stats.map((s) => (
-            <div className="hv2-stat" key={s.l}>
+          {stats.map((s, i) => (
+            <div className={`hv2-stat fade d${i + 1}`} key={s.l}>
               <div className="hv2-stat__n">{s.n}</div>
               <div className="hv2-stat__l">{s.l}</div>
             </div>
@@ -218,8 +225,8 @@ export default function HomeV2Client({
         <section className="hv2-services" id="services">
           <div className="wrap">
             <div className="v2-head">
-              <span className="v2-pill">What we do</span>
-              <h2 className="v2-display v2-head__title">
+              <span className="v2-pill fade">What we do</span>
+              <h2 className="v2-display v2-head__title fade d1">
                 A deliberate process: four
                 <br />
                 chapters from brief to launch.
@@ -229,7 +236,7 @@ export default function HomeV2Client({
 
           <div className="wrap hv2-services__list">
             {services.map((s, i) => (
-              <Link href="/services" className="hv2-svc" key={s.name}>
+              <Link href="/services" className={`hv2-svc fade d${(i % 5) + 1}`} key={s.name}>
                 <span className="hv2-svc__num">/ {String(i + 1).padStart(2, "0")}</span>
                 <h3 className="hv2-svc__title">
                   {s.name.split("\n").map((line, k) => (
@@ -259,7 +266,7 @@ export default function HomeV2Client({
         <section className="hv2-caps" aria-label="Capabilities">
           <div className="hv2-caps__track">
             {[0, 1].map((dup) => (
-              <div className="hv2-caps__track-half" style={{ display: "flex", gap: 64 }} key={dup} aria-hidden={dup === 1}>
+              <div className="hv2-caps__half" key={dup} aria-hidden={dup === 1}>
                 {CAPABILITIES.map((c) => (
                   <span className="hv2-caps__item" key={c}>{c}</span>
                 ))}
@@ -273,10 +280,10 @@ export default function HomeV2Client({
           <div className="wrap">
             <div className="hv2-work__head">
               <div>
-                <p className="hv2-work__eyebrow">Featured work · 2024 / 2026</p>
-                <h2 className="v2-display hv2-work__title">Selected recent projects</h2>
+                <p className="hv2-work__eyebrow fade">Featured work · 2024 / 2026</p>
+                <h2 className="v2-display hv2-work__title fade d1">Selected recent projects</h2>
               </div>
-              <Link href="/work" className="hv2-work__all">
+              <Link href="/work" className="hv2-work__all fade d2">
                 All case studies <Arrow size={16} />
               </Link>
             </div>
@@ -285,7 +292,7 @@ export default function HomeV2Client({
               {cases.map((p, i) => {
                 const href = p.slug ? `/work/${p.slug}` : "/work";
                 return (
-                  <article className="hv2-case" key={p.name}>
+                  <article className="hv2-case fade" key={p.name}>
                     <Link href={href} className="hv2-case__media">
                       {/* DB thumbnails come from arbitrary remote hosts, so plain
                           <img> here matches the rest of the codebase. */}
@@ -321,8 +328,8 @@ export default function HomeV2Client({
         <section className="hv2-testi">
           <div className="wrap">
             <div className="v2-head">
-              <span className="v2-pill">Client Portal</span>
-              <h2 className="v2-display v2-head__title">
+              <span className="v2-pill fade">Client Portal</span>
+              <h2 className="v2-display v2-head__title fade d1">
                 Chosen by 50+ growing
                 <br />
                 businesses worldwide!
@@ -330,8 +337,8 @@ export default function HomeV2Client({
             </div>
 
             <div className="hv2-testi__grid">
-              {testis.map((t) => (
-                <figure className="hv2-testi__card" key={t.id}>
+              {testis.map((t, i) => (
+                <figure className={`hv2-testi__card fade d${(i % 4) + 1}`} key={t.id}>
                   <span className="hv2-testi__stars">{"★".repeat(Math.round(t.rating || 5))}</span>
                   <blockquote className="hv2-testi__quote">{t.quote}</blockquote>
                   <figcaption className="hv2-testi__who">
@@ -355,13 +362,13 @@ export default function HomeV2Client({
         <section className="hv2-ai">
           <div className="wrap hv2-ai__inner">
             <div>
-              <span className="v2-pill">AI is our sharpest tool</span>
-              <h2 className="v2-display hv2-ai__title">
+              <span className="v2-pill fade">AI is our sharpest tool</span>
+              <h2 className="v2-display hv2-ai__title fade d1">
                 We embed intelligence, not
                 <br />
                 bolt it on after launch.
               </h2>
-              <p className="hv2-ai__body">
+              <p className="hv2-ai__body fade d2">
                 AI is no longer a feature; it&rsquo;s a layer. We design product surfaces where AI does the heavy
                 lifting invisibly, fewer clicks, faster answers, defensible moats.
               </p>
@@ -374,7 +381,7 @@ export default function HomeV2Client({
               </Link>
             </div>
 
-            <div className="hv2-ai__panel">
+            <div className="hv2-ai__panel fade d1">
               <div className="hv2-ai__chips">
                 {AI_CHIPS.map((c) => <span className="hv2-ai__chip" key={c}>{c}</span>)}
               </div>
@@ -385,16 +392,16 @@ export default function HomeV2Client({
         {/* ══ 7. PROCESS ══ */}
         <section className="hv2-card" id="process">
           <div className="hv2-card__pad">
-            <p className="hv2-proc__eyebrow">HOW WE WORK</p>
-            <h2 className="v2-display v2-display--light hv2-proc__title">
+            <p className="hv2-proc__eyebrow fade">HOW WE WORK</p>
+            <h2 className="v2-display v2-display--light hv2-proc__title fade d1">
               A deliberate process: four
               <br />
               chapters from brief to launch.
             </h2>
 
             <div className="hv2-proc__steps">
-              {PROCESS.map((s) => (
-                <div className="hv2-proc__step" key={s.n}>
+              {PROCESS.map((s, i) => (
+                <div className={`hv2-proc__step fade d${i + 1}`} key={s.n}>
                   <div className="hv2-proc__n">{s.n}</div>
                   <p className="hv2-proc__kicker">{s.kicker}</p>
                   <h3 className="hv2-proc__h">{s.h}</h3>
@@ -411,21 +418,21 @@ export default function HomeV2Client({
         {/* ══ 8. CLIENT PORTAL ══ */}
         <section className="hv2-portal" id="portal">
           <div className="wrap">
-            <span className="v2-pill">Client Portal</span>
-            <h2 className="v2-display hv2-portal__title">
+            <span className="v2-pill fade">Client Portal</span>
+            <h2 className="v2-display hv2-portal__title fade d1">
               Your project, always
               <br />
               in the light.
             </h2>
-            <p className="hv2-portal__intro">
+            <p className="hv2-portal__intro fade d2">
               Every Foxmen project ships with a private client portal, real-time progress, files, milestones and a
               direct line to the team.
             </p>
 
             <div className="hv2-portal__inner">
               <div className="hv2-portal__steps">
-                {PORTAL_STEPS.map((s) => (
-                  <div className="hv2-portal__step" key={s.n}>
+                {PORTAL_STEPS.map((s, i) => (
+                  <div className={`hv2-portal__step fade d${i + 1}`} key={s.n}>
                     <span className="hv2-portal__n">{s.n}</span>
                     <h3 className="hv2-portal__h">{s.h}</h3>
                     <p className="hv2-portal__d">{s.d}</p>
@@ -438,7 +445,7 @@ export default function HomeV2Client({
               </div>
 
               {/* Portal mock */}
-              <div className="hv2-mock" aria-hidden="true">
+              <div className="hv2-mock fade d2" aria-hidden="true">
                 <div className="hv2-mock__bar">
                   <span className="hv2-mock__dots"><i /><i /><i /></span>
                   foxmen.studio/portal
@@ -483,11 +490,11 @@ export default function HomeV2Client({
           <div className="hv2-card__pad">
             <div className="hv2-support__grid">
               <div>
-                <span className="v2-pill v2-pill--light">Always-on support</span>
-                <h2 className="v2-display v2-display--light hv2-support__title">
+                <span className="v2-pill v2-pill--light fade">Always-on support</span>
+                <h2 className="v2-display v2-display--light hv2-support__title fade d1">
                   Help that&rsquo;s there when you need it.
                 </h2>
-                <p className="hv2-support__body">
+                <p className="hv2-support__body fade d2">
                   Whether it&rsquo;s a quick question at midnight or a project kickoff call at noon, we&rsquo;re
                   covered. AI answers instantly, humans follow up when it matters.
                 </p>
@@ -505,7 +512,7 @@ export default function HomeV2Client({
               </div>
 
               {/* Chat mock */}
-              <div className="hv2-chat" aria-hidden="true">
+              <div className="hv2-chat fade d2" aria-hidden="true">
                 <div className="hv2-chat__head">
                   <span className="hv2-chat__avatars">
                     <Image src="/redesign/chat-1.jpg" alt="" width={34} height={34} />
@@ -543,13 +550,13 @@ export default function HomeV2Client({
           <div className="hv2-card__pad">
             <div className="hv2-est__grid">
               <div>
-                <span className="v2-pill v2-pill--light">✦ AI Project Estimator</span>
-                <h2 className="v2-display v2-display--light hv2-est__title">
+                <span className="v2-pill v2-pill--light fade">✦ AI Project Estimator</span>
+                <h2 className="v2-display v2-display--light hv2-est__title fade d1">
                   Get an instant price range
                   <br />
                   for your project
                 </h2>
-                <p className="hv2-est__body">
+                <p className="hv2-est__body fade d2">
                   Answer 4 quick questions. Our AI generates a real estimate — no fluff, no forms.
                 </p>
                 <Link href="/contact" className="v2-btn v2-btn--ghost" style={{ marginTop: 40 }}>
@@ -569,19 +576,19 @@ export default function HomeV2Client({
         <section className="hv2-faq" id="faq">
           <div className="wrap hv2-faq__inner">
             <div>
-              <span className="v2-pill">FAQ</span>
-              <h2 className="v2-display hv2-faq__title">
+              <span className="v2-pill fade">FAQ</span>
+              <h2 className="v2-display hv2-faq__title fade d1">
                 Got a question?
                 <br />
                 We&rsquo;ve got answers.
               </h2>
-              <p className="hv2-faq__intro">
+              <p className="hv2-faq__intro fade d2">
                 We dive deep into your goals, audience, and challenges to craft a strategy that drives clear
                 direction and impact.
               </p>
             </div>
 
-            <div className="hv2-faq__list">
+            <div className="hv2-faq__list fade d1">
               {FAQS.map((f, i) => (
                 <div className="hv2-faq__item" data-open={openFaq === i} key={f.q}>
                   <button

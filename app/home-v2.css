@@ -147,70 +147,121 @@
 }
 
 /* ============================================================
-   1 — HERO
+   1 — HERO   (Figma 1920x1101; content y=268, rule y=918, stats y=948)
    ============================================================ */
 .hv2-hero {
   position: relative;
   min-height: 1101px;
-  padding-top: 168px;
-  background: var(--v2-ink-1);
+  padding-top: 268px;
+  padding-bottom: 34px;
+  background: #000;
   color: #fff;
   isolation: isolate;
   overflow: hidden;
+  /* Column flow with the stats pushed to the bottom keeps the designed
+     vertical rhythm (rule ~918, stats bottom 1067) even when text metrics
+     drift a few px from the Figma measurements. */
+  display: flex;
+  flex-direction: column;
 }
 
-/* Vertical column rhythm — 64px bars, matching "Background Elements" */
-.hv2-hero__grid {
+/* Layer 1 — purple glow rising from the bottom-left.
+   Figma: 4 concentric blurred ellipses, group at (-763, 701), 1587px. */
+.hv2-hero__glow {
+  position: absolute;
+  z-index: 0;
+  left: -763px;
+  top: 701px;
+  width: 1587px;
+  height: 1587px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle,
+    #e5c7ff 0%,  #e5c7ff 33%,
+    #ce94ff 33%, #ce94ff 41%,
+    #b86cf9 41%, #b86cf9 46%,
+    #760fce 46%, #760fce 50%,
+    transparent 50%);
+  filter: blur(190px);
+  opacity: 0.72;
+}
+
+/* Layer 2 — wide star flare, top-right. Figma: LINEAR_DODGE @ 70%. */
+.hv2-hero__flare {
+  position: absolute;
+  z-index: 0;
+  left: 1456px;
+  top: -520px;
+  width: 1400px;
+  height: 1200px;
+  background: radial-gradient(ellipse at 30% 80%, rgba(184, 108, 249, 0.5) 0%, transparent 60%);
+  mix-blend-mode: screen;
+  filter: blur(100px);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Layer 3 — vertical light streaks on a 64px pitch, faded in a band
+   (Figma "Background Elements" masked by a 0 → 54% → 0 white gradient). */
+.hv2-hero__streaks {
   position: absolute;
   inset: 0;
   z-index: 0;
+  pointer-events: none;
   background-image: repeating-linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.045) 0 1px,
+    rgba(255, 255, 255, 0.055) 0 1px,
     transparent 1px 64px
   );
   -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 54%, transparent 100%);
   mask-image: linear-gradient(180deg, transparent 0%, #000 54%, transparent 100%);
-  pointer-events: none;
 }
 
-/* Concentric purple glow (Ellipse 7610-7613, heavily blurred) */
-.hv2-hero__glow {
+/* Layer 4 — darker "glass" slats on a 71px pitch, offset from the streaks
+   so the two pitches interfere the way they do in the file. */
+.hv2-hero__glass {
   position: absolute;
-  z-index: 0;
-  left: 50%;
-  top: 701px;
-  width: 1587px;
-  height: 1587px;
-  transform: translateX(-50%);
+  inset: 0;
+  z-index: 1;
   pointer-events: none;
-  background:
-    radial-gradient(circle at 50% 50%, #e5c7ff 0%, transparent 34%),
-    radial-gradient(circle at 50% 50%, #ce94ff 0%, transparent 42%),
-    radial-gradient(circle at 50% 50%, #b86cf9 0%, transparent 46%),
-    radial-gradient(circle at 50% 50%, #760fce 0%, transparent 50%);
-  filter: blur(120px);
-  opacity: 0.85;
-}
-/* Wide star flare, LINEAR_DODGE in Figma → screen blend here */
-.hv2-hero__flare {
-  position: absolute;
-  z-index: 0;
-  left: 50%;
-  top: -420px;
-  width: 1600px;
-  height: 900px;
-  transform: translateX(-50%);
-  background: radial-gradient(ellipse at 50% 100%, rgba(184, 108, 249, 0.55) 0%, transparent 62%);
-  mix-blend-mode: screen;
-  filter: blur(100px);
-  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.42) 0 36px,
+    transparent 36px 71px
+  );
+  -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.15) 0%, #000 67%, rgba(0,0,0,.15) 100%);
+  mask-image: linear-gradient(180deg, rgba(0,0,0,.15) 0%, #000 67%, rgba(0,0,0,.15) 100%);
+  opacity: 0.5;
 }
 
-.hv2-hero__inner { position: relative; z-index: 2; text-align: center; }
+/* Layer 5 — the 5-column rule grid: one horizontal rule at y=128 and
+   verticals at x = 384/768/1152/1536, each 790px tall, white @5%. */
+.hv2-hero__rules {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  top: 128px;
+  height: 790px;
+  pointer-events: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0 1px,
+    transparent 1px 20%
+  );
+}
+
+.hv2-hero__inner {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 1234px;
+}
 
 .hv2-hero__badge {
   display: inline-flex;
+  vertical-align: top;
   align-items: center;
   gap: 8px;
   height: 32px;
@@ -235,6 +286,7 @@
 
 .hv2-hero__title {
   margin: 24px 0 0;
+  padding-top: 8px;
   font-size: var(--v2-display-sm);
   line-height: 1.1;
 }
@@ -249,7 +301,7 @@
 }
 
 .hv2-hero__cta {
-  margin-top: 64px;
+  margin-top: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -266,13 +318,13 @@
 }
 .hv2-hero__stars { color: var(--v2-primary); letter-spacing: 2px; }
 
-/* Stats row — 4 up, hairline separators, italic serif figures */
+/* Stats row — rule at y=918, figures at y=948 */
 .hv2-hero__stats {
   position: relative;
   z-index: 2;
-  margin-top: 96px;
+  margin-top: auto;
   padding-top: 30px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   display: grid;
   grid-template-columns: repeat(4, 1fr);
 }
@@ -298,7 +350,7 @@
   color: transparent;
 }
 .hv2-stat__l {
-  margin-top: 4px;
+  margin-top: 22px;
   font-size: var(--v2-p-lg);
   font-weight: 500;
   line-height: 1.1;
@@ -405,10 +457,19 @@
 .hv2-caps__track {
   display: flex;
   align-items: center;
-  gap: 64px;
+  gap: 0;
   width: max-content;
   animation: hv2-marquee var(--v2-marquee-duration) linear infinite;
 }
+/* Each half holds one full copy of the list plus the trailing gap, so a
+   -50% shift lands exactly on the duplicate and the loop is seamless. */
+.hv2-caps__half {
+  display: flex;
+  align-items: center;
+  gap: 64px;
+  padding-right: 64px;
+}
+.hv2-caps:hover .hv2-caps__track { animation-play-state: paused; }
 .hv2-caps__item {
   display: flex;
   align-items: center;
@@ -1013,4 +1074,14 @@
   .hv2-services, .hv2-work, .hv2-testi, .hv2-ai, .hv2-portal, .hv2-faq { padding-top: 96px; }
   .hv2-card { margin-top: 96px; width: min(1856px, 100% - 32px); }
   .hv2-foot__bottom { flex-direction: column; align-items: flex-start; }
+}
+
+/* ============================================================
+   Motion — reuses the site-wide .fade / .in convention driven by
+   useScrollReveal(): elements already in view get .in immediately,
+   the rest are revealed by IntersectionObserver on scroll.
+   ============================================================ */
+.hv2 .fade { will-change: opacity, transform; }
+@media (prefers-reduced-motion: reduce) {
+  .hv2 .fade { opacity: 1 !important; transform: none !important; transition: none !important; }
 }
