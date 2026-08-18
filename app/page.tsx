@@ -1,5 +1,5 @@
 import { sql } from "@/lib/db";
-import HomeClient from "./HomeClient";
+import HomeV2Client from "./HomeV2Client";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +28,7 @@ export default async function Page() {
   const testis:  DbTesti[]   = testiRes.status  === "fulfilled" ? testiRes.value  as DbTesti[]  : [];
 
   return (
-    <HomeClient
+    <HomeV2Client
       initialServices={services}
       initialProjects={projects}
       initialClients={clients}
