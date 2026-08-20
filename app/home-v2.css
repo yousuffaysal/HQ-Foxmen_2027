@@ -903,6 +903,8 @@
    Inside this panel the Figma layout already supplies the heading and the
    surrounding card, so strip its chrome and keep only the step UI. */
 .hv2-est__panel > section { padding: 0 !important; }
+.hv2-est__panel .est { background: none; margin: 0; padding: 0; border-radius: 0; }
+.hv2-est__panel .est::before { display: none; }
 .hv2-est__panel .est-head { display: none; }
 .hv2-est__panel .est-wrap { max-width: none; padding: 0; }
 .hv2-est__panel .est-card { background: transparent; border: 0; padding: 0; }
