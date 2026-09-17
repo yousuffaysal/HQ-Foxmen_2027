@@ -25,7 +25,9 @@ type Profile = { name?: string; avatar?: string };
 
 export default function Nav() {
   const pathname = usePathname();
-  // Pages whose hero sits behind the nav on a dark background (e.g. video hero)
+  // Pages whose hero sits behind the nav on a dark background (e.g. video hero).
+  // "/" only qualifies for the desktop Home V2 hero — the mobile V1 home opts out
+  // of the dark treatment via the body:not(:has(.home-v1)) guard on the rules below.
   const darkTop = pathname === "/" || pathname === "/services" || pathname.startsWith("/services/") || pathname === "/work" || pathname === "/about";
   const [scrolled,  setScrolled]  = useState(false);
   const [profile,   setProfile]   = useState<Profile | null>(null);
@@ -66,16 +68,16 @@ export default function Nav() {
     <>
       <style dangerouslySetInnerHTML={{ __html: `
         .brand .wm-studio { font-style: italic; color: var(--brand); }
-        .nav--darktop .brand, .nav--darktop .brand .wm { color:#fff; }
-        .nav--darktop .brand .wm-studio { color: var(--brand); }
-        .nav--darktop .brand .wm .small { color: rgba(255,255,255,.62); }
-        .nav--darktop .nav-links { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.2); }
-        .nav--darktop .nav-links a { color: rgba(255,255,255,.85); }
-        .nav--darktop .nav-links a:hover, .nav--darktop .nav-links a.active { background:#fff; color:#0a0a0a; }
-        .nav--darktop .nav-time { color: rgba(255,255,255,.72); }
-        .nav--darktop .nav-cta .btn--ghost { border-color: rgba(255,255,255,.5); color:#fff; }
-        .nav--darktop .nav-cta .btn--ghost .chip { background:#fff; color:#0a0a0a; }
-        .nav--darktop .nav-hamburger span { background:#fff; }
+        body:not(:has(.home-v1)) .nav--darktop .brand, body:not(:has(.home-v1)) .nav--darktop .brand .wm { color:#fff; }
+        body:not(:has(.home-v1)) .nav--darktop .brand .wm-studio { color: var(--brand); }
+        body:not(:has(.home-v1)) .nav--darktop .brand .wm .small { color: rgba(255,255,255,.62); }
+        body:not(:has(.home-v1)) .nav--darktop .nav-links { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.2); }
+        body:not(:has(.home-v1)) .nav--darktop .nav-links a { color: rgba(255,255,255,.85); }
+        body:not(:has(.home-v1)) .nav--darktop .nav-links a:hover, body:not(:has(.home-v1)) .nav--darktop .nav-links a.active { background:#fff; color:#0a0a0a; }
+        body:not(:has(.home-v1)) .nav--darktop .nav-time { color: rgba(255,255,255,.72); }
+        body:not(:has(.home-v1)) .nav--darktop .nav-cta .btn--ghost { border-color: rgba(255,255,255,.5); color:#fff; }
+        body:not(:has(.home-v1)) .nav--darktop .nav-cta .btn--ghost .chip { background:#fff; color:#0a0a0a; }
+        body:not(:has(.home-v1)) .nav--darktop .nav-hamburger span { background:#fff; }
       ` }} />
       <header
         className={`nav${scrolled ? " scrolled" : ""}${menuOpen ? " menu-open" : ""}${darkTop && !scrolled && !menuOpen ? " nav--darktop" : ""}`}

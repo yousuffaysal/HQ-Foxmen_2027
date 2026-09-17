@@ -1,5 +1,8 @@
 import { sql } from "@/lib/db";
+import HomeClient from "./HomeClient";
 import HomeV2Client from "./HomeV2Client";
+import Footer from "@/components/Footer";
+import { isMobileDevice } from "@/lib/device";
 
 export const dynamic = "force-dynamic";
 
@@ -9,6 +12,8 @@ type DbClient  = { id:number; name:string; industry:string; country:string };
 type DbTesti   = { id:number; quote:string; name:string; role:string; av:string; hi:string; rating:number; img:string };
 
 export default async function Page() {
+  const mobile = await isMobileDevice();
+
   const [svcRes, projRes, clientRes, testiRes] = await Promise.allSettled([
     sql`SELECT * FROM services WHERE visible = true ORDER BY ord ASC`,
     sql`SELECT id, name, tagline, industry, year, scope, status, thumbnail, slug, color_cls, live_url, home_featured, home_order FROM projects ORDER BY home_order ASC, id ASC`,
@@ -26,6 +31,24 @@ export default async function Page() {
 
   const clients: DbClient[]  = clientRes.status === "fulfilled" ? clientRes.value as DbClient[] : [];
   const testis:  DbTesti[]   = testiRes.status  === "fulfilled" ? testiRes.value  as DbTesti[]  : [];
+
+  // Phones keep the previous landing page; the Figma redesign is desktop-only.
+  if (mobile) {
+    return (
+      <>
+        {/* Marker the shell CSS keys off of (light nav, see components/Nav.tsx). */}
+        <div className="home-v1" hidden aria-hidden="true" />
+        <HomeClient
+          initialServices={services}
+          initialProjects={projects}
+          initialClients={clients}
+          initialTestis={testis}
+        />
+        {/* SiteShell drops the shared footer on "/" for Home V2, so V1 brings its own. */}
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <HomeV2Client
