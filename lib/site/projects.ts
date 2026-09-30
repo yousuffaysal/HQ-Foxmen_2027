@@ -1,4 +1,5 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import { sql } from "@/lib/db";
 import { PROJECT_TAGS, SEED_PROJECTS, slug as toSlug, type SiteProject } from "./data";
 import { str } from "./sanitize";
@@ -58,7 +59,17 @@ function ensure() {
   return ready;
 }
 
+export const PROJECTS_TAG = "site-projects";
+
+// Public reads are cached under PROJECTS_TAG; admin writes expire the tag so edits show up
+// on the very next request (see app/api/site/admin/projects). The admin reads uncached.
+const cachedVisible = unstable_cache(() => readProjects(false), ["site-projects-visible"], { tags: [PROJECTS_TAG], revalidate: 300 });
+
 export async function listProjects({ includeHidden = false } = {}): Promise<SiteProject[]> {
+  return includeHidden ? readProjects(true) : cachedVisible();
+}
+
+async function readProjects(includeHidden: boolean): Promise<SiteProject[]> {
   try {
     await ensure();
     const rows = (includeHidden

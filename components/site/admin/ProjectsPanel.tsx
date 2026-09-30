@@ -22,7 +22,7 @@ export default function ProjectsPanel({ items, setItems, onError }: { items: Sit
   const toggleVisible = async (p: SiteProject) => {
     const prev = items;
     setItems(items.map(x => (x.id === p.id ? { ...x, visible: !x.visible } : x)));
-    try { await call("/api/site/admin/projects", "PATCH", { id: p.id, visible: !p.visible }); } catch (e) { setItems(prev); fail(e); }
+    try { await call("/api/site/admin/projects", "PATCH", { id: p.id, visible: !p.visible, slug: p.slug }); } catch (e) { setItems(prev); fail(e); }
   };
 
   const move = async (i: number, d: -1 | 1) => {
@@ -37,7 +37,8 @@ export default function ProjectsPanel({ items, setItems, onError }: { items: Sit
     e.preventDefault();
     if (!draft || saving) return;
     setSaving(true);
-    const body = { ...draft, features: draft.features.split("\n").map(s => s.trim()).filter(Boolean) };
+    const oldSlug = draft.id ? items.find(x => x.id === draft.id)?.slug : undefined;
+    const body = { ...draft, oldSlug, features: draft.features.split("\n").map(s => s.trim()).filter(Boolean) };
     try {
       if (draft.id) {
         const p = await call<SiteProject>("/api/site/admin/projects", "PUT", body);
@@ -53,7 +54,7 @@ export default function ProjectsPanel({ items, setItems, onError }: { items: Sit
 
   const remove = async () => {
     if (!draft?.id || !confirm(`Delete "${draft.name}"? Its case study page will disappear from the site.`)) return;
-    try { await call("/api/site/admin/projects", "DELETE", { id: draft.id }); setItems(items.filter(x => x.id !== draft.id)); setDraft(null); } catch (e) { fail(e); }
+    try { await call("/api/site/admin/projects", "DELETE", { id: draft.id, slug: draft.slug }); setItems(items.filter(x => x.id !== draft.id)); setDraft(null); } catch (e) { fail(e); }
   };
 
   const upload = async (key: "heroImage" | "imageA" | "imageB", file: File) => {
