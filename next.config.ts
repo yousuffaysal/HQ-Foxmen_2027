@@ -5,7 +5,7 @@ const securityHeaders = [
   { key: "X-Frame-Options",           value: "SAMEORIGIN" },
   { key: "X-XSS-Protection",          value: "0" }, // legacy auditor is itself exploitable; CSP below replaces it
   { key: "Referrer-Policy",           value: "strict-origin-when-cross-origin" },
-  { key: "Permissions-Policy",        value: "camera=(), microphone=(), geolocation=()" },
+  { key: "Permissions-Policy",        value: "camera=(), microphone=(self), geolocation=()" },
   { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
   // Restrictive directives that don't need per-request nonces: no clickjacking, no <base>
   // hijacking, no plugins, and forms may only post back to this site.
