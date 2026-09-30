@@ -196,7 +196,7 @@ export default function ToolProductPage({ toolId, settings, related }: { toolId:
             <h2 data-reveal="1" style={S("margin:0 0 clamp(28px,4vw,48px);font-size:clamp(40px,6vw,96px);font-weight:800;letter-spacing:-0.068em;line-height:.9;")}>More tools.</h2>
             <div style={S("border-top:1px solid rgba(31,23,18,.14);")}>
               {others.map(x => (
-                <a key={x.id} href={`/tools/${x.slug}`} onClick={openTool(x)} className="hv15" style={S("display:grid;grid-template-columns:48px minmax(0,1.1fr) minmax(0,1fr) auto;gap:12px clamp(16px,3vw,40px);align-items:center;padding:clamp(18px,2vw,26px) 0;border-bottom:1px solid rgba(31,23,18,.14);border-radius:12px;transition:padding .35s ease, background .35s ease;")}>
+                <a key={x.id} href={`/tools/${x.slug}`} onClick={openTool(x)} className="hv15 fx-lib-row" style={S("display:grid;grid-template-columns:48px minmax(0,1.1fr) minmax(0,1fr) auto;gap:12px clamp(16px,3vw,40px);align-items:center;padding:clamp(18px,2vw,26px) 0;border-bottom:1px solid rgba(31,23,18,.14);border-radius:12px;transition:padding .35s ease, background .35s ease;")}>
                   <span style={S("font-family:'JetBrains Mono',monospace;font-size:13px;color:#5E5249;")}>{String(AI_TOOLS.indexOf(x) + 1).padStart(2, "0")}</span>
                   <span style={S("font-size:clamp(22px,2.4vw,36px);font-weight:800;letter-spacing:-0.048em;line-height:1.05;")}>{x.name}</span>
                   <span style={S("font-size:15px;line-height:1.5;color:#5E5249;")}>{x.desc}</span>

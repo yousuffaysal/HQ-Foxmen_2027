@@ -66,3 +66,5 @@ html.fx-js [data-reveal="up"]{transform:translateY(110%)}
   .fx-len{padding:0 8px!important;gap:6px!important;font-size:13px!important;white-space:nowrap}
   .fx-send{margin-left:auto!important;flex:none}
 }
+/* Tool pages: "More tools" rows stack on phones, like the tools list on /tools */
+@media (max-width: 700px){.fx-lib-row{grid-template-columns:minmax(0,1fr)!important}.fx-lib-row > span:last-child{justify-self:start!important}}
