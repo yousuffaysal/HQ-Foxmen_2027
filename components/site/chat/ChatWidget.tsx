@@ -24,6 +24,9 @@ const GENIE: Keyframe[] = [
   { transform: "none", clipPath: "polygon(0 0,100% 0,100% 100%,0 100%)", opacity: 1, borderRadius: "24px" },
 ];
 
+// Closing plays the genie backwards; offsets must be mirrored to stay in increasing order.
+const GENIE_CLOSE: Keyframe[] = [...GENIE].reverse().map(k => (k.offset == null ? { ...k } : { ...k, offset: 1 - (k.offset as number) }));
+
 function load(): Msg[] {
   try { const v = JSON.parse(sessionStorage.getItem(STORE) || "null"); return Array.isArray(v) && v.length ? v : [GREETING]; } catch { return [GREETING]; }
 }
@@ -76,7 +79,7 @@ export default function ChatWidget() {
     setOpen(false);
     if (!el || reduced()) { setShown(false); return; }
     ripple(40, 420);
-    const a = el.animate([...GENIE].reverse(), { duration: 480, easing: "cubic-bezier(.55,0,.75,.2)", fill: "forwards" });
+    const a = el.animate(GENIE_CLOSE, { duration: 480, easing: "cubic-bezier(.55,0,.75,.2)", fill: "forwards" });
     a.onfinish = () => { setShown(false); a.cancel(); btn.current?.focus(); };
   };
 
