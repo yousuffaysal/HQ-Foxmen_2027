@@ -52,7 +52,7 @@ export default function SiteChrome({ children, projects }: { children: ReactNode
   const menuRef = useRef(false);
   useEffect(() => { menuRef.current = menu; }, [menu]);
   const [nextLabel, setNextLabel] = useState("");
-  const [cur, setCur] = useState<"bdt" | "usd">("bdt");
+  const [cur, setCur] = useState<"bdt" | "usd">("usd"); // USD by default; the BDT toggle shows Taka prices
   const [pendingTool, setPendingTool] = useState<string | null>(null);
   const { mobile, narrow } = useViewport();
 
