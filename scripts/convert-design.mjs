@@ -59,6 +59,16 @@ rep('              {{ curTool.short }}\n', '              <span class="fx-pick-l
 rep('<button type="button" onClick="{{ cycleLen }}"', '<button type="button" class="fx-len" onClick="{{ cycleLen }}"');
 rep('<span style="margin-left:auto;font-size:12px;color:#8F8278;padding-right:6px;">Enter to run</span>', '<span class="fx-hide-m" style="margin-left:auto;font-size:12px;color:#8F8278;padding-right:6px;">Enter to run</span>');
 rep('<button type="button" onClick="{{ runChat }}"', '<button type="button" class="fx-send" onClick="{{ runChat }}"');
+// Isaac's face on the "Store assistant" demos (hero card + chatbot section).
+rep('<span style="width:30px;height:30px;border-radius:999px;background:#B86CF9;display:flex;align-items:center;justify-content:center;"><img src="assets/logo.png" alt="" style="width:16px;height:16px;"></span>',
+    '<img src="assets/isaac.svg" alt="Isaac" style="width:30px;height:30px;border-radius:999px;display:block;flex:none;">');
+rep('<div style="width:40px;height:40px;border-radius:999px;background:#B86CF9;display:flex;align-items:center;justify-content:center;"><img src="assets/logo.png" alt="" style="width:22px;height:22px;"></div>',
+    '<img src="assets/isaac.svg" alt="Isaac" style="width:40px;height:40px;border-radius:999px;display:block;flex:none;">');
+// Tools hub: logo on a dark disc (purple on purple was unreadable).
+raw = raw.split('<span style="width:26px;height:26px;border-radius:999px;background:#B86CF9;display:flex;align-items:center;justify-content:center;"><img src="assets/logo.png" alt="" style="width:14px;height:14px;"></span>')
+  .join('<span style="width:26px;height:26px;border-radius:999px;background:#120C09;box-shadow:inset 0 0 0 1px rgba(184,108,249,.45);display:flex;align-items:center;justify-content:center;"><img src="assets/logo.png" alt="" style="width:15px;height:15px;"></span>');
+// Selected-work deck: square cards sized to the viewport (desktop and phone).
+rep('<div style="position:relative;min-height:0;perspective:1600px;">', '<div class="fx-deck-stage" style="position:relative;min-height:0;perspective:1600px;">');
 if (raw.includes("[Phone")) throw new Error("unhandled phone placeholder");
 const lines = raw.split("\n");
 const slice = (a, b) => lines.slice(a - 1, b).join("\n");

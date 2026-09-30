@@ -88,3 +88,7 @@ html.fx-js [data-reveal="up"]{transform:translateY(110%)}
   .fx-bubble{font-size:15px!important}
   .fx-fab-open{opacity:0;pointer-events:none;transform:scale(.6)}
 }
+
+/* Selected-work deck: square cards that fit the screen instead of stretching to its full height */
+.fx-deck-stage{width:min(100%,calc(100svh - 170px));aspect-ratio:1/1;align-self:center;justify-self:center;max-height:100%;clip-path:inset(-30% -12% -3% -12%)}
+@media (max-width: 1099px){.fx-deck-stage{width:min(100%,calc(100svh - 140px))}}

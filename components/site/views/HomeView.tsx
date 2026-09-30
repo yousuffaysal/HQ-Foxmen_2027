@@ -98,9 +98,7 @@ export default function HomeView({ v }: { v: any }) {
             <div style={S("position:relative;width:min(760px,100%);height:100%;")}>
               <div data-depth="18" style={S("position:absolute;left:0;top:14%;width:min(300px,78%);background:#F3EEE4;border-radius:24px;padding:18px;box-shadow:0 30px 60px rgba(0,0,0,.35);")}>
                 <div style={S("display:flex;align-items:center;gap:10px;margin-bottom:12px;")}>
-                  <span style={S("width:30px;height:30px;border-radius:999px;background:#B86CF9;display:flex;align-items:center;justify-content:center;")}>
-                    <img src="/assets/logo.png" alt="" style={S("width:16px;height:16px;")} />
-                  </span>
+                  <img src="/assets/isaac.svg" alt="Isaac" style={S("width:30px;height:30px;border-radius:999px;display:block;flex:none;")} />
                   <span style={S("font-size:14px;font-weight:600;")}>
                     {"Store assistant"}
                   </span>
@@ -318,7 +316,7 @@ export default function HomeView({ v }: { v: any }) {
                 </div>
               </div>
             </div>
-            <div style={S("position:relative;min-height:0;perspective:1600px;")}>
+            <div style={S("position:relative;min-height:0;perspective:1600px;")} className="fx-deck-stage">
               {(v.featured || []).map((p: any, p$i: number) => (
                 <Fragment key={p$i}>
                 <a href="/work" onClick={p.open} data-deckcard="1" style={S(`position:absolute;inset:0;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;background:${p.tint};box-shadow:0 30px 70px rgba(31,23,18,.18);transform-origin:50% 0%;will-change:transform;transform:translateY(115%) rotate(4deg);`)}>
@@ -464,9 +462,7 @@ export default function HomeView({ v }: { v: any }) {
           </div>
           <div data-chat="1" data-reveal="1" style={S("background:#FAF7F1;border-radius:24px;border:1px solid rgba(31,23,18,.1);overflow:hidden;")}>
             <div style={S("display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid rgba(31,23,18,.1);")}>
-              <div style={S("width:40px;height:40px;border-radius:999px;background:#B86CF9;display:flex;align-items:center;justify-content:center;")}>
-                <img src="/assets/logo.png" alt="" style={S("width:22px;height:22px;")} />
-              </div>
+              <img src="/assets/isaac.svg" alt="Isaac" style={S("width:40px;height:40px;border-radius:999px;display:block;flex:none;")} />
               <div>
                 <div style={S("font-weight:600;font-size:15px;")}>
                   {"Store assistant"}

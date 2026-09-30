@@ -51,8 +51,8 @@ export default function ToolsView({ v }: { v: any }) {
             <div style={S("display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap;")} className="fx-toolrow">
               <div style={S("position:relative;")}>
                 <button type="button" onClick={v.togglePick} style={S(`display:flex;align-items:center;gap:8px;height:40px;padding:0 14px 0 8px;border-radius:999px;border:none;cursor:pointer;background:${v.pickBg};color:#1F1712;font-size:14px;font-weight:600;transition:background .25s;`)} className="fx-pick hv1">
-                  <span style={S("width:26px;height:26px;border-radius:999px;background:#B86CF9;display:flex;align-items:center;justify-content:center;")}>
-                    <img src="/assets/logo.png" alt="" style={S("width:14px;height:14px;")} />
+                  <span style={S("width:26px;height:26px;border-radius:999px;background:#120C09;box-shadow:inset 0 0 0 1px rgba(184,108,249,.45);display:flex;align-items:center;justify-content:center;")}>
+                    <img src="/assets/logo.png" alt="" style={S("width:15px;height:15px;")} />
                   </span>
                   <span className="fx-pick-label">
                     {v.curTool.short}
@@ -140,8 +140,8 @@ export default function ToolsView({ v }: { v: any }) {
             <div style={S("margin-top:28px;background:#FAF7F1;border-radius:24px;box-shadow:0 0 0 1px rgba(31,23,18,.1);padding:clamp(20px,3vw,32px);")}>
               <div style={S("display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid rgba(31,23,18,.1);")}>
                 <span style={S("display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;")}>
-                  <span style={S("width:26px;height:26px;border-radius:999px;background:#B86CF9;display:flex;align-items:center;justify-content:center;")}>
-                    <img src="/assets/logo.png" alt="" style={S("width:14px;height:14px;")} />
+                  <span style={S("width:26px;height:26px;border-radius:999px;background:#120C09;box-shadow:inset 0 0 0 1px rgba(184,108,249,.45);display:flex;align-items:center;justify-content:center;")}>
+                    <img src="/assets/logo.png" alt="" style={S("width:15px;height:15px;")} />
                   </span>
                   {v.curTool.name}
                 </span>
