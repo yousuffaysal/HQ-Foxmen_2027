@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     description: "Foxmen Studio builds fast websites, online stores, AI chatbots and custom software for growing businesses worldwide. Designed and coded by hand, with no templates.",
     category: "technology",
   }),
-  title: "Foxmen Studio",
+  title: { default: "Foxmen Studio — Web, AI and Custom Software for Growing Businesses", template: "%s — Foxmen Studio" },
   other: { "p:domain_verify": "21219fd3e40b159af585737929893236" },
 };
 

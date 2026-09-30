@@ -19,3 +19,13 @@ input,textarea,select,button{font-family:Inter,sans-serif}
 html.fx-js [data-reveal="1"]{opacity:0;transform:translateY(40px)}
 html.fx-js [data-reveal="up"]{transform:translateY(110%)}
 @media (prefers-reduced-motion: reduce){html.fx-js [data-reveal]{opacity:1!important;transform:none!important}}
+
+/* Large or zoomed-out screens: the design's header and menu panel are fixed-px while the page
+   type grows with the viewport, so scale them up past the 1440px design width. */
+@media (min-width:1600px){header[data-nav],header[data-nav] ~ div[data-lenis-prevent]{zoom:1.1}}
+@media (min-width:1760px){header[data-nav],header[data-nav] ~ div[data-lenis-prevent]{zoom:1.2}}
+@media (min-width:1920px){header[data-nav],header[data-nav] ~ div[data-lenis-prevent]{zoom:1.3}}
+@media (min-width:2160px){header[data-nav],header[data-nav] ~ div[data-lenis-prevent]{zoom:1.45}}
+@media (min-width:2400px){header[data-nav],header[data-nav] ~ div[data-lenis-prevent]{zoom:1.6}}
+@media (min-width:2720px){header[data-nav],header[data-nav] ~ div[data-lenis-prevent]{zoom:1.8}}
+@media (min-width:3200px){header[data-nav],header[data-nav] ~ div[data-lenis-prevent]{zoom:2}}
