@@ -14,15 +14,9 @@ export default function HomeView({ v }: { v: any }) {
       {/* 01 Hero */}
       <section style={S("position:relative;padding:clamp(96px,12vh,124px) clamp(20px,4.5vw,64px) 0;")}>
         <div style={S("max-width:1440px;margin:0 auto;position:relative;")}>
-          <div data-reveal="1" style={S("display:inline-flex;align-items:center;gap:10px;padding:8px 16px 8px 10px;border-radius:999px;background:#FAF7F1;box-shadow:inset 0 0 0 1px rgba(31,23,18,.1);font-size:14px;font-weight:600;margin-bottom:clamp(24px,4vh,40px);")}>
-            <span style={S("width:22px;height:22px;border-radius:999px;background:#B86CF9;display:flex;align-items:center;justify-content:center;")}>
-              <img src="/assets/logo.png" alt="" style={S("width:13px;height:13px;")} />
-            </span>
-            {"Web, AI and custom software studio"}
-          </div>
           {v.clutchHref ? (
             <>
-            <a data-reveal="1" data-delay="80" href={v.clutchHref} target="_blank" rel="noopener" aria-label="Foxmen Studio is verified on Clutch" style={S("display:inline-flex;align-items:center;gap:10px;margin-left:8px;padding:8px 16px 8px 8px;border-radius:999px;background:#1F1712;color:#F3EEE4;font-size:14px;font-weight:600;margin-bottom:clamp(24px,4vh,40px);vertical-align:top;")}>
+            <a data-reveal="1" href={v.clutchHref} target="_blank" rel="noopener" aria-label="Foxmen Studio is verified on Clutch" style={S("display:inline-flex;align-items:center;gap:10px;padding:8px 16px 8px 8px;border-radius:999px;background:#1F1712;color:#F3EEE4;font-size:14px;font-weight:600;margin-bottom:clamp(24px,4vh,40px);vertical-align:top;")}>
               <span style={S("width:22px;height:22px;border-radius:999px;background:#B86CF9;display:flex;align-items:center;justify-content:center;flex:none;")}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1F1712" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 12l5 5L20 7"></path>
@@ -42,7 +36,7 @@ export default function HomeView({ v }: { v: any }) {
           ) : null}
           {v.noClutchHref ? (
             <>
-            <span data-reveal="1" data-delay="80" style={S("display:inline-flex;align-items:center;gap:10px;margin-left:8px;padding:8px 16px 8px 8px;border-radius:999px;background:#1F1712;color:#F3EEE4;font-size:14px;font-weight:600;margin-bottom:clamp(24px,4vh,40px);vertical-align:top;")}>
+            <span data-reveal="1" style={S("display:inline-flex;align-items:center;gap:10px;padding:8px 16px 8px 8px;border-radius:999px;background:#1F1712;color:#F3EEE4;font-size:14px;font-weight:600;margin-bottom:clamp(24px,4vh,40px);vertical-align:top;")}>
               <span style={S("width:22px;height:22px;border-radius:999px;background:#B86CF9;display:flex;align-items:center;justify-content:center;flex:none;")}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1F1712" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 12l5 5L20 7"></path>
@@ -180,11 +174,19 @@ export default function HomeView({ v }: { v: any }) {
       <section style={S("padding:clamp(88px,10vw,140px) clamp(20px,4.5vw,64px) clamp(40px,6vw,80px);")}>
         <div style={S("max-width:1440px;margin:0 auto;")}>
           <div style={S("display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:clamp(40px,6vw,72px);")}>
-            <h2 data-reveal="1" style={S("margin:0;font-size:clamp(44px,7.5vw,120px);font-weight:800;letter-spacing:-0.068em;line-height:.92;")}>
-              {"Six ways"}
-              <br />
-              {"we can help."}
-            </h2>
+            <div>
+              <div data-reveal="1" style={S("display:inline-flex;align-items:center;gap:10px;padding:8px 16px 8px 8px;border-radius:999px;background:#FAF7F1;box-shadow:inset 0 0 0 1px rgba(31,23,18,.1);font-size:14px;font-weight:600;margin-bottom:24px;")}>
+                <span style={S("width:26px;height:26px;border-radius:999px;background:#120C09;box-shadow:inset 0 0 0 1px rgba(184,108,249,.45);display:flex;align-items:center;justify-content:center;flex:none;")}>
+                  <img src="/assets/logo.png" alt="" style={S("width:15px;height:15px;")} />
+                </span>
+                {"Web, AI and custom software studio"}
+              </div>
+              <h2 data-reveal="1" style={S("margin:0;font-size:clamp(44px,7.5vw,120px);font-weight:800;letter-spacing:-0.068em;line-height:.92;")}>
+                {"Six ways"}
+                <br />
+                {"we can help."}
+              </h2>
+            </div>
             <div data-reveal="1" data-delay="120">
               <Btn label="All services" variant="light" href="/services" onClick={v.go.services} />
             </div>
