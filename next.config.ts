@@ -42,7 +42,7 @@ const nextConfig: NextConfig = {
       // Pages from the previous site that the redesign retired (code kept in app/_legacy).
       { source: "/journal", destination: "/", permanent: false },
       { source: "/journal/:path*", destination: "/", permanent: false },
-      { source: "/tools/:path+", destination: "/tools", permanent: false },
+      { source: "/tools/:slug(website-speed-checker|roast-my-website|price-calculator|tech-stack-recommender|agency-rate-comparator)", destination: "/tools", permanent: false },
       { source: "/services/:path+", destination: "/services", permanent: false },
       // Case-study slugs from the previous site's database.
       { source: "/work/redleaf-ai-powered-ecommerce", destination: "/work/redleaf", permanent: true },

@@ -126,6 +126,13 @@ export default function ToolsView({ v }: { v: any }) {
               </Fragment>
             ))}
           </div>
+          {v.showLoader ? (
+            <>
+            <div style={S("margin-top:28px;")}>
+              {v.loaderNode}
+            </div>
+            </>
+          ) : null}
           {v.hasOut ? (
             <>
             <div style={S("margin-top:28px;background:#FAF7F1;border-radius:24px;box-shadow:0 0 0 1px rgba(31,23,18,.1);padding:clamp(20px,3vw,32px);")}>

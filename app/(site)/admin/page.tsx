@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import AdminPage from "@/components/site/pages/AdminPage";
 import { getAiRuns, listConsultations, listInquiries, type Consultation, type Inquiry } from "@/lib/site/store";
 import { listProjects } from "@/lib/site/projects";
+import { getToolSettings } from "@/lib/site/tools-store";
 
 export const metadata: Metadata = { title: "Admin", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -18,6 +19,6 @@ export default async function Page() {
   let dbError = false;
   try { [inquiries, consultations] = await Promise.all([listInquiries(), listConsultations()]); }
   catch (e) { console.error("[admin] load", e); dbError = true; }
-  const [projects, runs] = await Promise.all([listProjects({ includeHidden: true }), getAiRuns()]);
-  return <AdminPage initialInquiries={inquiries} initialConsultations={consultations} initialProjects={projects} runs={runs} dbError={dbError} />;
+  const [projects, runs, tools] = await Promise.all([listProjects({ includeHidden: true }), getAiRuns(), getToolSettings({ live: true })]);
+  return <AdminPage initialInquiries={inquiries} initialConsultations={consultations} initialProjects={projects} initialTools={tools} runs={runs} dbError={dbError} />;
 }

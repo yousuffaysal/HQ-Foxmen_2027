@@ -1,4 +1,5 @@
 import "server-only";
+import { GROQ_MODEL } from "@/lib/ai";
 import { AI_TOOLS } from "./data";
 
 // Tool prompts from the design, kept server-side so clients can only pick a tool id,
@@ -31,5 +32,28 @@ export function buildToolPrompt(id: string, text: string, len: number): string |
   const lenLine = ["Keep the answer short and to the point.", "", "Give a detailed, thorough answer."][len] ?? "";
   return 'You are the "' + t.name + '" tool. ' + t.desc + "\nThe user wrote (it may cover: " + (t.fields || []).map(f => f.label).join("; ") + "):\n\n" + text + "\n\nTask: " + prompt(fill) + " " + lenLine;
 }
+
+// Product pages send one value per field: the prompt gets the real values instead of the
+// free-text box plus a "(see above)" placeholder, which is shorter and more precise.
+export function buildFieldsPrompt(id: string, raw: Record<string, unknown>, len: number): { prompt: string; input: string } | null {
+  const t = AI_TOOLS.find(x => x.id === id);
+  const prompt = PROMPTS[id];
+  if (!t || !prompt || !t.fields) return null;
+  const v: Record<string, string> = {};
+  for (const f of t.fields) {
+    const val = typeof raw[f.k] === "string" ? (raw[f.k] as string).trim().slice(0, f.long ? 2500 : 300) : "";
+    v[f.k] = val || "(not specified)";
+  }
+  if (t.fields.every(f => v[f.k] === "(not specified)")) return null;
+  const lenLine = ["Keep the answer short and to the point.", "", "Give a detailed, thorough answer."][len] ?? "";
+  return { prompt: (prompt(v) + " " + lenLine).trim(), input: t.fields.map(f => v[f.k]).join(" | ") };
+}
+
+// Cheaper, faster model for simple tools; the large one where reasoning quality matters.
+export const FAST_MODEL = process.env.GROQ_MODEL_FAST || "openai/gpt-oss-20b";
+export const modelFor = (id: string) => (AI_TOOLS.find(t => t.id === id)?.tier === "fast" ? FAST_MODEL : GROQ_MODEL);
+
+// Output budget per length setting (includes the model's short reasoning pass).
+export const maxTokensFor = (len: number) => [700, 1200, 2000][len] ?? 1200;
 
 export const cleanOutput = (s: string) => s.replace(/\s*—\s*/g, ", ").replace(/\*\*/g, "").replace(/^#+\s*/gm, "");

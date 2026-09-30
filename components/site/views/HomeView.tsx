@@ -20,6 +20,46 @@ export default function HomeView({ v }: { v: any }) {
             </span>
             {"Web, AI and custom software studio"}
           </div>
+          {v.clutchHref ? (
+            <>
+            <a data-reveal="1" data-delay="80" href={v.clutchHref} target="_blank" rel="noopener" aria-label="Foxmen Studio is verified on Clutch" style={S("display:inline-flex;align-items:center;gap:10px;margin-left:8px;padding:8px 16px 8px 8px;border-radius:999px;background:#1F1712;color:#F3EEE4;font-size:14px;font-weight:600;margin-bottom:clamp(24px,4vh,40px);vertical-align:top;")}>
+              <span style={S("width:22px;height:22px;border-radius:999px;background:#B86CF9;display:flex;align-items:center;justify-content:center;flex:none;")}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1F1712" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12l5 5L20 7"></path>
+                </svg>
+              </span>
+              <span style={S("font-weight:800;font-size:15px;letter-spacing:-0.035em;")}>
+                {"Clutch"}
+                <span style={S("color:#EF4335;")}>
+                  {"."}
+                </span>
+              </span>
+              <span style={S("color:rgba(243,238,228,.72);")}>
+                {"Verified agency"}
+              </span>
+            </a>
+            </>
+          ) : null}
+          {v.noClutchHref ? (
+            <>
+            <span data-reveal="1" data-delay="80" style={S("display:inline-flex;align-items:center;gap:10px;margin-left:8px;padding:8px 16px 8px 8px;border-radius:999px;background:#1F1712;color:#F3EEE4;font-size:14px;font-weight:600;margin-bottom:clamp(24px,4vh,40px);vertical-align:top;")}>
+              <span style={S("width:22px;height:22px;border-radius:999px;background:#B86CF9;display:flex;align-items:center;justify-content:center;flex:none;")}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1F1712" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12l5 5L20 7"></path>
+                </svg>
+              </span>
+              <span style={S("font-weight:800;font-size:15px;letter-spacing:-0.035em;")}>
+                {"Clutch"}
+                <span style={S("color:#EF4335;")}>
+                  {"."}
+                </span>
+              </span>
+              <span style={S("color:rgba(243,238,228,.72);")}>
+                {"Verified agency"}
+              </span>
+            </span>
+            </>
+          ) : null}
           <h1 style={S("margin:0;font-size:clamp(52px,10.4vw,184px);font-weight:800;letter-spacing:-0.068em;line-height:.92;")}>
             <div style={S("overflow:hidden;padding-bottom:.04em;")}>
               <div data-reveal="up">

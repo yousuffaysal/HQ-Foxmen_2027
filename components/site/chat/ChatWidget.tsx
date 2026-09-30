@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { S } from "../style";
+import ThinkingLoader from "../tools/ThinkingLoader";
 
 // Floating AI assistant. Opens with a "genie" motion (the panel is pulled out of the button
 // through a funnel) while an SVG turbulence/displacement filter ripples it like water.
@@ -10,10 +11,10 @@ type Msg = { role: "user" | "assistant"; content: string; booked?: string; sent?
 
 const GREETING: Msg = {
   role: "assistant",
-  content: "Good day, sir. I am the Foxmen Studio assistant. I can answer questions about our services, prices and work, or book a free consultation with our team. How may I help you?",
+  content: "Good day, sir. I am Isaac, the Foxmen Studio assistant. I can answer questions about our services, prices and work, or book a free consultation with our team. How may I help you?",
 };
 const QUICK = ["Book a consultation", "What do you build?", "How much does a website cost?", "Show me your work"];
-const STORE = "fx-assistant-v1";
+const STORE = "fx-assistant-v2";
 const EASE = "cubic-bezier(.2,.85,.25,1)";
 
 // Genie keyframes: 4-point clip-paths so the browser can interpolate the funnel shape.
@@ -127,15 +128,15 @@ export default function ChatWidget() {
         <div
           ref={panel}
           role="dialog"
-          aria-label="Foxmen Studio assistant"
+          aria-label="Isaac, Foxmen Studio assistant"
           style={S("position:fixed;right:clamp(12px,2vw,28px);bottom:calc(clamp(12px,2vw,28px) + 76px);z-index:80;width:min(400px,calc(100vw - 24px));height:min(620px,calc(100vh - 120px));transform-origin:calc(100% - 32px) calc(100% + 44px);will-change:transform,clip-path;border-radius:24px;")}
         >
           <BorderBeam size="md" colorVariant="ocean" theme="dark" style={{ height: "100%", borderRadius: 24 }}>
             <div style={S("height:100%;display:flex;flex-direction:column;background:#1F1712;color:#F3EEE4;border-radius:24px;overflow:hidden;box-shadow:0 30px 70px rgba(31,23,18,.35), inset 0 0 0 1px rgba(243,238,228,.06);font-family:Inter,sans-serif;")}>
               <div style={S("display:flex;align-items:center;gap:12px;padding:14px 14px 14px 16px;border-bottom:1px solid rgba(243,238,228,.1);")}>
-                <span style={S("width:40px;height:40px;border-radius:999px;background:#B86CF9;display:flex;align-items:center;justify-content:center;flex:none;")}><img src="/assets/logo.png" alt="" style={S("width:22px;height:22px;")} /></span>
+                <span style={S("width:40px;height:40px;border-radius:999px;background:#120C09;box-shadow:inset 0 0 0 1px rgba(184,108,249,.35);display:flex;align-items:center;justify-content:center;flex:none;")}><img src="/assets/logo.png" alt="" style={S("width:22px;height:22px;")} /></span>
                 <div style={S("min-width:0;flex:1;")}>
-                  <div style={S("font-weight:700;font-size:15px;letter-spacing:-0.01em;")}>Foxmen Assistant</div>
+                  <div style={S("font-weight:700;font-size:15px;letter-spacing:-0.01em;")}>Isaac <span style={S("font-weight:500;color:rgba(243,238,228,.55);")}>· Foxmen Studio</span></div>
                   <div style={S("font-size:12px;color:rgba(243,238,228,.6);display:flex;align-items:center;gap:6px;")}><span style={S("width:7px;height:7px;border-radius:999px;background:#3BA55C;")}></span>Online · books consultations</div>
                 </div>
                 {!onlyGreeting ? <button onClick={reset} style={S("border:none;background:transparent;color:rgba(243,238,228,.6);font-size:12px;font-weight:600;cursor:pointer;padding:8px;")}>New chat</button> : null}
@@ -155,11 +156,7 @@ export default function ChatWidget() {
                     {m.sent ? <div style={S("font-size:12px;color:rgba(243,238,228,.6);")}>Message delivered to the Foxmen team</div> : null}
                   </div>
                 ))}
-                {busy ? (
-                  <div style={S("display:flex;gap:5px;padding:14px 16px;border-radius:16px;background:rgba(243,238,228,.08);width:max-content;")}>
-                    {[0, 0.2, 0.4].map(d => <span key={d} style={S(`width:7px;height:7px;border-radius:999px;background:#F3EEE4;animation:fxblink 1s ${d}s infinite;`)}></span>)}
-                  </div>
-                ) : null}
+                {busy ? <div style={S("max-width:86%;")}><ThinkingLoader tool="chat" dark compact /></div> : null}
                 {onlyGreeting ? (
                   <div style={S("display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;")}>
                     {QUICK.map(q => <button key={q} onClick={() => send(q)} style={S("border:none;cursor:pointer;padding:9px 14px;border-radius:999px;font-size:13px;font-weight:600;background:transparent;color:#F3EEE4;box-shadow:inset 0 0 0 1px rgba(243,238,228,.22);")} className="hv13">{q}</button>)}
@@ -197,17 +194,17 @@ export default function ChatWidget() {
       <button
         ref={btn}
         onClick={toggle}
-        aria-label={open ? "Close assistant" : "Open Foxmen assistant"}
+        aria-label={open ? "Close assistant" : "Chat with Isaac, the Foxmen assistant"}
         aria-expanded={open}
         className="fx-fab"
         style={S("position:fixed;right:clamp(12px,2vw,28px);bottom:clamp(12px,2vw,28px);z-index:81;width:64px;height:64px;border-radius:999px;border:none;cursor:pointer;background:#1F1712;display:flex;align-items:center;justify-content:center;box-shadow:0 14px 34px rgba(31,23,18,.3);")}
       >
         <span className="fx-fab-ring" aria-hidden="true" />
         <span className="fx-fab-ring fx-fab-ring2" aria-hidden="true" />
-        <span style={S(`width:44px;height:44px;border-radius:999px;background:#B86CF9;display:flex;align-items:center;justify-content:center;transition:transform .45s cubic-bezier(.2,.7,.2,1);transform:${open ? "rotate(135deg)" : "none"};`)}>
+        <span style={S(`width:48px;height:48px;border-radius:999px;background:#120C09;box-shadow:inset 0 0 0 1.5px rgba(184,108,249,.45);display:flex;align-items:center;justify-content:center;transition:transform .45s cubic-bezier(.2,.7,.2,1);transform:${open ? "rotate(135deg)" : "none"};`)}>
           {open
-            ? <span style={S("font-size:28px;font-weight:400;line-height:1;color:#1F1712;")}>+</span>
-            : <img src="/assets/logo.png" alt="" style={S("width:24px;height:24px;")} />}
+            ? <span style={S("font-size:28px;font-weight:400;line-height:1;color:#B86CF9;")}>+</span>
+            : <img src="/assets/logo.png" alt="" style={S("width:28px;height:28px;")} />}
         </span>
       </button>
     </>

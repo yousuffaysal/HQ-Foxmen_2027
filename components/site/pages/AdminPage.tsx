@@ -9,17 +9,18 @@ import { call } from "../admin/ui";
 import MessagesPanel from "../admin/MessagesPanel";
 import ConsultationsPanel from "../admin/ConsultationsPanel";
 import ProjectsPanel from "../admin/ProjectsPanel";
-import { SERVICES, TINTS, type SiteProject } from "@/lib/site/data";
+import ToolsPanel from "../admin/ToolsPanel";
+import { SERVICES, TINTS, type SiteProject, type ToolSettings } from "@/lib/site/data";
 import type { Consultation, Inquiry } from "@/lib/site/store";
 
-const TITLES: Record<string, string> = { overview: "Overview", inquiries: "Inquiries", messages: "Messages", consultations: "Consultations", projects: "Projects", services: "Services and prices" };
+const TITLES: Record<string, string> = { overview: "Overview", inquiries: "Inquiries", messages: "Messages", consultations: "Consultations", projects: "Projects", tools: "AI tools", services: "Services and prices" };
 const STATUS_BG: Record<string, string> = { New: "#B86CF9", Contacted: "#EAE3D6", Won: "#CFE8D2", Lost: "#F1D9D2" };
 
 const noSub = () => () => {};
 const localToday = () => new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
-export default function AdminPage({ initialInquiries, initialConsultations, initialProjects, runs, dbError }: {
-  initialInquiries: Inquiry[]; initialConsultations: Consultation[]; initialProjects: SiteProject[]; runs: number; dbError: boolean;
+export default function AdminPage({ initialInquiries, initialConsultations, initialProjects, initialTools, runs, dbError }: {
+  initialInquiries: Inquiry[]; initialConsultations: Consultation[]; initialProjects: SiteProject[]; initialTools: ToolSettings[]; runs: number; dbError: boolean;
 }) {
   const router = useRouter();
   const { mobile: M } = useViewport();
@@ -57,7 +58,7 @@ export default function AdminPage({ initialInquiries, initialConsultations, init
   const visibleCount = projects.filter(p => p.visible).length;
   const tabs: [string, string, string][] = [
     ["overview", "Overview", ""], ["inquiries", "Inquiries", String(newCount)], ["messages", "Messages", unread ? String(unread) : ""],
-    ["consultations", "Consultations", requested ? String(requested) : ""], ["projects", "Projects", String(visibleCount)], ["services", "Services and prices", ""],
+    ["consultations", "Consultations", requested ? String(requested) : ""], ["projects", "Projects", String(visibleCount)], ["tools", "AI tools", ""], ["services", "Services and prices", ""],
   ];
 
   const extra =
@@ -66,6 +67,7 @@ export default function AdminPage({ initialInquiries, initialConsultations, init
         onStatus={(id, status) => mutateCon(consults.map(c => (c.id === id ? { ...c, status } : c)), () => call("/api/site/admin/consultations", "PATCH", { id, status }))}
         onDelete={id => mutateCon(consults.filter(c => c.id !== id), () => call("/api/site/admin/consultations", "DELETE", { id }))} />
     : tab === "projects" ? <ProjectsPanel items={projects} setItems={setProjects} onError={setErr} />
+    : tab === "tools" ? <ToolsPanel items={initialTools} onError={setErr} />
     : null;
 
   const v = {

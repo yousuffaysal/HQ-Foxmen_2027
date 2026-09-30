@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import HomeView from "../views/HomeView";
 import { useSite } from "../SiteChrome";
 import { currencyVals, projectVals, serviceVals, PRINCIPLES, PROCESS } from "../values";
-import { FAQS, HERO_WORDS, TECH, TECH_GROUPS, TOOLS } from "@/lib/site/data";
+import { CLUTCH_URL, FAQS, HERO_WORDS, TECH, TECH_GROUPS, TOOLS } from "@/lib/site/data";
 
 const CHAT = [
   { u: 1, t: "Hi, do you have the rose print kurti in size M?" },
@@ -55,6 +55,7 @@ export default function HomePage() {
   const shown = Math.min(chat, CHAT.length);
   const v = {
     go,
+    clutchHref: CLUTCH_URL, noClutchHref: !CLUTCH_URL,
     heroWords: HERO_WORDS.map((w, i) => { const k = heroI % HERO_WORDS.length, prev = (k + HERO_WORDS.length - 1) % HERO_WORDS.length; return { word: w, t: i === k ? "none" : i === prev ? "translateY(-105%)" : "translateY(105%)" }; }),
     marquee: [...Array(2)].flatMap(() => ["Websites", "E-commerce", "3D Web", "AI Chatbots", "Custom Apps", "Care Plans"]),
     words: "We build fast websites, online stores, AI assistants and custom software for growing businesses. Everything is written in code, made to bring in customers and built to last.".split(" "),

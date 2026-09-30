@@ -5,7 +5,7 @@ import { S } from "./style";
 import { FxRuntime } from "./runtime";
 import HeaderView from "./views/HeaderView";
 import FooterView from "./views/FooterView";
-import { CONTACT, LABELS, PAGES, SERVICES, pathOf, type SiteProject } from "@/lib/site/data";
+import { AI_TOOLS, CONTACT, LABELS, PAGES, SERVICES, pathOf, type SiteProject } from "@/lib/site/data";
 import ChatWidget from "./chat/ChatWidget";
 
 type Go = Record<string, (e?: MouseEvent) => void>;
@@ -121,10 +121,10 @@ export default function SiteChrome({ children, projects }: { children: ReactNode
 
   const openTool = useCallback((id: string) => (e?: MouseEvent) => {
     e?.preventDefault();
-    setPendingTool(id);
-    if (pathname === "/tools") rt.current?.scrollTop();
-    else navigate("/tools", LABELS.tools);
-  }, [navigate, pathname]);
+    // Every AI tool has its own product page.
+    const t = AI_TOOLS.find(x => x.id === id);
+    if (t) navigate(`/tools/${t.slug}`, t.name); else { setPendingTool(id); navigate("/tools", LABELS.tools); }
+  }, [navigate]);
 
   const ctx: Ctx = {
     go, navigate, openProject, openTool, cur, setCur, pendingTool, mobile, narrow, projects,

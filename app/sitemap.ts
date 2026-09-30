@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { listProjects } from "@/lib/site/projects";
+import { AI_TOOLS } from "@/lib/site/data";
 
 const BASE = "https://www.foxmen.studio";
 export const revalidate = 3600;
@@ -12,6 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
   return [
     ...pages.map(([p, changeFrequency, priority]) => ({ url: BASE + p, lastModified: now, changeFrequency, priority })),
+    ...AI_TOOLS.map(t => ({ url: `${BASE}/tools/${t.slug}`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.7 })),
     ...(await listProjects()).map(p => ({ url: `${BASE}/work/${p.slug}`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.7 })),
   ];
 }

@@ -37,3 +37,20 @@ html.fx-js [data-reveal="up"]{transform:translateY(110%)}
 .fx-fab-ring2{animation-delay:1.4s}
 @keyframes fxring{0%{transform:scale(1);opacity:.55}100%{transform:scale(1.9);opacity:0}}
 @media (prefers-reduced-motion: reduce){.fx-fab-ring{animation:none}}
+
+/* AI waiting animation (components/site/tools/ThinkingLoader.tsx) */
+.fx-orb{position:relative;flex:none;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 30%,#D4A6FF,#B86CF9 45%,#7C3FD0);border-radius:42% 58% 63% 37% / 41% 44% 56% 59%;animation:fxmorph 6s ease-in-out infinite,fxspin 9s linear infinite;box-shadow:0 10px 30px rgba(184,108,249,.45)}
+.fx-orb-core{width:30%;height:30%;border-radius:999px;background:#1F1712;animation:fxpulse 1.4s ease-in-out infinite}
+@keyframes fxmorph{0%,100%{border-radius:42% 58% 63% 37% / 41% 44% 56% 59%}33%{border-radius:63% 37% 45% 55% / 55% 62% 38% 45%}66%{border-radius:38% 62% 36% 64% / 62% 38% 62% 38%}}
+@keyframes fxspin{to{transform:rotate(360deg)}}
+@keyframes fxpulse{0%,100%{transform:scale(.8);opacity:.85}50%{transform:scale(1.15);opacity:1}}
+.fx-fadeup{animation:fxfadeup .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes fxfadeup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.fx-ellipsis::after{content:"";display:inline-block;width:1.2em;text-align:left;animation:fxdots 1.2s steps(4,end) infinite}
+@keyframes fxdots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+.fx-indet{height:100%;width:35%;border-radius:999px;background:linear-gradient(90deg,transparent,#B86CF9,transparent);animation:fxindet 1.3s ease-in-out infinite}
+@keyframes fxindet{from{transform:translateX(-100%)}to{transform:translateX(300%)}}
+.fx-shimmer{background-image:linear-gradient(90deg,transparent 0%,rgba(184,108,249,.22) 50%,transparent 100%);background-size:200% 100%;background-repeat:no-repeat;animation:fxshimmer 1.5s linear infinite}
+@keyframes fxshimmer{from{background-position:-150% 0}to{background-position:250% 0}}
+.fx-caret::after{content:"";display:inline-block;width:.55em;height:1em;margin-left:2px;vertical-align:-2px;background:#B86CF9;border-radius:2px;animation:fxblink 1s infinite}
+@media (prefers-reduced-motion: reduce){.fx-orb,.fx-orb-core,.fx-indet,.fx-shimmer,.fx-fadeup{animation:none}}
