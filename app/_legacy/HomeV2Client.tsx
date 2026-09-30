@@ -10,7 +10,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
-import ProjectEstimator from "@/app/components/ProjectEstimator";
+import ProjectEstimator from "@/app/_legacy/components/ProjectEstimator";
 import NewsletterForm from "@/components/NewsletterForm";
 import "./home-v2.css";
 

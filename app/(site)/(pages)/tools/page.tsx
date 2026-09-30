@@ -1,0 +1,9 @@
+import type { Metadata } from "next";
+import ToolsPage from "@/components/site/pages/ToolsPage";
+import { constructMetadata } from "@/lib/metadata";
+
+export const metadata: Metadata = constructMetadata({ title: "Free AI tools", description: "Free AI tools for your business: website copy, SEO meta, product descriptions, name ideas, chatbot FAQs, translation and more.", url: "/tools" });
+
+export default function Page() {
+  return <ToolsPage />;
+}

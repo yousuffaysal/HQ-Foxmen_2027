@@ -1,3 +1,5 @@
+import { GROQ_MODEL } from "@/lib/ai";
+import { clientIp, rateLimit } from "@/lib/site/store";
 import { NextResponse } from "next/server";
 
 const SYSTEM_PROMPT = `You are Foxo, the AI assistant for Foxmen Studio — a premium global digital product agency. You are smart, friendly, and focused on helping visitors understand what Foxmen Studio does and how it can help them.
@@ -45,6 +47,7 @@ Clients can reach out via the contact form at foxmen.studio/contact, or start a 
 - You can use light markdown (bold for emphasis) but keep it readable as plain text too.`;
 
 export async function POST(req: Request) {
+  if (!(await rateLimit("foxo-chat", clientIp(req), 30, 600))) return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
   const { messages } = await req.json() as {
     messages: { role: "user" | "assistant"; content: string }[];
   };
@@ -62,7 +65,7 @@ export async function POST(req: Request) {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "llama-3.3-70b-versatile",
+      model: GROQ_MODEL,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         ...messages.slice(-12),

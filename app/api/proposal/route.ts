@@ -1,3 +1,4 @@
+import { GROQ_MODEL } from "@/lib/ai";
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import { requireAdmin } from "@/lib/require-admin";
@@ -37,7 +38,7 @@ Return this exact JSON shape (all values must be non-empty strings/arrays):
 
   try {
     const chat = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: GROQ_MODEL,
       messages: [{ role: "system", content: SYSTEM }, { role: "user", content: prompt }],
       temperature: 0.45,
       max_tokens: 2400,

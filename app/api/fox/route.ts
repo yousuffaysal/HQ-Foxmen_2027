@@ -1,3 +1,5 @@
+import { GROQ_MODEL } from "@/lib/ai";
+import { clientIp, rateLimit } from "@/lib/site/store";
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 import Groq from "groq-sdk";
@@ -146,6 +148,7 @@ function emailHtml(
 }
 
 export async function POST(req: Request) {
+  if (!(await rateLimit("fox", clientIp(req), 20, 600))) return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
   try {
     const { messages, email, projectType, features, totalMin, totalMax, process: phases } = await req.json();
 
@@ -186,7 +189,7 @@ export async function POST(req: Request) {
 
     // ── AI chat ──────────────────────────────────────────────
     const chat = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: GROQ_MODEL,
       messages: [
         { role: "system", content: SYSTEM },
         ...messages.map((m: ChatMsg) => ({ role: m.role, content: m.content })),

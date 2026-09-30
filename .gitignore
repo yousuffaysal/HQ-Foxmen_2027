@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# design source (contains licensed PP Frama fonts; repo is public). Assets used by the site live in public/assets.
+/foxmen new/

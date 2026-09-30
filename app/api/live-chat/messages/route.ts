@@ -11,6 +11,11 @@ export async function GET(req: Request) {
   if (!session_id && !chat_id)
     return NextResponse.json({ error: "session_id or chat_id required" }, { status: 400 });
 
+  if (chat_id && !session_id) {
+    const s = await auth().catch(() => null);
+    if ((s?.user as { role?: string } | undefined)?.role !== "admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   let chatId = chat_id;
   if (session_id) {
     const rows = await sql`SELECT id FROM live_chats WHERE session_id = ${session_id}` as { id: number }[];

@@ -1,3 +1,5 @@
+import { esc } from "@/lib/site/sanitize";
+import { clientIp, rateLimit } from "@/lib/site/store";
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 
@@ -5,6 +7,7 @@ const NOTIFY_TO = "yousuf.h.faysal@foxmen.studio";
 const FROM      = "Foxmen Studio <team@foxmen.studio>";
 
 export async function POST(req: Request) {
+  if (!(await rateLimit("contact", clientIp(req), 5, 600))) return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
   const { name, email, company, whatsapp, message, budget, service, sources, trial } = await req.json();
 
   if (!name || !email || !message) {
@@ -41,12 +44,13 @@ export async function POST(req: Request) {
 
   // Send email notification (fire-and-forget — don't fail the response if email errors)
   if (process.env.RESEND_API_KEY) {
+    const e = (v: unknown) => esc(String(v ?? ""));
     const rows = [
-      company  && `<tr><td style="color:#888;padding:3px 0;width:110px;vertical-align:top">Company</td><td style="padding:3px 0">${company}</td></tr>`,
-      whatsapp && `<tr><td style="color:#888;padding:3px 0;width:110px;vertical-align:top">WhatsApp</td><td style="padding:3px 0">${whatsapp}</td></tr>`,
-      budget   && `<tr><td style="color:#888;padding:3px 0;width:110px;vertical-align:top">Budget</td><td style="padding:3px 0">${budget}</td></tr>`,
-      service  && `<tr><td style="color:#888;padding:3px 0;width:110px;vertical-align:top">Service</td><td style="padding:3px 0">${service}</td></tr>`,
-      sources?.length && `<tr><td style="color:#888;padding:3px 0;width:110px;vertical-align:top">Heard via</td><td style="padding:3px 0">${sources.join(", ")}</td></tr>`,
+      company  && `<tr><td style="color:#888;padding:3px 0;width:110px;vertical-align:top">Company</td><td style="padding:3px 0">${e(company)}</td></tr>`,
+      whatsapp && `<tr><td style="color:#888;padding:3px 0;width:110px;vertical-align:top">WhatsApp</td><td style="padding:3px 0">${e(whatsapp)}</td></tr>`,
+      budget   && `<tr><td style="color:#888;padding:3px 0;width:110px;vertical-align:top">Budget</td><td style="padding:3px 0">${e(budget)}</td></tr>`,
+      service  && `<tr><td style="color:#888;padding:3px 0;width:110px;vertical-align:top">Service</td><td style="padding:3px 0">${e(service)}</td></tr>`,
+      sources?.length && `<tr><td style="color:#888;padding:3px 0;width:110px;vertical-align:top">Heard via</td><td style="padding:3px 0">${e(sources.join(", "))}</td></tr>`,
       trial    && `<tr><td style="color:#888;padding:3px 0;width:110px;vertical-align:top">Trial</td><td style="padding:3px 0">Yes (20 hrs)</td></tr>`,
     ].filter(Boolean).join("");
 
@@ -59,14 +63,14 @@ export async function POST(req: Request) {
   </div>
   <div style="padding:32px;">
     <p style="margin:0 0 4px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#b86cf9;font-weight:700;">New Enquiry</p>
-    <h1 style="margin:0 0 24px;font-size:24px;color:#0a0a0a;font-weight:400;letter-spacing:-.02em;">${name}</h1>
+    <h1 style="margin:0 0 24px;font-size:24px;color:#0a0a0a;font-weight:400;letter-spacing:-.02em;">${e(name)}</h1>
     <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:24px;">
-      <tr><td style="color:#888;padding:3px 0;width:110px;vertical-align:top">Email</td><td style="padding:3px 0"><a href="mailto:${email}" style="color:#b86cf9;">${email}</a></td></tr>
+      <tr><td style="color:#888;padding:3px 0;width:110px;vertical-align:top">Email</td><td style="padding:3px 0"><a href="mailto:${e(email)}" style="color:#b86cf9;">${e(email)}</a></td></tr>
       ${rows}
     </table>
-    <div style="background:#f8f5f0;border-radius:12px;padding:20px 24px;font-size:15px;line-height:1.7;color:#0a0a0a;white-space:pre-wrap;">${message}</div>
+    <div style="background:#f8f5f0;border-radius:12px;padding:20px 24px;font-size:15px;line-height:1.7;color:#0a0a0a;white-space:pre-wrap;">${e(message)}</div>
     <div style="margin-top:24px;">
-      <a href="mailto:${email}?subject=Re: Your enquiry to Foxmen Studio" style="display:inline-block;background:#b86cf9;color:#fff;padding:10px 22px;border-radius:999px;font-size:13px;text-decoration:none;">Reply to ${name}</a>
+      <a href="mailto:${e(email)}?subject=Re: Your enquiry to Foxmen Studio" style="display:inline-block;background:#b86cf9;color:#fff;padding:10px 22px;border-radius:999px;font-size:13px;text-decoration:none;">Reply to ${e(name)}</a>
     </div>
   </div>
   <div style="padding:16px 32px;border-top:1px solid #f0ede8;font-size:11px;color:#aaa;">Foxmen Studio · foxmen.studio</div>
@@ -76,7 +80,7 @@ export async function POST(req: Request) {
     fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: FROM, to: [NOTIFY_TO], reply_to: email, subject: `New enquiry from ${name}`, html }),
+      body: JSON.stringify({ from: FROM, to: [NOTIFY_TO], reply_to: email, subject: `New enquiry from ${String(name).replace(/[\r\n]/g, " ")}`, html }),
     }).catch(() => {});
   }
 

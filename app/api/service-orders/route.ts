@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { requireAdmin } from "@/lib/require-admin";
+import { clientIp, rateLimit } from "@/lib/site/store";
+import { str } from "@/lib/site/sanitize";
 
 export async function GET() {
+  const deny = await requireAdmin(); if (deny) return deny;
   await sql`
     CREATE TABLE IF NOT EXISTS service_orders (
       id           SERIAL PRIMARY KEY,
@@ -39,23 +43,28 @@ export async function POST(req: Request) {
       submitted_at TIMESTAMPTZ  NOT NULL DEFAULT now()
     )
   `;
-  const { service_name, name, email, company, description, budget, budget_custom, timeline, website } = await req.json();
+  if (!(await rateLimit("service-order", clientIp(req), 5, 600))) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  const b = await req.json().catch(() => ({}));
+  const [service_name, name, email, company, description, budget, budget_custom, timeline, website] =
+    [str(b.service_name, 200), str(b.name, 120), str(b.email, 254), str(b.company, 160), str(b.description, 5000), str(b.budget, 60), str(b.budget_custom, 60), str(b.timeline, 60), str(b.website, 300)];
   if (!name || !email) return NextResponse.json({ error: "name and email required" }, { status: 400 });
   const rows = await sql`
     INSERT INTO service_orders (service_name, name, email, company, description, budget, budget_custom, timeline, website)
     VALUES (${service_name ?? ""}, ${name}, ${email}, ${company ?? ""}, ${description ?? ""}, ${budget ?? ""}, ${budget_custom ?? ""}, ${timeline ?? ""}, ${website ?? ""})
-    RETURNING *
+    RETURNING id
   ` as Record<string, unknown>[];
   return NextResponse.json(rows[0], { status: 201 });
 }
 
 export async function PATCH(req: Request) {
+  const deny = await requireAdmin(); if (deny) return deny;
   const { id, status } = await req.json();
   const rows = await sql`UPDATE service_orders SET status = ${status} WHERE id = ${id} RETURNING *` as Record<string, unknown>[];
   return NextResponse.json(rows[0]);
 }
 
 export async function DELETE(req: Request) {
+  const deny = await requireAdmin(); if (deny) return deny;
   const { id } = await req.json();
   await sql`DELETE FROM service_orders WHERE id = ${id}`;
   return NextResponse.json({ ok: true });

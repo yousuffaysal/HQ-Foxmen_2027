@@ -1,8 +1,10 @@
+import { clientIp, rateLimit } from "@/lib/site/store";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
+  if (!(await rateLimit("tools/speed", clientIp(req), 10, 600))) return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
   // Top-level catch — ensures we ALWAYS return JSON, never HTML
   try {
     let body: { url?: string };

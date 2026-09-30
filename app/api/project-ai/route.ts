@@ -1,4 +1,6 @@
+import { GROQ_MODEL } from "@/lib/ai";
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/require-admin";
 import Groq from "groq-sdk";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -9,6 +11,7 @@ Your job is to turn that into a complete, professional case study entry.
 Respond with valid JSON only — no markdown fences, no extra text.`;
 
 export async function POST(req: Request) {
+  const deny = await requireAdmin(); if (deny) return deny;
   const { description } = await req.json();
   if (!description?.trim())
     return NextResponse.json({ error: "No description provided" }, { status: 400 });
@@ -46,7 +49,7 @@ Rules:
 
   try {
     const chat = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: GROQ_MODEL,
       messages: [{ role: "system", content: SYSTEM }, { role: "user", content: prompt }],
       temperature: 0.4,
       max_tokens: 1200,

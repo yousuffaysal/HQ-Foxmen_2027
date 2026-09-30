@@ -1,3 +1,4 @@
+import { clientIp, rateLimit } from "@/lib/site/store";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { randomBytes } from "crypto";
@@ -31,6 +32,7 @@ async function assignFoxId(userId: number): Promise<string> {
 }
 
 export async function POST(req: Request) {
+  if (!(await rateLimit("auth/register", clientIp(req), 5, 3600))) return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
   await ensureUsersTable();
   const { name, email, password } = await req.json();
   if (!name || !email || !password)

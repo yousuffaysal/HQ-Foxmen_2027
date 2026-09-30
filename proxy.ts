@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 
 export default auth((req) => {
   const session = req.auth;
-  const isLoggedIn = !!session;
+  // Require a real user: on an auth config error req.auth is an error object, which must not count as signed in.
+  const isLoggedIn = !!session?.user;
   const role = (session?.user as { role?: string } | undefined)?.role;
   const { pathname } = req.nextUrl;
 

@@ -1,8 +1,11 @@
+import { GROQ_MODEL } from "@/lib/ai";
+import { clientIp, rateLimit } from "@/lib/site/store";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
+  if (!(await rateLimit("tools/roast", clientIp(req), 10, 600))) return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
   try {
     let body: { url?: string; description?: string };
     try {
@@ -43,7 +46,7 @@ Rules: Start each section with its heading on a new line. Do not use ## or any m
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model: GROQ_MODEL,
         messages: [
           {
             role: "system",

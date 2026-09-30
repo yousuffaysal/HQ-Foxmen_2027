@@ -6,7 +6,7 @@ import { useScrollReveal } from "@/hooks/useScrollReveal";
 import AboutHero from "./AboutHero";
 
 const WorldMapDecoration = dynamic(
-  () => import("@/app/components/WorldMapLeaflet"),
+  () => import("@/app/_legacy/components/WorldMapLeaflet"),
   { ssr: false, loading: () => <div style={{ width: "100%", height: "100%" }} /> }
 );
 

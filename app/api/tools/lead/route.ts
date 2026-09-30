@@ -1,3 +1,4 @@
+import { clientIp, rateLimit } from "@/lib/site/store";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -500,6 +501,7 @@ function buildRateEmail(data: Record<string, unknown>): { subject: string; html:
 ════════════════════════════════════════════ */
 
 export async function POST(req: Request) {
+  if (!(await rateLimit("tools/lead", clientIp(req), 5, 600))) return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
   try {
     let body: { email?: string; tool?: string; summary?: unknown };
     try {

@@ -3,11 +3,11 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
-import ProjectEstimator from "@/app/components/ProjectEstimator";
-import { VisualAI } from "@/app/services/ServicesClient";
+import ProjectEstimator from "@/app/_legacy/components/ProjectEstimator";
+import { VisualAI } from "@/app/_legacy/services/ServicesClient";
 import dynamic from "next/dynamic";
 const WorldMapDecoration = dynamic(
-  () => import("@/app/components/WorldMapLeaflet"),
+  () => import("@/app/_legacy/components/WorldMapLeaflet"),
   { ssr: false, loading: () => null }
 );
 
