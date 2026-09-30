@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import HomeView from "../views/HomeView";
 import { useSite } from "../SiteChrome";
 import { currencyVals, projectVals, serviceVals, PRINCIPLES, PROCESS } from "../values";
-import { HERO_WORDS, TECH, TECH_GROUPS, TOOLS } from "@/lib/site/data";
+import { FAQS, HERO_WORDS, TECH, TECH_GROUPS, TOOLS } from "@/lib/site/data";
 
 const CHAT = [
   { u: 1, t: "Hi, do you have the rose print kurti in size M?" },
@@ -14,14 +14,6 @@ const CHAT = [
   { u: 0, t: "Of course. I am connecting you with our team now." },
 ];
 
-const FAQS = [
-  { q: "Do you use WordPress or templates?", a: "No. Every website is custom designed and built in code with Next.js. That makes it faster, safer and easier to grow." },
-  { q: "Can my store accept bKash and Nagad?", a: "Yes. Our e-commerce stores support bKash, Nagad, SSLCommerz and Cash on Delivery." },
-  { q: "Does the chatbot understand Bangla?", a: "Yes. It answers customers in Bangla and English, trained on your own business information." },
-  { q: "Do you work with clients outside Bangladesh?", a: "Yes. We work with international clients on projects or hourly, at USD 25 to 40 per hour." },
-  { q: "What happens after my site goes live?", a: "On the Monthly Care Plan we handle hosting, backups, security updates, bug fixes and small changes, plus a monthly performance check." },
-  { q: "How do we get started?", a: "Send us a message on the contact page. We will ask a few questions and send you a clear plan and price." },
-];
 
 const AGENTS = [
   { k: 0, n: "01", t: "Built by our team", d: "We set up and train every agent for your business." },
@@ -34,7 +26,7 @@ const AGENTS = [
 ];
 
 export default function HomePage() {
-  const { go, openProject, openTool, cur, setCur, mobile } = useSite();
+  const { go, openProject, openTool, cur, setCur, mobile, projects } = useSite();
   const usd = cur === "usd";
   const [heroI, setHeroI] = useState(0);
   const [chat, setChat] = useState(0);
@@ -58,7 +50,8 @@ export default function HomePage() {
     return () => { io.disconnect(); clearInterval(chatTimer.current); };
   }, []);
 
-  const proj = projectVals();
+  const proj = projectVals(projects);
+  const featured = proj.slice(0, 6);
   const shown = Math.min(chat, CHAT.length);
   const v = {
     go,
@@ -66,7 +59,8 @@ export default function HomePage() {
     marquee: [...Array(2)].flatMap(() => ["Websites", "E-commerce", "3D Web", "AI Chatbots", "Custom Apps", "Care Plans"]),
     words: "We build fast websites, online stores, AI assistants and custom software for growing businesses. Everything is written in code, made to bring in customers and built to last.".split(" "),
     services: serviceVals(usd, mobile),
-    featured: proj.slice(0, 6).map(p => ({ ...p, tags: p.tags.slice(0, 2), tagLine: p.tags.slice(0, 2).join(" · "), urlShow: p.url || "private project", open: openProject(p.i) })),
+    featured: featured.map(p => ({ ...p, tags: p.tags.slice(0, 2), tagLine: p.tags.slice(0, 2).join(" · "), urlShow: p.url || "private project", open: openProject(p), shotText: p.heroImage ? "" : "screenshot" })),
+    projCount: proj.length, featCount: String(featured.length).padStart(2, "0"),
     deckH: "520vh", deckCols: mobile ? "minmax(0,1fr)" : "minmax(0,5fr) minmax(0,7fr)", deckSide: mobile ? "none" : "flex",
     industries: ["Clinics", "Coaching centers", "Restaurants", "Hotels", "Offices", "Personal brands", "Fashion", "Real estate", "Hospitality", "Product launches"].map((n, i) => ({ name: n, n: String(i + 1).padStart(2, "0") })),
     agents: AGENTS,

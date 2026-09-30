@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/require-admin";
-import { deleteInquiry, listInquiries, setInquiryStatus } from "@/lib/site/store";
+import { deleteInquiry, listInquiries, setInquiryRead, setInquiryStatus } from "@/lib/site/store";
 import { INQUIRY_STATUSES } from "@/lib/site/data";
 import { sameOrigin } from "@/lib/site/sanitize";
 
@@ -14,7 +14,10 @@ export async function GET() {
 export async function PATCH(req: Request) {
   const deny = await requireAdmin(); if (deny) return deny;
   if (!sameOrigin(req)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  const { id, status } = await req.json().catch(() => ({}));
+  const { id, status, read } = await req.json().catch(() => ({}));
+  if (Number.isInteger(id) && typeof read === "boolean" && status === undefined) {
+    return (await setInquiryRead(id, read)) ? NextResponse.json({ ok: true }) : NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
   if (!Number.isInteger(id) || !(INQUIRY_STATUSES as readonly string[]).includes(status)) {
     return NextResponse.json({ error: "Invalid id or status" }, { status: 400 });
   }

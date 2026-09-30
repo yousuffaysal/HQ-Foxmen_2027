@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import AdminPage from "@/components/site/pages/AdminPage";
-import { getAiRuns, getHiddenProjects, listInquiries, type Inquiry } from "@/lib/site/store";
+import { getAiRuns, listConsultations, listInquiries, type Consultation, type Inquiry } from "@/lib/site/store";
+import { listProjects } from "@/lib/site/projects";
 
-export const metadata: Metadata = { title: "Admin · Foxmen Studio", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Admin", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function Page() {
@@ -13,9 +14,10 @@ export default async function Page() {
   if (!session?.user) redirect("/login?from=/admin");
   if ((session.user as { role?: string }).role !== "admin") redirect("/portal");
 
-  let inquiries: Inquiry[] = [];
+  let inquiries: Inquiry[] = [], consultations: Consultation[] = [];
   let dbError = false;
-  try { inquiries = await listInquiries(); } catch (e) { console.error("[admin] inquiries", e); dbError = true; }
-  const [hidden, runs] = await Promise.all([getHiddenProjects(), getAiRuns()]);
-  return <AdminPage initialInquiries={inquiries} initialHidden={hidden} runs={runs} dbError={dbError} />;
+  try { [inquiries, consultations] = await Promise.all([listInquiries(), listConsultations()]); }
+  catch (e) { console.error("[admin] load", e); dbError = true; }
+  const [projects, runs] = await Promise.all([listProjects({ includeHidden: true }), getAiRuns()]);
+  return <AdminPage initialInquiries={inquiries} initialConsultations={consultations} initialProjects={projects} runs={runs} dbError={dbError} />;
 }

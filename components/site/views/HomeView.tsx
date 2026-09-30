@@ -251,7 +251,7 @@ export default function HomeView({ v }: { v: any }) {
                     </div>
                   </div>
                   <span style={S("font-family:'JetBrains Mono',monospace;font-size:14px;padding-bottom:14px;")}>
-                    {"/ 06"}
+                    {"/ "}{v.featCount}
                   </span>
                 </div>
               </div>
@@ -270,7 +270,7 @@ export default function HomeView({ v }: { v: any }) {
                 ))}
               </div>
               <div style={S("display:flex;align-items:center;gap:16px;flex-wrap:wrap;")}>
-                <Btn label="All 13 projects" variant="dark" href="/work" onClick={v.go.work} />
+                <Btn label={`All ${v.projCount} projects`} variant="dark" href="/work" onClick={v.go.work} />
                 <div style={S("width:120px;height:4px;border-radius:999px;background:rgba(31,23,18,.12);overflow:hidden;")}>
                   <div data-deckbar="1" style={S("height:100%;width:100%;background:#B86CF9;transform-origin:0 50%;transform:scaleX(0);")}></div>
                 </div>
@@ -314,8 +314,13 @@ export default function HomeView({ v }: { v: any }) {
                           {p.urlShow}
                         </span>
                       </div>
-                      <div style={S("flex:1;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(135deg,rgba(31,23,18,.05) 0 1px,transparent 1px 10px);font-family:'JetBrains Mono',monospace;font-size:12px;color:#5E5249;")}>
-                        {"screenshot"}
+                      <div style={S("flex:1;position:relative;min-height:0;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(135deg,rgba(31,23,18,.05) 0 1px,transparent 1px 10px);font-family:'JetBrains Mono',monospace;font-size:12px;color:#5E5249;")}>
+                        {p.shotText}
+                        {p.heroImage ? (
+                          <>
+                          <img src={p.heroImage} alt={p.name} style={S("position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top;")} />
+                          </>
+                        ) : null}
                       </div>
                     </div>
                   </div>

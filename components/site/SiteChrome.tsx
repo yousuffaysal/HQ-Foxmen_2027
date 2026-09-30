@@ -5,13 +5,15 @@ import { S } from "./style";
 import { FxRuntime } from "./runtime";
 import HeaderView from "./views/HeaderView";
 import FooterView from "./views/FooterView";
-import { CONTACT, LABELS, PAGES, PROJECTS, SERVICES, pathOf, slug } from "@/lib/site/data";
+import { CONTACT, LABELS, PAGES, SERVICES, pathOf, type SiteProject } from "@/lib/site/data";
+import ChatWidget from "./chat/ChatWidget";
 
 type Go = Record<string, (e?: MouseEvent) => void>;
 type Ctx = {
   go: Go;
   navigate: (href: string, label: string) => void;
-  openProject: (i: number) => (e?: MouseEvent) => void;
+  openProject: (p: { slug: string; name: string }) => (e?: MouseEvent) => void;
+  projects: SiteProject[];
   openTool: (id: string) => (e?: MouseEvent) => void;
   cur: "bdt" | "usd";
   setCur: (c: "bdt" | "usd") => void;
@@ -38,7 +40,7 @@ export function useViewport() {
 
 const EASE = "cubic-bezier(.76,0,.24,1)";
 
-export default function SiteChrome({ children }: { children: ReactNode }) {
+export default function SiteChrome({ children, projects }: { children: ReactNode; projects: SiteProject[] }) {
   const router = useRouter();
   const pathname = usePathname();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -111,10 +113,10 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
     return g;
   }, [navigate, router]);
 
-  const openProject = useCallback((i: number) => (e?: MouseEvent) => {
+  const openProject = useCallback((p: { slug: string; name: string }) => (e?: MouseEvent) => {
     if (e && (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1)) return;
     e?.preventDefault();
-    navigate("/work/" + slug(PROJECTS[i].name), PROJECTS[i].name);
+    navigate("/work/" + p.slug, p.name);
   }, [navigate]);
 
   const openTool = useCallback((id: string) => (e?: MouseEvent) => {
@@ -125,7 +127,7 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
   }, [navigate, pathname]);
 
   const ctx: Ctx = {
-    go, navigate, openProject, openTool, cur, setCur, pendingTool, mobile, narrow,
+    go, navigate, openProject, openTool, cur, setCur, pendingTool, mobile, narrow, projects,
     scrollTop: () => rt.current?.scrollTop(),
   };
 
@@ -157,6 +159,7 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
         <HeaderView v={chromeV} />
         {children}
         <FooterView v={chromeV} />
+        <ChatWidget />
       </div>
     </SiteCtx.Provider>
   );

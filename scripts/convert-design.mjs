@@ -19,6 +19,14 @@ raw = raw.replace('<form onSubmit="{{ submitContact }}" style="display:flex;flex
 const back = '<a href="#/" onClick="{{ go.home }}" style="padding:12px 16px;border-radius:14px;font-size:15px;font-weight:600;box-shadow:inset 0 0 0 1px rgba(31,23,18,.15);flex:none;white-space:nowrap;">Back to site</a>';
 if (!raw.includes(back)) throw new Error("admin back link not found");
 raw = raw.replace(back, back + '<button onClick="{{ signOut }}" style="border:none;cursor:pointer;background:transparent;text-align:left;padding:12px 16px;border-radius:14px;font-size:15px;font-weight:600;color:#5E5249;flex:none;white-space:nowrap;">Sign out</button>');
+// Live project data: counts, uploaded screenshots in the deck browser frame.
+const rep = (a, b) => { if (!raw.includes(a)) throw new Error("anchor not found: " + a.slice(0, 60)); raw = raw.replace(a, b); };
+rep('label="All 13 projects"', 'label="All {{ projCount }} projects"');
+rep('padding-bottom:14px;">/ 06</span>', 'padding-bottom:14px;">/ {{ featCount }}</span>');
+rep('<div style="flex:1;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(135deg,rgba(31,23,18,.05) 0 1px,transparent 1px 10px);font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#5E5249;">screenshot</div>',
+    '<div style="flex:1;position:relative;min-height:0;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(135deg,rgba(31,23,18,.05) 0 1px,transparent 1px 10px);font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#5E5249;">{{ p.shotText }}<sc-if value="{{ p.heroImage }}"><img src="{{ p.heroImage }}" alt="{{ p.name }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top;"></sc-if></div>');
+// Admin: slot for tabs the design doesn't have (messages, consultations, project editor).
+rep('<sc-if value="{{ tabServices }}"', '<sc-if value="{{ tabExtra }}"><div>{{ extraContent }}</div></sc-if>\n    <sc-if value="{{ tabServices }}"');
 if (raw.includes("[Phone")) throw new Error("unhandled phone placeholder");
 const lines = raw.split("\n");
 const slice = (a, b) => lines.slice(a - 1, b).join("\n");
@@ -135,13 +143,15 @@ function node(n, scope, ind) {
   }
   if (tag === "dc-import") {
     const a = n.attribs;
-    const p = [`label=${JSON.stringify(a.label)}`, `variant=${JSON.stringify(a.variant)}`];
+    const lab = valueExpr(a.label, scope);
+    const p = [lab.startsWith('"') ? `label=${lab}` : `label={${lab}}`, `variant=${JSON.stringify(a.variant)}`];
     if (a.href) p.push(`href=${JSON.stringify(fixPath(a.href))}`);
     if (a["on-click"]) p.push(`onClick={${valueExpr(a["on-click"], scope)}}`);
     return `${pad}<Btn ${p.join(" ")} />`;
   }
   if (tag === "image-slot") {
-    return `${pad}<ImageSlot id={${valueExpr(n.attribs.id, scope)}} placeholder={${valueExpr(n.attribs.placeholder || "", scope)}} />`;
+    const id = valueExpr(n.attribs.id, scope);
+    return `${pad}<ImageSlot id={${id}} src={v.slots?.[${id}]} placeholder={${valueExpr(n.attribs.placeholder || "", scope)}} />`;
   }
   const a = attrs(n, scope);
   if (VOID.has(tag)) return `${pad}<${tag}${a} />`;

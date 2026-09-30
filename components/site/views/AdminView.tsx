@@ -227,6 +227,13 @@ export default function AdminView({ v }: { v: any }) {
           </div>
           </>
         ) : null}
+        {v.tabExtra ? (
+          <>
+          <div>
+            {v.extraContent}
+          </div>
+          </>
+        ) : null}
         {v.tabServices ? (
           <>
           <div style={S("display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;")}>

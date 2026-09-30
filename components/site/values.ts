@@ -1,11 +1,11 @@
 // Shared pieces of the design's renderVals(), used by several pages.
-import { CARD_BG, PRINCIPLES, PROCESS, PROJECTS, SERVICES, TINTS } from "@/lib/site/data";
+import { CARD_BG, PRINCIPLES, PROCESS, SERVICES, TINTS, type SiteProject } from "@/lib/site/data";
 
 export const serviceVals = (usd: boolean, mobile: boolean) =>
   SERVICES.map((s, i) => ({ ...s, top: `calc(${mobile ? 76 : 96}px + ${i * 14}px)`, bg: CARD_BG[i], price: usd ? s.usd : s.bdt, extra: s.xb ? (usd ? s.xu : s.xb) : "" }));
 
-export const projectVals = () =>
-  PROJECTS.map((p, i) => ({ ...p, i, num: String(i + 1).padStart(2, "0"), tint: TINTS[i % TINTS.length], label: p.url ? `screenshot · ${p.url}` : "screenshot", hasUrl: !!p.url, href: "https://" + p.url, latest: !!p.latest }));
+export const projectVals = (projects: SiteProject[]) =>
+  projects.map((p, i) => ({ ...p, i, num: String(i + 1).padStart(2, "0"), tint: TINTS[i % TINTS.length], label: p.url ? `screenshot · ${p.url}` : "screenshot", hasUrl: !!p.url, href: "https://" + p.url, latest: !!p.latest }));
 
 export const currencyVals = (usd: boolean, setCur: (c: "bdt" | "usd") => void) => ({
   setBdt: () => setCur("bdt"), setUsd: () => setCur("usd"),

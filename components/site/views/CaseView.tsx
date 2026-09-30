@@ -58,7 +58,7 @@ export default function CaseView({ v }: { v: any }) {
       </section>
       <section style={S("padding:0 clamp(12px,2vw,28px);")}>
         <div data-reveal="1" style={S(`max-width:1560px;margin:0 auto;aspect-ratio:16/9;border-radius:clamp(20px,2.4vw,32px);overflow:hidden;background:${v.cs.tint};`)}>
-          <ImageSlot id={`case-${v.cs.slug}-hero`} placeholder={`Hero screenshot of ${v.cs.name}`} />
+          <ImageSlot id={`case-${v.cs.slug}-hero`} src={v.slots?.[`case-${v.cs.slug}-hero`]} placeholder={`Hero screenshot of ${v.cs.name}`} />
         </div>
       </section>
       <section style={S("padding:clamp(80px,10vw,150px) clamp(20px,4.5vw,64px);")}>
@@ -95,10 +95,10 @@ export default function CaseView({ v }: { v: any }) {
       <section style={S("padding:0 clamp(12px,2vw,28px) clamp(80px,10vw,150px);")}>
         <div style={S("max-width:1560px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:clamp(12px,1.6vw,24px);")}>
           <div data-reveal="1" style={S("aspect-ratio:4/5;border-radius:clamp(20px,2.4vw,32px);overflow:hidden;background:#EAE3D6;")}>
-            <ImageSlot id={`case-${v.cs.slug}-a`} placeholder={"Mobile or detail screenshot"} />
+            <ImageSlot id={`case-${v.cs.slug}-a`} src={v.slots?.[`case-${v.cs.slug}-a`]} placeholder={"Mobile or detail screenshot"} />
           </div>
           <div data-reveal="1" data-delay="120" style={S("aspect-ratio:4/5;border-radius:clamp(20px,2.4vw,32px);overflow:hidden;background:#EAE3D6;")}>
-            <ImageSlot id={`case-${v.cs.slug}-b`} placeholder={"Second screenshot"} />
+            <ImageSlot id={`case-${v.cs.slug}-b`} src={v.slots?.[`case-${v.cs.slug}-b`]} placeholder={"Second screenshot"} />
           </div>
         </div>
         {v.cs.hasUrl ? (

@@ -29,3 +29,11 @@ html.fx-js [data-reveal="up"]{transform:translateY(110%)}
 @media (min-width:2400px){header[data-nav],header[data-nav] ~ div[data-lenis-prevent]{zoom:1.6}}
 @media (min-width:2720px){header[data-nav],header[data-nav] ~ div[data-lenis-prevent]{zoom:1.8}}
 @media (min-width:3200px){header[data-nav],header[data-nav] ~ div[data-lenis-prevent]{zoom:2}}
+
+/* AI assistant button: slow water-drop rings */
+.fx-fab{transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+.fx-fab:hover{transform:scale(1.06)}
+.fx-fab-ring{position:absolute;inset:0;border-radius:999px;box-shadow:0 0 0 2px #B86CF9;opacity:0;animation:fxring 2.8s cubic-bezier(.2,.6,.3,1) infinite;pointer-events:none}
+.fx-fab-ring2{animation-delay:1.4s}
+@keyframes fxring{0%{transform:scale(1);opacity:.55}100%{transform:scale(1.9);opacity:0}}
+@media (prefers-reduced-motion: reduce){.fx-fab-ring{animation:none}}

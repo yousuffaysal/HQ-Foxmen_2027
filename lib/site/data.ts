@@ -31,6 +31,15 @@ export type Project = {
   name: string; type: string; url: string; latest?: boolean; tags: string[]; desc: string; features: string[];
 };
 
+// A project as stored in site_projects (admin-editable). Images are optional screenshot URLs.
+export type SiteProject = Project & {
+  id: number; slug: string; visible: boolean; ord: number;
+  heroImage: string; imageA: string; imageB: string;
+};
+
+export const PROJECT_TAGS = ["E-commerce", "AI", "Websites", "Platforms", "3D"];
+
+// Initial content, used to seed the site_projects table and as a fallback if the DB is down.
 export const PROJECTS: Project[] = [
   { name: "Lyverne", type: "3D Website and Premium Clothing Brand Store", url: "lyverne.com", latest: true, tags: ["3D", "E-commerce"], desc: "An immersive 3D web experience for a Bangladeshi clothing label.", features: ["3D product presentation that lets visitors explore the pieces", "Editorial, premium design with a strong visual identity", "Interactive Style Studio for building outfits", "Motion lookbook, customer accounts and store admin"] },
   { name: "Redleaf", type: "AI-Powered Fashion E-Commerce", url: "redleaf-bd.com", tags: ["AI", "E-commerce"], desc: "A live fashion store for a Bangladeshi brand with its own AI shopping assistant, \"Aria\".", features: ["Custom LLM assistant that helps shoppers find products through conversation", "Full e-commerce flow with local payment support", "Running in production for a real client"] },
@@ -47,7 +56,9 @@ export const PROJECTS: Project[] = [
   { name: "Folang", type: "[Project type]", url: "folang-web.vercel.app", tags: ["Platforms"], desc: "[One-line description of what Folang does]", features: ["[Key feature]", "[Key feature]"] },
 ];
 
-export const PROJECT_SLUGS = PROJECTS.map(p => slug(p.name));
+export const SEED_PROJECTS: SiteProject[] = PROJECTS.map((p, i) => ({
+  ...p, latest: !!p.latest, id: -(i + 1), slug: slug(p.name), visible: true, ord: i, heroImage: "", imageA: "", imageB: "",
+}));
 
 export type ToolField = { k: string; label: string; ph: string; long?: boolean };
 export type Tool = { id: string; name: string; cat: string; desc: string; fields?: ToolField[]; est?: boolean };
@@ -112,3 +123,14 @@ export const INQUIRY_STATUSES = ["New", "Contacted", "Won", "Lost"] as const;
 export const CONTACT_SERVICES = ["Business website", "E-commerce store", "3D website", "AI chatbot", "Custom web app", "Care plan"];
 export const BUDGETS_USD = ["Under USD 1,000", "USD 1,000 to 5,000", "USD 5,000+", "Not sure"];
 export const BUDGETS_BDT = ["Under BDT 50k", "BDT 50k to 1.5L", "BDT 1.5L+", "Not sure"];
+
+export const FAQS = [
+  { q: "Do you use WordPress or templates?", a: "No. Every website is custom designed and built in code with Next.js. That makes it faster, safer and easier to grow." },
+  { q: "Can my store accept bKash and Nagad?", a: "Yes. Our e-commerce stores support bKash, Nagad, SSLCommerz and Cash on Delivery." },
+  { q: "Does the chatbot understand Bangla?", a: "Yes. It answers customers in Bangla and English, trained on your own business information." },
+  { q: "Do you work with clients outside Bangladesh?", a: "Yes. We work with international clients on projects or hourly, at USD 25 to 40 per hour." },
+  { q: "What happens after my site goes live?", a: "On the Monthly Care Plan we handle hosting, backups, security updates, bug fixes and small changes, plus a monthly performance check." },
+  { q: "How do we get started?", a: "Send us a message on the contact page. We will ask a few questions and send you a clear plan and price." },
+];
+
+export const CONSULT_STATUSES = ["Requested", "Confirmed", "Done", "Cancelled"] as const;

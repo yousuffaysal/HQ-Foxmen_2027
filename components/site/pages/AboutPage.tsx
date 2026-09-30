@@ -11,7 +11,7 @@ const PILLARS = [
 ];
 
 export default function AboutPage() {
-  const { go, openProject, mobile: M, narrow } = useSite();
+  const { go, openProject, mobile: M, narrow, projects } = useSite();
   const film = useRef<HTMLVideoElement | null>(null);
   const [filmOn, setFilmOn] = useState(false);
   const playFilm = () => {
@@ -30,7 +30,7 @@ export default function AboutPage() {
     belCols: M ? "112px minmax(0,1fr)" : "112px minmax(0,1fr) minmax(0,1fr)",
     principles: PRINCIPLES, process: PROCESS,
     industriesLoop: [...Array(2)].flatMap(() => ["Clinics", "Coaching centers", "Restaurants", "Hotels", "Fashion", "Real estate", "Offices", "Personal brands"]),
-    clientNames: projectVals().map(p => ({ name: p.name, num: p.num, open: openProject(p.i) })),
+    clientNames: projectVals(projects).map(p => ({ name: p.name, num: p.num, open: openProject(p) })),
   };
   return <AboutView v={v} />;
 }
