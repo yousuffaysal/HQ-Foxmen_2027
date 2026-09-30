@@ -27,6 +27,8 @@ rep('<div style="flex:1;display:flex;align-items:center;justify-content:center;b
     '<div style="flex:1;position:relative;min-height:0;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(135deg,rgba(31,23,18,.05) 0 1px,transparent 1px 10px);font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#5E5249;">{{ p.shotText }}<sc-if value="{{ p.heroImage }}"><img src="{{ p.heroImage }}" alt="{{ p.name }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top;"></sc-if></div>');
 // Admin: slot for tabs the design doesn't have (messages, consultations, project editor).
 rep('<sc-if value="{{ tabServices }}"', '<sc-if value="{{ tabExtra }}"><div>{{ extraContent }}</div></sc-if>\n    <sc-if value="{{ tabServices }}"');
+// No public link to the admin panel (it stays reachable at /admin for signed-in admins).
+rep('<a href="#/admin" onClick="{{ go.admin }}" style="color:#F3EEE4;">Admin</a>', '');
 if (raw.includes("[Phone")) throw new Error("unhandled phone placeholder");
 const lines = raw.split("\n");
 const slice = (a, b) => lines.slice(a - 1, b).join("\n");

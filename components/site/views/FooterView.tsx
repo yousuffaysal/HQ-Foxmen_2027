@@ -73,9 +73,6 @@ export default function FooterView({ v }: { v: any }) {
           <span>
             {"© 2026 Foxmen Studio. Web, AI and Custom Software for Growing Businesses."}
           </span>
-          <a href="/admin" onClick={v.go.admin} style={S("color:#F3EEE4;")}>
-            {"Admin"}
-          </a>
         </div>
       </div>
     </footer>
