@@ -3,11 +3,10 @@
 
 export const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
-// The design leaves email/phone as placeholders. Email matches the previous site's footer;
-// the phone row only renders once NEXT_PUBLIC_CONTACT_PHONE is set.
+// Fills the design's [Email] and [Phone / WhatsApp] placeholders.
 export const CONTACT = {
   email: "hello@foxmen.studio",
-  phone: process.env.NEXT_PUBLIC_CONTACT_PHONE || "",
+  phone: "+8801753973892",
   web: "foxmen.studio",
 };
 
