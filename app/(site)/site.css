@@ -54,3 +54,15 @@ html.fx-js [data-reveal="up"]{transform:translateY(110%)}
 @keyframes fxshimmer{from{background-position:-150% 0}to{background-position:250% 0}}
 .fx-caret::after{content:"";display:inline-block;width:.55em;height:1em;margin-left:2px;vertical-align:-2px;background:#B86CF9;border-radius:2px;animation:fxblink 1s infinite}
 @media (prefers-reduced-motion: reduce){.fx-orb,.fx-orb-core,.fx-indet,.fx-shimmer,.fx-fadeup{animation:none}}
+
+/* Phones: layout fixes for design sections that only worked side by side */
+@media (max-width: 899px){.fx-unstick-m{position:static!important}}
+@media (max-width: 600px){
+  .fx-toolrow{flex-wrap:nowrap!important;gap:4px!important}
+  .fx-toolrow > div{min-width:0}
+  .fx-hide-m{display:none!important}
+  .fx-pick{padding:0 10px 0 6px!important;gap:6px!important;font-size:13px!important;max-width:100%}
+  .fx-pick-label{display:block;max-width:31vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .fx-len{padding:0 8px!important;gap:6px!important;font-size:13px!important;white-space:nowrap}
+  .fx-send{margin-left:auto!important;flex:none}
+}

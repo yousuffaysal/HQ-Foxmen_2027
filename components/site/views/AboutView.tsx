@@ -353,7 +353,7 @@ export default function AboutView({ v }: { v: any }) {
               {"Tell us about your business. We will reply with a clear plan and price."}
             </p>
             <div>
-              <Btn label="Contact us" variant="light" href="/contact" onClick={v.go.contact} />
+              <Btn label="Contact us" variant="cream" href="/contact" onClick={v.go.contact} />
             </div>
           </div>
         </div>

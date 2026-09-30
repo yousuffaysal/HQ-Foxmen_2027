@@ -11,7 +11,7 @@ export const CONTACT = {
 };
 
 // Clutch profile for the hero "Clutch Verified" badge. Paste the profile URL here to make it a link.
-export const CLUTCH_URL = "";
+export const CLUTCH_URL = "https://clutch.co/profile/foxmen-studio";
 
 export type Service = {
   n: string; title: string; line: string; features: string[]; from: string;

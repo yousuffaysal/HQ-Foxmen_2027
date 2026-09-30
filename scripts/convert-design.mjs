@@ -20,13 +20,18 @@ const back = '<a href="#/" onClick="{{ go.home }}" style="padding:12px 16px;bord
 if (!raw.includes(back)) throw new Error("admin back link not found");
 raw = raw.replace(back, back + '<button onClick="{{ signOut }}" style="border:none;cursor:pointer;background:transparent;text-align:left;padding:12px 16px;border-radius:14px;font-size:15px;font-weight:600;color:#5E5249;flex:none;white-space:nowrap;">Sign out</button>');
 // Live project data: counts, uploaded screenshots in the deck browser frame.
-const rep = (a, b) => { if (!raw.includes(a)) throw new Error("anchor not found: " + a.slice(0, 60)); raw = raw.replace(a, b); };
+// Sections are sliced by line number below, so a replacement must never change the line count.
+const rep = (a, b) => {
+  if (!raw.includes(a)) throw new Error("anchor not found: " + a.slice(0, 60));
+  if (a.split("\n").length !== b.split("\n").length) throw new Error("replacement changes line count: " + a.slice(0, 60));
+  raw = raw.replace(a, b);
+};
 rep('label="All 13 projects"', 'label="All {{ projCount }} projects"');
 rep('padding-bottom:14px;">/ 06</span>', 'padding-bottom:14px;">/ {{ featCount }}</span>');
 rep('<div style="flex:1;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(135deg,rgba(31,23,18,.05) 0 1px,transparent 1px 10px);font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#5E5249;">screenshot</div>',
     '<div style="flex:1;position:relative;min-height:0;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(135deg,rgba(31,23,18,.05) 0 1px,transparent 1px 10px);font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#5E5249;">{{ p.shotText }}<sc-if value="{{ p.heroImage }}"><img src="{{ p.heroImage }}" alt="{{ p.name }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top;"></sc-if></div>');
 // Admin: slot for tabs the design doesn't have (messages, consultations, project editor).
-rep('<sc-if value="{{ tabServices }}"', '<sc-if value="{{ tabExtra }}"><div>{{ extraContent }}</div></sc-if>\n    <sc-if value="{{ tabServices }}"');
+rep('<sc-if value="{{ tabServices }}"', '<sc-if value="{{ tabExtra }}"><div>{{ extraContent }}</div></sc-if><sc-if value="{{ tabServices }}"');
 // No public link to the admin panel (it stays reachable at /admin for signed-in admins).
 rep('<a href="#/admin" onClick="{{ go.admin }}" style="color:#F3EEE4;">Admin</a>', '');
 // Hero: "Clutch Verified" badge beside the studio pill (links to the profile once CLUTCH_URL is set).
@@ -34,7 +39,21 @@ rep('Web, AI and custom software studio\n      </div>', 'Web, AI and custom soft
   + '<sc-if value="{{ clutchHref }}"><a data-reveal="1" data-delay="80" href="{{ clutchHref }}" target="_blank" rel="noopener" aria-label="Foxmen Studio is verified on Clutch" style="display:inline-flex;align-items:center;gap:10px;margin-left:8px;padding:8px 16px 8px 8px;border-radius:999px;background:#1F1712;color:#F3EEE4;font-size:14px;font-weight:600;margin-bottom:clamp(24px,4vh,40px);vertical-align:top;"><span style="width:22px;height:22px;border-radius:999px;background:#B86CF9;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1F1712" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"></path></svg></span><span style="font-weight:800;font-size:15px;letter-spacing:-0.035em;">Clutch<span style="color:#EF4335;">.</span></span><span style="color:rgba(243,238,228,.72);">Verified agency</span></a></sc-if>'
   + '<sc-if value="{{ noClutchHref }}"><span data-reveal="1" data-delay="80" style="display:inline-flex;align-items:center;gap:10px;margin-left:8px;padding:8px 16px 8px 8px;border-radius:999px;background:#1F1712;color:#F3EEE4;font-size:14px;font-weight:600;margin-bottom:clamp(24px,4vh,40px);vertical-align:top;"><span style="width:22px;height:22px;border-radius:999px;background:#B86CF9;display:flex;align-items:center;justify-content:center;flex:none;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1F1712" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"></path></svg></span><span style="font-weight:800;font-size:15px;letter-spacing:-0.035em;">Clutch<span style="color:#EF4335;">.</span></span><span style="color:rgba(243,238,228,.72);">Verified agency</span></span></sc-if>');
 // Tools hub: waiting animation slot shown while the AI is working.
-rep('<sc-if value="{{ hasOut }}" hint-placeholder-val="{{ false }}">\n        <div style="margin-top:28px;background:#FAF7F1;', '<sc-if value="{{ showLoader }}"><div style="margin-top:28px;">{{ loaderNode }}</div></sc-if>\n      <sc-if value="{{ hasOut }}" hint-placeholder-val="{{ false }}">\n        <div style="margin-top:28px;background:#FAF7F1;');
+rep('<sc-if value="{{ hasOut }}" hint-placeholder-val="{{ false }}">\n        <div style="margin-top:28px;background:#FAF7F1;', '<sc-if value="{{ showLoader }}"><div style="margin-top:28px;">{{ loaderNode }}</div></sc-if><sc-if value="{{ hasOut }}" hint-placeholder-val="{{ false }}">\n        <div style="margin-top:28px;background:#FAF7F1;');
+// Buttons that sit on dark cards: the "light" variant has dark text there and disappears.
+rep('<div><dc-import name="Btn" label="Contact us" variant="light" href="#/contact"', '<div><dc-import name="Btn" label="Contact us" variant="cream" href="#/contact"');
+rep('label="Build my AI tool" variant="light"', 'label="Build my AI tool" variant="cream"');
+rep('label="Get exact quote" variant="light"', 'label="Get exact quote" variant="cream"');
+// Estimator heading: sticky beside the list on desktop, but it overlapped the list once stacked.
+rep('<div style="position:sticky;top:120px;display:flex;flex-direction:column;gap:20px;">\n        <div style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#5E5249;"><span style="width:8px;height:8px;border-radius:2px;background:#B86CF9;"></span>Project cost estimator',
+    '<div class="fx-unstick-m" style="position:sticky;top:120px;display:flex;flex-direction:column;gap:20px;">\n        <div style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#5E5249;"><span style="width:8px;height:8px;border-radius:2px;background:#B86CF9;"></span>Project cost estimator');
+// Tools hub input: keep tool picker, length and send on one row on phones.
+rep('<div style="display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap;">', '<div class="fx-toolrow" style="display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap;">');
+rep('<button type="button" onClick="{{ togglePick }}"', '<button type="button" class="fx-pick" onClick="{{ togglePick }}"');
+rep('              {{ curTool.short }}\n', '              <span class="fx-pick-label">{{ curTool.short }}</span>\n');
+rep('<button type="button" onClick="{{ cycleLen }}"', '<button type="button" class="fx-len" onClick="{{ cycleLen }}"');
+rep('<span style="margin-left:auto;font-size:12px;color:#8F8278;padding-right:6px;">Enter to run</span>', '<span class="fx-hide-m" style="margin-left:auto;font-size:12px;color:#8F8278;padding-right:6px;">Enter to run</span>');
+rep('<button type="button" onClick="{{ runChat }}"', '<button type="button" class="fx-send" onClick="{{ runChat }}"');
 if (raw.includes("[Phone")) throw new Error("unhandled phone placeholder");
 const lines = raw.split("\n");
 const slice = (a, b) => lines.slice(a - 1, b).join("\n");

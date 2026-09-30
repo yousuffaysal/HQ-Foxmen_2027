@@ -48,13 +48,15 @@ export default function ToolsView({ v }: { v: any }) {
           </div>
           <div style={S("position:relative;margin-top:-10px;background:#FAF7F1;border-radius:28px;box-shadow:0 0 0 1px rgba(31,23,18,.12), 0 30px 60px -20px rgba(31,23,18,.25);padding:18px 18px 12px;")}>
             <textarea value={v.toolText} onChange={v.onToolText} onKeyDown={v.onToolKey} placeholder={v.curTool.ph} rows={3} aria-label="Describe what you need" style={S("display:block;width:100%;border:none;background:transparent;resize:none;outline:none;font-family:Inter,sans-serif;font-size:18px;line-height:1.5;color:#1F1712;min-height:84px;padding:4px 6px;")}></textarea>
-            <div style={S("display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap;")}>
+            <div style={S("display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap;")} className="fx-toolrow">
               <div style={S("position:relative;")}>
-                <button type="button" onClick={v.togglePick} style={S(`display:flex;align-items:center;gap:8px;height:40px;padding:0 14px 0 8px;border-radius:999px;border:none;cursor:pointer;background:${v.pickBg};color:#1F1712;font-size:14px;font-weight:600;transition:background .25s;`)} className="hv1">
+                <button type="button" onClick={v.togglePick} style={S(`display:flex;align-items:center;gap:8px;height:40px;padding:0 14px 0 8px;border-radius:999px;border:none;cursor:pointer;background:${v.pickBg};color:#1F1712;font-size:14px;font-weight:600;transition:background .25s;`)} className="fx-pick hv1">
                   <span style={S("width:26px;height:26px;border-radius:999px;background:#B86CF9;display:flex;align-items:center;justify-content:center;")}>
                     <img src="/assets/logo.png" alt="" style={S("width:14px;height:14px;")} />
                   </span>
-                  {v.curTool.short}
+                  <span className="fx-pick-label">
+                    {v.curTool.short}
+                  </span>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" style={S(`transform:${v.pickRot};transition:transform .3s;`)}>
                     <path d="M6 9l6 6 6-6"></path>
                   </svg>
@@ -81,7 +83,7 @@ export default function ToolsView({ v }: { v: any }) {
                   </>
                 ) : null}
               </div>
-              <button type="button" onClick={v.cycleLen} style={S("display:flex;align-items:center;gap:8px;height:40px;padding:0 14px 0 12px;border-radius:999px;border:none;cursor:pointer;background:transparent;color:#5E5249;font-size:14px;font-weight:600;")} className="hv14">
+              <button type="button" onClick={v.cycleLen} style={S("display:flex;align-items:center;gap:8px;height:40px;padding:0 14px 0 12px;border-radius:999px;border:none;cursor:pointer;background:transparent;color:#5E5249;font-size:14px;font-weight:600;")} className="fx-len hv14">
                 <span style={S("display:flex;align-items:flex-end;gap:2px;height:14px;")}>
                   {(v.lenBars || []).map((lb: any, lb$i: number) => (
                     <Fragment key={lb$i}>
@@ -91,10 +93,10 @@ export default function ToolsView({ v }: { v: any }) {
                 </span>
                 {v.lenLabel}
               </button>
-              <span style={S("margin-left:auto;font-size:12px;color:#8F8278;padding-right:6px;")}>
+              <span style={S("margin-left:auto;font-size:12px;color:#8F8278;padding-right:6px;")} className="fx-hide-m">
                 {"Enter to run"}
               </span>
-              <button type="button" onClick={v.runChat} aria-label="Run tool" style={S(`width:44px;height:44px;border-radius:999px;border:none;cursor:pointer;background:${v.sendBg};color:${v.sendFg};display:flex;align-items:center;justify-content:center;transition:background .25s, transform .25s;`)} className="hv6">
+              <button type="button" onClick={v.runChat} aria-label="Run tool" style={S(`width:44px;height:44px;border-radius:999px;border:none;cursor:pointer;background:${v.sendBg};color:${v.sendFg};display:flex;align-items:center;justify-content:center;transition:background .25s, transform .25s;`)} className="fx-send hv6">
                 {v.notBusy ? (
                   <>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
@@ -232,7 +234,7 @@ export default function ToolsView({ v }: { v: any }) {
               ))}
             </div>
             <div style={S("display:flex;gap:12px;flex-wrap:wrap;")}>
-              <Btn label="Build my AI tool" variant="light" href="/contact" onClick={v.go.contact} />
+              <Btn label="Build my AI tool" variant="cream" href="/contact" onClick={v.go.contact} />
               <a href="/services" onClick={v.go.services} style={S("display:inline-flex;align-items:center;gap:8px;height:56px;padding:0 22px;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(243,238,228,.3);color:#F3EEE4;font-size:16px;font-weight:600;")} className="hv8">
                 {"See services "}
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
@@ -245,7 +247,7 @@ export default function ToolsView({ v }: { v: any }) {
       </section>
       <section style={S("padding:clamp(88px,10vw,140px) clamp(20px,4.5vw,64px);")}>
         <div style={S("max-width:1440px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:clamp(40px,6vw,96px);align-items:start;")}>
-          <div style={S("position:sticky;top:120px;display:flex;flex-direction:column;gap:20px;")}>
+          <div style={S("position:sticky;top:120px;display:flex;flex-direction:column;gap:20px;")} className="fx-unstick-m">
             <div style={S("display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#5E5249;")}>
               <span style={S("width:8px;height:8px;border-radius:2px;background:#B86CF9;")}></span>
               {"Project cost estimator"}
@@ -280,7 +282,7 @@ export default function ToolsView({ v }: { v: any }) {
                   {v.estTotal}
                 </div>
               </div>
-              <Btn label="Get exact quote" variant="light" href="/contact" onClick={v.go.contact} />
+              <Btn label="Get exact quote" variant="cream" href="/contact" onClick={v.go.contact} />
             </div>
           </div>
         </div>

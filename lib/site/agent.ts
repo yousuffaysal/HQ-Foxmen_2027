@@ -1,7 +1,7 @@
 import "server-only";
 import Groq from "groq-sdk";
 import { GROQ_MODEL } from "@/lib/ai";
-import { AI_TOOLS, CONTACT, FAQS, PRINCIPLES, PROCESS, SERVICES, TECH } from "./data";
+import { AI_TOOLS, CLUTCH_URL, CONTACT, FAQS, PRINCIPLES, PROCESS, SERVICES, TECH } from "./data";
 import { listProjects } from "./projects";
 import { addConsultation, addInquiry, rateLimit, recentMessage } from "./store";
 import { isEmail, str } from "./sanitize";
@@ -29,6 +29,7 @@ async function knowledge(): Promise<string> {
     `Today is ${today} (Bangladesh time, UTC+6).`,
     "CALENDAR (use this to resolve words like tomorrow or next Tuesday; never compute dates yourself):\n" + calendar(),
     `STUDIO: Foxmen Studio is a web and AI agency that designs and builds fast websites, online stores, 3D websites, AI chatbots and custom web software for growing businesses worldwide. Everything is custom designed and coded (Next.js), no templates, no WordPress. Works remotely with clients in any country and time zone. Languages: English and Bangla. Pricing in USD or BDT; engagements by project or hourly.`,
+    `CLUTCH: Foxmen Studio is a verified agency on Clutch (${CLUTCH_URL}). You may mention this and share the link. Never mention a number of reviews or a rating.`,
     `CONTACT: email ${CONTACT.email}${CONTACT.phone ? `, phone/WhatsApp ${CONTACT.phone}` : ""}, website ${CONTACT.web}. Contact page: /contact. Free AI tools: /tools.`,
     "SERVICES AND STARTING PRICES:\n" + SERVICES.map(s => `- ${s.title}: ${s.line} ${s.from} ${s.usd} (${s.bdt})${s.xb ? `; ${s.xu} (${s.xb})` : ""}. Includes: ${s.features.join("; ")}.`).join("\n"),
     "Hourly work for international clients: USD 25 to 40 per hour. Final prices are confirmed after a short call.",
