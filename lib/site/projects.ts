@@ -44,7 +44,7 @@ function ensure() {
       )`;
     await sql`ALTER TABLE site_projects ADD COLUMN IF NOT EXISTS gallery TEXT NOT NULL DEFAULT '[]'`;
     const n = (await sql`SELECT count(*)::int AS n FROM site_projects` as { n: number }[])[0].n;
-    if (n > 0) return refreshSeedContent();
+    if (n > 0) { await refreshSeedContent(); await fixRedleafLinks(); return; }
     let hidden: string[] = [];
     try {
       const h = await sql`SELECT value FROM settings WHERE key = 'site_hidden_projects'` as { value: string }[];
@@ -76,6 +76,25 @@ async function refreshSeedContent() {
       WHERE slug = ${p.slug} AND updated_at < '2026-10-01'`;
   }
   await sql`INSERT INTO settings (key, value) VALUES (${REFRESH_KEY}, '1') ON CONFLICT (key) DO NOTHING`;
+}
+
+// One-time fix (2026-10): the Redleaf fashion store lives at ecom-x-frontend.vercel.app, and
+// redleaf-bd.com is the separate Redleaf BD food store. Each row is only touched while it still
+// has the old wrong address, so admin edits survive.
+const REDLEAF_KEY = "site_projects_redleaf_v3";
+async function fixRedleafLinks() {
+  try {
+    if ((await sql`SELECT 1 FROM settings WHERE key = ${REDLEAF_KEY}` as unknown[]).length) return;
+  } catch { return; }
+  const stale: Record<string, string> = { redleaf: "redleaf-bd.com", "redleaf-bd": "redleafbd.com" };
+  for (const p of SEED_PROJECTS.filter(p => p.slug in stale)) {
+    await sql`
+      UPDATE site_projects SET type = ${p.type}, url = ${p.url}, tags = ${JSON.stringify(p.tags)}, description = ${p.desc},
+        features = ${JSON.stringify(p.features)}, hero_image = ${p.heroImage}, image_a = ${p.imageA}, image_b = ${p.imageB},
+        gallery = ${JSON.stringify(p.gallery)}, visible = ${p.visible}, updated_at = now()
+      WHERE slug = ${p.slug} AND url = ${stale[p.slug]}`;
+  }
+  await sql`INSERT INTO settings (key, value) VALUES (${REDLEAF_KEY}, '1') ON CONFLICT (key) DO NOTHING`;
 }
 
 export const PROJECTS_TAG = "site-projects";
