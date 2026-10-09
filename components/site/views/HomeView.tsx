@@ -271,15 +271,15 @@ export default function HomeView({ v }: { v: any }) {
       {/* 06 Selected work: scroll-stacked deck */}
       <section data-deck="1" style={S(`position:relative;height:${v.deckH};`)}>
         <div style={S("position:sticky;top:0;height:100vh;overflow:hidden;padding:clamp(84px,11vh,110px) clamp(20px,4.5vw,64px) clamp(20px,3vh,36px);")}>
-          <div style={S(`max-width:1440px;height:100%;margin:0 auto;display:grid;grid-template-columns:${v.deckCols};gap:clamp(24px,4vw,64px);`)}>
-            <div style={S(`display:${v.deckSide};flex-direction:column;justify-content:space-between;gap:24px;min-height:0;`)}>
+          <div style={S(`max-width:1440px;height:100%;margin:0 auto;display:grid;grid-template-columns:${v.deckCols};gap:clamp(24px,4vw,64px);`)} className="fx-deck-grid">
+            <div style={S(`display:${v.deckSide};flex-direction:column;justify-content:space-between;gap:24px;min-height:0;`)} className="fx-deck-side">
               <div>
                 <div style={S("display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#5E5249;margin-bottom:18px;")}>
                   <span style={S("width:8px;height:8px;border-radius:2px;background:#B86CF9;")}></span>
                   {"Selected work"}
                 </div>
                 <div style={S("display:flex;align-items:flex-end;gap:10px;line-height:.8;")}>
-                  <div style={S("height:clamp(96px,11vw,170px);overflow:hidden;")}>
+                  <div style={S("height:clamp(96px,11vw,170px);overflow:hidden;")} className="fx-deck-num">
                     <div data-deckcount="1" style={S("display:flex;flex-direction:column;transition:transform .8s cubic-bezier(.76,0,.24,1);")}>
                       {(v.featured || []).map((p: any, p$i: number) => (
                         <Fragment key={p$i}>
@@ -350,7 +350,7 @@ export default function HomeView({ v }: { v: any }) {
                         <span style={S("width:8px;height:8px;border-radius:999px;background:#1F1712;opacity:.25;")}></span>
                         <span style={S("width:8px;height:8px;border-radius:999px;background:#1F1712;opacity:.25;")}></span>
                         <span style={S("width:8px;height:8px;border-radius:999px;background:#1F1712;opacity:.25;")}></span>
-                        <span style={S("margin-left:10px;font-family:'JetBrains Mono',monospace;font-size:11px;padding:4px 10px;border-radius:999px;background:#F3EEE4;")}>
+                        <span style={S("margin-left:10px;font-family:'JetBrains Mono',monospace;font-size:11px;padding:4px 10px;border-radius:999px;background:#F3EEE4;")} className="fx-deck-url">
                           {p.urlShow}
                         </span>
                       </div>

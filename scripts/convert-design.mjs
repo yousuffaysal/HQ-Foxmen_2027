@@ -84,6 +84,11 @@ rep('<div style="width:40px;height:40px;border-radius:999px;background:#B86CF9;d
 // Tools hub: logo on a dark disc (purple on purple was unreadable).
 raw = raw.split('<span style="width:26px;height:26px;border-radius:999px;background:#B86CF9;display:flex;align-items:center;justify-content:center;"><img src="assets/logo.png" alt="" style="width:14px;height:14px;"></span>')
   .join('<span style="width:26px;height:26px;border-radius:999px;background:#120C09;box-shadow:inset 0 0 0 1px rgba(184,108,249,.45);display:flex;align-items:center;justify-content:center;"><img src="assets/logo.png" alt="" style="width:15px;height:15px;"></span>');
+// Deck on phones: keep the "Selected work" label + counter above the card, URL pill on one line.
+rep('<div style="max-width:1440px;height:100%;margin:0 auto;display:grid;grid-template-columns:{{ deckCols }}', '<div class="fx-deck-grid" style="max-width:1440px;height:100%;margin:0 auto;display:grid;grid-template-columns:{{ deckCols }}');
+rep('<div style="display:{{ deckSide }};flex-direction:column', '<div class="fx-deck-side" style="display:{{ deckSide }};flex-direction:column');
+rep('<div style="height:clamp(96px,11vw,170px);overflow:hidden;', '<div class="fx-deck-num" style="height:clamp(96px,11vw,170px);overflow:hidden;');
+rep('<span style="margin-left:10px;font-family:\'JetBrains Mono\',monospace;font-size:11px;padding:4px 10px;', '<span class="fx-deck-url" style="margin-left:10px;font-family:\'JetBrains Mono\',monospace;font-size:11px;padding:4px 10px;');
 // Selected-work deck: square cards sized to the viewport (desktop and phone).
 rep('<div style="position:relative;min-height:0;perspective:1600px;">', '<div class="fx-deck-stage" style="position:relative;min-height:0;perspective:1600px;">');
 if (raw.includes("[Phone")) throw new Error("unhandled phone placeholder");

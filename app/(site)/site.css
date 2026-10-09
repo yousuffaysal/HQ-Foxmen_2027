@@ -91,7 +91,17 @@ html.fx-js [data-reveal="up"]{transform:translateY(110%)}
 
 /* Selected-work deck: square cards that fit the screen instead of stretching to its full height */
 .fx-deck-stage{width:min(100%,calc(100svh - 170px));aspect-ratio:1/1;align-self:center;justify-self:center;max-height:100%;clip-path:inset(-30% -12% -3% -12%)}
-@media (max-width: 1099px){.fx-deck-stage{width:min(100%,calc(100svh - 140px))}}
+.fx-deck-url{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+/* Phones/tablets: the side column collapses to a header (label + counter) centred with the card as one group */
+@media (max-width: 1099px){
+  .fx-deck-grid{grid-template-rows:auto auto;align-content:center;gap:clamp(16px,3vh,28px)!important}
+  .fx-deck-side{display:block!important;margin-bottom:clamp(20px,4vh,36px)}
+  .fx-deck-side>div:nth-child(n+2){display:none!important}
+  .fx-deck-side>div:first-child>div:first-child{margin-bottom:10px!important}
+  .fx-deck-num,.fx-deck-num span{height:56px!important;font-size:56px!important}
+  .fx-deck-side>div:first-child>div:last-child>span{padding-bottom:6px!important}
+  .fx-deck-stage{width:min(100%,calc(100svh - 240px))}
+}
 
 /* E-ink display mode (components/site/eink.ts): colour e-paper. Keeps the palette but muted and
    matte, with real paper grain over everything; no animation, transitions, blur or scroll
