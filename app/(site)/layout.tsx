@@ -10,6 +10,7 @@ import "@fontsource/jetbrains-mono/500.css";
 import "./site.css";
 import "@/components/site/hover.css";
 import { constructMetadata } from "@/lib/metadata";
+import { EINK_INIT_SCRIPT } from "@/components/site/eink";
 
 export const metadata: Metadata = {
   ...constructMetadata({
@@ -27,6 +28,8 @@ export const viewport: Viewport = { width: "device-width", initialScale: 1, them
 export default function SiteRootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="fx-js" suppressHydrationWarning>
+      {/* Plain inline script so e-ink mode applies before first paint (next/script would defer it). */}
+      <head><script dangerouslySetInnerHTML={{ __html: EINK_INIT_SCRIPT }} /></head>
       <body>
         <noscript><style>{`html.fx-js [data-reveal]{opacity:1!important;transform:none!important}`}</style></noscript>
         {children}

@@ -71,7 +71,10 @@ export default function FooterView({ v }: { v: any }) {
         </div>
         <div style={S("display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;padding-top:28px;font-size:14px;opacity:.7;")}>
           <span>
-            {"© 2026 Foxmen Studio. Web, AI and Custom Software for Growing Businesses."}
+            {"© 2026 Foxmen Studio. Web, AI and Custom Software for Growing Businesses. "}
+            <button onClick={v.toggleEink} aria-pressed={v.einkOn} style={S("border:none;cursor:pointer;background:transparent;padding:0;margin-left:12px;color:inherit;font:inherit;text-decoration:underline;text-underline-offset:3px;")}>
+              {v.einkLabel}
+            </button>
           </span>
         </div>
       </div>

@@ -92,3 +92,13 @@ html.fx-js [data-reveal="up"]{transform:translateY(110%)}
 /* Selected-work deck: square cards that fit the screen instead of stretching to its full height */
 .fx-deck-stage{width:min(100%,calc(100svh - 170px));aspect-ratio:1/1;align-self:center;justify-self:center;max-height:100%;clip-path:inset(-30% -12% -3% -12%)}
 @media (max-width: 1099px){.fx-deck-stage{width:min(100%,calc(100svh - 140px))}}
+
+/* E-ink display mode (components/site/eink.ts): colour e-paper. Keeps the palette but muted and
+   matte, with real paper grain over everything; no animation, transitions, blur or scroll
+   progress, since every repaint flashes the panel. */
+html.fx-eink{filter:saturate(.72) contrast(.94) brightness(.99)}
+html.fx-eink [data-progress]{display:none}
+html.fx-eink body::after{opacity:1;mix-blend-mode:multiply;background-size:180px 180px,520px 520px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2 0 0 0 0 .18 0 0 0 0 .16 0 0 0 .55 -.12'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.008 .03' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .36 0 0 0 0 .3 0 0 0 .22 -.04'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E")}
+html.fx-eink *,html.fx-eink *::before,html.fx-eink *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+html.fx-js.fx-eink [data-reveal]{opacity:1!important;transform:none!important}
+html.fx-eink [data-w]{opacity:1!important}

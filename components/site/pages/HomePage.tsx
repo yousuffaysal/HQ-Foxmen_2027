@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import HomeView from "../views/HomeView";
-import { useSite } from "../SiteChrome";
+import { useEink, useSite } from "../SiteChrome";
+import { isEink } from "../eink";
 import { currencyVals, projectVals, serviceVals, PRINCIPLES, PROCESS } from "../values";
 import { CLUTCH_URL, FAQS, HERO_WORDS, TECH, TECH_GROUPS, TOOLS } from "@/lib/site/data";
 
@@ -33,13 +34,16 @@ export default function HomePage() {
   const [faq, setFaq] = useState(0);
   const chatTimer = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
 
+  // E-ink: hold the first hero word and show the demo chat complete instead of animating them.
   useEffect(() => {
+    if (isEink()) return;
     const t = setInterval(() => setHeroI(i => i + 1), 2400);
     return () => clearInterval(t);
   }, []);
 
   // The demo chat only plays while it's on screen, like the design.
   useEffect(() => {
+    if (isEink()) return;
     const el = document.querySelector("[data-chat]");
     if (!el) return;
     const io = new IntersectionObserver(es => {
@@ -52,7 +56,8 @@ export default function HomePage() {
 
   const proj = projectVals(projects);
   const featured = proj.slice(0, 6);
-  const shown = Math.min(chat, CHAT.length);
+  const eink = useEink();
+  const shown = eink ? CHAT.length : Math.min(chat, CHAT.length);
   const v = {
     go,
     clutchHref: CLUTCH_URL, noClutchHref: !CLUTCH_URL,
