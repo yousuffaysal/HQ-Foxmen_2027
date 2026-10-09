@@ -3,7 +3,6 @@
 // It drives every data-* hook in the generated views: reveals, marquees, sticky decks,
 // word reveal, scale-in, ASCII art, the workforce 3D scene, nav hide and the progress bar.
 import Lenis from "lenis";
-import { isEink } from "./eink";
 
 type El = HTMLElement & Record<string, any>;
 
@@ -38,8 +37,6 @@ export class FxRuntime {
   lastW = 0; lastA = 0; aA = 0; aB = 0;
   wf: { host: Element; api: any } | null = null; wfP = 0;
   mo: MutationObserver | null = null; moT: any;
-  // E-ink: no smooth scroll, reveals shown at once, time-driven art drawn once then held still.
-  eink = isEink();
 
   constructor(root: HTMLElement, opts: { isMenuOpen: () => boolean }) {
     this.root = root;
@@ -55,11 +52,10 @@ export class FxRuntime {
     this.revealTimer = setInterval(this.revealPending, 300);
     this.iconTimer = setInterval(() => {
       const ic = this.root.querySelectorAll<HTMLElement>("[data-icon]"); if (!ic.length) return;
-      if (this.eink && this.iconF) return;
       const f = ++this.iconF;
       ic.forEach(el => { const rr = el.getBoundingClientRect(); if (rr.bottom < -50 || rr.top > innerHeight + 50) { if (el.textContent) return; } el.textContent = asciiIcon(+(el.dataset.icon || 0), f); });
     }, 140);
-    if (!this.eink && !matchMedia("(pointer: coarse)").matches) { try { this.lenis = new Lenis({ lerp: 0.1, smoothWheel: true }); } catch { this.lenis = null; } }
+    if (!matchMedia("(pointer: coarse)").matches) { try { this.lenis = new Lenis({ lerp: 0.1, smoothWheel: true }); } catch { this.lenis = null; } }
     const loop = (t: number) => { if (this.lenis) this.lenis.raf(t); this.tick(t); this.raf = requestAnimationFrame(loop); };
     this.raf = requestAnimationFrame(loop);
     // Re-collect when React swaps page content (route change, filters, tabs).
@@ -97,7 +93,6 @@ export class FxRuntime {
     this.pending = (this.pending || []).filter(t => t.isConnected);
     q("[data-reveal]").forEach(el => {
       if (el.__done) return; el.__done = 1;
-      if (this.eink) return;
       const up = el.dataset.reveal === "up", d = +(el.dataset.delay || 0);
       el.style.transition = `opacity .9s cubic-bezier(.16,1,.3,1) ${d}ms, transform 1.1s cubic-bezier(.16,1,.3,1) ${d}ms`;
       el.style.opacity = up ? "1" : "0";
@@ -145,8 +140,7 @@ export class FxRuntime {
     const moved = dy !== 0 || this.dirty; this.dirty = false; this.lastY = sy;
     this.vel = (this.vel || 0) * 0.92 + dy * 0.08;
     const boost = 0.7 + Math.min(Math.abs(this.vel) * 0.6, 14);
-    if (this.eink) { if (moved) this.still(); else return; }
-    else E.mq.forEach((el: El) => {
+    E.mq.forEach((el: El) => {
       const dir = Number(el.dataset.marquee) || 1;
       el.__x = (el.__x || 0) + boost * dir;
       const half = el.__half || (el.__half = el.scrollWidth / 2);
@@ -154,16 +148,16 @@ export class FxRuntime {
       let x = el.__x % half; if (x > 0) x -= half;
       el.style.transform = `translate3d(${x.toFixed(1)}px,0,0)`;
     });
-    if (E.depth.length && !this.eink) {
+    if (E.depth.length) {
       this.cx = (this.cx || 0) + ((this.mx || 0) - (this.cx || 0)) * 0.06; this.cy = (this.cy || 0) + ((this.my || 0) - (this.cy || 0)) * 0.06;
       const fy = Math.sin(t / 1400);
       E.depth.forEach((el: El, i: number) => { const d = Number(el.dataset.depth); el.style.transform = `translate3d(${(this.cx * d).toFixed(1)}px,${(this.cy * d + fy * (6 + i * 3)).toFixed(1)}px,0)`; });
     }
-    if (!this.eink && E.wave && E.wave.isConnected && t - (this.lastW || 0) > 60) {
+    if (E.wave && E.wave.isConnected && t - (this.lastW || 0) > 60) {
       const b = E.wave.getBoundingClientRect();
       if (b.bottom > 0 && b.top < vh) { this.lastW = t; this.wave(E.wave, t / 1000, b); }
     }
-    if (!this.eink && E.ascii && E.ascii.isConnected && t - (this.lastA || 0) > 45) {
+    if (E.ascii && E.ascii.isConnected && t - (this.lastA || 0) > 45) {
       const b = E.ascii.getBoundingClientRect();
       if (b.bottom > 0 && b.top < vh) { this.lastA = t; this.ascii(E.ascii); }
     }
@@ -252,17 +246,6 @@ export class FxRuntime {
       const cl2 = el.__cl || (el.__cl = el.querySelector("[data-clocklabel]")); const lab = hh >= 7 && hh < 19 ? "Day shift" : "Night shift, still working"; if (cl2.textContent !== lab) cl2.textContent = lab;
       const hd = el.__hd || (el.__hd = el.querySelector("[data-wfhead]")); const col = night > .5 ? "#F3EEE4" : "#1F1712"; if (hd.style.color !== col) hd.style.color = col;
       const bar = el.__bar || (el.__bar = el.querySelector("[data-wfbar]")); bar.style.transform = `scaleX(${p})`;
-    }
-  }
-
-  // E-ink: paint the wave and ASCII art once (their first frame), only while on screen.
-  still() {
-    const E = this.els, vh = innerHeight;
-    for (const k of ["wave", "ascii"] as const) {
-      const el = E[k] as El | null;
-      if (!el || !el.isConnected || el.__still) continue;
-      const b = el.getBoundingClientRect();
-      if (b.bottom > 0 && b.top < vh) { el.__still = 1; if (k === "wave") this.wave(el, 0, b); else this.ascii(el); }
     }
   }
 

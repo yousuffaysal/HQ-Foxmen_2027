@@ -7,7 +7,6 @@ import HeaderView from "./views/HeaderView";
 import FooterView from "./views/FooterView";
 import { AI_TOOLS, CONTACT, LABELS, PAGES, SERVICES, pathOf, type SiteProject } from "@/lib/site/data";
 import ChatWidget from "./chat/ChatWidget";
-import { isEink, setEink } from "./eink";
 
 type Go = Record<string, (e?: MouseEvent) => void>;
 type Ctx = {
@@ -34,9 +33,6 @@ export const useSite = () => {
 // The design's two breakpoints (mobile < 1100px, narrow < 700px). Server render assumes desktop.
 const subscribe = (cb: () => void) => { addEventListener("resize", cb); return () => removeEventListener("resize", cb); };
 const bp = () => (innerWidth < 700 ? 2 : innerWidth < 1100 ? 1 : 0);
-const noSub = () => () => {};
-export const useEink = () => useSyncExternalStore(noSub, isEink, () => false);
-
 export function useViewport() {
   const b = useSyncExternalStore(subscribe, bp, () => 0);
   return useMemo(() => ({ mobile: b >= 1, narrow: b === 2 }), [b]);
@@ -59,7 +55,6 @@ export default function SiteChrome({ children, projects }: { children: ReactNode
   const [cur, setCur] = useState<"bdt" | "usd">("usd"); // USD by default; the BDT toggle shows Taka prices
   const [pendingTool, setPendingTool] = useState<string | null>(null);
   const { mobile, narrow } = useViewport();
-  const eink = useEink();
 
   useEffect(() => {
     const r = new FxRuntime(rootRef.current!, { isMenuOpen: () => menuRef.current });
@@ -90,8 +85,6 @@ export default function SiteChrome({ children, projects }: { children: ReactNode
   const navigate = useCallback((href: string, label: string) => {
     setMenu(false);
     if (href === pathname) { rt.current?.scrollTop(); return; }
-    // E-ink screens ghost on animation: switch pages directly.
-    if (isEink()) { router.push(href); return; }
     const c = curtainRef.current;
     if (busy.current || !c) return;
     busy.current = true;
@@ -151,7 +144,6 @@ export default function SiteChrome({ children, projects }: { children: ReactNode
     toggleMenu: () => setMenu(m => !m), closeMenu: () => setMenu(false),
     panelT: menu ? "none" : "scale(.2)", panelOp: menu ? "1" : "0", panelBackOp: menu ? "1" : "0", panelPE: menu ? "auto" : "none",
     services: SERVICES,
-    einkOn: eink, einkLabel: eink ? "Standard display" : "E-ink display", toggleEink: () => setEink(!eink),
   };
 
   return (
