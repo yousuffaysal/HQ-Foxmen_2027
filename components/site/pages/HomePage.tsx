@@ -60,7 +60,7 @@ export default function HomePage() {
     marquee: [...Array(2)].flatMap(() => ["Websites", "E-commerce", "3D Web", "AI Chatbots", "Custom Apps", "Care Plans"]),
     words: "We build fast websites, online stores, AI assistants and custom software for growing businesses. Everything is written in code, made to bring in customers and built to last.".split(" "),
     services: serviceVals(usd, mobile),
-    featured: featured.map(p => ({ ...p, tags: p.tags.slice(0, 2), tagLine: p.tags.slice(0, 2).join(" · "), urlShow: p.url || "private project", open: openProject(p), shotText: p.heroImage ? "" : "screenshot" })),
+    featured: featured.map(p => ({ ...p, tags: p.tags.slice(0, 2), tagLine: p.tags.slice(0, 2).join(" · "), urlShow: p.url || "private project", open: openProject(p), heroImage: p.thumb, shotText: p.heroImage ? "" : "screenshot" })),
     projCount: proj.length, featCount: String(featured.length).padStart(2, "0"),
     deckH: "520vh", deckCols: mobile ? "minmax(0,1fr)" : "minmax(0,5fr) minmax(0,7fr)", deckSide: mobile ? "none" : "flex",
     industries: ["Clinics", "Coaching centers", "Restaurants", "Hotels", "Offices", "Personal brands", "Fashion", "Real estate", "Hospitality", "Product launches"].map((n, i) => ({ name: n, n: String(i + 1).padStart(2, "0") })),

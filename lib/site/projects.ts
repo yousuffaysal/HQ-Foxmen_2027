@@ -10,6 +10,7 @@ import { str } from "./sanitize";
 type Row = {
   id: number; slug: string; name: string; type: string; url: string; tags: string; description: string;
   features: string; latest: boolean; visible: boolean; ord: number; hero_image: string; image_a: string; image_b: string;
+  gallery: string;
 };
 
 const parse = (s: string): string[] => { try { const v = JSON.parse(s); return Array.isArray(v) ? v.map(String) : []; } catch { return []; } };
@@ -17,7 +18,7 @@ const parse = (s: string): string[] => { try { const v = JSON.parse(s); return A
 const fromRow = (r: Row): SiteProject => ({
   id: r.id, slug: r.slug, name: r.name, type: r.type, url: r.url, tags: parse(r.tags), desc: r.description,
   features: parse(r.features), latest: r.latest, visible: r.visible, ord: r.ord,
-  heroImage: r.hero_image, imageA: r.image_a, imageB: r.image_b,
+  heroImage: r.hero_image, imageA: r.image_a, imageB: r.image_b, gallery: parse(r.gallery ?? "[]"),
 });
 
 let ready: Promise<void> | null = null;
@@ -41,8 +42,9 @@ function ensure() {
         image_b     TEXT        NOT NULL DEFAULT '',
         updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
       )`;
+    await sql`ALTER TABLE site_projects ADD COLUMN IF NOT EXISTS gallery TEXT NOT NULL DEFAULT '[]'`;
     const n = (await sql`SELECT count(*)::int AS n FROM site_projects` as { n: number }[])[0].n;
-    if (n > 0) return;
+    if (n > 0) return refreshSeedContent();
     let hidden: string[] = [];
     try {
       const h = await sql`SELECT value FROM settings WHERE key = 'site_hidden_projects'` as { value: string }[];
@@ -50,13 +52,30 @@ function ensure() {
     } catch { /* settings table missing: nothing hidden */ }
     for (const p of SEED_PROJECTS) {
       await sql`
-        INSERT INTO site_projects (slug, name, type, url, tags, description, features, latest, visible, ord)
+        INSERT INTO site_projects (slug, name, type, url, tags, description, features, latest, visible, ord, hero_image, image_a, image_b, gallery)
         VALUES (${p.slug}, ${p.name}, ${p.type}, ${p.url}, ${JSON.stringify(p.tags)}, ${p.desc}, ${JSON.stringify(p.features)},
-                ${!!p.latest}, ${!hidden.includes(p.slug)}, ${p.ord})
+                ${!!p.latest}, ${p.visible && !hidden.includes(p.slug)}, ${p.ord}, ${p.heroImage}, ${p.imageA}, ${p.imageB}, ${JSON.stringify(p.gallery)})
         ON CONFLICT (slug) DO NOTHING`;
     }
   })().catch(e => { ready = null; throw e; });
   return ready;
+}
+
+// One-time refresh (2026-10): detailed copy and the bundled 16:10 screenshots, applied only to
+// rows nobody has edited in the admin since the first seed, so admin changes are never overwritten.
+const REFRESH_KEY = "site_projects_content_v2";
+async function refreshSeedContent() {
+  try {
+    if ((await sql`SELECT 1 FROM settings WHERE key = ${REFRESH_KEY}` as unknown[]).length) return;
+  } catch { return; } // settings table missing: nothing to mark progress with, so leave the rows alone
+  for (const p of SEED_PROJECTS) {
+    await sql`
+      UPDATE site_projects SET type = ${p.type}, tags = ${JSON.stringify(p.tags)}, description = ${p.desc},
+        features = ${JSON.stringify(p.features)}, hero_image = ${p.heroImage}, image_a = ${p.imageA}, image_b = ${p.imageB},
+        gallery = ${JSON.stringify(p.gallery)}, visible = visible AND ${p.visible}, updated_at = now()
+      WHERE slug = ${p.slug} AND updated_at < '2026-10-01'`;
+  }
+  await sql`INSERT INTO settings (key, value) VALUES (${REFRESH_KEY}, '1') ON CONFLICT (key) DO NOTHING`;
 }
 
 export const PROJECTS_TAG = "site-projects";
@@ -78,7 +97,7 @@ async function readProjects(includeHidden: boolean): Promise<SiteProject[]> {
     return rows.map(fromRow);
   } catch (e) {
     console.error("[projects] falling back to built-in list", e);
-    return SEED_PROJECTS;
+    return includeHidden ? SEED_PROJECTS : SEED_PROJECTS.filter(p => p.visible);
   }
 }
 
@@ -91,8 +110,8 @@ export async function getProject(slug: string): Promise<SiteProject | null> {
 const cleanUrl = (v: unknown, max = 500) => {
   const s = str(v, max);
   if (!s) return "";
-  // Screenshots must be https URLs; site addresses are stored without the scheme.
-  return /^https:\/\/[^\s"'<>]+$/.test(s) ? s : "";
+  // Screenshots must be https URLs or bundled files under /projects/; site addresses are stored without the scheme.
+  return /^https:\/\/[^\s"'<>]+$/.test(s) || /^\/projects\/[\w./-]+$/.test(s) ? s : "";
 };
 const siteUrl = (v: unknown) => str(v, 200).replace(/^https?:\/\//, "").replace(/\/+$/, "").replace(/[\s"'<>]/g, "");
 const list = (v: unknown, max: number, each: number) =>
@@ -117,6 +136,7 @@ export function cleanProject(b: ProjectInput): { error: string } | { value: Omit
       latest: b.latest === true,
       visible: b.visible !== false,
       heroImage: cleanUrl(b.heroImage), imageA: cleanUrl(b.imageA), imageB: cleanUrl(b.imageB),
+      gallery: (Array.isArray(b.gallery) ? b.gallery : []).map(x => cleanUrl(x)).filter(Boolean).slice(0, 12),
     },
   };
 }
@@ -124,9 +144,9 @@ export function cleanProject(b: ProjectInput): { error: string } | { value: Omit
 export async function createProject(p: Omit<SiteProject, "id" | "ord">) {
   await ensure();
   const rows = await sql`
-    INSERT INTO site_projects (slug, name, type, url, tags, description, features, latest, visible, hero_image, image_a, image_b, ord)
+    INSERT INTO site_projects (slug, name, type, url, tags, description, features, latest, visible, hero_image, image_a, image_b, gallery, ord)
     VALUES (${p.slug}, ${p.name}, ${p.type}, ${p.url}, ${JSON.stringify(p.tags)}, ${p.desc}, ${JSON.stringify(p.features)},
-            ${p.latest}, ${p.visible}, ${p.heroImage}, ${p.imageA}, ${p.imageB},
+            ${p.latest}, ${p.visible}, ${p.heroImage}, ${p.imageA}, ${p.imageB}, ${JSON.stringify(p.gallery)},
             (SELECT COALESCE(MAX(ord), -1) + 1 FROM site_projects))
     ON CONFLICT (slug) DO NOTHING
     RETURNING *` as Row[];
@@ -142,7 +162,7 @@ export async function updateProject(id: number, p: Omit<SiteProject, "id" | "ord
     UPDATE site_projects SET slug = ${p.slug}, name = ${p.name}, type = ${p.type}, url = ${p.url},
       tags = ${JSON.stringify(p.tags)}, description = ${p.desc}, features = ${JSON.stringify(p.features)},
       latest = ${p.latest}, visible = ${p.visible}, hero_image = ${p.heroImage}, image_a = ${p.imageA}, image_b = ${p.imageB},
-      updated_at = now()
+      gallery = ${JSON.stringify(p.gallery)}, updated_at = now()
     WHERE id = ${id} RETURNING *` as Row[];
   if (rows[0] && p.latest) await sql`UPDATE site_projects SET latest = false WHERE id <> ${id}`;
   return rows[0] ? fromRow(rows[0]) : null;

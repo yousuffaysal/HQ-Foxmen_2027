@@ -11,8 +11,8 @@ export default function CasePage({ slug }: { slug: string }) {
     go,
     cs: { ...cs, total: String(proj.length).padStart(2, "0"), services: cs.tags.join(", "), site: cs.hasUrl ? cs.url : "Private build", feats: cs.features.map((f, k) => ({ f, n: String(k + 1).padStart(2, "0") })) },
     nx: { ...nx, open: openProject(nx) },
-    // Screenshots uploaded in the admin fill the design's image slots.
-    slots: { [`case-${cs.slug}-hero`]: cs.heroImage, [`case-${cs.slug}-a`]: cs.imageA, [`case-${cs.slug}-b`]: cs.imageB },
+    // The cover fills the hero slot; the rest of the screenshots (cs.shots) follow below it.
+    slots: { [`case-${cs.slug}-hero`]: cs.heroImage },
   };
   return <CaseView v={v} />;
 }

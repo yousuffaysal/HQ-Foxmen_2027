@@ -45,10 +45,20 @@ export default function WorkView({ v }: { v: any }) {
             <Fragment key={p$i}>
             <article data-reveal="1" style={S(`grid-column:span ${p.span};margin-top:${p.mt};display:flex;flex-direction:column;gap:20px;min-width:0;`)}>
               <a href="/work" onClick={p.open} style={S(`display:block;position:relative;width:100%;aspect-ratio:${p.ratio};border-radius:clamp(20px,2.4vw,32px);overflow:hidden;background:${p.tint};`)} className="hv10">
-                <div style={S("position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(31,23,18,.05) 0 1px,transparent 1px 16px);transition:transform 1s cubic-bezier(.2,.7,.2,1);")} className="hv11"></div>
-                <div style={S(`position:absolute;left:0;right:0;bottom:-.14em;padding:0 clamp(16px,2vw,28px);font-size:clamp(64px,${p.wm},260px);font-weight:800;letter-spacing:-0.075em;line-height:1;color:rgba(31,23,18,.07);white-space:nowrap;overflow:hidden;pointer-events:none;`)}>
-                  {p.name}
+                <div style={S("position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(31,23,18,.05) 0 1px,transparent 1px 16px);transition:transform 1s cubic-bezier(.2,.7,.2,1);")} className="hv11">
+                  {p.thumb ? (
+                    <>
+                    <img src={p.thumb} alt={p.name} loading="lazy" decoding="async" style={S("position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;")} />
+                    </>
+                  ) : null}
                 </div>
+                {p.noThumb ? (
+                  <>
+                  <div style={S(`position:absolute;left:0;right:0;bottom:-.14em;padding:0 clamp(16px,2vw,28px);font-size:clamp(64px,${p.wm},260px);font-weight:800;letter-spacing:-0.075em;line-height:1;color:rgba(31,23,18,.07);white-space:nowrap;overflow:hidden;pointer-events:none;`)}>
+                    {p.name}
+                  </div>
+                  </>
+                ) : null}
                 <div style={S("position:absolute;top:clamp(14px,1.6vw,22px);left:clamp(14px,1.6vw,22px);right:clamp(14px,1.6vw,22px);display:flex;justify-content:space-between;align-items:flex-start;gap:12px;")}>
                   <span style={S("font-family:'JetBrains Mono',monospace;font-size:13px;padding:8px 12px;border-radius:999px;background:#F3EEE4;")}>
                     {p.num}

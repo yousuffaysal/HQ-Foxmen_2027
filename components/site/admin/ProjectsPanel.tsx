@@ -6,11 +6,11 @@ import { PROJECT_TAGS, TINTS, slug as toSlug, type SiteProject } from "@/lib/sit
 
 type Draft = {
   id?: number; name: string; slug: string; slugTouched: boolean; type: string; url: string; desc: string;
-  features: string; tags: string[]; latest: boolean; visible: boolean; heroImage: string; imageA: string; imageB: string;
+  features: string; tags: string[]; latest: boolean; visible: boolean; heroImage: string; imageA: string; imageB: string; gallery: string[];
 };
 
-const blank: Draft = { name: "", slug: "", slugTouched: false, type: "", url: "", desc: "", features: "", tags: [], latest: false, visible: true, heroImage: "", imageA: "", imageB: "" };
-const toDraft = (p: SiteProject): Draft => ({ id: p.id, name: p.name, slug: p.slug, slugTouched: true, type: p.type, url: p.url, desc: p.desc, features: p.features.join("\n"), tags: p.tags, latest: !!p.latest, visible: p.visible, heroImage: p.heroImage, imageA: p.imageA, imageB: p.imageB });
+const blank: Draft = { name: "", slug: "", slugTouched: false, type: "", url: "", desc: "", features: "", tags: [], latest: false, visible: true, heroImage: "", imageA: "", imageB: "", gallery: [] };
+const toDraft = (p: SiteProject): Draft => ({ id: p.id, name: p.name, slug: p.slug, slugTouched: true, type: p.type, url: p.url, desc: p.desc, features: p.features.join("\n"), tags: p.tags, latest: !!p.latest, visible: p.visible, heroImage: p.heroImage, imageA: p.imageA, imageB: p.imageB, gallery: p.gallery });
 
 export default function ProjectsPanel({ items, setItems, onError }: { items: SiteProject[]; setItems: (p: SiteProject[]) => void; onError: (m: string) => void }) {
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -57,14 +57,15 @@ export default function ProjectsPanel({ items, setItems, onError }: { items: Sit
     try { await call("/api/site/admin/projects", "DELETE", { id: draft.id, slug: draft.slug }); setItems(items.filter(x => x.id !== draft.id)); setDraft(null); } catch (e) { fail(e); }
   };
 
-  const upload = async (key: "heroImage" | "imageA" | "imageB", file: File) => {
+  // "gallery" appends to the extra screenshots; the named slots are replaced.
+  const upload = async (key: "heroImage" | "imageA" | "imageB" | "gallery", file: File) => {
     setUploading(key);
     try {
       const fd = new FormData(); fd.append("file", file);
       const r = await fetch("/api/upload", { method: "POST", body: fd });
       const d = await r.json().catch(() => ({}));
       if (!r.ok || !d.url) throw new Error(d.error ? "Upload failed: " + String(d.error).slice(0, 120) : "Upload failed");
-      setDraft(dr => (dr ? { ...dr, [key]: d.url } : dr));
+      setDraft(dr => (!dr ? dr : key === "gallery" ? { ...dr, gallery: [...dr.gallery, d.url] } : { ...dr, [key]: d.url }));
     } catch (e) { fail(e); }
     setUploading("");
   };
@@ -134,9 +135,9 @@ export default function ProjectsPanel({ items, setItems, onError }: { items: Sit
             </div>
 
             <div>
-              <div style={S("font-size:14px;font-weight:600;margin-bottom:10px;")}>Screenshots (shown on the case study; the first also on the home page)</div>
+              <div style={S("font-size:14px;font-weight:600;margin-bottom:10px;")}>Screenshots (16:10, e.g. a 1440×900 browser capture; the cover also shows on the home and work pages)</div>
               <div style={S("display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px;")}>
-                {([["heroImage", "Hero (16:9)"], ["imageA", "Detail A (4:5)"], ["imageB", "Detail B (4:5)"]] as const).map(([k, l]) => (
+                {([["heroImage", "Cover"], ["imageA", "Screenshot 2"], ["imageB", "Screenshot 3"]] as const).map(([k, l]) => (
                   <div key={k} style={S("display:flex;flex-direction:column;gap:8px;")}>
                     <div style={S(label)}>{l}</div>
                     <div style={S(`aspect-ratio:16/10;border-radius:14px;overflow:hidden;background:${draft[k] ? `center/cover no-repeat url("${draft[k]}")` : "repeating-linear-gradient(135deg,rgba(31,23,18,.06) 0 1px,transparent 1px 10px),#EAE3D6"};`)}></div>
@@ -149,6 +150,21 @@ export default function ProjectsPanel({ items, setItems, onError }: { items: Sit
                     </div>
                   </div>
                 ))}
+              </div>
+              <div style={S(label + "margin:16px 0 8px;")}>More screenshots (shown after screenshot 3)</div>
+              <div style={S("display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,160px),1fr));gap:12px;")}>
+                {draft.gallery.map((src, i) => (
+                  <div key={src + i} style={S("display:flex;flex-direction:column;gap:8px;")}>
+                    <div style={S(`aspect-ratio:16/10;border-radius:14px;overflow:hidden;background:center/cover no-repeat url("${src}");`)}></div>
+                    <button type="button" onClick={() => set("gallery", draft.gallery.filter((_, j) => j !== i))} style={S("border:none;cursor:pointer;padding:9px 12px;border-radius:999px;font-size:13px;font-weight:600;background:#EAE3D6;")}>Remove</button>
+                  </div>
+                ))}
+                {draft.gallery.length < 12 ? (
+                  <label style={S("aspect-ratio:16/10;border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;font-weight:600;box-shadow:inset 0 0 0 1px rgba(31,23,18,.18);")}>
+                    {uploading === "gallery" ? "Uploading..." : "+ Add screenshot"}
+                    <input type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={e => { const f = e.target.files?.[0]; if (f) upload("gallery", f); e.target.value = ""; }} />
+                  </label>
+                ) : null}
               </div>
             </div>
 

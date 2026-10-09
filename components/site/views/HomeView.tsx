@@ -344,8 +344,8 @@ export default function HomeView({ v }: { v: any }) {
                       </svg>
                     </span>
                   </div>
-                  <div style={S("position:relative;flex:1;display:flex;align-items:center;justify-content:center;padding:0 clamp(16px,3vw,40px);min-height:0;")}>
-                    <div style={S("width:min(78%,640px);aspect-ratio:16/10;max-height:100%;border-radius:14px;background:#FAF7F1;box-shadow:0 20px 50px rgba(31,23,18,.16);overflow:hidden;display:flex;flex-direction:column;")}>
+                  <div style={S("position:relative;flex:1;display:flex;align-items:center;justify-content:center;padding:0 clamp(16px,3vw,40px);min-height:0;container-type:size;")}>
+                    <div style={S("width:min(78%,640px,calc((100cqh - 48px) * 1.6));border-radius:14px;background:#FAF7F1;box-shadow:0 20px 50px rgba(31,23,18,.16);overflow:hidden;display:flex;flex-direction:column;")}>
                       <div style={S("display:flex;align-items:center;gap:6px;padding:10px 12px;border-bottom:1px solid rgba(31,23,18,.08);")}>
                         <span style={S("width:8px;height:8px;border-radius:999px;background:#1F1712;opacity:.25;")}></span>
                         <span style={S("width:8px;height:8px;border-radius:999px;background:#1F1712;opacity:.25;")}></span>
@@ -354,11 +354,11 @@ export default function HomeView({ v }: { v: any }) {
                           {p.urlShow}
                         </span>
                       </div>
-                      <div style={S("flex:1;position:relative;min-height:0;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(135deg,rgba(31,23,18,.05) 0 1px,transparent 1px 10px);font-family:'JetBrains Mono',monospace;font-size:12px;color:#5E5249;")}>
+                      <div style={S("flex:none;aspect-ratio:16/10;position:relative;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(135deg,rgba(31,23,18,.05) 0 1px,transparent 1px 10px);font-family:'JetBrains Mono',monospace;font-size:12px;color:#5E5249;")}>
                         {p.shotText}
                         {p.heroImage ? (
                           <>
-                          <img src={p.heroImage} alt={p.name} style={S("position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top;")} />
+                          <img src={p.heroImage} alt={p.name} loading="lazy" decoding="async" style={S("position:absolute;inset:0;width:100%;height:100%;object-fit:cover;")} />
                           </>
                         ) : null}
                       </div>

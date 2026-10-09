@@ -57,7 +57,7 @@ export default function CaseView({ v }: { v: any }) {
         </div>
       </section>
       <section style={S("padding:0 clamp(12px,2vw,28px);")}>
-        <div data-reveal="1" style={S(`max-width:1560px;margin:0 auto;aspect-ratio:16/9;border-radius:clamp(20px,2.4vw,32px);overflow:hidden;background:${v.cs.tint};`)}>
+        <div data-reveal="1" style={S(`max-width:1560px;margin:0 auto;aspect-ratio:16/10;border-radius:clamp(20px,2.4vw,32px);overflow:hidden;background:${v.cs.tint};`)}>
           <ImageSlot id={`case-${v.cs.slug}-hero`} src={v.slots?.[`case-${v.cs.slug}-hero`]} placeholder={`Hero screenshot of ${v.cs.name}`} />
         </div>
       </section>
@@ -93,13 +93,14 @@ export default function CaseView({ v }: { v: any }) {
         </div>
       </section>
       <section style={S("padding:0 clamp(12px,2vw,28px) clamp(80px,10vw,150px);")}>
-        <div style={S("max-width:1560px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:clamp(12px,1.6vw,24px);")}>
-          <div data-reveal="1" style={S("aspect-ratio:4/5;border-radius:clamp(20px,2.4vw,32px);overflow:hidden;background:#EAE3D6;")}>
-            <ImageSlot id={`case-${v.cs.slug}-a`} src={v.slots?.[`case-${v.cs.slug}-a`]} placeholder={"Mobile or detail screenshot"} />
-          </div>
-          <div data-reveal="1" data-delay="120" style={S("aspect-ratio:4/5;border-radius:clamp(20px,2.4vw,32px);overflow:hidden;background:#EAE3D6;")}>
-            <ImageSlot id={`case-${v.cs.slug}-b`} src={v.slots?.[`case-${v.cs.slug}-b`]} placeholder={"Second screenshot"} />
-          </div>
+        <div style={S("max-width:1560px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:clamp(12px,1.6vw,24px);")}>
+          {(v.cs.shots || []).map((s: any, s$i: number) => (
+            <Fragment key={s$i}>
+            <div data-reveal="1" style={S("aspect-ratio:16/10;border-radius:clamp(20px,2.4vw,32px);overflow:hidden;background:#EAE3D6;")}>
+              <img src={s.src} alt={s.alt} loading="lazy" decoding="async" style={S("display:block;width:100%;height:100%;object-fit:cover;")} />
+            </div>
+            </Fragment>
+          ))}
         </div>
         {v.cs.hasUrl ? (
           <>
