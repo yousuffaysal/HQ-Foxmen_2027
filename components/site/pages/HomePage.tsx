@@ -60,7 +60,7 @@ export default function HomePage() {
     const settled = () => { const t = revealEl ? getComputedStyle(revealEl).transform : "none"; return t === "none" || t === "matrix(1, 0, 0, 1, 0, 0)"; };
     const reveal = new Promise<void>(res => { const t0 = Date.now(); const poll = () => (dead || settled() || Date.now() - t0 > 8000 ? res() : setTimeout(poll, 120)); setTimeout(poll, 400); });
     Promise.all([import("@/lib/site/rover-hero"), document.fonts.ready, reveal]).then(([{ mountRoverHero }]) => {
-      if (!dead) destroy = mountRoverHero({ wrapper, highlight, scanLine, target: cta, scaleEl: grid, size: mobile ? 1 : 0.75 });
+      if (!dead) destroy = mountRoverHero({ wrapper, highlight, scanLine, target: cta, scaleEl: grid, size: mobile ? 0.8 : 0.75 });
     });
     return () => { dead = true; destroy?.(); };
   }, [mobile]);
