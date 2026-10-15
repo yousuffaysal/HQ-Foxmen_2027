@@ -27,7 +27,7 @@ export const viewport: Viewport = { width: "device-width", initialScale: 1, them
 export default function SiteRootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="fx-js" suppressHydrationWarning>
-      <body>
+      <body suppressHydrationWarning>
         <noscript><style>{`html.fx-js [data-reveal]{opacity:1!important;transform:none!important}`}</style></noscript>
         {children}
         <Script src="https://www.googletagmanager.com/gtag/js?id=G-J3RWYPW4EH" strategy="afterInteractive" />

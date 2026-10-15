@@ -38,6 +38,33 @@ export default function HomePage() {
     return () => clearInterval(t);
   }, []);
 
+  // Rover + drone over the hero highlight. The rover drives on the purple word,
+  // so its track follows the visible word's width, eased so a word swap never makes it jump.
+  useEffect(() => {
+    const q = (k: string) => document.querySelector<HTMLElement>(`[data-rover="${k}"]`);
+    const wrapper = q("wrap"), grid = q("hl"), scanLine = q("line"), cta = q("cta")?.firstElementChild;
+    if (!wrapper || !grid) return;
+    let w = 0;
+    const highlight = {
+      getBoundingClientRect() {
+        const r = grid.getBoundingClientRect();
+        const word = [...grid.children].find(c => (c as HTMLElement).style.transform === "none") as HTMLElement | undefined;
+        const target = word?.offsetWidth || r.width;
+        w = w ? w + (target - w) * 0.06 : target;
+        return { left: r.left, top: r.top, width: w, height: r.height };
+      },
+    };
+    let destroy: (() => void) | undefined, dead = false;
+    // Start once the headline's slide-up reveal has settled, so the rover lands on the box, not mid-air.
+    const revealEl = grid.closest<HTMLElement>("[data-reveal]");
+    const settled = () => { const t = revealEl ? getComputedStyle(revealEl).transform : "none"; return t === "none" || t === "matrix(1, 0, 0, 1, 0, 0)"; };
+    const reveal = new Promise<void>(res => { const t0 = Date.now(); const poll = () => (dead || settled() || Date.now() - t0 > 8000 ? res() : setTimeout(poll, 120)); setTimeout(poll, 400); });
+    Promise.all([import("@/lib/site/rover-hero"), document.fonts.ready, reveal]).then(([{ mountRoverHero }]) => {
+      if (!dead) destroy = mountRoverHero({ wrapper, highlight, scanLine, target: cta, scaleEl: grid, size: mobile ? 1 : 0.75 });
+    });
+    return () => { dead = true; destroy?.(); };
+  }, [mobile]);
+
   // The demo chat only plays while it's on screen, like the design.
   useEffect(() => {
     const el = document.querySelector("[data-chat]");

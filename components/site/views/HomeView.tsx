@@ -12,7 +12,7 @@ export default function HomeView({ v }: { v: any }) {
     <>
     <main data-screen-label="Home">
       {/* 01 Hero */}
-      <section style={S("position:relative;padding:clamp(96px,12vh,124px) clamp(20px,4.5vw,64px) 0;")}>
+      <section data-rover="wrap" style={S("position:relative;padding:clamp(96px,12vh,124px) clamp(20px,4.5vw,64px) 0;")}>
         <div style={S("max-width:1440px;margin:0 auto;position:relative;")}>
           {v.clutchHref ? (
             <>
@@ -62,7 +62,7 @@ export default function HomeView({ v }: { v: any }) {
             </div>
             <div style={S("overflow:hidden;padding-bottom:.04em;")}>
               <div data-reveal="up" data-delay="90">
-                <span style={S("display:inline-grid;vertical-align:bottom;overflow:hidden;border-radius:.16em;")}>
+                <span data-rover="hl" style={S("display:inline-grid;vertical-align:bottom;overflow:hidden;border-radius:.16em;")}>
                   {(v.heroWords || []).map((w: any, w$i: number) => (
                     <Fragment key={w$i}>
                     <span style={S(`grid-area:1/1;justify-self:start;background:#B86CF9;border-radius:.16em;padding:0 .14em .04em;white-space:nowrap;transform:${w.t};transition:transform .9s cubic-bezier(.76,0,.24,1);`)}>
@@ -74,7 +74,7 @@ export default function HomeView({ v }: { v: any }) {
               </div>
             </div>
             <div style={S("overflow:hidden;padding-bottom:.04em;")}>
-              <div data-reveal="up" data-delay="180">
+              <div data-reveal="up" data-delay="180" data-rover="line">
                 {"that grow your business."}
               </div>
             </div>
@@ -83,7 +83,7 @@ export default function HomeView({ v }: { v: any }) {
             <p data-reveal="1" data-delay="300" style={S("margin:0;max-width:440px;font-size:clamp(17px,1.4vw,20px);line-height:1.5;color:#5E5249;text-wrap:pretty;")}>
               {"Fast websites, online stores, AI chatbots and custom software. Designed and coded by hand, with no templates."}
             </p>
-            <div data-reveal="1" data-delay="400" style={S("display:flex;flex-wrap:wrap;gap:12px;")}>
+            <div data-reveal="1" data-delay="400" data-rover="cta" style={S("display:flex;flex-wrap:wrap;gap:12px;")}>
               <Btn label="Start a project" variant="dark" href="/contact" onClick={v.go.contact} />
               <Btn label="See our work" variant="light" href="/work" onClick={v.go.work} />
             </div>
