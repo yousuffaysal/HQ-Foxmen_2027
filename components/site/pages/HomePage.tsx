@@ -83,6 +83,7 @@ export default function HomePage() {
   const v = {
     go,
     clutchHref: CLUTCH_URL, noClutchHref: !CLUTCH_URL,
+    heroBg: mobile ? "none" : "linear-gradient(to bottom,rgba(243,238,228,0) 70%,#F3EEE4),url(/redesign/hero-1a.webp) center/cover no-repeat",
     heroWords: HERO_WORDS.map((w, i) => { const k = heroI % HERO_WORDS.length, prev = (k + HERO_WORDS.length - 1) % HERO_WORDS.length; return { word: w, t: i === k ? "none" : i === prev ? "translateY(-105%)" : "translateY(105%)" }; }),
     marquee: [...Array(2)].flatMap(() => ["Websites", "E-commerce", "3D Web", "AI Chatbots", "Custom Apps", "Care Plans"]),
     words: "We build fast websites, online stores, AI assistants and custom software for growing businesses. Everything is written in code, made to bring in customers and built to last.".split(" "),

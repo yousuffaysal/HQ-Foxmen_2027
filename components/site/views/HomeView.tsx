@@ -12,7 +12,7 @@ export default function HomeView({ v }: { v: any }) {
     <>
     <main data-screen-label="Home">
       {/* 01 Hero */}
-      <section data-rover="wrap" style={S("position:relative;padding:clamp(96px,12vh,124px) clamp(20px,4.5vw,64px) 0;")}>
+      <section data-rover="wrap" style={S(`position:relative;padding:clamp(96px,12vh,124px) clamp(20px,4.5vw,64px) 0;background:${v.heroBg};`)}>
         <div style={S("max-width:1440px;margin:0 auto;position:relative;")}>
           {v.clutchHref ? (
             <>
